@@ -1,9 +1,9 @@
-#include "template.hh"
-
 #include <string>
 
-namespace cxx_template {
+#include "argon.hh"
+
+namespace argon {
 
 auto hello() -> std::string { return "Hello, World!"; }
 
-}  // namespace cxx_template
+}  // namespace argon
