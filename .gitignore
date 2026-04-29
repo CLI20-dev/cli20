@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# direnv
+.direnv/
+
+# build artifacts
+build/
+*.o
+*.a
+*.so
+*.dylib
+
+# Nix build result
+result
