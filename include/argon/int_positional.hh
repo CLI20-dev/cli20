@@ -25,7 +25,8 @@ struct PositionalArgument<int> : ArgumentTag {
   auto parse(std::string_view sv) -> std::expected<void, std::error_code> {
     auto res = std::from_chars(sv.begin(), sv.end(), value_);
     if (res.ec != std::errc() || res.ptr != sv.end()) {
-      return std::unexpected(std::make_error_code(std::errc::invalid_argument));
+      return std::unexpected(res.ec != std::errc() ? std::make_error_code(res.ec)
+                                                   : std::make_error_code(std::errc::invalid_argument));
     }
     return {};
   }

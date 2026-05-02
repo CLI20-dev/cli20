@@ -14,8 +14,9 @@
       perSystem =
         { pkgs, ... }:
         {
-          devShells.default = pkgs.mkShell {
+          devShells.default = pkgs.mkShellNoCC {
             packages = [
+              pkgs.llvmPackages.libcxxClang
               pkgs.cmake
               pkgs.ninja
               pkgs.gtest
@@ -23,10 +24,11 @@
             ];
           };
 
-          packages.default = pkgs.stdenv.mkDerivation {
+          packages.default = pkgs.stdenvNoCC.mkDerivation {
             name = "cxx-template";
             src = ./.;
             nativeBuildInputs = [
+              pkgs.llvmPackages.libcxxClang
               pkgs.cmake
               pkgs.ninja
               pkgs.clang-tools

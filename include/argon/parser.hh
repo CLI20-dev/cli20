@@ -171,7 +171,7 @@ class Parser {
     std::size_t pos_idx = 0;
     std::string pos_error;
     std::string missing;
-    (..., [&] {
+    (..., [&] -> auto {
       if constexpr (opts.type == ArgumentType::positional) {
         if (pos_idx < tokenized->positional.size()) {
           const auto sv = tokenized->positional[pos_idx++];
@@ -239,8 +239,9 @@ class Parser {
 
     (..., [&] -> auto {
       if constexpr (options.type == ArgumentType::option) {
-        auto make_fn = [&options](std::span<const std::string_view> values)
-            -> std::expected<void, std::string> {
+        auto make_fn =
+            [&options](
+                std::span<const std::string_view> values) -> std::expected<void, std::string> {
           auto r = options.parse(values);
           if (!r) {
             return std::unexpected(r.error().message());
@@ -254,8 +255,8 @@ class Parser {
         }
       }
       if constexpr (options.type == ArgumentType::flag) {
-        auto make_fn = [&options](std::span<const std::string_view>)
-            -> std::expected<void, std::string> {
+        auto make_fn =
+            [&options](std::span<const std::string_view>) -> std::expected<void, std::string> {
           options.markSeen();
           return {};
         };
