@@ -1,6 +1,11 @@
 #pragma once
 
 #include <argon/string_literal.hh>
+#include <charconv>
+#include <cstdint>
+#include <expected>
+#include <span>
+#include <system_error>
 
 namespace argon {
 
@@ -57,6 +62,30 @@ template <StringLiteral Name>
 [[nodiscard]]
 consteval auto IsCommandName() noexcept {
   return IsValidLongOpt<Name>();
+}
+
+template <typename T>
+concept ArithmeticParseable =
+    (std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) || std::floating_point<T>;
+
+// Parse a single arithmetic value from a string_view via std::from_chars.
+// Returns result_out_of_range on overflow, invalid_argument on bad input / partial parse.
+template <ArithmeticParseable T>
+auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::error_code> {
+  const char* first = sv.data();
+  const char* last = sv.data() + sv.size();
+  std::from_chars_result res;
+  if constexpr (std::floating_point<T>) {
+    res = std::from_chars(first, last, out, std::chars_format::general);
+  } else {
+    res = std::from_chars(first, last, out);
+  }
+  if (res.ec != std::errc() || res.ptr != last) {
+    return std::unexpected(res.ec != std::errc()
+                               ? std::make_error_code(res.ec)
+                               : std::make_error_code(std::errc::invalid_argument));
+  }
+  return {};
 }
 
 struct Nargs {
@@ -140,6 +169,12 @@ struct PositionalArgument : ArgumentTag {
   [[nodiscard]] constexpr auto valueRef() noexcept -> ValueT& { return value_; }
   constexpr auto markSeen() noexcept -> void { seen_ = true; }
 
+  auto parse(std::string_view sv) -> std::expected<void, std::error_code>
+    requires detail::ArithmeticParseable<ValueT>
+  {
+    return detail::parseArithmetic(sv, value_);
+  }
+
  private:
   ValueT value_{};
   bool seen_ = false;
@@ -173,6 +208,30 @@ template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
   using ArgBase<ValueT, LongOpt, ShortOpt>::ArgBase;
+  template <class>
+  friend class Parser;
+
+ protected:
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code>
+    requires detail::ArithmeticParseable<ValueT>
+  {
+    return detail::parseArithmetic(sv[0], this->valueRef());
+  }
+
+  auto validate() -> std::expected<void, std::error_code>
+    requires detail::ArithmeticParseable<ValueT>
+  {
+    return {};
+  }
+
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs
+    requires detail::ArithmeticParseable<ValueT>
+  {
+    return nargs_;
+  }
+
+ private:
+  detail::Nargs nargs_ = nargs::one;
 };
 
 template <class T, StringLiteral CommandName>

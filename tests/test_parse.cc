@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "argon/int_argument.hh"
-#include "argon/int_positional.hh"
+#include "argon/arithmetic_argument.hh"
+#include "argon/arithmetic_positional.hh"
 #include "argon/parser.hh"
 
 using namespace argon;

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "argon/argument.hh"
-#include "argon/int_argument.hh"
+#include "argon/arithmetic_argument.hh"
 #include "argon/parser.hh"
 
 struct Args {
