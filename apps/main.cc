@@ -1,49 +1,30 @@
 #include <iostream>
 
-// #include "argon.hh"
 #include "argon/argument.hh"
+#include "argon/int_argument.hh"
+#include "argon/parser.hh"
 
-// template <class T>
-// struct String {};
-//
-// struct Args {
-//   consteval Args(std::string_view str) : option1(str) {
-//     if (str.starts_with("Hello")) {
-//       throw std::runtime_error("String cannot start with 'Hello'");
-//     }
-//   }
-//
-//   std::string_view option1;
-//   auto print() const { std::cout << "A: " << option1 << std::endl; }
-// };
-//
-// struct Argument {
-//   argon::Arg<int> arg1 = {"arg1", "a"};
-//   argon::Arg<int> arg2 = {"arg2", "b"};
-//   struct Argument2 {
-//     argon::Arg<int> arg1 = {"arg1", "a"};
-//     argon::Arg<int> arg2 = {"arg2", "b"};
-//   } sub_parser;
-// };
+struct Args {
+  argon::IntArg<"arg1", 'a'> arg1;
+  argon::IntArg<"arg2"> arg2;
+  argon::IntArg<"arg3"> arg3;
+  argon::IntListArg<"arg4", 'c'> arg4{argon::nargs::one_or_more};
+  struct SubArgs {
+    argon::IntArg<"arg1", 'a'> arg1;
+    argon::IntArg<"arg2", 'b'> arg2;
+  };
+  argon::Command<SubArgs, "subcommand"> subcommand;
+};
 
 auto main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) -> int {
-  // auto _ = argon::Failure<true>{};
+  auto parser = argon::Parser<Args>{};
 
-  // auto option_name = "Hello, World!";
-  //
-  // // auto a = A("Hell, World!");
-  // auto a = A(option_name);
-  // a.print();
-  //
-  // // auto res = argon::parse<Argument>(argc, argv);
-  // //
-  // // if (!res) {
-  // //   std::cerr << "Error parsing arguments: " << res.error().message() << std::endl;
-  // //   return 1;
-  // // }
-  // //
-  // // std::cout << "arg1: " << res->arg1.value << std::endl;
-  // // std::cout << "arg2: " << res->arg2.value << std::endl;
-  // //
+  auto res = parser.parse(argc, argv);
+
+  if (!res) {
+    std::cerr << "Error parsing arguments: " << res.error() << std::endl;
+    return 1;
+  }
+
   return 0;
 }

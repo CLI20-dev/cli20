@@ -37,7 +37,7 @@
             cmakeFlags = [
               "-G Ninja"
               "-DCMAKE_BUILD_TYPE=Release"
-              "-DCXX_TEMPLATE_ENABLE_TEST=ON"
+              "-DCXX_ARGON_ENABLE_TEST=ON"
               "-DCXX_TEMPLATE_ENABLE_CLANG_TIDY=ON"
               "-DCXX_TEMPLATE_ENABLE_SANITIZERS=ON"
             ];
@@ -70,7 +70,7 @@
                 if [ ! -d build ]; then
                   nix develop --command cmake -S . -B build -G Ninja \
                     -DCMAKE_BUILD_TYPE=Debug \
-                    -DCXX_TEMPLATE_ENABLE_TEST=ON \
+                    -DCXX_ARGON_ENABLE_TEST=ON \
                     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
                 fi
                 nix develop --command cmake --build build

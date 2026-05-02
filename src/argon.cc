@@ -1,8 +1,6 @@
-#include "argon.hh"
-
 #include <string>
 
-namespace cxx_template {
+namespace argon {
 
 auto hello() -> std::string { return "Hello, World!"; }
 

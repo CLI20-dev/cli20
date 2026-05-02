@@ -2,9 +2,9 @@
 
 #include "argon/argument.hh"
 
-// IsLongOptionName is consteval, so wrap each case in a lambda to call at runtime.
+// IsValidLongOpt is consteval, so wrap each case in a lambda to call at runtime.
 template <argon::StringLiteral Name>
-constexpr bool IsLong = argon::detail::IsLongOptionName<Name>();
+constexpr bool IsLong = argon::detail::IsValidLongOpt<Name>();
 
 TEST(Argument, OptionNameValidation) {
   // ---- specified cases ----

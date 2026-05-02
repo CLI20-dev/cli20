@@ -1,20 +1,23 @@
 #pragma once
 
 #include <argon/string_literal.hh>
-#include <charconv>
-#include <concepts>
-#include <expected>
-#include <string>
-#include <system_error>
-#include <vector>
 
 namespace argon {
+
+struct ArgumentTag {};
+
+enum class ArgumentType : std::uint8_t {
+  flag,
+  option,
+  positional,
+  command,
+};
 
 namespace detail {
 
 template <StringLiteral Name>
 [[nodiscard]]
-consteval auto IsLongOptionName() noexcept -> bool {
+constexpr auto IsValidLongOpt() noexcept -> bool {
   constexpr auto size = Name.size();
 
   if constexpr (size == 0) {
@@ -46,61 +49,133 @@ consteval auto IsLongOptionName() noexcept -> bool {
   return !previous_is_hyphen;
 }
 
-consteval auto IsShortOptionName(char Name) noexcept -> bool {
+constexpr auto IsShortOptionName(char Name) noexcept -> bool {
   return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z');
 }
 
+constexpr auto IsValidShortOpt(char Name) noexcept -> bool {
+  return IsShortOptionName(Name) || Name == '\0';
+}
+
+template <StringLiteral Name>
+[[nodiscard]]
+consteval auto IsCommandName() noexcept {
+  return IsValidLongOpt<Name>();
+}
+
+struct Nargs {
+  std::size_t min;
+  std::optional<std::size_t> max;
+};
+
 }  // namespace detail
 
-struct ArgumentTag {};
+enum class Requirement : std::uint8_t {
+  optional,
+  required,
+};
 
-template <std::derived_from<ArgumentTag>>
-class Parser;
+namespace nargs {
 
-template <class ValueT, StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsShortOptionName(ShortOpt) && detail::IsLongOptionName<LongOpt>())
+inline constexpr detail::Nargs none{.min = 0, .max = 0};
+inline constexpr detail::Nargs one{.min = 1, .max = 1};
+inline constexpr detail::Nargs optional{.min = 0, .max = 1};
+inline constexpr detail::Nargs zero_or_more{.min = 0, .max = std::nullopt};
+inline constexpr detail::Nargs one_or_more{.min = 1, .max = std::nullopt};
+
+template <std::size_t N>
+inline constexpr detail::Nargs exactly{.min = N, .max = N};
+
+template <std::size_t Min, std::size_t Max>
+inline constexpr detail::Nargs between{.min = Min, .max = Max};
+
+}  // namespace nargs
+
+inline constexpr Requirement optional = Requirement::optional;
+inline constexpr Requirement required = Requirement::required;
+
+template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
+  requires(detail::IsValidShortOpt(ShortOpt) && detail::IsValidLongOpt<LongOpt>())
 struct ArgBase : ArgumentTag {
-  ValueT value_ = {};
-  ArgBase(const ArgBase&) = delete;
-  auto operator=(const ArgBase&) -> ArgBase& = delete;
-  ArgBase(ArgBase&&) = default;
-  auto operator=(ArgBase&&) -> ArgBase& = default;
-  ArgBase() = default;
-  virtual ~ArgBase() = default;
+  static constexpr auto type = ArgumentType::option;
+  using value_type = ValueT;
+
+  static constexpr auto long_opt = LongOpt;
+  static constexpr char short_opt = ShortOpt;
+
+  constexpr explicit ArgBase(Requirement requirement = optional) : requirement_(requirement) {}
+
+  [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
+    return LongOpt.view();
+  }
+  [[nodiscard]] static constexpr auto shortOpt() noexcept -> char { return ShortOpt; }
+  [[nodiscard]] constexpr auto requirement() const noexcept -> Requirement { return requirement_; }
+  [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
+    return requirement_ == required;
+  }
+  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
+  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return occurrence_count_ != 0; }
+  [[nodiscard]] constexpr auto occurrenceCount() const noexcept -> std::size_t {
+    return occurrence_count_;
+  }
 
  protected:
-  virtual auto parse(std::vector<std::string_view> sv) -> std::expected<void, std::error_code> = 0;
-  virtual auto validate() -> std::expected<void, std::error_code> { return {}; }
+  constexpr auto valueRef() noexcept -> ValueT& { return value_; }
+  constexpr auto markSeen() noexcept -> void { ++occurrence_count_; }
 
-  template <std::derived_from<ArgumentTag>>
+ private:
+  Requirement requirement_ = optional;
+  std::size_t occurrence_count_ = 0;
+  ValueT value_ = {};
+};
+
+template <typename ValueT>
+struct PositionalArgument : ArgumentTag {
+  static constexpr auto type = ArgumentType::positional;
+  using value_type = ValueT;
+
+  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
+
+ protected:
+  [[nodiscard]] constexpr auto valueRef() noexcept -> ValueT& { return value_; }
+
+ private:
+  ValueT value_ = {};
+};
+
+template <StringLiteral LongOpt, char ShortOpt>
+struct Flag : ArgumentTag {
+  static constexpr auto type = ArgumentType::flag;
+
+ protected:
+  [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
+  [[nodiscard]] static constexpr auto shortOpt() -> char { return ShortOpt; }
+
+  template <class>
   friend class Parser;
 };
 
-template <class ValueT, StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsLongOptionName<LongOpt>() && detail::IsShortOptionName(ShortOpt))
+template <class>
+class Parser;
+
+template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
+  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
   using ArgBase<ValueT, LongOpt, ShortOpt>::ArgBase;
 };
 
-template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsLongOptionName<LongOpt>() && detail::IsShortOptionName(ShortOpt))
-struct Arg<int, LongOpt, ShortOpt> : public ArgBase<int, LongOpt, ShortOpt> {
-  using ArgBase<int, LongOpt, ShortOpt>::ArgBase;
+template <class T, StringLiteral CommandName>
+  requires(detail::IsCommandName<CommandName>())
+struct Command : ArgumentTag {
+  static constexpr auto type = ArgumentType::command;
+  T args;
 
  protected:
-  auto parse(std::vector<std::string_view> sv) -> std::expected<void, std::error_code> override {
-    auto res = std::from_chars(sv[0].begin(), sv[0].end(), this->value_);
-    if (res.ec != std::errc()) {
-      return std::unexpected(std::make_error_code(res.ec));
-    }
-    return {};
+  [[nodiscard]] static constexpr auto commandName() -> std::string_view {
+    return CommandName.view();
   }
-
-  auto validate() -> std::expected<void, std::error_code> override { return {}; }
+  template <class>
+  friend class Parser;
 };
-
-template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsLongOptionName<LongOpt>() && detail::IsShortOptionName(ShortOpt))
-using IntArg = Arg<int, LongOpt, ShortOpt>;
 
 }  // namespace argon
