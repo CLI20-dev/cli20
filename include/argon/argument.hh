@@ -149,6 +149,11 @@ struct Flag : ArgumentTag {
 
   template <class>
   friend class Parser;
+
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+
+ private:
+  detail::Nargs nargs_ = nargs::none;
 };
 
 template <class>

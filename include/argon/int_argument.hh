@@ -13,6 +13,8 @@ template <StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg<int, LongOpt, ShortOpt> : public ArgBase<int, LongOpt, ShortOpt> {
   using ArgBase<int, LongOpt, ShortOpt>::ArgBase;
+  template <class>
+  friend class Parser;
 
  protected:
   auto parse(std::span<std::string_view> sv)
@@ -23,7 +25,13 @@ struct Arg<int, LongOpt, ShortOpt> : public ArgBase<int, LongOpt, ShortOpt> {
     }
     return sv.subspan(1);
   }
+
   auto validate() -> std::expected<void, std::error_code> { return {}; }
+
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+
+ private:
+  detail::Nargs nargs_ = nargs::one;
 };
 
 template <StringLiteral LongOpt, char ShortOpt>
@@ -31,6 +39,8 @@ template <StringLiteral LongOpt, char ShortOpt>
 struct Arg<std::vector<int>, LongOpt, ShortOpt>
     : public ArgBase<std::vector<int>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<int>, LongOpt, ShortOpt>;
+  template <class>
+  friend class Parser;
 
   constexpr explicit Arg(Requirement requirement = optional,
                          detail::Nargs nargs = nargs::one_or_more)

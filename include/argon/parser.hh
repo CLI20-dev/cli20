@@ -5,6 +5,7 @@
 #include <expected>
 #include <print>
 #include <span>
+#include <unordered_map>
 #include <vector>
 
 namespace argon {
@@ -81,20 +82,36 @@ class Parser {
     std::println("Parsing arguments for program: {}", program_name_);
 
     Arguments result;
-    [[maybe_unused]] auto& [... optionLists] = result;
+    auto specMap = this->makeArgumentSpecMap(result);
+
+    std::vector<std::string_view> positional_argument = {};
+    auto parsedArgs = std::unordered_map<std::string, std::vector<std::string_view>>{};
+    auto longOptions = getLongOptions(result);
+    auto shortOptions = getShortOptions(result);
+    auto commandNames = getCommandNames(result);
+
+    for (std::size_t i = 1; i < args.size(); ++i) {
+      auto it = specMap.find(std::string(args[i]));
+      if (it == specMap.end()) {
+        positional_argument.push_back(args[i]);
+        continue;
+      }
+    }
+
+    // [[maybe_unused]] auto& [... optionLists] = result;
 
     return result;
   }
 
  private:
-  auto getLongOptions(Arguments args) const {
+  auto getLongOptions(const Arguments& args) const {
     auto ret = std::vector<std::string_view>{};
     auto [... options] = args;
     (..., (ret.push_back(options.longOpt())));
     return ret;
   }
 
-  auto getShortOptions(Arguments args) const {
+  auto getShortOptions(const Arguments& args) const {
     auto ret = std::vector<char>{};
     auto [... options] = args;
     (..., [&] -> auto {
@@ -106,17 +123,51 @@ class Parser {
     return ret;
   }
 
-  [[nodiscard]] auto isOption(std::string_view arg,
-                              const std::vector<std::string_view>& longOptions,
-                              const std::vector<char>& shortOptions) const -> bool {
+  auto getCommandNames(const Arguments& args) const {
+    auto ret = std::vector<std::string_view>{};
+    auto [... options] = args;
+    (..., [&] -> auto {
+      if constexpr (options.type == ArgumentType::command) {
+        ret.push_back(options.commandName());
+      }
+    }());
+    return ret;
+  }
+
+  [[nodiscard]] auto isArgument(std::string_view arg,
+                                const std::vector<std::string_view>& longOptions,
+                                const std::vector<char>& shortOptions,
+                                const std::vector<std::string_view>& commandNames) const -> bool {
     if (arg.starts_with("--")) {
       auto longOpt = arg.substr(2);
       return std::ranges::find(longOptions, longOpt) != longOptions.end();
     } else if (arg.starts_with("-") && arg.size() == 2) {
       char shortOpt = arg[1];
       return std::ranges::find(shortOptions, shortOpt) != shortOptions.end();
+    } else {
+      return std::ranges::find(commandNames, arg) != commandNames.end();
     }
-    return false;
+  }
+
+  auto makeArgumentSpecMap(const Arguments& args) const {
+    auto [... options] = args;
+
+    std::unordered_map<std::string, detail::Nargs> argumentSpecMap;
+
+    (..., [&argumentSpecMap, &options] -> auto {
+      if constexpr (options.type == ArgumentType::option || options.type == ArgumentType::flag) {
+        argumentSpecMap.emplace(std::string("--") + options.longOpt(), options.nargs());
+        if (options.shortOpt() != '\0') {
+          argumentSpecMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
+                                  options.nargs());
+        }
+      }
+      if constexpr (options.type == ArgumentType::command) {
+        argumentSpecMap.emplace(options.commandName(),
+                                detail::Nargs{.min = 0, .max = std::nullopt});
+      }
+    }());
+    return argumentSpecMap;
   }
 
   std::string program_name_ = "program";
