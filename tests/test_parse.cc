@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "argon/int_argument.hh"
+#include "argon/int_positional.hh"
 #include "argon/parser.hh"
 
 using namespace argon;
@@ -23,6 +24,24 @@ struct TwoIntArgs {
 struct FlagAndIntArgs {
   Flag<"verbose", 'v'> verbose;
   IntArg<"count", 'n'> count;
+};
+
+// ---- Positional argument structs ----
+
+struct OnePositionalArgs {
+  IntPositional x;
+};
+
+struct TwoPositionalArgs {
+  IntPositional x;
+  IntPositional y;
+};
+
+struct MixedArgs {
+  IntArg<"count", 'n'> count;
+  Flag<"verbose", 'v'> verbose;
+  IntPositional x;
+  IntPositional y;
 };
 
 // ---- success: basic value parsing ----
@@ -274,4 +293,153 @@ TEST(ParseIntArg, DuplicateMixedLongShort) {
   // Both keys are distinct in the tokenizer, so no duplicate error.
   // The value should reflect both parses — whichever runs second wins.
   ASSERT_TRUE(result.has_value());
+}
+
+// ---- success: single positional ----
+
+TEST(ParseIntPositional, SingleValue) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "42"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result->x.seen());
+  EXPECT_EQ(result->x.value(), 42);
+}
+
+TEST(ParseIntPositional, ZeroValue) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "0"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 0);
+}
+
+TEST(ParseIntPositional, NegativeValue) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "-7"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), -7);
+}
+
+TEST(ParseIntPositional, MaxInt) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "2147483647"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 2147483647);
+}
+
+TEST(ParseIntPositional, NotProvided) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_FALSE(result->x.seen());
+  EXPECT_EQ(result->x.value(), 0);
+}
+
+// ---- success: multiple positionals ----
+
+TEST(ParseIntPositional, TwoValues) {
+  Parser<TwoPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "10", "20"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 10);
+  EXPECT_EQ(result->y.value(), 20);
+  EXPECT_TRUE(result->x.seen());
+  EXPECT_TRUE(result->y.seen());
+}
+
+TEST(ParseIntPositional, OnlyFirstProvided) {
+  Parser<TwoPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "5"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result->x.seen());
+  EXPECT_EQ(result->x.value(), 5);
+  EXPECT_FALSE(result->y.seen());
+  EXPECT_EQ(result->y.value(), 0);
+}
+
+// ---- success: positionals mixed with options and flags ----
+
+TEST(ParseIntPositional, MixedOptionFlagPositional) {
+  Parser<MixedArgs> parser;
+  std::vector<std::string_view> args = {"prog", "--count", "3", "--verbose", "10", "20"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->count.value(), 3);
+  EXPECT_TRUE(result->verbose.seen());
+  EXPECT_EQ(result->x.value(), 10);
+  EXPECT_EQ(result->y.value(), 20);
+}
+
+TEST(ParseIntPositional, PositionalBeforeOption) {
+  Parser<MixedArgs> parser;
+  std::vector<std::string_view> args = {"prog", "10", "20", "--count", "3"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 10);
+  EXPECT_EQ(result->y.value(), 20);
+  EXPECT_EQ(result->count.value(), 3);
+}
+
+TEST(ParseIntPositional, PositionalInterleavedWithOptions) {
+  Parser<MixedArgs> parser;
+  std::vector<std::string_view> args = {"prog", "10", "--count", "3", "20"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 10);
+  EXPECT_EQ(result->y.value(), 20);
+  EXPECT_EQ(result->count.value(), 3);
+}
+
+TEST(ParseIntPositional, OptionOnlyNoPositionals) {
+  Parser<MixedArgs> parser;
+  std::vector<std::string_view> args = {"prog", "--count", "99"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->count.value(), 99);
+  EXPECT_FALSE(result->x.seen());
+  EXPECT_FALSE(result->y.seen());
+}
+
+// ---- error: invalid positional integer ----
+
+TEST(ParseIntPositional, InvalidNotANumber) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "abc"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
+}
+
+TEST(ParseIntPositional, PartialNumber) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "42abc"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+}
+
+TEST(ParseIntPositional, FloatString) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "3.14"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+}
+
+TEST(ParseIntPositional, Overflow) {
+  Parser<OnePositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "99999999999999"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+}
+
+TEST(ParseIntPositional, SecondPositionalInvalid) {
+  Parser<TwoPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "10", "bad"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
 }

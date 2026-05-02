@@ -131,12 +131,18 @@ struct PositionalArgument : ArgumentTag {
   using value_type = ValueT;
 
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
+  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return seen_; }
+
+  template <class>
+  friend class Parser;
 
  protected:
   [[nodiscard]] constexpr auto valueRef() noexcept -> ValueT& { return value_; }
+  constexpr auto markSeen() noexcept -> void { seen_ = true; }
 
  private:
-  ValueT value_ = {};
+  ValueT value_{};
+  bool seen_ = false;
 };
 
 template <StringLiteral LongOpt, char ShortOpt>

@@ -166,16 +166,38 @@ class Parser {
       }
     }
 
-    // Check that all required options were provided
+    // Assign positional values and check required options in one pass
     auto& [... opts] = result;
+    std::size_t pos_idx = 0;
+    std::string pos_error;
     std::string missing;
     (..., [&] {
+      if constexpr (opts.type == ArgumentType::positional) {
+        if (pos_idx < tokenized->positional.size()) {
+          const auto sv = tokenized->positional[pos_idx++];
+          if constexpr (requires { opts.parse(sv); }) {
+            if (pos_error.empty()) {
+              auto r = opts.parse(sv);
+              if (!r) {
+                pos_error = r.error().message();
+              } else {
+                opts.markSeen();
+              }
+            }
+          }
+        } else {
+          ++pos_idx;  // advance index even for fields without a parseable value
+        }
+      }
       if constexpr (opts.type == ArgumentType::option) {
         if (opts.isRequired() && !opts.seen() && missing.empty()) {
           missing = std::string("--") + std::string(opts.longOpt());
         }
       }
     }());
+    if (!pos_error.empty()) {
+      return std::unexpected(pos_error);
+    }
     if (!missing.empty()) {
       return std::unexpected(std::format("required option '{}' was not provided", missing));
     }
