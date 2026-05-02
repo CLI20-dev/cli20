@@ -51,7 +51,7 @@ TEST(ParseIntArg, LongOption) {
   std::vector<std::string_view> args = {"prog", "--count", "42"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->count.seen());
+  EXPECT_TRUE(result->count.provided());
   EXPECT_EQ(result->count.value(), 42);
 }
 
@@ -60,7 +60,7 @@ TEST(ParseIntArg, ShortOption) {
   std::vector<std::string_view> args = {"prog", "-n", "7"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->count.seen());
+  EXPECT_TRUE(result->count.provided());
   EXPECT_EQ(result->count.value(), 7);
 }
 
@@ -69,7 +69,7 @@ TEST(ParseIntArg, EqualsSyntax) {
   std::vector<std::string_view> args = {"prog", "--count=99"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->count.seen());
+  EXPECT_TRUE(result->count.provided());
   EXPECT_EQ(result->count.value(), 99);
 }
 
@@ -113,7 +113,7 @@ TEST(ParseIntArg, OptionalNotProvided) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_FALSE(result->count.seen());
+  EXPECT_FALSE(result->count.provided());
   EXPECT_EQ(result->count.value(), 0);  // default-initialized
 }
 
@@ -123,7 +123,8 @@ TEST(ParseIntArg, EmptyArgs) {
   std::vector<std::string_view> args = {};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_FALSE(result->count.seen());
+  EXPECT_FALSE(result->count.provided());
+  EXPECT_EQ(result->count.value(), 0);
 }
 
 // ---- success: multiple options ----
@@ -161,7 +162,7 @@ TEST(ParseIntArg, FlagAndOption) {
   std::vector<std::string_view> args = {"prog", "--verbose", "--count", "3"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->verbose.seen());
+  EXPECT_TRUE(result->verbose.provided());
   EXPECT_EQ(result->count.value(), 3);
 }
 
@@ -170,7 +171,7 @@ TEST(ParseIntArg, FlagNotProvided) {
   std::vector<std::string_view> args = {"prog", "--count", "3"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_FALSE(result->verbose.seen());
+  EXPECT_FALSE(result->verbose.provided());
   EXPECT_EQ(result->count.value(), 3);
 }
 
@@ -179,7 +180,7 @@ TEST(ParseIntArg, FlagShortForm) {
   std::vector<std::string_view> args = {"prog", "-v"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->verbose.seen());
+  EXPECT_TRUE(result->verbose.provided());
 }
 
 // ---- success: required option ----
@@ -218,6 +219,7 @@ TEST(ParseIntArg, PartialNumber) {
   std::vector<std::string_view> args = {"prog", "--count", "42abc"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 TEST(ParseIntArg, FloatString) {
@@ -225,6 +227,7 @@ TEST(ParseIntArg, FloatString) {
   std::vector<std::string_view> args = {"prog", "--count", "3.14"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 TEST(ParseIntArg, EmptyString) {
@@ -232,6 +235,7 @@ TEST(ParseIntArg, EmptyString) {
   std::vector<std::string_view> args = {"prog", "--count", ""};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 TEST(ParseIntArg, Overflow) {
@@ -239,6 +243,7 @@ TEST(ParseIntArg, Overflow) {
   std::vector<std::string_view> args = {"prog", "--count", "99999999999999"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 TEST(ParseIntArg, Underflow) {
@@ -246,6 +251,7 @@ TEST(ParseIntArg, Underflow) {
   std::vector<std::string_view> args = {"prog", "--count", "-99999999999999"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 // ---- error: tokenizer errors propagated through parse() ----
@@ -302,7 +308,7 @@ TEST(ParseIntPositional, SingleValue) {
   std::vector<std::string_view> args = {"prog", "42"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->x.seen());
+  EXPECT_TRUE(result->x.provided());
   EXPECT_EQ(result->x.value(), 42);
 }
 
@@ -335,7 +341,7 @@ TEST(ParseIntPositional, NotProvided) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_FALSE(result->x.seen());
+  EXPECT_FALSE(result->x.provided());
   EXPECT_EQ(result->x.value(), 0);
 }
 
@@ -348,8 +354,8 @@ TEST(ParseIntPositional, TwoValues) {
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->x.value(), 10);
   EXPECT_EQ(result->y.value(), 20);
-  EXPECT_TRUE(result->x.seen());
-  EXPECT_TRUE(result->y.seen());
+  EXPECT_TRUE(result->x.provided());
+  EXPECT_TRUE(result->y.provided());
 }
 
 TEST(ParseIntPositional, OnlyFirstProvided) {
@@ -357,9 +363,9 @@ TEST(ParseIntPositional, OnlyFirstProvided) {
   std::vector<std::string_view> args = {"prog", "5"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->x.seen());
+  EXPECT_TRUE(result->x.provided());
   EXPECT_EQ(result->x.value(), 5);
-  EXPECT_FALSE(result->y.seen());
+  EXPECT_FALSE(result->y.provided());
   EXPECT_EQ(result->y.value(), 0);
 }
 
@@ -371,7 +377,7 @@ TEST(ParseIntPositional, MixedOptionFlagPositional) {
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->count.value(), 3);
-  EXPECT_TRUE(result->verbose.seen());
+  EXPECT_TRUE(result->verbose.provided());
   EXPECT_EQ(result->x.value(), 10);
   EXPECT_EQ(result->y.value(), 20);
 }
@@ -402,8 +408,8 @@ TEST(ParseIntPositional, OptionOnlyNoPositionals) {
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->count.value(), 99);
-  EXPECT_FALSE(result->x.seen());
-  EXPECT_FALSE(result->y.seen());
+  EXPECT_FALSE(result->x.provided());
+  EXPECT_FALSE(result->y.provided());
 }
 
 // ---- error: invalid positional integer ----

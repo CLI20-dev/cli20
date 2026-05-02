@@ -72,8 +72,14 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
+  constexpr PositionalArgument(Requirement requirement = optional)
+      : requirement_(requirement) {}
+
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
-  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return seen_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
+    return requirement_ == Requirement::required;
+  }
 
   template <class>
   friend class Parser;
@@ -84,11 +90,12 @@ struct PositionalArgument<std::string> : ArgumentTag {
     return {};
   }
 
-  constexpr auto markSeen() noexcept -> void { seen_ = true; }
+  constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
  private:
+  Requirement requirement_ = optional;
   std::string value_;
-  bool seen_ = false;
+  bool provided_ = false;
 };
 
 // ---- Aliases ----
@@ -102,5 +109,18 @@ template <StringLiteral LongOpt, char ShortOpt = '\0'>
 using StringListArg = Arg<std::vector<std::string>, LongOpt, ShortOpt>;
 
 using StringPositional = PositionalArgument<std::string>;
+
+// Short-form aliases
+template <StringLiteral LongOpt, char ShortOpt = '\0'>
+  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+using StrArg = StringArg<LongOpt, ShortOpt>;
+
+template <StringLiteral LongOpt, char ShortOpt = '\0'>
+  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+using StrListArg = StringListArg<LongOpt, ShortOpt>;
+
+using StrPositional    = StringPositional;
+using StrPositionalArg = StringPositional;
+using StrPosArg        = StringPositional;
 
 }  // namespace argon

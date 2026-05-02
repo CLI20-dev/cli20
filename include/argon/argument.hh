@@ -139,14 +139,14 @@ struct ArgBase : ArgumentTag {
     return requirement_ == required;
   }
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
-  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return occurrence_count_ != 0; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return occurrence_count_ != 0; }
   [[nodiscard]] constexpr auto occurrenceCount() const noexcept -> std::size_t {
     return occurrence_count_;
   }
 
  protected:
   constexpr auto valueRef() noexcept -> ValueT& { return value_; }
-  constexpr auto markSeen() noexcept -> void { ++occurrence_count_; }
+  constexpr auto markProvided() noexcept -> void { ++occurrence_count_; }
 
  private:
   Requirement requirement_ = optional;
@@ -159,15 +159,21 @@ struct PositionalArgument : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = ValueT;
 
+  constexpr PositionalArgument(Requirement requirement = optional)
+      : requirement_(requirement) {}
+
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
-  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return seen_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
+    return requirement_ == Requirement::required;
+  }
 
   template <class>
   friend class Parser;
 
  protected:
   [[nodiscard]] constexpr auto valueRef() noexcept -> ValueT& { return value_; }
-  constexpr auto markSeen() noexcept -> void { seen_ = true; }
+  constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
   auto parse(std::string_view sv) -> std::expected<void, std::error_code>
     requires detail::ArithmeticParseable<ValueT>
@@ -176,15 +182,16 @@ struct PositionalArgument : ArgumentTag {
   }
 
  private:
+  Requirement requirement_ = optional;
   ValueT value_{};
-  bool seen_ = false;
+  bool provided_ = false;
 };
 
 template <StringLiteral LongOpt, char ShortOpt>
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
-  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return seen_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
 
  protected:
   [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
@@ -194,11 +201,11 @@ struct Flag : ArgumentTag {
   friend class Parser;
 
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
-  constexpr auto markSeen() noexcept -> void { seen_ = true; }
+  constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
  private:
   detail::Nargs nargs_ = nargs::none;
-  bool seen_ = false;
+  bool provided_ = false;
 };
 
 template <class>
@@ -240,12 +247,25 @@ struct Command : ArgumentTag {
   static constexpr auto type = ArgumentType::command;
   T args;
 
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+
  protected:
   [[nodiscard]] static constexpr auto commandName() -> std::string_view {
     return CommandName.view();
   }
+  constexpr auto markProvided() noexcept -> void { provided_ = true; }
+
   template <class>
   friend class Parser;
+
+ private:
+  bool provided_ = false;
 };
+
+// ---- FlagArg alias ----
+
+template <StringLiteral LongOpt, char ShortOpt = '\0'>
+  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+using FlagArg = Flag<LongOpt, ShortOpt>;
 
 }  // namespace argon

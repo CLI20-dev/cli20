@@ -17,4 +17,22 @@ using Uint64Positional = PositionalArgument<uint64_t>;
 using FloatPositional  = PositionalArgument<float>;
 using DoublePositional = PositionalArgument<double>;
 
+// Long-form *PositionalArg aliases
+using IntPositionalArg    = IntPositional;
+using Int32PositionalArg  = Int32Positional;
+using Int64PositionalArg  = Int64Positional;
+using Uint32PositionalArg = Uint32Positional;
+using Uint64PositionalArg = Uint64Positional;
+using FloatPositionalArg  = FloatPositional;
+using DoublePositionalArg = DoublePositional;
+
+// Short-form *PosArg aliases
+using IntPosArg    = IntPositional;
+using Int32PosArg  = Int32Positional;
+using Int64PosArg  = Int64Positional;
+using Uint32PosArg = Uint32Positional;
+using Uint64PosArg = Uint64Positional;
+using FloatPosArg  = FloatPositional;
+using DoublePosArg = DoublePositional;
+
 }  // namespace argon

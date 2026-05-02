@@ -7,6 +7,7 @@
 #include <functional>
 #include <span>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace argon {
@@ -27,15 +28,34 @@ struct isValidArgumentsType {
 struct TokenizeResult {
   std::unordered_map<std::string, std::vector<std::string_view>> named;
   std::vector<std::string_view> positional;
+  // Set when a command name is encountered; points from that token to end of args.
+  std::optional<std::span<const std::string_view>> command_tail;
 };
 
+// spec_map      : option/flag keys → nargs  (does NOT contain command names)
+// command_names : set of bare command name strings (no "--" prefix)
 inline auto tokenize(std::span<const std::string_view> args,
-                     const std::unordered_map<std::string, Nargs>& spec_map)
+                     const std::unordered_map<std::string, Nargs>& spec_map,
+                     const std::unordered_set<std::string>& command_names = {})
     -> std::expected<TokenizeResult, std::string> {
   TokenizeResult result;
 
   for (std::size_t i = 0; i < args.size(); ++i) {
     const auto arg = args[i];
+
+    // "--" end-of-options separator: everything after is positional
+    if (arg == "--") {
+      for (std::size_t j = i + 1; j < args.size(); ++j) {
+        result.positional.push_back(args[j]);
+      }
+      break;
+    }
+
+    // Command name: stop parsing at this level; hand off remainder to sub-parser
+    if (command_names.contains(std::string(arg))) {
+      result.command_tail = args.subspan(i);
+      break;
+    }
 
     // --foo=bar syntax: only recognized when nargs is exact<1>
     if (arg.starts_with("--")) {
@@ -68,12 +88,14 @@ inline auto tokenize(std::span<const std::string_view> args,
       return std::unexpected(std::format("option '{}' specified multiple times", key));
     }
 
-    // Collect values up to max, stopping when another option name is encountered
+    // Collect values up to max, stopping at the next option/command/separator
     const auto& nargs_spec = it->second;
     auto& values = result.named[key];
     for (std::size_t count = 0;
          i + 1 < args.size() && (!nargs_spec.max.has_value() || count < *nargs_spec.max) &&
-         !spec_map.contains(std::string(args[i + 1]));
+         args[i + 1] != "--" &&
+         !spec_map.contains(std::string(args[i + 1])) &&
+         !command_names.contains(std::string(args[i + 1]));
          ++count) {
       values.push_back(args[++i]);
     }
@@ -145,11 +167,12 @@ class Parser {
     program_name_ = args.empty() ? "program" : std::string(args[0]);
 
     Arguments result;
-    auto specMap = makeArgumentSpecMap(result);
-
-    // Skip argv[0] (program name); guard against empty span
     const auto rest = args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
-    auto tokenized = detail::tokenize(rest, specMap);
+
+    auto specMap = makeOptionSpecMap(result);
+    auto cmdNames = makeCommandNamesSet(result);
+
+    auto tokenized = detail::tokenize(rest, specMap, cmdNames);
     if (!tokenized) {
       return std::unexpected(tokenized.error());
     }
@@ -166,7 +189,7 @@ class Parser {
       }
     }
 
-    // Assign positional values and check required options in one pass
+    // Assign positionals and check required options
     auto& [... opts] = result;
     std::size_t pos_idx = 0;
     std::string pos_error;
@@ -181,16 +204,22 @@ class Parser {
               if (!r) {
                 pos_error = r.error().message();
               } else {
-                opts.markSeen();
+                opts.markProvided();
               }
             }
           }
         } else {
-          ++pos_idx;  // advance index even for fields without a parseable value
+          if constexpr (requires { opts.isRequired(); }) {
+            if (opts.isRequired() && pos_error.empty()) {
+              pos_error = std::format("required positional argument (position {}) was not provided",
+                                      pos_idx + 1);
+            }
+          }
+          ++pos_idx;
         }
       }
       if constexpr (opts.type == ArgumentType::option) {
-        if (opts.isRequired() && !opts.seen() && missing.empty()) {
+        if (opts.isRequired() && !opts.provided() && missing.empty()) {
           missing = std::string("--") + std::string(opts.longOpt());
         }
       }
@@ -202,33 +231,68 @@ class Parser {
       return std::unexpected(std::format("required option '{}' was not provided", missing));
     }
 
+    // Recursively parse sub-command if one was encountered
+    if (tokenized->command_tail) {
+      std::string cmd_error;
+      (..., [&] {
+        if constexpr (opts.type == ArgumentType::command) {
+          const auto& tail = *tokenized->command_tail;
+          if (!tail.empty() && tail[0] == opts.commandName() && cmd_error.empty()) {
+            using SubArgs = std::remove_cvref_t<decltype(opts.args)>;
+            Parser<SubArgs> sub_parser;
+            auto sub = sub_parser.parse(tail);  // tail[0] acts as sub-command's argv[0]
+            if (!sub) {
+              cmd_error = sub.error();
+            } else {
+              opts.args = std::move(*sub);
+              opts.markProvided();
+            }
+          }
+        }
+      }());
+      if (!cmd_error.empty()) {
+        return std::unexpected(cmd_error);
+      }
+    }
+
     return result;
   }
 
  private:
-  auto makeArgumentSpecMap(const Arguments& args) const {
+  // Build a spec map for options and flags only (commands are handled separately).
+  auto makeOptionSpecMap(const Arguments& args) const {
     auto [... options] = args;
 
-    std::unordered_map<std::string, detail::Nargs> argumentSpecMap;
+    std::unordered_map<std::string, detail::Nargs> specMap;
 
     (..., [&] -> auto {
       if constexpr (options.type == ArgumentType::option || options.type == ArgumentType::flag) {
-        argumentSpecMap.emplace(std::string("--") + options.longOpt(), options.nargs());
+        specMap.emplace(std::string("--") + options.longOpt(), options.nargs());
         if (options.shortOpt() != '\0') {
-          argumentSpecMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
-                                  options.nargs());
+          specMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
+                          options.nargs());
         }
       }
+    }());
+    return specMap;
+  }
+
+  // Collect bare command name strings (no "--" prefix).
+  auto makeCommandNamesSet(const Arguments& args) const {
+    auto [... options] = args;
+
+    std::unordered_set<std::string> cmdNames;
+
+    (..., [&] -> auto {
       if constexpr (options.type == ArgumentType::command) {
-        argumentSpecMap.emplace(options.commandName(),
-                                detail::Nargs{.min = 0, .max = std::nullopt});
+        cmdNames.emplace(std::string(options.commandName()));
       }
     }());
-    return argumentSpecMap;
+    return cmdNames;
   }
 
   // Build a map from option key (e.g. "--foo", "-f") to a callable that parses
-  // the tokenized values into the corresponding field of `args` and marks it seen.
+  // the tokenized values into the corresponding field of `args` and marks it as provided.
   // `args` must remain alive for as long as the returned map is used.
   auto makeParseMap(Arguments& args) {
     auto& [... options] = args;
@@ -246,7 +310,7 @@ class Parser {
           if (!r) {
             return std::unexpected(r.error().message());
           }
-          options.markSeen();
+          options.markProvided();
           return {};
         };
         parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
@@ -257,7 +321,7 @@ class Parser {
       if constexpr (options.type == ArgumentType::flag) {
         auto make_fn =
             [&options](std::span<const std::string_view>) -> std::expected<void, std::string> {
-          options.markSeen();
+          options.markProvided();
           return {};
         };
         parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
@@ -265,12 +329,26 @@ class Parser {
           parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()), make_fn);
         }
       }
-      // Command sub-argument parsing is not yet implemented.
     }());
     return parseMap;
   }
 
   std::string program_name_ = "program";
 };
+
+// ---- Free-function syntax sugar ----
+
+template <class Arguments>
+[[nodiscard]]
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse(int argc, char* argv[]) -> std::expected<Arguments, std::string> {
+  return Parser<Arguments>{}.parse(argc, argv);
+}
+
+template <class Arguments>
+[[nodiscard]]
+auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, std::string> {
+  return Parser<Arguments>{}.parse(args);
+}
 
 }  // namespace argon
