@@ -5,10 +5,15 @@
 #include "argon/parser.hh"
 
 struct Args {
-  argon::IntArg<"arg1", 'a'> arg1;
+  argon::Flag<"flag1", 'a'> flag1;
+
+  argon::IntArg<"arg1", 'b'> arg1;
   argon::IntArg<"arg2"> arg2;
   argon::IntArg<"arg3"> arg3;
   argon::IntListArg<"arg4", 'c'> arg4{argon::nargs::one_or_more};
+
+  argon::PositionalArgument<std::string> positional1;
+
   struct SubArgs {
     argon::IntArg<"arg1", 'a'> arg1;
     argon::IntArg<"arg2", 'b'> arg2;
