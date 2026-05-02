@@ -4,5 +4,6 @@ CompileFlags:
     - -Werror
     - -Wextra
     - -Wpedantic
+    - -std=c++26
 
   CompilationDatabase: ./build
