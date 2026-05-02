@@ -34,16 +34,16 @@ TEST(Argument, OptionNameValidation) {
 }
 
 TEST(Argument, ShortOptionNameValidation) {
-  EXPECT_TRUE(argon::detail::IsShortOptionName('a'));
-  EXPECT_TRUE(argon::detail::IsShortOptionName('z'));
-  EXPECT_TRUE(argon::detail::IsShortOptionName('A'));
-  EXPECT_TRUE(argon::detail::IsShortOptionName('Z'));
-  EXPECT_TRUE(argon::detail::IsShortOptionName('n'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('0'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('9'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('-'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('_'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('?'));
-  EXPECT_FALSE(argon::detail::IsShortOptionName(' '));
-  EXPECT_FALSE(argon::detail::IsShortOptionName('\0'));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('a'));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('z'));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('A'));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('Z'));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('n'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt('0'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt('9'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt('-'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt('_'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt('?'));
+  EXPECT_FALSE(argon::detail::IsValidShortOpt(' '));
+  EXPECT_TRUE(argon::detail::IsValidShortOpt('\0'));  // '\0' = no short option (sentinel)
 }

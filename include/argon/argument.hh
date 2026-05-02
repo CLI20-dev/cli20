@@ -49,12 +49,8 @@ constexpr auto IsValidLongOpt() noexcept -> bool {
   return !previous_is_hyphen;
 }
 
-constexpr auto IsShortOptionName(char Name) noexcept -> bool {
-  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z');
-}
-
 constexpr auto IsValidShortOpt(char Name) noexcept -> bool {
-  return IsShortOptionName(Name) || Name == '\0';
+  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') || Name == '\0';
 }
 
 template <StringLiteral Name>
