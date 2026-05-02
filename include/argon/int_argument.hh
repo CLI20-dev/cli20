@@ -17,13 +17,13 @@ struct Arg<int, LongOpt, ShortOpt> : public ArgBase<int, LongOpt, ShortOpt> {
   friend class Parser;
 
  protected:
-  auto parse(std::span<std::string_view> sv)
-      -> std::expected<std::span<std::string_view>, std::error_code> {
-    auto res = std::from_chars(sv[0].begin(), sv[0].end(), this->valueRef());
-    if (res.ec != std::errc()) {
-      return std::unexpected(std::make_error_code(res.ec));
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+    auto& out = this->valueRef();
+    auto res = std::from_chars(sv[0].begin(), sv[0].end(), out);
+    if (res.ec != std::errc() || res.ptr != sv[0].end()) {
+      return std::unexpected(std::make_error_code(std::errc::invalid_argument));
     }
-    return sv.subspan(1);
+    return {};
   }
 
   auto validate() -> std::expected<void, std::error_code> { return {}; }
@@ -50,20 +50,18 @@ struct Arg<std::vector<int>, LongOpt, ShortOpt>
       : Base(optional), nargs_(nargs) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv)
-      -> std::expected<std::span<const std::string_view>, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
     auto& out = this->valueRef();
     out.clear();
-
-    std::size_t i = 0;
-    for (i = 0; i < sv.size(); ++i) {
-      auto res = std::from_chars(sv[i].begin(), sv[i].end(), out.emplace_back());
-      if (res.ec != std::errc()) {
-        return std::unexpected(std::make_error_code(res.ec));
+    for (const auto& s : sv) {
+      int val{};
+      auto res = std::from_chars(s.begin(), s.end(), val);
+      if (res.ec != std::errc() || res.ptr != s.end()) {
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
       }
+      out.push_back(val);
     }
-
-    return sv.subspan(i);
+    return {};
   }
 
   auto validate() -> std::expected<void, std::error_code> { return {}; }
@@ -74,29 +72,26 @@ struct Arg<std::vector<int>, LongOpt, ShortOpt>
   detail::Nargs nargs_ = nargs::one_or_more;
 };
 
-template <StringLiteral LongOpt, char ShortOpt, size_t N>
+template <StringLiteral LongOpt, char ShortOpt, std::size_t N>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg<std::array<int, N>, LongOpt, ShortOpt>
     : public ArgBase<std::array<int, N>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::array<int, N>, LongOpt, ShortOpt>;
+  template <class>
+  friend class Parser;
 
   constexpr explicit Arg(Requirement requirement = optional) : Base(requirement) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv)
-      -> std::expected<std::span<const std::string_view>, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
     auto& out = this->valueRef();
-    out.clear();
-
-    std::size_t i = 0;
-    for (i = 0; i < sv.size(); ++i) {
-      auto res = std::from_chars(sv[i].begin(), sv[i].end(), out.emplace_back());
-      if (res.ec != std::errc()) {
-        return std::unexpected(std::make_error_code(res.ec));
+    for (std::size_t i = 0; i < N; ++i) {
+      auto res = std::from_chars(sv[i].begin(), sv[i].end(), out[i]);
+      if (res.ec != std::errc() || res.ptr != sv[i].end()) {
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
       }
     }
-
-    return sv.subspan(i);
+    return {};
   }
 
   auto validate() -> std::expected<void, std::error_code> { return {}; }
@@ -107,29 +102,12 @@ struct Arg<std::array<int, N>, LongOpt, ShortOpt>
   detail::Nargs nargs_ = nargs::exactly<N>;
 };
 
-template <size_t N, StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
-struct Arg<std::array<int, N>, LongOpt, ShortOpt> : public ArgBase<int, LongOpt, ShortOpt> {
-  using ArgBase<int, LongOpt, ShortOpt>::ArgBase;
-
- protected:
-  auto parse(std::span<std::string_view> sv)
-      -> std::expected<std::span<std::string_view>, std::error_code> {
-    auto res = std::from_chars(sv[0].begin(), sv[0].end(), this->valueRef());
-    if (res.ec != std::errc()) {
-      return std::unexpected(std::make_error_code(res.ec));
-    }
-    return sv.subspan(1);
-  }
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
-};
-
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using IntArg = Arg<int, LongOpt, ShortOpt>;
 
-template <StringLiteral LongOpt, char ShortOpt>
+template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using IntListArg = Arg<std::vector<int>, LongOpt, ShortOpt>;
 
-};  // namespace argon
+}  // namespace argon

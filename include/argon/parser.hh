@@ -5,7 +5,6 @@
 #include <expected>
 #include <format>
 #include <functional>
-#include <print>
 #include <span>
 #include <unordered_map>
 #include <vector>
@@ -144,69 +143,47 @@ class Parser {
 
   auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, std::string> {
     program_name_ = args.empty() ? "program" : std::string(args[0]);
-    std::println("Parsing arguments for program: {}", program_name_);
 
     Arguments result;
-    auto specMap = this->makeArgumentSpecMap(result);
+    auto specMap = makeArgumentSpecMap(result);
 
-    auto tokenized = detail::tokenize(args.subspan(1), specMap);
+    // Skip argv[0] (program name); guard against empty span
+    const auto rest = args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
+    auto tokenized = detail::tokenize(rest, specMap);
     if (!tokenized) {
       return std::unexpected(tokenized.error());
     }
-    auto& [parsedArgs, positional_argument] = *tokenized;
 
-    std::println("Parsed named arguments: {}", parsedArgs);
-    std::println("Parsed positional arguments: {}", positional_argument);
+    auto parseMap = makeParseMap(result);
+
+    for (const auto& [key, values] : tokenized->named) {
+      const auto it = parseMap.find(key);
+      if (it != parseMap.end()) {
+        auto r = it->second(values);
+        if (!r) {
+          return std::unexpected(r.error());
+        }
+      }
+    }
+
+    // Check that all required options were provided
+    auto& [... opts] = result;
+    std::string missing;
+    (..., [&] {
+      if constexpr (opts.type == ArgumentType::option) {
+        if (opts.isRequired() && !opts.seen() && missing.empty()) {
+          missing = std::string("--") + std::string(opts.longOpt());
+        }
+      }
+    }());
+    if (!missing.empty()) {
+      return std::unexpected(std::format("required option '{}' was not provided", missing));
+    }
 
     return result;
   }
 
  private:
-  auto getLongOptions(const Arguments& args) const {
-    auto ret = std::vector<std::string_view>{};
-    auto [... options] = args;
-    (..., (ret.push_back(options.longOpt())));
-    return ret;
-  }
-
-  auto getShortOptions(const Arguments& args) const {
-    auto ret = std::vector<char>{};
-    auto [... options] = args;
-    (..., [&] -> auto {
-      const auto short_opt = options.shortOpt();
-      if (short_opt != '\0') {
-        ret.push_back(short_opt);
-      }
-    }());
-    return ret;
-  }
-
-  auto getCommandNames(const Arguments& args) const {
-    auto ret = std::vector<std::string_view>{};
-    auto [... options] = args;
-    (..., [&] -> auto {
-      if constexpr (options.type == ArgumentType::command) {
-        ret.push_back(options.commandName());
-      }
-    }());
-    return ret;
-  }
-
-  [[nodiscard]] auto isArgument(std::string_view arg,
-                                const std::vector<std::string_view>& longOptions,
-                                const std::vector<char>& shortOptions,
-                                const std::vector<std::string_view>& commandNames) const -> bool {
-    if (arg.starts_with("--")) {
-      auto longOpt = arg.substr(2);
-      return std::ranges::find(longOptions, longOpt) != longOptions.end();
-    } else if (arg.starts_with("-") && arg.size() == 2) {
-      char shortOpt = arg[1];
-      return std::ranges::find(shortOptions, shortOpt) != shortOptions.end();
-    } else {
-      return std::ranges::find(commandNames, arg) != commandNames.end();
-    }
-  }
-
   auto makeArgumentSpecMap(const Arguments& args) const {
     auto [... options] = args;
 
@@ -228,32 +205,44 @@ class Parser {
     return argumentSpecMap;
   }
 
-  auto makeParseMap(const Arguments& args) const {
-    auto [... options] = args;
+  // Build a map from option key (e.g. "--foo", "-f") to a callable that parses
+  // the tokenized values into the corresponding field of `args` and marks it seen.
+  // `args` must remain alive for as long as the returned map is used.
+  auto makeParseMap(Arguments& args) {
+    auto& [... options] = args;
 
     std::unordered_map<std::string, std::function<std::expected<void, std::string>(
                                         std::span<const std::string_view>)>>
         parseMap;
 
     (..., [&] -> auto {
-      if constexpr (options.type == ArgumentType::option || options.type == ArgumentType::flag) {
-        parseMap.emplace(std::string("--") + options.longOpt(),
-                         [&options](std::span<const std::string_view> values) -> auto {
-                           return options.parse(values);
-                         });
+      if constexpr (options.type == ArgumentType::option) {
+        auto make_fn = [&options](std::span<const std::string_view> values)
+            -> std::expected<void, std::string> {
+          auto r = options.parse(values);
+          if (!r) {
+            return std::unexpected(r.error().message());
+          }
+          options.markSeen();
+          return {};
+        };
+        parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
         if (options.shortOpt() != '\0') {
-          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
-                           [&options](std::span<const std::string_view> values) -> auto {
-                             return options.parse(values);
-                           });
+          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()), make_fn);
         }
       }
-      if constexpr (options.type == ArgumentType::command) {
-        parseMap.emplace(options.commandName(),
-                         [&options](std::span<const std::string_view> values) -> auto {
-                           return options.args.parse(values);
-                         });
+      if constexpr (options.type == ArgumentType::flag) {
+        auto make_fn = [&options](std::span<const std::string_view>)
+            -> std::expected<void, std::string> {
+          options.markSeen();
+          return {};
+        };
+        parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
+        if (options.shortOpt() != '\0') {
+          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()), make_fn);
+        }
       }
+      // Command sub-argument parsing is not yet implemented.
     }());
     return parseMap;
   }

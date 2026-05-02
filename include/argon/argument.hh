@@ -143,6 +143,8 @@ template <StringLiteral LongOpt, char ShortOpt>
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
+  [[nodiscard]] constexpr auto seen() const noexcept -> bool { return seen_; }
+
  protected:
   [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
   [[nodiscard]] static constexpr auto shortOpt() -> char { return ShortOpt; }
@@ -151,9 +153,11 @@ struct Flag : ArgumentTag {
   friend class Parser;
 
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+  constexpr auto markSeen() noexcept -> void { seen_ = true; }
 
  private:
   detail::Nargs nargs_ = nargs::none;
+  bool seen_ = false;
 };
 
 template <class>
