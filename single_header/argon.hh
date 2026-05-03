@@ -5,20 +5,23 @@
 
 #include <algorithm>
 #include <array>
-#include <charconv>
+#include <string_view>
 #include <cstdint>
+#include <string>
+#include <vector>
+#include <charconv>
 #include <expected>
+#include <span>
+#include <system_error>
+#include <io.h>
+#include <unistd.h>
 #include <format>
 #include <functional>
-#include <span>
-#include <string>
-#include <string_view>
-#include <system_error>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 // ---- begin: include/argon/string_literal.hh ----
+
 
 namespace argon {
 template <std::size_t N>
@@ -59,6 +62,7 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 // ---- end: include/argon/string_literal.hh ----
 
 // ---- begin: include/argon/argument.hh ----
+
 
 namespace argon {
 
@@ -174,7 +178,10 @@ struct ArgBase : ArgumentTag {
   static constexpr auto long_opt = LongOpt;
   static constexpr char short_opt = ShortOpt;
 
-  constexpr explicit ArgBase(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr explicit ArgBase(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
     return LongOpt.view();
@@ -189,6 +196,9 @@ struct ArgBase : ArgumentTag {
   [[nodiscard]] constexpr auto occurrenceCount() const noexcept -> std::size_t {
     return occurrence_count_;
   }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
+  }
 
  protected:
   constexpr auto valueRef() noexcept -> ValueT& { return value_; }
@@ -196,6 +206,7 @@ struct ArgBase : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   std::size_t occurrence_count_ = 0;
   ValueT value_ = {};
 };
@@ -205,12 +216,18 @@ struct PositionalArgument : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = ValueT;
 
-  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -222,6 +239,7 @@ struct PositionalArgument : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   ValueT value_{};
   bool provided_ = false;
 };
@@ -242,7 +260,12 @@ struct Command : ArgumentTag, public T {
   using args_type = T;
   static constexpr auto type = ArgumentType::command;
 
+  constexpr Command(std::string_view desc = {}) : description_(desc) {}
+
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
+  }
 
  protected:
   [[nodiscard]] static constexpr auto commandName() -> std::string_view {
@@ -254,6 +277,7 @@ struct Command : ArgumentTag, public T {
   friend class Parser;
 
  private:
+  std::string_view description_;
   bool provided_ = false;
 };
 
@@ -261,6 +285,7 @@ struct Command : ArgumentTag, public T {
 // ---- end: include/argon/argument.hh ----
 
 // ---- begin: include/argon/error.hh ----
+
 
 namespace argon {
 
@@ -364,6 +389,8 @@ struct ParseError {
 
 // ---- begin: include/argon/arithmetic_argument.hh ----
 
+
+
 namespace argon {
 
 namespace detail {
@@ -414,13 +441,18 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = T;
 
-  constexpr ArithmeticPositionalImpl(Requirement requirement = optional)
-      : requirement_(requirement) {}
+  constexpr ArithmeticPositionalImpl(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr ArithmeticPositionalImpl(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const T& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -436,6 +468,7 @@ struct ArithmeticPositionalImpl : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   T value_{};
   bool provided_ = false;
 };
@@ -505,11 +538,18 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
-      : Base(requirement), nargs_(nargs) {}
+  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  constexpr Arg() = default;
 
-  constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
-      : Base(optional), nargs_(nargs) {}
+  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
+                          std::string_view desc = {})
+      : Base(req, desc), nargs_(nargs) {}
+
+  // nargs has no default to avoid ambiguity with Arg() above.
+  constexpr explicit Arg(detail::Nargs nargs, std::string_view desc = {})
+      : Base(optional, desc), nargs_(nargs) {}
+
+  constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
@@ -621,6 +661,8 @@ using DoublePosArg = DoublePositional;
 
 // ---- begin: include/argon/bool_argument.hh ----
 
+
+
 namespace argon {
 
 namespace detail {
@@ -669,12 +711,18 @@ struct PositionalArgument<bool> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = bool;
 
-  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -689,6 +737,7 @@ struct PositionalArgument<bool> : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   bool value_ = false;
   bool provided_ = false;
 };
@@ -703,11 +752,18 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
-      : Base(requirement), nargs_(nargs) {}
+  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  constexpr Arg() = default;
 
-  constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
-      : Base(optional), nargs_(nargs) {}
+  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
+                          std::string_view desc = {})
+      : Base(req, desc), nargs_(nargs) {}
+
+  // nargs has no default to avoid ambiguity with Arg() above.
+  constexpr explicit Arg(detail::Nargs nargs, std::string_view desc = {})
+      : Base(optional, desc), nargs_(nargs) {}
+
+  constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
@@ -745,13 +801,73 @@ using BoolPosArg = BoolPositional;
 }  // namespace argon
 // ---- end: include/argon/bool_argument.hh ----
 
+// ---- begin: include/argon/color.hh ----
+
+#ifdef _WIN32
+#else
+#endif
+
+namespace argon {
+
+// Controls whether ANSI escape codes are emitted by formatHelp().
+//   auto_  : emit codes only when stdout is a TTY (default)
+//   never  : always plain text
+//   always : always emit codes regardless of terminal type
+enum class ColorMode { auto_, never, always };
+
+// Tag type passed to formatHelp() to request recursive sub-command output.
+//   parser.formatHelp(argon::recurseHelp)               // auto color + recurse
+//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color + recurse
+struct RecurseHelpTag {};
+inline constexpr RecurseHelpTag recurseHelp{};
+
+namespace detail {
+
+// Wraps standard ANSI SGR (Select Graphic Rendition) sequences.
+// Only the portable 8/16-color subset is used — no RGB/truecolor extensions.
+// All accessors return an empty string_view when disabled so callers can
+// concatenate unconditionally without branches.
+struct AnsiStyle {
+  bool enabled;
+
+  [[nodiscard]] constexpr auto bold() const noexcept -> std::string_view {
+    return enabled ? "\033[1m" : "";
+  }
+  [[nodiscard]] constexpr auto underline() const noexcept -> std::string_view {
+    return enabled ? "\033[4m" : "";
+  }
+  [[nodiscard]] constexpr auto reset() const noexcept -> std::string_view {
+    return enabled ? "\033[0m" : "";
+  }
+};
+
+// Returns true when file descriptor 1 (stdout) is connected to a terminal.
+inline auto isTty() noexcept -> bool {
+#ifdef _WIN32
+  return _isatty(1) != 0;
+#else
+  return ::isatty(STDOUT_FILENO) != 0;
+#endif
+}
+
+// Resolves a ColorMode to a concrete AnsiStyle.
+inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
+  const bool on = (mode == ColorMode::always) ||
+                  (mode == ColorMode::auto_ && isTty());
+  return AnsiStyle{on};
+}
+
+}  // namespace detail
+}  // namespace argon
+// ---- end: include/argon/color.hh ----
+
 // ---- begin: include/argon/constraints.hh ----
 
 namespace argon {};
-
 // ---- end: include/argon/constraints.hh ----
 
 // ---- begin: include/argon/flag_argument.hh ----
+
 
 namespace argon {
 
@@ -760,7 +876,12 @@ template <StringLiteral LongOpt, char ShortOpt>
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
+  constexpr Flag(std::string_view desc = {}) : description_(desc) {}
+
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
+  }
 
  protected:
   [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
@@ -774,6 +895,7 @@ struct Flag : ArgumentTag {
 
  private:
   detail::Nargs nargs_ = nargs::none;
+  std::string_view description_;
   bool provided_ = false;
 };
 
@@ -781,14 +903,55 @@ template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using FlagArg = Flag<LongOpt, ShortOpt>;
 
+// A flag that signals "show help".  When the parser detects this flag anywhere
+// in argv (before "--" or a subcommand token), it marks the flag as provided
+// and returns a successful parse immediately, bypassing missing-required-arg
+// errors so the caller can unconditionally check `args.help.provided()`.
+//
+// Default: --help / -h.  Override by supplying template arguments:
+//   argon::HelpFlag<>                    // --help, -h  (default)
+//   argon::HelpFlag<"version", 'V'>      // --version, -V
+//   argon::HelpFlag<"info">              // --info, no short opt
+template <StringLiteral LongOpt = "help", char ShortOpt = 'h'>
+  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+struct HelpFlag : public Flag<LongOpt, ShortOpt> {
+  using Flag<LongOpt, ShortOpt>::Flag;
+  // Compile-time sentinel detected by Parser::parse() for early-exit logic.
+  static constexpr bool is_help = true;
+};
+
 }  // namespace argon
 // ---- end: include/argon/flag_argument.hh ----
 
 // ---- begin: include/argon/parser.hh ----
 
+
+
 namespace argon {
 
 namespace detail {
+
+// Returns a human-readable type metavar string for use in help output.
+template <typename T>
+auto typeMetavar() -> std::string {
+  if constexpr (std::same_as<T, std::string>) {
+    return "string";
+  } else if constexpr (std::same_as<T, bool>) {
+    return "bool";
+  } else if constexpr (std::same_as<T, float>) {
+    return "float";
+  } else if constexpr (std::same_as<T, double>) {
+    return "double";
+  } else if constexpr (std::unsigned_integral<T> && !std::same_as<T, bool>) {
+    return "uint";
+  } else if constexpr (std::integral<T>) {
+    return "int";
+  } else if constexpr (requires { typename T::value_type; }) {
+    return typeMetavar<typename T::value_type>() + "...";
+  } else {
+    return "value";
+  }
+}
 
 template <class Argument>
 constexpr auto castBaseIfCommand(Argument& arg) -> auto& {
@@ -862,7 +1025,10 @@ inline auto tokenize(std::span<const std::string_view> args,
           }
           result.named[key].push_back(val);
         } else {
-          result.positional.push_back(arg);
+          return std::unexpected(ParseError{.code = ErrorCode::unknown_option,
+                                            .kind = ErrorKind::parse,
+                                            .position = static_cast<int>(i),
+                                            .subject = key});
         }
         continue;
       }
@@ -871,6 +1037,15 @@ inline auto tokenize(std::span<const std::string_view> args,
     // Look up the token in spec_map
     const auto it = spec_map.find(std::string(arg));
     if (it == spec_map.end()) {
+      // Arguments that look like options (start with '-') but are not in the spec are errors.
+      // Bare words without a leading '-' are positional arguments.
+      // To pass a '--'-prefixed string as a positional, use the '--' end-of-options separator.
+      if (arg.size() > 1 && arg[0] == '-') {
+        return std::unexpected(ParseError{.code = ErrorCode::unknown_option,
+                                          .kind = ErrorKind::parse,
+                                          .position = static_cast<int>(i),
+                                          .subject = std::string(arg)});
+      }
       result.positional.push_back(arg);
       continue;
     }
@@ -952,6 +1127,167 @@ class Parser {
                 "Arguments must not contain duplicate long or short options");
 
  public:
+  [[nodiscard]] auto formatHelp(ColorMode color = ColorMode::auto_) const -> std::string {
+    return formatHelpImpl(color, false);
+  }
+
+  [[nodiscard]] auto formatHelp(RecurseHelpTag /*tag*/) const -> std::string {
+    return formatHelpImpl(ColorMode::auto_, true);
+  }
+
+  [[nodiscard]] auto formatHelp(ColorMode color, RecurseHelpTag /*tag*/) const -> std::string {
+    return formatHelpImpl(color, true);
+  }
+
+ private:
+  [[nodiscard]] auto formatHelpImpl(ColorMode color, bool recurse) const -> std::string {
+    const detail::AnsiStyle ansi = detail::resolveColor(color);
+
+    Arguments defaults{};
+    auto& [... opts] = defaults;
+
+    // Each entry stores the plain-text left column (used for alignment measurement)
+    // and the description.  ANSI codes are applied when printing, not stored here,
+    // so that col-width arithmetic works on visual character counts.
+    struct Entry {
+      std::string left;
+      std::string_view desc;
+    };
+    std::vector<Entry> options_section;
+    std::vector<Entry> positionals_section;
+    std::vector<Entry> commands_section;
+    bool has_options = false;
+    bool has_commands = false;
+
+    (..., [&] -> auto {
+      using OptT = std::remove_cvref_t<decltype(opts)>;
+      if constexpr (opts.type == ArgumentType::option) {
+        std::string left;
+        if (opts.shortOpt() != '\0') {
+          left += '-';
+          left += opts.shortOpt();
+          left += ", ";
+        } else {
+          left += "    ";
+        }
+        left += "--";
+        left += opts.longOpt();
+        left += " <";
+        left += detail::typeMetavar<typename OptT::value_type>();
+        left += '>';
+        options_section.push_back({std::move(left), opts.description()});
+        has_options = true;
+      }
+      if constexpr (opts.type == ArgumentType::flag) {
+        std::string left;
+        if (opts.shortOpt() != '\0') {
+          left += '-';
+          left += opts.shortOpt();
+          left += ", ";
+        } else {
+          left += "    ";
+        }
+        left += "--";
+        left += opts.longOpt();
+        options_section.push_back({std::move(left), opts.description()});
+        has_options = true;
+      }
+      if constexpr (opts.type == ArgumentType::positional) {
+        using VT = typename OptT::value_type;
+        std::string mv = "<";
+        mv += detail::typeMetavar<VT>();
+        mv += '>';
+        positionals_section.push_back({std::move(mv), opts.description()});
+      }
+      if constexpr (opts.type == ArgumentType::command) {
+        commands_section.push_back({std::string(opts.commandName()), opts.description()});
+        has_commands = true;
+      }
+    }());
+
+    // Usage line — "Usage:" in bold, rest plain
+    std::string out;
+    out += ansi.bold();
+    out += "Usage:";
+    out += ansi.reset();
+    out += " ";
+    out += program_name_;
+    if (has_options) out += " [options]";
+    for (const auto& e : positionals_section) out += " " + e.left;
+    if (has_commands) out += " [command]";
+    out += '\n';
+
+    // Compute alignment column from plain-text widths only (ANSI codes are
+    // zero-width and must not be counted here).
+    // col = 2 (indent) + max_left_width + 2 (gap)
+    std::size_t max_left = 0;
+    for (const auto& e : options_section) max_left = std::max(max_left, e.left.size());
+    for (const auto& e : positionals_section) max_left = std::max(max_left, e.left.size());
+    for (const auto& e : commands_section) max_left = std::max(max_left, e.left.size());
+    const std::size_t col = max_left + 4;  // 2 indent + 2 gap
+
+    auto append_section = [&](std::string_view header, const std::vector<Entry>& entries) {
+      if (entries.empty()) return;
+      out += '\n';
+      out += ansi.bold();
+      out += ansi.underline();
+      out += header;
+      out += ansi.reset();
+      out += ":\n";
+      for (const auto& e : entries) {
+        out += "  ";
+        out += ansi.bold();
+        out += e.left;
+        out += ansi.reset();
+        if (!e.desc.empty()) {
+          out += std::string(col - 2 - e.left.size(), ' ');
+          out += e.desc;
+        }
+        out += '\n';
+      }
+    };
+
+    append_section("Options", options_section);
+    append_section("Positional arguments", positionals_section);
+    append_section("Commands", commands_section);
+
+    // Recursively append each sub-command's help text
+    if (recurse) {
+      (..., [&] -> auto {
+        if constexpr (opts.type == ArgumentType::command) {
+          using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
+          Parser<SubArgs> sub_parser;
+          sub_parser.program_name_ = program_name_ + " " + std::string(opts.commandName());
+
+          // ── <name> ── separator
+          constexpr std::size_t rule_width = 60;
+          const std::string name_part =
+              std::string(" ") + std::string(opts.commandName()) + " ";
+          const std::size_t left_dashes = 4;
+          const std::size_t right_dashes =
+              rule_width > left_dashes + name_part.size()
+                  ? rule_width - left_dashes - name_part.size()
+                  : 4;
+          out += '\n';
+          out += ansi.bold();
+          out += std::string(left_dashes, '-');
+          out += name_part;
+          out += std::string(right_dashes, '-');
+          out += ansi.reset();
+          if (!opts.description().empty()) {
+            out += "  ";
+            out += opts.description();
+          }
+          out += '\n';
+          out += sub_parser.formatHelpImpl(color, true);
+        }
+      }());
+    }
+
+    return out;
+  }
+
+ public:
   [[nodiscard]]
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> std::expected<Arguments, ParseError> {
@@ -979,6 +1315,10 @@ class Parser {
 
     auto specMap = makeOptionSpecMap(out);
     auto cmdNames = makeCommandNamesSet(out);
+
+    if (checkHelpFlag(rest, out, cmdNames)) {
+      return {};
+    }
 
     auto tokenized = detail::tokenize(rest, specMap, cmdNames);
     if (!tokenized) {
@@ -1035,6 +1375,14 @@ class Parser {
         }
       }
     }());
+    if (tokenized->positional.size() > pos_idx) {
+      return std::unexpected(ParseError{
+          .code = ErrorCode::unexpected_argument,
+          .kind = ErrorKind::parse,
+          .subject = std::string(tokenized->positional[pos_idx]),
+          .detail = std::format("{} positional argument(s) provided but only {} expected",
+                                tokenized->positional.size(), pos_idx)});
+    }
     if (pos_error.hasError()) {
       return std::unexpected(pos_error);
     }
@@ -1146,6 +1494,38 @@ class Parser {
     return parseMap;
   }
 
+  // Scan raw args for a HelpFlag before full tokenization.
+  // Stops scanning at "--" or at any command name token.
+  // Returns true if a HelpFlag was found and marks it as provided.
+  auto checkHelpFlag(std::span<const std::string_view> rest, Arguments& out,
+                     const std::unordered_set<std::string>& cmd_names) -> bool {
+    auto& [... opts] = out;
+
+    // Collect the long and short option strings for each HelpFlag field
+    bool found = false;
+    (..., [&] -> auto {
+      if constexpr (requires { std::remove_cvref_t<decltype(opts)>::is_help; }) {
+        const std::string long_key = std::string("--") + std::string(opts.longOpt());
+        const char short_ch = opts.shortOpt();
+        const std::string short_key = short_ch != '\0' ? std::string("-") + short_ch : "";
+
+        for (const auto& tok : rest) {
+          if (tok == "--") break;
+          if (cmd_names.contains(std::string(tok))) break;
+          if (tok == long_key || (!short_key.empty() && tok == short_key)) {
+            opts.markProvided();
+            found = true;
+            break;
+          }
+        }
+      }
+    }());
+    return found;
+  }
+
+  template <class>
+  friend class Parser;
+
   std::string program_name_ = "program";
 };
 
@@ -1168,6 +1548,8 @@ auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, P
 // ---- end: include/argon/parser.hh ----
 
 // ---- begin: include/argon/string_argument.hh ----
+
+
 
 namespace argon {
 
@@ -1203,11 +1585,18 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
-      : Base(requirement), nargs_(nargs) {}
+  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  constexpr Arg() = default;
 
-  constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
-      : Base(optional), nargs_(nargs) {}
+  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
+                          std::string_view desc = {})
+      : Base(req, desc), nargs_(nargs) {}
+
+  // nargs has no default to avoid ambiguity with Arg() above.
+  constexpr explicit Arg(detail::Nargs nargs, std::string_view desc = {})
+      : Base(optional, desc), nargs_(nargs) {}
+
+  constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
@@ -1233,12 +1622,18 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
-  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -1254,6 +1649,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   std::string value_;
   bool provided_ = false;
 };
