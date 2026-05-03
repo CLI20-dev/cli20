@@ -88,7 +88,10 @@ inline auto tokenize(std::span<const std::string_view> args,
           }
           result.named[key].push_back(val);
         } else {
-          result.positional.push_back(arg);
+          return std::unexpected(ParseError{.code = ErrorCode::unknown_option,
+                                            .kind = ErrorKind::parse,
+                                            .position = static_cast<int>(i),
+                                            .subject = key});
         }
         continue;
       }
@@ -97,6 +100,15 @@ inline auto tokenize(std::span<const std::string_view> args,
     // Look up the token in spec_map
     const auto it = spec_map.find(std::string(arg));
     if (it == spec_map.end()) {
+      // Arguments that look like options (start with '-') but are not in the spec are errors.
+      // Bare words without a leading '-' are positional arguments.
+      // To pass a '--'-prefixed string as a positional, use the '--' end-of-options separator.
+      if (arg.size() > 1 && arg[0] == '-') {
+        return std::unexpected(ParseError{.code = ErrorCode::unknown_option,
+                                          .kind = ErrorKind::parse,
+                                          .position = static_cast<int>(i),
+                                          .subject = std::string(arg)});
+      }
       result.positional.push_back(arg);
       continue;
     }
@@ -261,6 +273,14 @@ class Parser {
         }
       }
     }());
+    if (tokenized->positional.size() > pos_idx) {
+      return std::unexpected(
+          ParseError{.code = ErrorCode::unexpected_argument,
+                     .kind = ErrorKind::parse,
+                     .subject = std::string(tokenized->positional[pos_idx]),
+                     .detail = std::format("{} positional argument(s) provided but only {} expected",
+                                           tokenized->positional.size(), pos_idx)});
+    }
     if (pos_error.hasError()) {
       return std::unexpected(pos_error);
     }

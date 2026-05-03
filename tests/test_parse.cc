@@ -156,12 +156,15 @@ TEST(ParseIntArg, ShortAndLongMix) {
   EXPECT_EQ(result->size.value(), 20);
 }
 
-TEST(ParseIntArg, IgnoresPositional) {
+TEST(ParseIntArg, ExtraPositionalIsError) {
+  // A struct with no positional fields: bare-word tokens that don't match any option
+  // are collected as positionals and then rejected as unexpected_argument.
   Parser<SingleIntArgs> parser;
-  std::vector<std::string_view> args = {"prog", "positional1", "--count", "5", "positional2"};
+  std::vector<std::string_view> args = {"prog", "positional1", "--count", "5"};
   auto result = parser.parse(args);
-  ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result->count.value(), 5);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error().code, ErrorCode::unexpected_argument);
+  EXPECT_EQ(result.error().subject, "positional1");
 }
 
 // ---- success: flag interaction ----
@@ -339,8 +342,9 @@ TEST(ParseIntPositional, ZeroValue) {
 }
 
 TEST(ParseIntPositional, NegativeValue) {
+  // Negative numbers start with '-' and require '--' to pass as a positional.
   Parser<OnePositionalArgs> parser;
-  std::vector<std::string_view> args = {"prog", "-7"};
+  std::vector<std::string_view> args = {"prog", "--", "-7"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->x.value(), -7);

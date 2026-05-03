@@ -154,30 +154,30 @@ TEST(Tokenize, EqualsSyntaxEmptyValue) {
   EXPECT_EQ(result->named.at("--tag")[0], "");
 }
 
-TEST(Tokenize, EqualsSyntaxNonExactOneGoesToPositional) {
-  // --foo=bar should be treated as positional when nargs is not exact<1>
+TEST(Tokenize, EqualsSyntaxNonExactOneIsError) {
+  // '=' syntax is only supported for nargs=1 options; other options are unknown_option errors.
   SpecMap spec{{"--list", zero_or_more}};
   auto result = tokenize({"--list=item"}, spec);
-  ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->named.empty());
-  ASSERT_EQ(result->positional.size(), 1u);
-  EXPECT_EQ(result->positional[0], "--list=item");
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error().code, argon::ErrorCode::unknown_option);
+  EXPECT_EQ(result.error().subject, "--list");
 }
 
-TEST(Tokenize, EqualsSyntaxFlagGoesToPositional) {
+TEST(Tokenize, EqualsSyntaxFlagIsError) {
+  // Flags have nargs=0, so '=' syntax is rejected.
   SpecMap spec{{"--verbose", none}};
   auto result = tokenize({"--verbose=true"}, spec);
-  ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->named.empty());
-  EXPECT_EQ(result->positional[0], "--verbose=true");
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error().code, argon::ErrorCode::unknown_option);
+  EXPECT_EQ(result.error().subject, "--verbose");
 }
 
-TEST(Tokenize, EqualsSyntaxUnknownKeyGoesToPositional) {
+TEST(Tokenize, EqualsSyntaxUnknownKeyIsError) {
   SpecMap spec{{"--foo", one}};
   auto result = tokenize({"--unknown=bar"}, spec);
-  ASSERT_TRUE(result.has_value());
-  EXPECT_TRUE(result->named.empty());
-  EXPECT_EQ(result->positional[0], "--unknown=bar");
+  ASSERT_FALSE(result.has_value());
+  EXPECT_EQ(result.error().code, argon::ErrorCode::unknown_option);
+  EXPECT_EQ(result.error().subject, "--unknown");
 }
 
 // ---- error: duplicate (all 4 path combinations) ----
