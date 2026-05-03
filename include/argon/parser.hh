@@ -344,12 +344,26 @@ class Parser {
           using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
           Parser<SubArgs> sub_parser;
           sub_parser.program_name_ = program_name_ + " " + std::string(opts.commandName());
+
+          // ── <name> ── separator
+          constexpr std::size_t rule_width = 60;
+          const std::string name_part =
+              std::string(" ") + std::string(opts.commandName()) + " ";
+          const std::size_t left_dashes = 4;
+          const std::size_t right_dashes =
+              rule_width > left_dashes + name_part.size()
+                  ? rule_width - left_dashes - name_part.size()
+                  : 4;
           out += '\n';
           out += ansi.bold();
-          out += ansi.underline();
-          out += "Command: ";
-          out += opts.commandName();
+          out += std::string(left_dashes, '-');
+          out += name_part;
+          out += std::string(right_dashes, '-');
           out += ansi.reset();
+          if (!opts.description().empty()) {
+            out += "  ";
+            out += opts.description();
+          }
           out += '\n';
           out += sub_parser.formatHelpImpl(color, true);
         }
