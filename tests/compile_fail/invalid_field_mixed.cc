@@ -8,6 +8,4 @@ struct Args {
   int count;  // not an argument type
 };
 
-auto main() -> int {
-  auto parser = argon::Parser<Args>{};
-}
+auto main() -> int { auto parser = argon::Parser<Args>{}; }

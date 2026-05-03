@@ -4,16 +4,30 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
-    inputs@{ flake-parts, nixpkgs, ... }:
+    inputs@{ flake-parts, treefmt-nix, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = nixpkgs.lib.platforms.all;
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+
+      imports = [
+        treefmt-nix.flakeModule
+      ];
 
       perSystem =
-        { pkgs, ... }:
+        { pkgs, config, ... }:
         {
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs.clang-format = {
+              enable = true;
+              package = pkgs.clang-tools;
+            };
+          };
+
           devShells.default = pkgs.mkShellNoCC {
             packages = [
               pkgs.llvmPackages.libcxxClang
@@ -21,11 +35,12 @@
               pkgs.ninja
               pkgs.gtest
               pkgs.clang-tools
+              config.treefmt.build.wrapper
             ];
           };
 
           packages.default = pkgs.stdenvNoCC.mkDerivation {
-            name = "cxx-template";
+            name = "argon";
             src = ./.;
             nativeBuildInputs = [
               pkgs.llvmPackages.libcxxClang
@@ -49,19 +64,6 @@
               ctest --output-on-failure
               runHook postCheck
             '';
-          };
-
-          apps.format = {
-            type = "app";
-            program =
-              (pkgs.writeShellScript "format-cxx-template" ''
-                set -euo pipefail
-                CPU_COUNT=$(${pkgs.coreutils}/bin/nproc)
-                echo "Running clang-format with $CPU_COUNT parallel processes..."
-                ${pkgs.fd}/bin/fd -0 -t f -e hh -e cc . include src tests apps | \
-                  xargs -0 -n 1 -P "$CPU_COUNT" clang-format -i
-                echo "OK"
-              '').outPath;
           };
 
           apps.build = {

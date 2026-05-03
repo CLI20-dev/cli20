@@ -1,0 +1,4 @@
+[formatter.clang-format]
+command = "clang-format"
+options = ["-i"]
+includes = ["*.hh", "*.cc"]

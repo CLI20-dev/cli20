@@ -5,21 +5,20 @@
 
 #include <algorithm>
 #include <array>
-#include <string_view>
-#include <cstdint>
-#include <string>
-#include <vector>
 #include <charconv>
+#include <cstdint>
 #include <expected>
-#include <span>
-#include <system_error>
 #include <format>
 #include <functional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <system_error>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 // ---- begin: include/argon/string_literal.hh ----
-
 
 namespace argon {
 template <std::size_t N>
@@ -60,7 +59,6 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 // ---- end: include/argon/string_literal.hh ----
 
 // ---- begin: include/argon/argument.hh ----
-
 
 namespace argon {
 
@@ -264,7 +262,6 @@ struct Command : ArgumentTag, public T {
 
 // ---- begin: include/argon/error.hh ----
 
-
 namespace argon {
 
 enum class ErrorCode {
@@ -366,8 +363,6 @@ struct ParseError {
 // ---- end: include/argon/error.hh ----
 
 // ---- begin: include/argon/arithmetic_argument.hh ----
-
-
 
 namespace argon {
 
@@ -626,8 +621,6 @@ using DoublePosArg = DoublePositional;
 
 // ---- begin: include/argon/bool_argument.hh ----
 
-
-
 namespace argon {
 
 namespace detail {
@@ -754,18 +747,11 @@ using BoolPosArg = BoolPositional;
 
 // ---- begin: include/argon/constraints.hh ----
 
-
-namespace argon {
-
-
-};
-
-
+namespace argon {};
 
 // ---- end: include/argon/constraints.hh ----
 
 // ---- begin: include/argon/flag_argument.hh ----
-
 
 namespace argon {
 
@@ -799,8 +785,6 @@ using FlagArg = Flag<LongOpt, ShortOpt>;
 // ---- end: include/argon/flag_argument.hh ----
 
 // ---- begin: include/argon/parser.hh ----
-
-
 
 namespace argon {
 
@@ -1184,8 +1168,6 @@ auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, P
 // ---- end: include/argon/parser.hh ----
 
 // ---- begin: include/argon/string_argument.hh ----
-
-
 
 namespace argon {
 

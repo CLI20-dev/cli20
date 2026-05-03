@@ -6,6 +6,4 @@ struct Args {
   argon::Command<SubArgs, "sub"> b;  // duplicate subcommand name
 };
 
-auto main() -> int {
-  auto parser = argon::Parser<Args>{};
-}
+auto main() -> int { auto parser = argon::Parser<Args>{}; }

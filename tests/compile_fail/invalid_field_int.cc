@@ -6,6 +6,4 @@ struct Args {
   int x;
 };
 
-auto main() -> int {
-  auto parser = argon::Parser<Args>{};
-}
+auto main() -> int { auto parser = argon::Parser<Args>{}; }

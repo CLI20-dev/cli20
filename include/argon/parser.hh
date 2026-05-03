@@ -274,12 +274,12 @@ class Parser {
       }
     }());
     if (tokenized->positional.size() > pos_idx) {
-      return std::unexpected(
-          ParseError{.code = ErrorCode::unexpected_argument,
-                     .kind = ErrorKind::parse,
-                     .subject = std::string(tokenized->positional[pos_idx]),
-                     .detail = std::format("{} positional argument(s) provided but only {} expected",
-                                           tokenized->positional.size(), pos_idx)});
+      return std::unexpected(ParseError{
+          .code = ErrorCode::unexpected_argument,
+          .kind = ErrorKind::parse,
+          .subject = std::string(tokenized->positional[pos_idx]),
+          .detail = std::format("{} positional argument(s) provided but only {} expected",
+                                tokenized->positional.size(), pos_idx)});
     }
     if (pos_error.hasError()) {
       return std::unexpected(pos_error);

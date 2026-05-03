@@ -5,6 +5,4 @@ struct Args {
   argon::Arg<int, "bar", 'f'> b;  // duplicate -f
 };
 
-auto main() -> int {
-  auto parser = argon::Parser<Args>{};
-}
+auto main() -> int { auto parser = argon::Parser<Args>{}; }
