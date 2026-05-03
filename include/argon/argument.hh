@@ -1,12 +1,8 @@
 #pragma once
 
 #include <argon/string_literal.hh>
-#include <charconv>
 #include <cstdint>
-#include <expected>
-#include <span>
 #include <string>
-#include <system_error>
 #include <vector>
 
 namespace argon {
@@ -57,28 +53,6 @@ consteval auto IsCommandName() noexcept {
   return IsValidLongOpt<Name>();
 }
 
-// Parse a single arithmetic value from a string_view via std::from_chars.
-// Returns result_out_of_range on overflow, invalid_argument on bad input / partial parse.
-template <typename T>
-  requires((std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) || std::floating_point<T>)
-auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::error_code> {
-  const char* first = sv.data();
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-  const char* last = first + sv.size();
-  std::from_chars_result res{};
-  if constexpr (std::floating_point<T>) {
-    res = std::from_chars(first, last, out, std::chars_format::general);
-  } else {
-    res = std::from_chars(first, last, out);
-  }
-  if (res.ec != std::errc() || res.ptr != last) {
-    return std::unexpected(res.ec != std::errc()
-                               ? std::make_error_code(res.ec)
-                               : std::make_error_code(std::errc::invalid_argument));
-  }
-  return {};
-}
-
 struct Nargs {
   std::size_t min;
   std::optional<std::size_t> max;
@@ -91,23 +65,13 @@ struct Nargs {
 // fires a static_assert for truly unsupported types.
 template <typename T>
 concept parsable_type =
-    std::same_as<T, int>                                                ||
-    std::same_as<T, int32_t>                                            ||
-    std::same_as<T, int64_t>                                            ||
-    std::same_as<T, uint32_t>                                           ||
-    std::same_as<T, uint64_t>                                           ||
-    std::same_as<T, float>                                              ||
-    std::same_as<T, double>                                             ||
-    std::same_as<T, bool>                                               ||
-    std::same_as<T, std::string>                                        ||
-    std::same_as<T, std::vector<int>>                                   ||
-    std::same_as<T, std::vector<int32_t>>                               ||
-    std::same_as<T, std::vector<int64_t>>                               ||
-    std::same_as<T, std::vector<uint32_t>>                              ||
-    std::same_as<T, std::vector<uint64_t>>                              ||
-    std::same_as<T, std::vector<float>>                                 ||
-    std::same_as<T, std::vector<double>>                                ||
-    std::same_as<T, std::vector<bool>>                                  ||
+    std::same_as<T, int> || std::same_as<T, int32_t> || std::same_as<T, int64_t> ||
+    std::same_as<T, uint32_t> || std::same_as<T, uint64_t> || std::same_as<T, float> ||
+    std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> ||
+    std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<int32_t>> ||
+    std::same_as<T, std::vector<int64_t>> || std::same_as<T, std::vector<uint32_t>> ||
+    std::same_as<T, std::vector<uint64_t>> || std::same_as<T, std::vector<float>> ||
+    std::same_as<T, std::vector<double>> || std::same_as<T, std::vector<bool>> ||
     std::same_as<T, std::vector<std::string>>;
 
 struct ArgumentTag {};
@@ -197,13 +161,6 @@ struct PositionalArgument : ArgumentTag {
  protected:
   [[nodiscard]] constexpr auto valueRef() noexcept -> ValueT& { return value_; }
   constexpr auto markProvided() noexcept -> void { provided_ = true; }
-
-  auto parse(std::string_view sv) -> std::expected<void, std::error_code>
-    requires((std::integral<ValueT> && !std::same_as<std::remove_cv_t<ValueT>, bool>) ||
-             std::floating_point<ValueT>)
-  {
-    return detail::parseArithmetic(sv, value_);
-  }
 
  private:
   Requirement requirement_ = optional;
