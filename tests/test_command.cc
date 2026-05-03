@@ -49,8 +49,8 @@ TEST(ParseCommand, BasicCommand) {
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->push.provided());
-  EXPECT_EQ(result->push.args.remote.value(), "origin");
-  EXPECT_FALSE(result->push.args.force.provided());
+  EXPECT_EQ(result->push.remote.value(), "origin");
+  EXPECT_FALSE(result->push.force.provided());
 }
 
 TEST(ParseCommand, CommandWithFlag) {
@@ -59,19 +59,20 @@ TEST(ParseCommand, CommandWithFlag) {
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->push.provided());
-  EXPECT_TRUE(result->push.args.force.provided());
-  EXPECT_FALSE(result->push.args.remote.provided());
+  EXPECT_TRUE(result->push.force.provided());
+  EXPECT_FALSE(result->push.remote.provided());
 }
 
 TEST(ParseCommand, CommandWithMultipleOptions) {
   Parser<TopLevelArgs> parser;
-  std::vector<std::string_view> args = {"prog", "push", "--remote", "upstream", "--force", "--depth", "3"};
+  std::vector<std::string_view> args = {"prog",    "push",    "--remote", "upstream",
+                                        "--force", "--depth", "3"};
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->push.provided());
-  EXPECT_EQ(result->push.args.remote.value(), "upstream");
-  EXPECT_TRUE(result->push.args.force.provided());
-  EXPECT_EQ(result->push.args.depth.value(), 3);
+  EXPECT_EQ(result->push.remote.value(), "upstream");
+  EXPECT_TRUE(result->push.force.provided());
+  EXPECT_EQ(result->push.depth.value(), 3);
 }
 
 TEST(ParseCommand, CommandShortOptions) {
@@ -80,9 +81,9 @@ TEST(ParseCommand, CommandShortOptions) {
   auto result = parser.parse(args);
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->push.provided());
-  EXPECT_EQ(result->push.args.remote.value(), "origin");
-  EXPECT_TRUE(result->push.args.force.provided());
-  EXPECT_EQ(result->push.args.depth.value(), 5);
+  EXPECT_EQ(result->push.remote.value(), "origin");
+  EXPECT_TRUE(result->push.force.provided());
+  EXPECT_EQ(result->push.depth.value(), 5);
 }
 
 // ============================================================
@@ -96,7 +97,7 @@ TEST(ParseCommand, TopLevelFlagThenCommand) {
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->verbose.provided());
   EXPECT_TRUE(result->push.provided());
-  EXPECT_EQ(result->push.args.remote.value(), "origin");
+  EXPECT_EQ(result->push.remote.value(), "origin");
 }
 
 TEST(ParseCommand, TopLevelOptionAndFlagThenCommand) {
@@ -107,7 +108,7 @@ TEST(ParseCommand, TopLevelOptionAndFlagThenCommand) {
   EXPECT_TRUE(result->verbose.provided());
   EXPECT_EQ(result->jobs.value(), 4);
   EXPECT_TRUE(result->push.provided());
-  EXPECT_TRUE(result->push.args.force.provided());
+  EXPECT_TRUE(result->push.force.provided());
 }
 
 // ============================================================
@@ -143,7 +144,7 @@ TEST(ParseCommand, FirstOfTwoCommands) {
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result->add.provided());
   EXPECT_FALSE(result->rm.provided());
-  EXPECT_EQ(result->add.args.file.value(), "main.cc");
+  EXPECT_EQ(result->add.file.value(), "main.cc");
 }
 
 TEST(ParseCommand, SecondOfTwoCommands) {
@@ -153,8 +154,8 @@ TEST(ParseCommand, SecondOfTwoCommands) {
   ASSERT_TRUE(result.has_value());
   EXPECT_FALSE(result->add.provided());
   EXPECT_TRUE(result->rm.provided());
-  EXPECT_TRUE(result->rm.args.recursive.provided());
-  EXPECT_EQ(result->rm.args.file.value(), "src");
+  EXPECT_TRUE(result->rm.recursive.provided());
+  EXPECT_EQ(result->rm.file.value(), "src");
 }
 
 // ============================================================
@@ -168,7 +169,7 @@ TEST(ParseCommand, PositionalThenCommand) {
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->repo.value(), "my-repo");
   EXPECT_TRUE(result->push.provided());
-  EXPECT_EQ(result->push.args.remote.value(), "origin");
+  EXPECT_EQ(result->push.remote.value(), "origin");
 }
 
 TEST(ParseCommand, PositionalNoCommand) {

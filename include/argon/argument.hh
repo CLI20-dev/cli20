@@ -74,7 +74,7 @@ template <ArithmeticParseable T>
 auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::error_code> {
   const char* first = sv.data();
   const char* last = sv.data() + sv.size();
-  std::from_chars_result res;
+  std::from_chars_result res{};
   if constexpr (std::floating_point<T>) {
     res = std::from_chars(first, last, out, std::chars_format::general);
   } else {
@@ -159,8 +159,7 @@ struct PositionalArgument : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = ValueT;
 
-  constexpr PositionalArgument(Requirement requirement = optional)
-      : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -243,9 +242,9 @@ struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
 
 template <class T, StringLiteral CommandName>
   requires(detail::IsCommandName<CommandName>())
-struct Command : ArgumentTag {
+struct Command : ArgumentTag, public T {
+  using args_type = T;
   static constexpr auto type = ArgumentType::command;
-  T args;
 
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
 

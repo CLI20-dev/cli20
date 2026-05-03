@@ -14,6 +14,18 @@ namespace argon {
 
 namespace detail {
 
+template <class Argument>
+constexpr auto castBaseIfCommand(Argument& arg) -> auto& {
+  if constexpr (requires {
+                  Argument::type;
+                  Argument::type == ArgumentType::command;
+                }) {
+    return static_cast<Argument::args_type&>(arg);
+  } else {
+    return arg;
+  }
+}
+
 template <class Arguments>
 struct isValidArgumentsType {
   static constexpr bool value = [] -> bool {
@@ -93,8 +105,7 @@ inline auto tokenize(std::span<const std::string_view> args,
     auto& values = result.named[key];
     for (std::size_t count = 0;
          i + 1 < args.size() && (!nargs_spec.max.has_value() || count < *nargs_spec.max) &&
-         args[i + 1] != "--" &&
-         !spec_map.contains(std::string(args[i + 1])) &&
+         args[i + 1] != "--" && !spec_map.contains(std::string(args[i + 1])) &&
          !command_names.contains(std::string(args[i + 1]));
          ++count) {
       values.push_back(args[++i]);
@@ -119,18 +130,18 @@ class Parser {
  private:
   template <class T = Arguments>
   static consteval auto hasDuplicateOptions() -> bool {
-    auto [... args] = T{};
+    std::vector<std::string> options;
+    auto t = T{};
+    auto [... args] = detail::castBaseIfCommand(t);
 
     if ((... || [&args] -> bool {
           if constexpr (args.type == ArgumentType::command) {
-            return hasDuplicateOptions<std::remove_cvref_t<decltype(args.args)>>();
+            return hasDuplicateOptions<std::remove_cvref_t<decltype(args)>>();
           }
           return false;
         }())) {
       return true;
     }
-
-    std::vector<std::string> options;
 
     (..., [&] -> auto {
       if constexpr (args.type == ArgumentType::option || args.type == ArgumentType::flag) {
@@ -234,17 +245,17 @@ class Parser {
     // Recursively parse sub-command if one was encountered
     if (tokenized->command_tail) {
       std::string cmd_error;
-      (..., [&] {
+      (..., [&] -> auto {
         if constexpr (opts.type == ArgumentType::command) {
           const auto& tail = *tokenized->command_tail;
           if (!tail.empty() && tail[0] == opts.commandName() && cmd_error.empty()) {
-            using SubArgs = std::remove_cvref_t<decltype(opts.args)>;
+            using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
             Parser<SubArgs> sub_parser;
             auto sub = sub_parser.parse(tail);  // tail[0] acts as sub-command's argv[0]
             if (!sub) {
               cmd_error = sub.error();
             } else {
-              opts.args = std::move(*sub);
+              detail::castBaseIfCommand(opts) = std::move(*sub);
               opts.markProvided();
             }
           }
@@ -269,8 +280,7 @@ class Parser {
       if constexpr (options.type == ArgumentType::option || options.type == ArgumentType::flag) {
         specMap.emplace(std::string("--") + options.longOpt(), options.nargs());
         if (options.shortOpt() != '\0') {
-          specMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
-                          options.nargs());
+          specMap.emplace(std::string("-") + std::string(1, options.shortOpt()), options.nargs());
         }
       }
     }());
