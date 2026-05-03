@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#include <io.h>
-#else
 #include <unistd.h>
-#endif
 
 namespace argon {
 
@@ -51,8 +47,7 @@ inline auto isTty() noexcept -> bool {
 
 // Resolves a ColorMode to a concrete AnsiStyle.
 inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
-  const bool on = (mode == ColorMode::always) ||
-                  (mode == ColorMode::auto_ && isTty());
+  const bool on = (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
   return AnsiStyle{on};
 }
 

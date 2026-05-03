@@ -13,7 +13,6 @@
 #include <expected>
 #include <span>
 #include <system_error>
-#include <io.h>
 #include <unistd.h>
 #include <format>
 #include <functional>
@@ -803,9 +802,6 @@ using BoolPosArg = BoolPositional;
 
 // ---- begin: include/argon/color.hh ----
 
-#ifdef _WIN32
-#else
-#endif
 
 namespace argon {
 
@@ -852,8 +848,7 @@ inline auto isTty() noexcept -> bool {
 
 // Resolves a ColorMode to a concrete AnsiStyle.
 inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
-  const bool on = (mode == ColorMode::always) ||
-                  (mode == ColorMode::auto_ && isTty());
+  const bool on = (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
   return AnsiStyle{on};
 }
 

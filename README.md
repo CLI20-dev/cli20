@@ -14,6 +14,8 @@ target_compile_features(your_target PRIVATE cxx_std_26)
 ## Quick start
 
 ```cpp
+#include <iostream>
+
 #include "argon/arithmetic_argument.hh"
 #include "argon/flag_argument.hh"
 #include "argon/parser.hh"
