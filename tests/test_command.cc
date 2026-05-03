@@ -196,7 +196,9 @@ TEST(ParseCommand, SubCommandRequiredOptionMissing) {
   std::vector<std::string_view> args = {"prog", "push"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "required option '--remote' was not provided");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--remote");
+  EXPECT_EQ(result.error().detail, "required option was not provided");
 }
 
 TEST(ParseCommand, SubCommandInvalidOption) {
@@ -204,7 +206,7 @@ TEST(ParseCommand, SubCommandInvalidOption) {
   std::vector<std::string_view> args = {"prog", "push", "--depth", "abc"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 // ============================================================

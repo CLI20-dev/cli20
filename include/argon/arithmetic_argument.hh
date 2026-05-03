@@ -9,6 +9,8 @@
 #include <system_error>
 #include <vector>
 
+#include "argon/error.hh"
+
 namespace argon {
 
 namespace detail {
@@ -17,7 +19,7 @@ namespace detail {
 // Returns result_out_of_range on overflow, invalid_argument on bad input / partial parse.
 template <typename T>
   requires((std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) || std::floating_point<T>)
-auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::error_code> {
+auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, ParseError> {
   const char* first = sv.data();
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   const char* last = first + sv.size();
@@ -28,9 +30,9 @@ auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::er
     res = std::from_chars(first, last, out);
   }
   if (res.ec != std::errc() || res.ptr != last) {
-    return std::unexpected(res.ec != std::errc()
-                               ? std::make_error_code(res.ec)
-                               : std::make_error_code(std::errc::invalid_argument));
+    return std::unexpected(ParseError{.code = ErrorCode::conversion_error,
+                                      .kind = ErrorKind::conversion,
+                                      .subject = std::string(sv)});
   }
   return {};
 }
@@ -43,7 +45,7 @@ struct ArithmeticArgImpl : public ArgBase<T, LongOpt, ShortOpt> {
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     return parseArithmetic(sv[0], this->valueRef());
   }
 
@@ -75,7 +77,7 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   [[nodiscard]] constexpr auto valueRef() noexcept -> T& { return value_; }
   constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
-  auto parse(std::string_view sv) -> std::expected<void, std::error_code> {
+  auto parse(std::string_view sv) -> std::expected<void, ParseError> {
     return parseArithmetic(sv, value_);
   }
 
@@ -157,7 +159,7 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
       : Base(optional), nargs_(nargs) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -168,7 +170,7 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
     return {};
   }
 
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
+  auto validate() -> std::expected<void, ParseError> { return {}; }
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
 
  private:

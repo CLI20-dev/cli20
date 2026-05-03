@@ -4,14 +4,15 @@
 #include <expected>
 #include <span>
 #include <string_view>
-#include <system_error>
 #include <vector>
+
+#include "argon/error.hh"
 
 namespace argon {
 
 namespace detail {
 
-inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, std::error_code> {
+inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, ParseError> {
   if (sv == "true") {
     out = true;
     return {};
@@ -20,7 +21,9 @@ inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, std
     out = false;
     return {};
   }
-  return std::unexpected(std::make_error_code(std::errc::invalid_argument));
+  return std::unexpected(ParseError{.code = ErrorCode::conversion_error,
+                                    .kind = ErrorKind::conversion,
+                                    .subject = std::string(sv)});
 }
 
 }  // namespace detail
@@ -35,11 +38,11 @@ struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     return detail::parseBool(sv[0], this->valueRef());
   }
 
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
+  auto validate() -> std::expected<void, ParseError> { return {}; }
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
 
  private:
@@ -65,7 +68,7 @@ struct PositionalArgument<bool> : ArgumentTag {
   friend class Parser;
 
  protected:
-  auto parse(std::string_view sv) -> std::expected<void, std::error_code> {
+  auto parse(std::string_view sv) -> std::expected<void, ParseError> {
     return detail::parseBool(sv, value_);
   }
 
@@ -94,7 +97,7 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
       : Base(optional), nargs_(nargs) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -105,7 +108,7 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
     return {};
   }
 
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
+  auto validate() -> std::expected<void, ParseError> { return {}; }
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
 
  private:

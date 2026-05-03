@@ -72,7 +72,7 @@ auto main(int argc, char** argv) -> int {
   auto res = argon::parse<Args>(argc, argv);
 
   if (!res) {
-    std::cerr << "error: " << res.error() << '\n';
+    std::cerr << "error: " << res.error().message() << '\n';
     return 1;
   }
 

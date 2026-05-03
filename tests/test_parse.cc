@@ -209,7 +209,8 @@ TEST(ParseIntArg, RequiredOptionMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "required option '--count' was not provided");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--count");
 }
 
 // ---- error: invalid integer string ----
@@ -219,7 +220,7 @@ TEST(ParseIntArg, InvalidNotANumber) {
   std::vector<std::string_view> args = {"prog", "--count", "abc"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntArg, PartialNumber) {
@@ -228,7 +229,7 @@ TEST(ParseIntArg, PartialNumber) {
   std::vector<std::string_view> args = {"prog", "--count", "42abc"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntArg, FloatString) {
@@ -236,7 +237,7 @@ TEST(ParseIntArg, FloatString) {
   std::vector<std::string_view> args = {"prog", "--count", "3.14"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntArg, EmptyString) {
@@ -244,7 +245,7 @@ TEST(ParseIntArg, EmptyString) {
   std::vector<std::string_view> args = {"prog", "--count", ""};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntArg, Overflow) {
@@ -252,7 +253,7 @@ TEST(ParseIntArg, Overflow) {
   std::vector<std::string_view> args = {"prog", "--count", "99999999999999"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntArg, Underflow) {
@@ -260,7 +261,7 @@ TEST(ParseIntArg, Underflow) {
   std::vector<std::string_view> args = {"prog", "--count", "-99999999999999"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 // ---- error: tokenizer errors propagated through parse() ----
@@ -270,7 +271,9 @@ TEST(ParseIntArg, MissingValue) {
   std::vector<std::string_view> args = {"prog", "--count"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--count' requires at least 1 argument(s), but got 0");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--count");
+  EXPECT_EQ(result.error().detail, "option requires at least 1 value(s), but only 0 provided");
 }
 
 TEST(ParseIntArg, MissingValueShortOpt) {
@@ -278,7 +281,9 @@ TEST(ParseIntArg, MissingValueShortOpt) {
   std::vector<std::string_view> args = {"prog", "-n"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '-n' requires at least 1 argument(s), but got 0");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "-n");
+  EXPECT_EQ(result.error().detail, "option requires at least 1 value(s), but only 0 provided");
 }
 
 TEST(ParseIntArg, DuplicateLongOption) {
@@ -286,7 +291,9 @@ TEST(ParseIntArg, DuplicateLongOption) {
   std::vector<std::string_view> args = {"prog", "--count", "1", "--count", "2"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--count' specified multiple times");
+  EXPECT_EQ(result.error().code, ErrorCode::duplicate_argument);
+  EXPECT_EQ(result.error().subject, "--count");
+  EXPECT_EQ(result.error().detail, "option specified multiple times");
 }
 
 TEST(ParseIntArg, DuplicateShortOption) {
@@ -294,7 +301,9 @@ TEST(ParseIntArg, DuplicateShortOption) {
   std::vector<std::string_view> args = {"prog", "-n", "1", "-n", "2"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '-n' specified multiple times");
+  EXPECT_EQ(result.error().code, ErrorCode::duplicate_argument);
+  EXPECT_EQ(result.error().subject, "-n");
+  EXPECT_EQ(result.error().detail, "option specified multiple times");
 }
 
 TEST(ParseIntArg, DuplicateMixedLongShort) {
@@ -428,7 +437,7 @@ TEST(ParseIntPositional, InvalidNotANumber) {
   std::vector<std::string_view> args = {"prog", "abc"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntPositional, PartialNumber) {
@@ -476,7 +485,7 @@ TEST(ParseIntPositional, RequiredMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntPositional, TwoRequiredBothProvided) {
@@ -493,7 +502,7 @@ TEST(ParseIntPositional, TwoRequiredSecondMissing) {
   std::vector<std::string_view> args = {"prog", "3"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseIntPositional, TwoRequiredBothMissing) {
@@ -501,5 +510,5 @@ TEST(ParseIntPositional, TwoRequiredBothMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }

@@ -10,6 +10,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "argon/error.hh"
+
 namespace argon {
 
 namespace detail {
@@ -49,7 +51,7 @@ struct TokenizeResult {
 inline auto tokenize(std::span<const std::string_view> args,
                      const std::unordered_map<std::string, Nargs>& spec_map,
                      const std::unordered_set<std::string>& command_names = {})
-    -> std::expected<TokenizeResult, std::string> {
+    -> std::expected<TokenizeResult, ParseError> {
   TokenizeResult result;
 
   for (std::size_t i = 0; i < args.size(); ++i) {
@@ -78,7 +80,11 @@ inline auto tokenize(std::span<const std::string_view> args,
         if (it != spec_map.end() && it->second.min == 1 &&
             it->second.max == std::optional<std::size_t>{1}) {
           if (result.named.contains(key)) {
-            return std::unexpected(std::format("option '{}' specified multiple times", key));
+            return std::unexpected(ParseError{.code = ErrorCode::duplicate_argument,
+                                              .kind = ErrorKind::parse,
+                                              .position = static_cast<int>(i),
+                                              .subject = key,
+                                              .detail = "option specified multiple times"});
           }
           result.named[key].push_back(val);
         } else {
@@ -97,7 +103,11 @@ inline auto tokenize(std::span<const std::string_view> args,
 
     const auto key = std::string(arg);
     if (result.named.contains(key)) {
-      return std::unexpected(std::format("option '{}' specified multiple times", key));
+      return std::unexpected(ParseError{.code = ErrorCode::duplicate_argument,
+                                        .kind = ErrorKind::parse,
+                                        .position = static_cast<int>(i),
+                                        .subject = key,
+                                        .detail = "option specified multiple times"});
     }
 
     // Collect values up to max, stopping at the next option/command/separator
@@ -112,8 +122,13 @@ inline auto tokenize(std::span<const std::string_view> args,
     }
 
     if (values.size() < nargs_spec.min) {
-      return std::unexpected(std::format("option '{}' requires at least {} argument(s), but got {}",
-                                         key, nargs_spec.min, values.size()));
+      return std::unexpected(ParseError{
+          .code = ErrorCode::missing_value,
+          .kind = ErrorKind::parse,
+          .position = static_cast<int>(i),
+          .subject = key,
+          .detail = std::format("option requires at least {} value(s), but only {} provided",
+                                nargs_spec.min, values.size())});
     }
   }
 
@@ -165,7 +180,7 @@ class Parser {
  public:
   [[nodiscard]]
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-  auto parse(int argc, char* argv[]) -> std::expected<Arguments, std::string> {
+  auto parse(int argc, char* argv[]) -> std::expected<Arguments, ParseError> {
     std::vector<std::string_view> args;
     args.reserve(static_cast<std::size_t>(argc));
     for (char* arg : std::span<char*>{argv, static_cast<std::size_t>(argc)}) {
@@ -174,7 +189,7 @@ class Parser {
     return parse(args);
   }
 
-  auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, std::string> {
+  auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, ParseError> {
     Arguments result;
     if (auto r = parse(args, result); !r) {
       return std::unexpected(r.error());
@@ -182,7 +197,8 @@ class Parser {
     return result;
   }
 
-  auto parse(std::span<const std::string_view> args, Arguments& out) -> std::expected<void, std::string> {
+  auto parse(std::span<const std::string_view> args, Arguments& out)
+      -> std::expected<void, ParseError> {
     program_name_ = args.empty() ? "program" : std::string(args[0]);
 
     const auto rest = args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
@@ -210,17 +226,17 @@ class Parser {
     // Assign positionals and check required options
     auto& [... opts] = out;
     std::size_t pos_idx = 0;
-    std::string pos_error;
+    ParseError pos_error;
     std::string missing;
     (..., [&] -> auto {
       if constexpr (opts.type == ArgumentType::positional) {
         if (pos_idx < tokenized->positional.size()) {
           const auto sv = tokenized->positional[pos_idx++];
           if constexpr (requires { opts.parse(sv); }) {
-            if (pos_error.empty()) {
+            if (!pos_error.hasError()) {
               auto r = opts.parse(sv);
               if (!r) {
-                pos_error = r.error().message();
+                pos_error = r.error();
               } else {
                 opts.markProvided();
               }
@@ -228,9 +244,12 @@ class Parser {
           }
         } else {
           if constexpr (requires { opts.isRequired(); }) {
-            if (opts.isRequired() && pos_error.empty()) {
-              pos_error = std::format("required positional argument (position {}) was not provided",
-                                      pos_idx + 1);
+            if (opts.isRequired() && !pos_error.hasError()) {
+              pos_error = ParseError{
+                  .code = ErrorCode::missing_value,
+                  .kind = ErrorKind::parse,
+                  .position = static_cast<int>(args.size()),
+                  .subject = std::format("positional argument at position {}", pos_idx + 1)};
             }
           }
           ++pos_idx;
@@ -242,20 +261,24 @@ class Parser {
         }
       }
     }());
-    if (!pos_error.empty()) {
+    if (pos_error.hasError()) {
       return std::unexpected(pos_error);
     }
     if (!missing.empty()) {
-      return std::unexpected(std::format("required option '{}' was not provided", missing));
+      return std::unexpected(ParseError{.code = ErrorCode::missing_value,
+                                        .kind = ErrorKind::parse,
+                                        .position = static_cast<int>(args.size()),
+                                        .subject = missing,
+                                        .detail = "required option was not provided"});
     }
 
     // Recursively parse sub-command if one was encountered
     if (tokenized->command_tail) {
-      std::string cmd_error;
+      ParseError cmd_error;
       (..., [&] -> auto {
         if constexpr (opts.type == ArgumentType::command) {
           const auto& tail = *tokenized->command_tail;
-          if (!tail.empty() && tail[0] == opts.commandName() && cmd_error.empty()) {
+          if (!tail.empty() && tail[0] == opts.commandName() && !cmd_error.hasError()) {
             using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
             Parser<SubArgs> sub_parser;
             if (auto r = sub_parser.parse(tail, detail::castBaseIfCommand(opts)); !r) {
@@ -266,7 +289,8 @@ class Parser {
           }
         }
       }());
-      if (!cmd_error.empty()) {
+      if (cmd_error.hasError()) {
+        cmd_error.position += static_cast<int>(args.size() - tokenized->command_tail->size());
         return std::unexpected(cmd_error);
       }
     }
@@ -312,7 +336,7 @@ class Parser {
   auto makeParseMap(Arguments& args) {
     auto& [... options] = args;
 
-    std::unordered_map<std::string, std::function<std::expected<void, std::string>(
+    std::unordered_map<std::string, std::function<std::expected<void, ParseError>(
                                         std::span<const std::string_view>)>>
         parseMap;
 
@@ -320,10 +344,10 @@ class Parser {
       if constexpr (options.type == ArgumentType::option) {
         auto make_fn =
             [&options](
-                std::span<const std::string_view> values) -> std::expected<void, std::string> {
+                std::span<const std::string_view> values) -> std::expected<void, ParseError> {
           auto r = options.parse(values);
           if (!r) {
-            return std::unexpected(r.error().message());
+            return std::unexpected(r.error());
           }
           options.markProvided();
           return {};
@@ -335,7 +359,7 @@ class Parser {
       }
       if constexpr (options.type == ArgumentType::flag) {
         auto make_fn =
-            [&options](std::span<const std::string_view>) -> std::expected<void, std::string> {
+            [&options](std::span<const std::string_view>) -> std::expected<void, ParseError> {
           options.markProvided();
           return {};
         };
@@ -356,13 +380,13 @@ class Parser {
 template <class Arguments>
 [[nodiscard]]
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-auto parse(int argc, char* argv[]) -> std::expected<Arguments, std::string> {
+auto parse(int argc, char* argv[]) -> std::expected<Arguments, ParseError> {
   return Parser<Arguments>{}.parse(argc, argv);
 }
 
 template <class Arguments>
 [[nodiscard]]
-auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, std::string> {
+auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, ParseError> {
   return Parser<Arguments>{}.parse(args);
 }
 

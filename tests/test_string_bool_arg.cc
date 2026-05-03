@@ -146,7 +146,9 @@ TEST(ParseStrArg, RequiredMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "required option '--name' was not provided");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--name");
+  EXPECT_EQ(result.error().detail, "required option was not provided");
 }
 
 // ---- error: tokenizer errors ----
@@ -156,7 +158,9 @@ TEST(ParseStrArg, MissingValue) {
   std::vector<std::string_view> args = {"prog", "--name"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--name' requires at least 1 argument(s), but got 0");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--name");
+  EXPECT_EQ(result.error().detail, "option requires at least 1 value(s), but only 0 provided");
 }
 
 TEST(ParseStrArg, DuplicateLongOption) {
@@ -164,7 +168,9 @@ TEST(ParseStrArg, DuplicateLongOption) {
   std::vector<std::string_view> args = {"prog", "--name", "a", "--name", "b"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--name' specified multiple times");
+  EXPECT_EQ(result.error().code, ErrorCode::duplicate_argument);
+  EXPECT_EQ(result.error().subject, "--name");
+  EXPECT_EQ(result.error().detail, "option specified multiple times");
 }
 
 // ============================================================
@@ -214,7 +220,7 @@ TEST(ParseStrListArg, MissingValue) {
   std::vector<std::string_view> args = {"prog", "--names"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 // ============================================================
@@ -293,7 +299,7 @@ TEST(ParseStrPositional, RequiredFirstMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseStrPositional, RequiredSecondMissing) {
@@ -301,7 +307,7 @@ TEST(ParseStrPositional, RequiredSecondMissing) {
   std::vector<std::string_view> args = {"prog", "src.txt"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 // ============================================================
@@ -384,7 +390,9 @@ TEST(ParseBoolArg, RequiredMissing) {
   std::vector<std::string_view> args = {"prog"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "required option '--flag' was not provided");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--flag");
+  EXPECT_EQ(result.error().detail, "required option was not provided");
 }
 
 TEST(ParseBoolArg, InvalidYes) {
@@ -392,7 +400,7 @@ TEST(ParseBoolArg, InvalidYes) {
   std::vector<std::string_view> args = {"prog", "--flag", "yes"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseBoolArg, InvalidOne) {
@@ -436,7 +444,9 @@ TEST(ParseBoolArg, MissingValue) {
   std::vector<std::string_view> args = {"prog", "--flag"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--flag' requires at least 1 argument(s), but got 0");
+  EXPECT_EQ(result.error().code, ErrorCode::missing_value);
+  EXPECT_EQ(result.error().subject, "--flag");
+  EXPECT_EQ(result.error().detail, "option requires at least 1 value(s), but only 0 provided");
 }
 
 TEST(ParseBoolArg, DuplicateOption) {
@@ -444,7 +454,9 @@ TEST(ParseBoolArg, DuplicateOption) {
   std::vector<std::string_view> args = {"prog", "--flag", "true", "--flag", "false"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), "option '--flag' specified multiple times");
+  EXPECT_EQ(result.error().code, ErrorCode::duplicate_argument);
+  EXPECT_EQ(result.error().subject, "--flag");
+  EXPECT_EQ(result.error().detail, "option specified multiple times");
 }
 
 // ============================================================
@@ -483,7 +495,7 @@ TEST(ParseBoolPositional, InvalidValue) {
   std::vector<std::string_view> args = {"prog", "yes"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseBoolPositional, InvalidNumeric) {
@@ -571,7 +583,7 @@ TEST(ParseBoolListArg, MissingValue) {
   std::vector<std::string_view> args = {"prog", "--flags"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
-  EXPECT_FALSE(result.error().empty());
+  EXPECT_TRUE(result.error().hasError());
 }
 
 TEST(ParseBoolListArg, InvalidValueInList) {

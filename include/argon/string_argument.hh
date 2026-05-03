@@ -4,8 +4,9 @@
 #include <expected>
 #include <span>
 #include <string>
-#include <system_error>
 #include <vector>
+
+#include "argon/error.hh"
 
 namespace argon {
 
@@ -19,12 +20,12 @@ struct Arg<std::string, LongOpt, ShortOpt> : public ArgBase<std::string, LongOpt
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     this->valueRef() = std::string(sv[0]);
     return {};
   }
 
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
+  auto validate() -> std::expected<void, ParseError> { return {}; }
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
 
  private:
@@ -48,7 +49,7 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
       : Base(optional), nargs_(nargs) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code> {
+  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -57,7 +58,7 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
     return {};
   }
 
-  auto validate() -> std::expected<void, std::error_code> { return {}; }
+  auto validate() -> std::expected<void, ParseError> { return {}; }
   [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
 
  private:
@@ -83,7 +84,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
   friend class Parser;
 
  protected:
-  auto parse(std::string_view sv) -> std::expected<void, std::error_code> {
+  auto parse(std::string_view sv) -> std::expected<void, ParseError> {
     value_ = std::string(sv);
     return {};
   }

@@ -38,4 +38,5 @@ struct StringLiteral {
 template <std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 StringLiteral(const char (&)[N]) -> StringLiteral<N>;
+
 }  // namespace argon
