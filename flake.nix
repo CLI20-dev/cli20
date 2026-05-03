@@ -9,9 +9,18 @@
   };
 
   outputs =
-    inputs@{ flake-parts, treefmt-nix, nixpkgs, ... }:
+    inputs@{
+      flake-parts,
+      treefmt-nix,
+      ...
+    }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
 
       imports = [
         treefmt-nix.flakeModule
@@ -33,7 +42,9 @@
               pkgs.llvmPackages.libcxxClang
               pkgs.cmake
               pkgs.ninja
-              pkgs.gtest
+              (pkgs.gtest.override {
+                stdenv = pkgs.libcxxStdenv;
+              })
               pkgs.clang-tools
               config.treefmt.build.wrapper
             ];
@@ -49,7 +60,9 @@
               pkgs.clang-tools
             ];
             buildInputs = [
-              pkgs.gtest
+              (pkgs.gtest.override {
+                stdenv = pkgs.libcxxStdenv;
+              })
             ];
             cmakeFlags = [
               "-G Ninja"
