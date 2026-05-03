@@ -2,6 +2,7 @@
 
 #include <argon/argument.hh>
 #include <expected>
+#include <functional>
 #include <span>
 #include <string>
 #include <vector>
@@ -25,11 +26,10 @@ struct Arg<std::string, LongOpt, ShortOpt> : public ArgBase<std::string, LongOpt
     return {};
   }
 
-  auto validate() -> std::expected<void, ParseError> { return {}; }
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
-
- private:
-  detail::Nargs nargs_ = nargs::one;
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs::one;
+  }
 };
 
 // ---- Arg<std::vector<std::string>, ...> (one-or-more values) ----
@@ -55,6 +55,8 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
 
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
+  constexpr explicit Arg(Param<std::vector<std::string>> p) : Base(std::move(p)) {}
+
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
@@ -65,8 +67,10 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
     return {};
   }
 
-  auto validate() -> std::expected<void, ParseError> { return {}; }
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs_;
+  }
 
  private:
   detail::Nargs nargs_ = nargs::one_or_more;
@@ -82,6 +86,10 @@ struct PositionalArgument<std::string> : ArgumentTag {
   constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
+  explicit PositionalArgument(Param<std::string> p)
+      : requirement_(p.requirement), description_(p.description) {
+    if (p.validator) validator_ = std::move(p.validator);
+  }
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -101,6 +109,16 @@ struct PositionalArgument<std::string> : ArgumentTag {
     return {};
   }
 
+  auto validate() -> std::expected<void, ParseError> {
+    if (!validator_ || !*validator_) return {};
+    auto r = (*validator_)(value_);
+    if (!r)
+      return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
+                                        .kind = ErrorKind::validation,
+                                        .detail = std::move(r).error()});
+    return {};
+  }
+
   constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
  private:
@@ -108,6 +126,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
   std::string_view description_;
   std::string value_;
   bool provided_ = false;
+  std::optional<std::function<std::expected<void, std::string>(const std::string&)>> validator_;
 };
 
 // ---- Aliases ----

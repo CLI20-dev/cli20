@@ -540,3 +540,194 @@ TEST(DescriptionConstructor, DefaultDescriptionIsEmpty) {
   IntPositional pos;
   EXPECT_TRUE(pos.description().empty());
 }
+
+// ============================================================
+// argon::description struct member
+// ============================================================
+
+struct StructDescArgs {
+  description prog_desc{"A simple utility that does useful things."};
+  IntArg<"count", 'n'> count{"Number of iterations"};
+};
+
+struct SubWithDesc {
+  description cmd_desc{"Compile all sources in the current directory."};
+  StrArg<"target", 't'> target{"Build target"};
+};
+
+struct TopWithSubDesc {
+  FlagArg<"verbose", 'v'> verbose;
+  Command<SubWithDesc, "build"> build;
+};
+
+TEST(FormatHelp, StructDescriptionAppearsAfterUsageLine) {
+  // The argon::description text must appear after the "Usage:" line.
+  Parser<StructDescArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  const auto usage_pos = help.find("Usage:");
+  const auto desc_pos = help.find("A simple utility that does useful things.");
+  ASSERT_NE(usage_pos, std::string::npos);
+  ASSERT_NE(desc_pos, std::string::npos);
+  EXPECT_GT(desc_pos, usage_pos);
+}
+
+TEST(FormatHelp, StructDescriptionAppearsBeforeOptions) {
+  // The argon::description text must come before the "Options:" section.
+  Parser<StructDescArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  const auto desc_pos = help.find("A simple utility that does useful things.");
+  const auto opts_pos = help.find("Options:");
+  ASSERT_NE(desc_pos, std::string::npos);
+  ASSERT_NE(opts_pos, std::string::npos);
+  EXPECT_LT(desc_pos, opts_pos);
+}
+
+TEST(FormatHelp, StructDescriptionFallsBackToCommandListing) {
+  // When Command<SubArgs, "name"> has no description of its own, the
+  // argon::description member inside SubArgs is shown in the parent
+  // "Commands:" listing.
+  Parser<TopWithSubDesc> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  EXPECT_NE(help.find("Compile all sources in the current directory."), std::string::npos);
+}
+
+TEST(FormatHelp, LongStructDescriptionAppearsInFull) {
+  // A long argon::description string must appear verbatim without truncation.
+  struct LongDescArgs {
+    description long_desc{
+        "This is a deliberately long description that spans many words and "
+        "should appear verbatim in the help output without truncation or "
+        "wrapping. It contains enough text to test that the output is not "
+        "silently clipped."};
+    FlagArg<"flag", 'f'> flag;
+  };
+  Parser<LongDescArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  EXPECT_NE(
+      help.find("This is a deliberately long description that spans many words and "
+                "should appear verbatim in the help output without truncation or "
+                "wrapping. It contains enough text to test that the output is not "
+                "silently clipped."),
+      std::string::npos);
+}
+
+TEST(FormatHelp, LongOptionDescriptionAppearsInFull) {
+  // A long per-option description string must appear verbatim.
+  struct LongOptDescArgs {
+    StrArg<"output", 'o'> output{
+        "Path to the output file. Accepts absolute or relative paths. "
+        "If the directory does not exist it will be created automatically."};
+  };
+  Parser<LongOptDescArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  EXPECT_NE(
+      help.find("Path to the output file. Accepts absolute or relative paths. "
+                "If the directory does not exist it will be created automatically."),
+      std::string::npos);
+}
+
+TEST(FormatHelp, LongCommandDescriptionAppearsInFull) {
+  // A long Command<> description must appear verbatim in the Commands listing.
+  struct Sub {};
+  struct LongCmdDescArgs {
+    Command<Sub, "deploy"> deploy{
+        "Deploy the application to the target environment. "
+        "Requires valid credentials stored in ~/.config/app/credentials."};
+  };
+  Parser<LongCmdDescArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+  EXPECT_NE(
+      help.find("Deploy the application to the target environment. "
+                "Requires valid credentials stored in ~/.config/app/credentials."),
+      std::string::npos);
+}
+
+// ============================================================
+// User-controlled line wrapping via '\n' in descriptions
+// ============================================================
+
+// Helper: returns the visual column (0-based chars from line start) of the
+// first occurrence of `needle` in `text`.
+static auto columnOf(const std::string& text, std::string_view needle) -> std::size_t {
+  const auto pos = text.find(needle);
+  if (pos == std::string::npos) return std::string::npos;
+  const auto line_start = text.rfind('\n', pos);
+  return pos - (line_start == std::string::npos ? 0 : line_start + 1);
+}
+
+TEST(FormatHelp, NewlineInOptionDescContinuationIsIndented) {
+  // A '\n' in an option description must be followed by indentation that
+  // places the continuation text at the same column as the first line.
+  struct WrappedOptArgs {
+    StrArg<"output", 'o'> output{"First line of description.\nSecond line continues here."};
+  };
+  Parser<WrappedOptArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+
+  ASSERT_NE(help.find("First line of description."), std::string::npos);
+  ASSERT_NE(help.find("Second line continues here."), std::string::npos);
+
+  const auto col_first  = columnOf(help, "First line of description.");
+  const auto col_second = columnOf(help, "Second line continues here.");
+  EXPECT_EQ(col_first, col_second);
+}
+
+TEST(FormatHelp, MultipleNewlinesInOptionDescAllAligned) {
+  // Three continuation lines must all start at the same column.
+  struct ThreeLineArgs {
+    IntArg<"count", 'n'> count{"Line one.\nLine two.\nLine three."};
+  };
+  Parser<ThreeLineArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+
+  const auto col1 = columnOf(help, "Line one.");
+  const auto col2 = columnOf(help, "Line two.");
+  const auto col3 = columnOf(help, "Line three.");
+  ASSERT_NE(col1, std::string::npos);
+  EXPECT_EQ(col1, col2);
+  EXPECT_EQ(col1, col3);
+}
+
+TEST(FormatHelp, NewlineInFlagDescContinuationIsIndented) {
+  struct WrappedFlagArgs {
+    FlagArg<"verbose", 'v'> verbose{"Enable verbose output.\nPrints extra diagnostics."};
+  };
+  Parser<WrappedFlagArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+
+  const auto col1 = columnOf(help, "Enable verbose output.");
+  const auto col2 = columnOf(help, "Prints extra diagnostics.");
+  ASSERT_NE(col1, std::string::npos);
+  EXPECT_EQ(col1, col2);
+}
+
+TEST(FormatHelp, NewlineInCommandDescContinuationIsIndented) {
+  struct Sub {};
+  struct WrappedCmdArgs {
+    Command<Sub, "deploy"> deploy{"Deploy to production.\nRequires credentials."};
+  };
+  Parser<WrappedCmdArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+
+  const auto col1 = columnOf(help, "Deploy to production.");
+  const auto col2 = columnOf(help, "Requires credentials.");
+  ASSERT_NE(col1, std::string::npos);
+  EXPECT_EQ(col1, col2);
+}
+
+TEST(FormatHelp, NewlineInDescAlignedWithOtherEntries) {
+  // Continuation lines must start at the same column as descriptions of
+  // other entries in the same section (the global alignment column).
+  struct MixedArgs {
+    StrArg<"file", 'f'>             file{"Single line desc."};
+    IntArg<"very-long-name", 'n'>   count{"First line.\nContinued here."};
+  };
+  Parser<MixedArgs> parser;
+  const auto help = parser.formatHelp(ColorMode::never);
+
+  const auto col_single = columnOf(help, "Single line desc.");
+  const auto col_cont   = columnOf(help, "Continued here.");
+  ASSERT_NE(col_single, std::string::npos);
+  ASSERT_NE(col_cont,   std::string::npos);
+  EXPECT_EQ(col_single, col_cont);
+}

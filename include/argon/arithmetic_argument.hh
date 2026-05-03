@@ -13,12 +13,6 @@
 
 namespace argon {
 
-struct ArgumentParam {
-  std::string_view description;
-  Requirement requirement = optional;
-  detail::Nargs nargs = nargs::one;
-};
-
 namespace detail {
 
 // Parse a single arithmetic value from a string_view via std::from_chars.
@@ -55,10 +49,10 @@ struct ArithmeticArgImpl : public ArgBase<T, LongOpt, ShortOpt> {
     return parseArithmetic(sv[0], this->valueRef());
   }
 
-  [[nodiscard]] auto nargs() const noexcept -> Nargs { return nargs_; }
-
- private:
-  Nargs nargs_ = nargs::one;
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs::one;
+  }
 };
 
 // Shared implementation base for single-value arithmetic PositionalArgument specializations.
@@ -70,6 +64,10 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   constexpr ArithmeticPositionalImpl(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr ArithmeticPositionalImpl(std::string_view desc) : description_(desc) {}
+  explicit ArithmeticPositionalImpl(Param<T> p)
+      : requirement_(p.requirement), description_(p.description) {
+    if (p.validator) validator_ = std::move(p.validator);
+  }
 
   [[nodiscard]] constexpr auto value() const noexcept -> const T& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -91,11 +89,22 @@ struct ArithmeticPositionalImpl : ArgumentTag {
     return parseArithmetic(sv, value_);
   }
 
+  auto validate() -> std::expected<void, ParseError> {
+    if (!validator_ || !*validator_) return {};
+    auto r = (*validator_)(value_);
+    if (!r)
+      return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
+                                        .kind = ErrorKind::validation,
+                                        .detail = std::move(r).error()});
+    return {};
+  }
+
  private:
   Requirement requirement_ = optional;
   std::string_view description_;
   T value_{};
   bool provided_ = false;
+  std::optional<std::function<std::expected<void, std::string>(const T&)>> validator_;
 };
 
 }  // namespace detail
@@ -176,6 +185,8 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
 
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
+  constexpr explicit Arg(Param<std::vector<T>> p) : Base(std::move(p)) {}
+
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
@@ -188,8 +199,10 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
     return {};
   }
 
-  auto validate() -> std::expected<void, ParseError> { return {}; }
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs_;
+  }
 
  private:
   detail::Nargs nargs_ = nargs::one_or_more;

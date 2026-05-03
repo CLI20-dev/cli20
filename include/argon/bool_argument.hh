@@ -2,6 +2,7 @@
 
 #include <argon/argument.hh>
 #include <expected>
+#include <functional>
 #include <span>
 #include <string_view>
 #include <vector>
@@ -41,11 +42,10 @@ struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
     return detail::parseBool(sv[0], this->valueRef());
   }
 
-  auto validate() -> std::expected<void, ParseError> { return {}; }
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
-
- private:
-  detail::Nargs nargs_ = nargs::one;
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs::one;
+  }
 };
 
 // ---- PositionalArgument<bool> ----
@@ -57,6 +57,10 @@ struct PositionalArgument<bool> : ArgumentTag {
   constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
+  explicit PositionalArgument(Param<bool> p)
+      : requirement_(p.requirement), description_(p.description) {
+    if (p.validator) validator_ = std::move(p.validator);
+  }
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -75,6 +79,16 @@ struct PositionalArgument<bool> : ArgumentTag {
     return detail::parseBool(sv, value_);
   }
 
+  auto validate() -> std::expected<void, ParseError> {
+    if (!validator_ || !*validator_) return {};
+    auto r = (*validator_)(value_);
+    if (!r)
+      return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
+                                        .kind = ErrorKind::validation,
+                                        .detail = std::move(r).error()});
+    return {};
+  }
+
   constexpr auto markProvided() noexcept -> void { provided_ = true; }
 
  private:
@@ -82,6 +96,7 @@ struct PositionalArgument<bool> : ArgumentTag {
   std::string_view description_;
   bool value_ = false;
   bool provided_ = false;
+  std::optional<std::function<std::expected<void, std::string>(bool)>> validator_;
 };
 
 // ---- Arg<std::vector<bool>, ...> (one-or-more values) ----
@@ -106,6 +121,8 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
 
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
+  constexpr explicit Arg(Param<std::vector<bool>> p) : Base(std::move(p)) {}
+
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
@@ -118,8 +135,10 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
     return {};
   }
 
-  auto validate() -> std::expected<void, ParseError> { return {}; }
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs { return nargs_; }
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs {
+    if (this->nargs_override_) return *this->nargs_override_;
+    return nargs_;
+  }
 
  private:
   detail::Nargs nargs_ = nargs::one_or_more;

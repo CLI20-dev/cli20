@@ -215,6 +215,6 @@ TEST(FormatHelpRecurse, ContainsCommandSectionHeader) {
   argon::Parser<RecurseTopArgs> parser;
   parser.parse(sv({"prog"}));
   const auto h = parser.formatHelp(argon::ColorMode::never, argon::recurseHelp);
-  // Should contain a separator line with the command name
-  EXPECT_NE(h.find("---- build"), std::string::npos);
+  // Should contain a separator line with the command name (─── build ───)
+  EXPECT_NE(h.find(" build "), std::string::npos);
 }

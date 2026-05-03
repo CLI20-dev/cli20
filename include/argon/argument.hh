@@ -2,8 +2,13 @@
 
 #include <argon/string_literal.hh>
 #include <cstdint>
+#include <expected>
+#include <functional>
+#include <optional>
 #include <string>
 #include <vector>
+
+#include "argon/error.hh"
 
 namespace argon {
 
@@ -31,6 +36,7 @@ enum class ArgumentType : std::uint8_t {
   option,
   positional,
   command,
+  description,
 };
 
 enum class Requirement : std::uint8_t {
@@ -110,6 +116,73 @@ inline constexpr detail::Nargs between{.min = Min, .max = Max};
 inline constexpr Requirement optional = Requirement::optional;
 inline constexpr Requirement required = Requirement::required;
 
+// ---- Param<T>: configuration bundle for Arg constructors ----
+//
+// Pass a Param<T> to any Arg constructor to configure requirement, nargs,
+// validator, and description in one place using designated initializers:
+//
+//   IntArg<"port", 'p'> port{{
+//       .requirement = argon::required,
+//       .validator   = argon::validate::range<1, 65535>,
+//       .description = "Port number"
+//   }};
+//
+// The <T> is inferred from context — no need to write Param<int> explicitly.
+//
+// validator must be a callable (const T&) -> std::expected<void, std::string>.
+// On failure the string becomes the detail field of a ParseError with
+// ErrorCode::validation_failed.
+
+template <typename T>
+struct Param {
+  Requirement requirement = optional;
+  detail::Nargs nargs = nargs::one;
+  std::function<std::expected<void, std::string>(const T&)> validator;
+  std::string_view description;
+};
+
+// Partial specialisation for list arguments: nargs defaults to one_or_more.
+template <typename T>
+struct Param<std::vector<T>> {
+  Requirement requirement = optional;
+  detail::Nargs nargs = nargs::one_or_more;
+  std::function<std::expected<void, std::string>(const std::vector<T>&)> validator;
+  std::string_view description;
+};
+
+// Detailed description for a parser or sub-command.
+//
+// Add exactly one member of this type to an Arguments struct to attach a
+// longer explanation that appears in formatHelp() immediately after the
+// usage line.  This is the right place for multi-sentence descriptions.
+//
+//   struct BuildArgs {
+//     argon::description desc{
+//         "Compile all source files in the current directory. "
+//         "Defaults to a debug build unless --target is set."};
+//     argon::StrArg<"target", 't'> target{"Build target"};
+//   };
+//
+// Relationship with Command<SubArgs, "name">:
+//   - The description on the Command<> field is a *simple one-line summary*
+//     shown in the parent's "Commands:" listing.
+//   - The argon::description member inside SubArgs is the *detailed*
+//     description shown when the sub-command's own help is rendered.
+//   - If the Command<> field has no description, the argon::description
+//     member is used as a fallback in the parent listing as well.
+struct Description : ArgumentTag {
+  static constexpr auto type = ArgumentType::description;
+
+  constexpr Description(std::string_view text = {}) : text_(text) {}
+
+  [[nodiscard]] constexpr auto text() const noexcept -> std::string_view { return text_; }
+
+ private:
+  std::string_view text_;
+};
+
+using description = Description;
+
 template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidShortOpt(ShortOpt) && detail::IsValidLongOpt<LongOpt>())
 struct ArgBase : ArgumentTag {
@@ -122,6 +195,11 @@ struct ArgBase : ArgumentTag {
   constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr explicit ArgBase(std::string_view desc) : description_(desc) {}
+  explicit ArgBase(Param<ValueT> p)
+      : requirement_(p.requirement), description_(p.description),
+        nargs_override_(p.nargs) {
+    if (p.validator) validator_ = std::move(p.validator);
+  }
 
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
     return LongOpt.view();
@@ -144,11 +222,27 @@ struct ArgBase : ArgumentTag {
   constexpr auto valueRef() noexcept -> ValueT& { return value_; }
   constexpr auto markProvided() noexcept -> void { ++occurrence_count_; }
 
+  std::optional<detail::Nargs> nargs_override_;
+
+  auto validate() -> std::expected<void, ParseError> {
+    if (!validator_ || !*validator_) return {};
+    auto r = (*validator_)(value_);
+    if (!r)
+      return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
+                                        .kind = ErrorKind::validation,
+                                        .subject = std::string(LongOpt.view()),
+                                        .detail = std::move(r).error()});
+    return {};
+  }
+
  private:
   Requirement requirement_ = optional;
   std::string_view description_;
   std::size_t occurrence_count_ = 0;
   ValueT value_ = {};
+  // std::optional used here so the default constructor is constexpr (empty
+  // optional does not construct std::function, which has no constexpr ctor).
+  std::optional<std::function<std::expected<void, std::string>(const ValueT&)>> validator_;
 };
 
 template <typename ValueT>
@@ -199,6 +293,9 @@ struct Command : ArgumentTag, public T {
   using args_type = T;
   static constexpr auto type = ArgumentType::command;
 
+  // Simple one-line summary shown in the parent's "Commands:" listing.
+  // For a detailed multi-sentence description rendered in the sub-command's
+  // own help output, add an argon::description member to T instead.
   constexpr Command(std::string_view desc = {}) : description_(desc) {}
 
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }

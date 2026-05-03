@@ -58,14 +58,20 @@ struct Args {
 
 ## Help / usage generation
 
-Auto-generate a `--help` / `-h` usage string from the argument struct.
+**Done:**
+- `formatHelp(ColorMode)` — usage line, Options / Positional arguments / Commands sections
+- Per-argument description strings passed via constructor
+- `argon::description` struct member for a detailed struct-level description shown after the usage line
+- ANSI bold + underline section headers; bold option names; TTY auto-detection
+- `HelpFlag<LongOpt, ShortOpt>` — special flag (default `--help` / `-h`) that bypasses parse errors so callers can unconditionally check `.provided()`
+- `formatHelp(argon::recurseHelp)` — recursively appends each sub-command's help with a `─── name ───` separator
+- User-controlled line wrapping: `\n` in a description indents continuation lines to the description column
+- `Command<SubArgs, "name">` description falls back to `SubArgs::description` member when not set explicitly
 
-**Scope:**
-- Per-argument description strings as optional metadata (e.g. `IntArg<"port"> port{argon::help("port to listen on")}`)
-- Top-level usage line: `usage: prog [OPTIONS] <COMMAND>`
-- Options section listing long/short names, value type, default, required marker
-- Sub-command section listing command names with one-line descriptions
-- Automatic `-h` / `--help` flag injection (or opt-out via parser config)
+**Remaining / nice-to-have:**
+- Show a `(required)` marker (or similar) next to required options in the listing
+- Show the default value for options that have one
+- `--help` inside a sub-command (`prog build --help`) should render that sub-command's help
 
 ---
 

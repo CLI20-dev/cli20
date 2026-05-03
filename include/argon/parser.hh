@@ -51,6 +51,20 @@ constexpr auto castBaseIfCommand(Argument& arg) -> auto& {
   }
 }
 
+// Returns the text of any Description member found in SubArgs, or empty.
+template <class SubArgs>
+auto getStructDescription() -> std::string_view {
+  SubArgs sub{};
+  auto& [... fields] = sub;
+  std::string_view desc;
+  (..., [&] -> auto {
+    if constexpr (fields.type == ArgumentType::description) {
+      desc = fields.text();
+    }
+  }());
+  return desc;
+}
+
 template <class Arguments>
 struct isValidArgumentsType {
   static constexpr bool value = [] -> bool {
@@ -286,8 +300,22 @@ class Parser {
         positionals_section.push_back({std::move(mv), opts.description()});
       }
       if constexpr (opts.type == ArgumentType::command) {
-        commands_section.push_back({std::string(opts.commandName()), opts.description()});
+        // Use the Command's own description; fall back to a Description member in SubArgs.
+        std::string_view cmd_desc = opts.description();
+        if (cmd_desc.empty()) {
+          using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
+          cmd_desc = detail::getStructDescription<SubArgs>();
+        }
+        commands_section.push_back({std::string(opts.commandName()), cmd_desc});
         has_commands = true;
+      }
+    }());
+
+    // Extract struct-level description (if any)
+    std::string_view struct_desc;
+    (..., [&] -> auto {
+      if constexpr (opts.type == ArgumentType::description) {
+        struct_desc = opts.text();
       }
     }());
 
@@ -302,6 +330,12 @@ class Parser {
     for (const auto& e : positionals_section) out += " " + e.left;
     if (has_commands) out += " [command]";
     out += '\n';
+
+    if (!struct_desc.empty()) {
+      out += '\n';
+      out += struct_desc;
+      out += '\n';
+    }
 
     // Compute alignment column from plain-text widths only (ANSI codes are
     // zero-width and must not be counted here).
@@ -320,6 +354,9 @@ class Parser {
       out += header;
       out += ansi.reset();
       out += ":\n";
+      // Continuation lines after a user-inserted '\n' are indented to `col`
+      // so they align with the first line of the description.
+      const std::string cont_indent(col, ' ');
       for (const auto& e : entries) {
         out += "  ";
         out += ansi.bold();
@@ -327,7 +364,15 @@ class Parser {
         out += ansi.reset();
         if (!e.desc.empty()) {
           out += std::string(col - 2 - e.left.size(), ' ');
-          out += e.desc;
+          std::string_view rest = e.desc;
+          while (true) {
+            const auto nl = rest.find('\n');
+            if (nl == std::string_view::npos) { out += rest; break; }
+            out += rest.substr(0, nl);
+            out += '\n';
+            out += cont_indent;
+            rest = rest.substr(nl + 1);
+          }
         }
         out += '\n';
       }
@@ -345,24 +390,32 @@ class Parser {
           Parser<SubArgs> sub_parser;
           sub_parser.program_name_ = program_name_ + " " + std::string(opts.commandName());
 
-          // ── <name> ── separator
-          constexpr std::size_t rule_width = 60;
+          // ─── <name> ─── separator  (U+2500 BOX DRAWINGS LIGHT HORIZONTAL)
+          constexpr std::string_view dash = "\xe2\x94\x80";  // UTF-8 for ─
+          constexpr std::size_t rule_width = 48;
           const std::string name_part =
               std::string(" ") + std::string(opts.commandName()) + " ";
-          const std::size_t left_dashes = 4;
-          const std::size_t right_dashes =
-              rule_width > left_dashes + name_part.size()
-                  ? rule_width - left_dashes - name_part.size()
-                  : 4;
+          const std::size_t left_count = 3;
+          const std::size_t right_count =
+              rule_width > left_count + name_part.size()
+                  ? rule_width - left_count - name_part.size()
+                  : 3;
+          auto repeat_dash = [&](std::size_t n) {
+            for (std::size_t k = 0; k < n; ++k) out += dash;
+          };
           out += '\n';
           out += ansi.bold();
-          out += std::string(left_dashes, '-');
+          repeat_dash(left_count);
           out += name_part;
-          out += std::string(right_dashes, '-');
+          repeat_dash(right_count);
           out += ansi.reset();
-          if (!opts.description().empty()) {
-            out += "  ";
-            out += opts.description();
+          {
+            std::string_view sep_desc = opts.description();
+            if (sep_desc.empty()) sep_desc = detail::getStructDescription<SubArgs>();
+            if (!sep_desc.empty()) {
+              out += "  ";
+              out += sep_desc;
+            }
           }
           out += '\n';
           out += sub_parser.formatHelpImpl(color, true);
@@ -438,7 +491,11 @@ class Parser {
               if (!r) {
                 pos_error = r.error();
               } else {
-                opts.markProvided();
+                if constexpr (requires { opts.validate(); }) {
+                  auto v = opts.validate();
+                  if (!v) { pos_error = v.error(); }
+                }
+                if (!pos_error.hasError()) opts.markProvided();
               }
             }
           }
@@ -554,8 +611,10 @@ class Parser {
             [&options](
                 std::span<const std::string_view> values) -> std::expected<void, ParseError> {
           auto r = options.parse(values);
-          if (!r) {
-            return std::unexpected(r.error());
+          if (!r) return std::unexpected(r.error());
+          if constexpr (requires { options.validate(); }) {
+            auto v = options.validate();
+            if (!v) return std::unexpected(v.error());
           }
           options.markProvided();
           return {};
