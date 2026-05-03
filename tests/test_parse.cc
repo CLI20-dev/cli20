@@ -2,6 +2,7 @@
 
 #include "argon/arithmetic_argument.hh"
 #include "argon/arithmetic_positional.hh"
+#include "argon/flag_argument.hh"
 #include "argon/parser.hh"
 
 using namespace argon;

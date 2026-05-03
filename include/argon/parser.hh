@@ -175,20 +175,27 @@ class Parser {
   }
 
   auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, std::string> {
+    Arguments result;
+    if (auto r = parse(args, result); !r) {
+      return std::unexpected(r.error());
+    }
+    return result;
+  }
+
+  auto parse(std::span<const std::string_view> args, Arguments& out) -> std::expected<void, std::string> {
     program_name_ = args.empty() ? "program" : std::string(args[0]);
 
-    Arguments result;
     const auto rest = args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
 
-    auto specMap = makeOptionSpecMap(result);
-    auto cmdNames = makeCommandNamesSet(result);
+    auto specMap = makeOptionSpecMap(out);
+    auto cmdNames = makeCommandNamesSet(out);
 
     auto tokenized = detail::tokenize(rest, specMap, cmdNames);
     if (!tokenized) {
       return std::unexpected(tokenized.error());
     }
 
-    auto parseMap = makeParseMap(result);
+    auto parseMap = makeParseMap(out);
 
     for (const auto& [key, values] : tokenized->named) {
       const auto it = parseMap.find(key);
@@ -201,7 +208,7 @@ class Parser {
     }
 
     // Assign positionals and check required options
-    auto& [... opts] = result;
+    auto& [... opts] = out;
     std::size_t pos_idx = 0;
     std::string pos_error;
     std::string missing;
@@ -251,11 +258,9 @@ class Parser {
           if (!tail.empty() && tail[0] == opts.commandName() && cmd_error.empty()) {
             using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
             Parser<SubArgs> sub_parser;
-            auto sub = sub_parser.parse(tail);  // tail[0] acts as sub-command's argv[0]
-            if (!sub) {
-              cmd_error = sub.error();
+            if (auto r = sub_parser.parse(tail, detail::castBaseIfCommand(opts)); !r) {
+              cmd_error = r.error();
             } else {
-              detail::castBaseIfCommand(opts) = std::move(*sub);
               opts.markProvided();
             }
           }
@@ -266,7 +271,7 @@ class Parser {
       }
     }
 
-    return result;
+    return {};
   }
 
  private:
