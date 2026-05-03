@@ -8,15 +8,15 @@ constexpr bool IsLong = argon::detail::IsValidLongOpt<Name>();
 
 TEST(Argument, OptionNameValidation) {
   // ---- specified cases ----
-  EXPECT_TRUE((IsLong<"kebab-case">));    // valid kebab-case
-  EXPECT_FALSE((IsLong<"Kebab-case">));   // leading uppercase
-  EXPECT_TRUE((IsLong<"kebab0-case">));   // digit inside segment
-  EXPECT_TRUE((IsLong<"kebab1">));        // trailing digit
-  EXPECT_FALSE((IsLong<"-kebab">));       // leading hyphen
-  EXPECT_FALSE((IsLong<"kebab-">));       // trailing hyphen
-  EXPECT_FALSE((IsLong<"0kebab">));       // leading digit
-  EXPECT_FALSE((IsLong<"?kebab">));       // leading special char
-  EXPECT_FALSE((IsLong<"0Kebab-">));      // leading digit + trailing hyphen
+  EXPECT_TRUE((IsLong<"kebab-case">));   // valid kebab-case
+  EXPECT_FALSE((IsLong<"Kebab-case">));  // leading uppercase
+  EXPECT_TRUE((IsLong<"kebab0-case">));  // digit inside segment
+  EXPECT_TRUE((IsLong<"kebab1">));       // trailing digit
+  EXPECT_FALSE((IsLong<"-kebab">));      // leading hyphen
+  EXPECT_FALSE((IsLong<"kebab-">));      // trailing hyphen
+  EXPECT_FALSE((IsLong<"0kebab">));      // leading digit
+  EXPECT_FALSE((IsLong<"?kebab">));      // leading special char
+  EXPECT_FALSE((IsLong<"0Kebab-">));     // leading digit + trailing hyphen
 
   // ---- edge cases ----
   EXPECT_FALSE((IsLong<"">));             // empty string

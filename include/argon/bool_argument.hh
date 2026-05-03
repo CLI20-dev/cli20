@@ -53,8 +53,7 @@ struct PositionalArgument<bool> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = bool;
 
-  constexpr PositionalArgument(Requirement requirement = optional)
-      : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -88,8 +87,7 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement,
-                         detail::Nargs nargs = nargs::one_or_more)
+  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
       : Base(requirement), nargs_(nargs) {}
 
   constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
@@ -124,8 +122,8 @@ template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using BoolListArg = Arg<std::vector<bool>, LongOpt, ShortOpt>;
 
-using BoolPositional    = PositionalArgument<bool>;
+using BoolPositional = PositionalArgument<bool>;
 using BoolPositionalArg = BoolPositional;
-using BoolPosArg        = BoolPositional;
+using BoolPosArg = BoolPositional;
 
 }  // namespace argon

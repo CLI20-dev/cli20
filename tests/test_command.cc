@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "argon/arithmetic_argument.hh"
-#include "argon/arithmetic_positional.hh"
 #include "argon/bool_argument.hh"
 #include "argon/flag_argument.hh"
 #include "argon/parser.hh"

@@ -41,8 +41,7 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement,
-                         detail::Nargs nargs = nargs::one_or_more)
+  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
       : Base(requirement), nargs_(nargs) {}
 
   constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
@@ -72,8 +71,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
-  constexpr PositionalArgument(Requirement requirement = optional)
-      : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -119,8 +117,8 @@ template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using StrListArg = StringListArg<LongOpt, ShortOpt>;
 
-using StrPositional    = StringPositional;
+using StrPositional = StringPositional;
 using StrPositionalArg = StringPositional;
-using StrPosArg        = StringPositional;
+using StrPosArg = StringPositional;
 
 }  // namespace argon

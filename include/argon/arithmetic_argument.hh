@@ -120,12 +120,12 @@ ARGON_ARITHMETIC_ARG_SPEC(double)
 // ---- PositionalArgument<T> explicit specializations for each arithmetic type ----
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ARGON_ARITHMETIC_POSITIONAL_SPEC(T)                                           \
-  template <>                                                                         \
-  struct PositionalArgument<T> : public detail::ArithmeticPositionalImpl<T> {         \
-    using detail::ArithmeticPositionalImpl<T>::ArithmeticPositionalImpl;              \
-    template <class>                                                                   \
-    friend class Parser;                                                              \
+#define ARGON_ARITHMETIC_POSITIONAL_SPEC(T)                                   \
+  template <>                                                                 \
+  struct PositionalArgument<T> : public detail::ArithmeticPositionalImpl<T> { \
+    using detail::ArithmeticPositionalImpl<T>::ArithmeticPositionalImpl;      \
+    template <class>                                                          \
+    friend class Parser;                                                      \
   };
 
 ARGON_ARITHMETIC_POSITIONAL_SPEC(int)
@@ -237,28 +237,28 @@ using DoubleListArg = Arg<std::vector<double>, LongOpt, ShortOpt>;
 
 // ---- Positional aliases ----
 
-using IntPositional    = PositionalArgument<int>;
-using Int32Positional  = PositionalArgument<int32_t>;
-using Int64Positional  = PositionalArgument<int64_t>;
+using IntPositional = PositionalArgument<int>;
+using Int32Positional = PositionalArgument<int32_t>;
+using Int64Positional = PositionalArgument<int64_t>;
 using Uint32Positional = PositionalArgument<uint32_t>;
 using Uint64Positional = PositionalArgument<uint64_t>;
-using FloatPositional  = PositionalArgument<float>;
+using FloatPositional = PositionalArgument<float>;
 using DoublePositional = PositionalArgument<double>;
 
-using IntPositionalArg    = IntPositional;
-using Int32PositionalArg  = Int32Positional;
-using Int64PositionalArg  = Int64Positional;
+using IntPositionalArg = IntPositional;
+using Int32PositionalArg = Int32Positional;
+using Int64PositionalArg = Int64Positional;
 using Uint32PositionalArg = Uint32Positional;
 using Uint64PositionalArg = Uint64Positional;
-using FloatPositionalArg  = FloatPositional;
+using FloatPositionalArg = FloatPositional;
 using DoublePositionalArg = DoublePositional;
 
-using IntPosArg    = IntPositional;
-using Int32PosArg  = Int32Positional;
-using Int64PosArg  = Int64Positional;
+using IntPosArg = IntPositional;
+using Int32PosArg = Int32Positional;
+using Int64PosArg = Int64Positional;
 using Uint32PosArg = Uint32Positional;
 using Uint64PosArg = Uint64Positional;
-using FloatPosArg  = FloatPositional;
+using FloatPosArg = FloatPositional;
 using DoublePosArg = DoublePositional;
 
 }  // namespace argon

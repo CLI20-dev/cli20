@@ -7,6 +7,37 @@
 
 namespace argon {
 
+template <class>
+class Parser;
+
+// Whitelist of all value types that Arg<T> supports.
+// The primary Arg template is constrained to !parsable_type<T> so it only
+// fires a static_assert for truly unsupported types.
+template <typename T>
+concept parsable_type =
+    std::same_as<T, int> || std::same_as<T, int32_t> || std::same_as<T, int64_t> ||
+    std::same_as<T, uint32_t> || std::same_as<T, uint64_t> || std::same_as<T, float> ||
+    std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> ||
+    std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<int32_t>> ||
+    std::same_as<T, std::vector<int64_t>> || std::same_as<T, std::vector<uint32_t>> ||
+    std::same_as<T, std::vector<uint64_t>> || std::same_as<T, std::vector<float>> ||
+    std::same_as<T, std::vector<double>> || std::same_as<T, std::vector<bool>> ||
+    std::same_as<T, std::vector<std::string>>;
+
+struct ArgumentTag {};
+
+enum class ArgumentType : std::uint8_t {
+  flag,
+  option,
+  positional,
+  command,
+};
+
+enum class Requirement : std::uint8_t {
+  optional,
+  required,
+};
+
 namespace detail {
 
 template <StringLiteral Name>
@@ -59,34 +90,6 @@ struct Nargs {
 };
 
 }  // namespace detail
-
-// Whitelist of all value types that Arg<T> supports.
-// The primary Arg template is constrained to !parsable_type<T> so it only
-// fires a static_assert for truly unsupported types.
-template <typename T>
-concept parsable_type =
-    std::same_as<T, int> || std::same_as<T, int32_t> || std::same_as<T, int64_t> ||
-    std::same_as<T, uint32_t> || std::same_as<T, uint64_t> || std::same_as<T, float> ||
-    std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> ||
-    std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<int32_t>> ||
-    std::same_as<T, std::vector<int64_t>> || std::same_as<T, std::vector<uint32_t>> ||
-    std::same_as<T, std::vector<uint64_t>> || std::same_as<T, std::vector<float>> ||
-    std::same_as<T, std::vector<double>> || std::same_as<T, std::vector<bool>> ||
-    std::same_as<T, std::vector<std::string>>;
-
-struct ArgumentTag {};
-
-enum class ArgumentType : std::uint8_t {
-  flag,
-  option,
-  positional,
-  command,
-};
-
-enum class Requirement : std::uint8_t {
-  optional,
-  required,
-};
 
 namespace nargs {
 
@@ -167,9 +170,6 @@ struct PositionalArgument : ArgumentTag {
   ValueT value_{};
   bool provided_ = false;
 };
-
-template <class>
-class Parser;
 
 template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))

@@ -7,11 +7,16 @@ enum class ErrorCode {
   UnknownOption,
   MissingValue,
   InvalidValue,
+  UnknownError,
 };
 
-struct Error {
+struct ParseError {
   std::string message;
-  explicit Error(std::string message) : message(std::move(message)) {}
+  ErrorCode code = ErrorCode::UnknownError;
+  int position = -1;
+  explicit ParseError(std::string message, ErrorCode code = ErrorCode::UnknownError,
+                      int position = -1)
+      : message(std::move(message)), code(code), position(position) {}
 };
 
 }  // namespace argon
