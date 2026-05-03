@@ -45,6 +45,15 @@ struct MixedArgs {
   IntPositional y;
 };
 
+struct RequiredIntPositionalArgs {
+  IntPositional x{required};
+};
+
+struct TwoRequiredIntPositionalArgs {
+  IntPositional x{required};
+  IntPositional y{required};
+};
+
 // ---- success: basic value parsing ----
 
 TEST(ParseIntArg, LongOption) {
@@ -449,4 +458,49 @@ TEST(ParseIntPositional, SecondPositionalInvalid) {
   std::vector<std::string_view> args = {"prog", "10", "bad"};
   auto result = parser.parse(args);
   ASSERT_FALSE(result.has_value());
+}
+
+// ============================================================
+// Required IntPositional
+// ============================================================
+
+TEST(ParseIntPositional, RequiredProvided) {
+  Parser<RequiredIntPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "7"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 7);
+}
+
+TEST(ParseIntPositional, RequiredMissing) {
+  Parser<RequiredIntPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
+}
+
+TEST(ParseIntPositional, TwoRequiredBothProvided) {
+  Parser<TwoRequiredIntPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "3", "9"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->x.value(), 3);
+  EXPECT_EQ(result->y.value(), 9);
+}
+
+TEST(ParseIntPositional, TwoRequiredSecondMissing) {
+  Parser<TwoRequiredIntPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "3"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
+}
+
+TEST(ParseIntPositional, TwoRequiredBothMissing) {
+  Parser<TwoRequiredIntPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }

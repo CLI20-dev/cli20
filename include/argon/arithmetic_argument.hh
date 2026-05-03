@@ -7,21 +7,28 @@
 #include <system_error>
 #include <vector>
 
+namespace argon::detail {
+
+// Register all ArithmeticParseable types so that parsable_type<T> is satisfied,
+// enabling the arithmetic path in the primary Arg template.
+template <ArithmeticParseable T>
+inline constexpr bool is_parsable<T> = true;
+
+}  // namespace argon::detail
+
 namespace argon {
 
 // ---- Arg<std::vector<T>, ...> for any arithmetic type (one-or-more values) ----
 
 template <detail::ArithmeticParseable T, StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
-struct Arg<std::vector<T>, LongOpt, ShortOpt>
-    : public ArgBase<std::vector<T>, LongOpt, ShortOpt> {
+struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<T>, LongOpt, ShortOpt>;
   template <class>
   friend class Parser;
 
   // Explicit requirement so default construction is unambiguous.
-  constexpr explicit Arg(Requirement requirement,
-                         detail::Nargs nargs = nargs::one_or_more)
+  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
       : Base(requirement), nargs_(nargs) {}
 
   constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)

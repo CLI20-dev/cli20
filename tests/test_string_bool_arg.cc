@@ -26,6 +26,11 @@ struct TwoStrPositionalArgs {
   StrPositional dst;
 };
 
+struct RequiredStrPositionalArgs {
+  StrPositional src{required};
+  StrPositional dst{required};
+};
+
 struct MixedStrArgs {
   StrArg<"output", 'o'> output;
   Flag<"verbose", 'v'> verbose;
@@ -270,6 +275,33 @@ TEST(ParseStrPositional, PositionalBeforeOption) {
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result->input.value(), "in.txt");
   EXPECT_EQ(result->output.value(), "out.txt");
+}
+
+// ---- required StrPositional ----
+
+TEST(ParseStrPositional, RequiredBothProvided) {
+  Parser<RequiredStrPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "src.txt", "dst.txt"};
+  auto result = parser.parse(args);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result->src.value(), "src.txt");
+  EXPECT_EQ(result->dst.value(), "dst.txt");
+}
+
+TEST(ParseStrPositional, RequiredFirstMissing) {
+  Parser<RequiredStrPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
+}
+
+TEST(ParseStrPositional, RequiredSecondMissing) {
+  Parser<RequiredStrPositionalArgs> parser;
+  std::vector<std::string_view> args = {"prog", "src.txt"};
+  auto result = parser.parse(args);
+  ASSERT_FALSE(result.has_value());
+  EXPECT_FALSE(result.error().empty());
 }
 
 // ============================================================

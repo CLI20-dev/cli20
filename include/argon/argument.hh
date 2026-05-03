@@ -9,15 +9,6 @@
 
 namespace argon {
 
-struct ArgumentTag {};
-
-enum class ArgumentType : std::uint8_t {
-  flag,
-  option,
-  positional,
-  command,
-};
-
 namespace detail {
 
 template <StringLiteral Name>
@@ -68,12 +59,19 @@ template <typename T>
 concept ArithmeticParseable =
     (std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) || std::floating_point<T>;
 
+// Extensibility hook: register a type as parsable by specializing this variable
+// template.  Each argument header (arithmetic_argument.hh, string_argument.hh,
+// bool_argument.hh) specializes it for its own value types.
+template <typename>
+inline constexpr bool is_parsable = false;
+
 // Parse a single arithmetic value from a string_view via std::from_chars.
 // Returns result_out_of_range on overflow, invalid_argument on bad input / partial parse.
 template <ArithmeticParseable T>
 auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, std::error_code> {
   const char* first = sv.data();
-  const char* last = sv.data() + sv.size();
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  const char* last = first + sv.size();
   std::from_chars_result res{};
   if constexpr (std::floating_point<T>) {
     res = std::from_chars(first, last, out, std::chars_format::general);
@@ -94,6 +92,21 @@ struct Nargs {
 };
 
 }  // namespace detail
+
+// Satisfied when detail::is_parsable<T> has been specialized to true by one of
+// the argument headers.  Used to constrain Arg partial specializations so they
+// are more specialized than the primary template.
+template <typename T>
+concept parsable_type = detail::is_parsable<T>;
+
+struct ArgumentTag {};
+
+enum class ArgumentType : std::uint8_t {
+  flag,
+  option,
+  positional,
+  command,
+};
 
 enum class Requirement : std::uint8_t {
   optional,
@@ -189,6 +202,17 @@ struct PositionalArgument : ArgumentTag {
 template <class>
 class Parser;
 
+// Primary Arg template.
+//
+// Two mutually exclusive overloads of nargs() and parse():
+//   • requires parsable_type<ValueT>  — arithmetic path (type registered by
+//     arithmetic_argument.hh); calls detail::parseArithmetic internally.
+//   • requires !parsable_type<ValueT> — fires a lazy static_assert with a
+//     clear message; reached for unsupported types and for arithmetic types
+//     when arithmetic_argument.hh has not been included.
+//
+// String/bool/vector partial specializations (defined in their own headers)
+// take priority and never reach this primary template.
 template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
@@ -197,22 +221,40 @@ struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
   friend class Parser;
 
  protected:
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs
+    requires parsable_type<ValueT>
+  {
+    return nargs_;
+  }
+
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, std::error_code>
-    requires detail::ArithmeticParseable<ValueT>
+    requires parsable_type<ValueT>
   {
     return detail::parseArithmetic(sv[0], this->valueRef());
   }
 
-  auto validate() -> std::expected<void, std::error_code>
-    requires detail::ArithmeticParseable<ValueT>
+  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs
+    requires(!parsable_type<ValueT>)
   {
+    static_assert(
+        []<typename T = ValueT>() consteval { return parsable_type<T>; }(),
+        "Arg<ValueT>: unsupported value type. "
+        "Supported: int/int32_t/int64_t/uint32_t/uint64_t/float/double "
+        "(arithmetic_argument.hh); std::string (string_argument.hh); "
+        "bool (bool_argument.hh); std::vector<T> of any of the above.");
     return {};
   }
 
-  [[nodiscard]] auto nargs() const noexcept -> detail::Nargs
-    requires detail::ArithmeticParseable<ValueT>
+  auto parse(std::span<const std::string_view>) -> std::expected<void, std::error_code>
+    requires(!parsable_type<ValueT>)
   {
-    return nargs_;
+    static_assert(
+        []<typename T = ValueT>() consteval { return parsable_type<T>; }(),
+        "Arg<ValueT>: unsupported value type. "
+        "Supported: int/int32_t/int64_t/uint32_t/uint64_t/float/double "
+        "(arithmetic_argument.hh); std::string (string_argument.hh); "
+        "bool (bool_argument.hh); std::vector<T> of any of the above.");
+    return {};
   }
 
  private:
