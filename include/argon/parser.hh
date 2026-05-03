@@ -10,11 +10,34 @@
 #include <unordered_set>
 #include <vector>
 
+#include "argon/color.hh"
 #include "argon/error.hh"
 
 namespace argon {
 
 namespace detail {
+
+// Returns a human-readable type metavar string for use in help output.
+template <typename T>
+auto typeMetavar() -> std::string {
+  if constexpr (std::same_as<T, std::string>) {
+    return "string";
+  } else if constexpr (std::same_as<T, bool>) {
+    return "bool";
+  } else if constexpr (std::same_as<T, float>) {
+    return "float";
+  } else if constexpr (std::same_as<T, double>) {
+    return "double";
+  } else if constexpr (std::unsigned_integral<T> && !std::same_as<T, bool>) {
+    return "uint";
+  } else if constexpr (std::integral<T>) {
+    return "int";
+  } else if constexpr (requires { typename T::value_type; }) {
+    return typeMetavar<typename T::value_type>() + "...";
+  } else {
+    return "value";
+  }
+}
 
 template <class Argument>
 constexpr auto castBaseIfCommand(Argument& arg) -> auto& {
@@ -190,6 +213,153 @@ class Parser {
                 "Arguments must not contain duplicate long or short options");
 
  public:
+  [[nodiscard]] auto formatHelp(ColorMode color = ColorMode::auto_) const -> std::string {
+    return formatHelpImpl(color, false);
+  }
+
+  [[nodiscard]] auto formatHelp(RecurseHelpTag /*tag*/) const -> std::string {
+    return formatHelpImpl(ColorMode::auto_, true);
+  }
+
+  [[nodiscard]] auto formatHelp(ColorMode color, RecurseHelpTag /*tag*/) const -> std::string {
+    return formatHelpImpl(color, true);
+  }
+
+ private:
+  [[nodiscard]] auto formatHelpImpl(ColorMode color, bool recurse) const -> std::string {
+    const detail::AnsiStyle ansi = detail::resolveColor(color);
+
+    Arguments defaults{};
+    auto& [... opts] = defaults;
+
+    // Each entry stores the plain-text left column (used for alignment measurement)
+    // and the description.  ANSI codes are applied when printing, not stored here,
+    // so that col-width arithmetic works on visual character counts.
+    struct Entry {
+      std::string left;
+      std::string_view desc;
+    };
+    std::vector<Entry> options_section;
+    std::vector<Entry> positionals_section;
+    std::vector<Entry> commands_section;
+    bool has_options = false;
+    bool has_commands = false;
+
+    (..., [&] -> auto {
+      using OptT = std::remove_cvref_t<decltype(opts)>;
+      if constexpr (opts.type == ArgumentType::option) {
+        std::string left;
+        if (opts.shortOpt() != '\0') {
+          left += '-';
+          left += opts.shortOpt();
+          left += ", ";
+        } else {
+          left += "    ";
+        }
+        left += "--";
+        left += opts.longOpt();
+        left += " <";
+        left += detail::typeMetavar<typename OptT::value_type>();
+        left += '>';
+        options_section.push_back({std::move(left), opts.description()});
+        has_options = true;
+      }
+      if constexpr (opts.type == ArgumentType::flag) {
+        std::string left;
+        if (opts.shortOpt() != '\0') {
+          left += '-';
+          left += opts.shortOpt();
+          left += ", ";
+        } else {
+          left += "    ";
+        }
+        left += "--";
+        left += opts.longOpt();
+        options_section.push_back({std::move(left), opts.description()});
+        has_options = true;
+      }
+      if constexpr (opts.type == ArgumentType::positional) {
+        using VT = typename OptT::value_type;
+        std::string mv = "<";
+        mv += detail::typeMetavar<VT>();
+        mv += '>';
+        positionals_section.push_back({std::move(mv), opts.description()});
+      }
+      if constexpr (opts.type == ArgumentType::command) {
+        commands_section.push_back({std::string(opts.commandName()), opts.description()});
+        has_commands = true;
+      }
+    }());
+
+    // Usage line — "Usage:" in bold, rest plain
+    std::string out;
+    out += ansi.bold();
+    out += "Usage:";
+    out += ansi.reset();
+    out += " ";
+    out += program_name_;
+    if (has_options) out += " [options]";
+    for (const auto& e : positionals_section) out += " " + e.left;
+    if (has_commands) out += " [command]";
+    out += '\n';
+
+    // Compute alignment column from plain-text widths only (ANSI codes are
+    // zero-width and must not be counted here).
+    // col = 2 (indent) + max_left_width + 2 (gap)
+    std::size_t max_left = 0;
+    for (const auto& e : options_section) max_left = std::max(max_left, e.left.size());
+    for (const auto& e : positionals_section) max_left = std::max(max_left, e.left.size());
+    for (const auto& e : commands_section) max_left = std::max(max_left, e.left.size());
+    const std::size_t col = max_left + 4;  // 2 indent + 2 gap
+
+    auto append_section = [&](std::string_view header, const std::vector<Entry>& entries) {
+      if (entries.empty()) return;
+      out += '\n';
+      out += ansi.bold();
+      out += ansi.underline();
+      out += header;
+      out += ansi.reset();
+      out += ":\n";
+      for (const auto& e : entries) {
+        out += "  ";
+        out += ansi.bold();
+        out += e.left;
+        out += ansi.reset();
+        if (!e.desc.empty()) {
+          out += std::string(col - 2 - e.left.size(), ' ');
+          out += e.desc;
+        }
+        out += '\n';
+      }
+    };
+
+    append_section("Options", options_section);
+    append_section("Positional arguments", positionals_section);
+    append_section("Commands", commands_section);
+
+    // Recursively append each sub-command's help text
+    if (recurse) {
+      (..., [&] -> auto {
+        if constexpr (opts.type == ArgumentType::command) {
+          using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
+          Parser<SubArgs> sub_parser;
+          sub_parser.program_name_ = program_name_ + " " + std::string(opts.commandName());
+          out += '\n';
+          out += ansi.bold();
+          out += ansi.underline();
+          out += "Command: ";
+          out += opts.commandName();
+          out += ansi.reset();
+          out += '\n';
+          out += sub_parser.formatHelpImpl(color, true);
+        }
+      }());
+    }
+
+    return out;
+  }
+
+ public:
   [[nodiscard]]
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> std::expected<Arguments, ParseError> {
@@ -217,6 +387,10 @@ class Parser {
 
     auto specMap = makeOptionSpecMap(out);
     auto cmdNames = makeCommandNamesSet(out);
+
+    if (checkHelpFlag(rest, out, cmdNames)) {
+      return {};
+    }
 
     auto tokenized = detail::tokenize(rest, specMap, cmdNames);
     if (!tokenized) {
@@ -391,6 +565,38 @@ class Parser {
     }());
     return parseMap;
   }
+
+  // Scan raw args for a HelpFlag before full tokenization.
+  // Stops scanning at "--" or at any command name token.
+  // Returns true if a HelpFlag was found and marks it as provided.
+  auto checkHelpFlag(std::span<const std::string_view> rest, Arguments& out,
+                     const std::unordered_set<std::string>& cmd_names) -> bool {
+    auto& [... opts] = out;
+
+    // Collect the long and short option strings for each HelpFlag field
+    bool found = false;
+    (..., [&] -> auto {
+      if constexpr (requires { std::remove_cvref_t<decltype(opts)>::is_help; }) {
+        const std::string long_key = std::string("--") + std::string(opts.longOpt());
+        const char short_ch = opts.shortOpt();
+        const std::string short_key = short_ch != '\0' ? std::string("-") + short_ch : "";
+
+        for (const auto& tok : rest) {
+          if (tok == "--") break;
+          if (cmd_names.contains(std::string(tok))) break;
+          if (tok == long_key || (!short_key.empty() && tok == short_key)) {
+            opts.markProvided();
+            found = true;
+            break;
+          }
+        }
+      }
+    }());
+    return found;
+  }
+
+  template <class>
+  friend class Parser;
 
   std::string program_name_ = "program";
 };

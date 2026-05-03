@@ -119,7 +119,10 @@ struct ArgBase : ArgumentTag {
   static constexpr auto long_opt = LongOpt;
   static constexpr char short_opt = ShortOpt;
 
-  constexpr explicit ArgBase(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr explicit ArgBase(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
     return LongOpt.view();
@@ -134,6 +137,9 @@ struct ArgBase : ArgumentTag {
   [[nodiscard]] constexpr auto occurrenceCount() const noexcept -> std::size_t {
     return occurrence_count_;
   }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
+  }
 
  protected:
   constexpr auto valueRef() noexcept -> ValueT& { return value_; }
@@ -141,6 +147,7 @@ struct ArgBase : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   std::size_t occurrence_count_ = 0;
   ValueT value_ = {};
 };
@@ -150,12 +157,18 @@ struct PositionalArgument : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = ValueT;
 
-  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -167,6 +180,7 @@ struct PositionalArgument : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   ValueT value_{};
   bool provided_ = false;
 };
@@ -187,7 +201,12 @@ struct Command : ArgumentTag, public T {
   using args_type = T;
   static constexpr auto type = ArgumentType::command;
 
+  constexpr Command(std::string_view desc = {}) : description_(desc) {}
+
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
+  }
 
  protected:
   [[nodiscard]] static constexpr auto commandName() -> std::string_view {
@@ -199,6 +218,7 @@ struct Command : ArgumentTag, public T {
   friend class Parser;
 
  private:
+  std::string_view description_;
   bool provided_ = false;
 };
 

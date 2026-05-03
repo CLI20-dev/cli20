@@ -42,11 +42,18 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
   template <class>
   friend class Parser;
 
-  constexpr explicit Arg(Requirement requirement, detail::Nargs nargs = nargs::one_or_more)
-      : Base(requirement), nargs_(nargs) {}
+  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  constexpr Arg() = default;
 
-  constexpr explicit Arg(detail::Nargs nargs = nargs::one_or_more)
-      : Base(optional), nargs_(nargs) {}
+  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
+                          std::string_view desc = {})
+      : Base(req, desc), nargs_(nargs) {}
+
+  // nargs has no default to avoid ambiguity with Arg() above.
+  constexpr explicit Arg(detail::Nargs nargs, std::string_view desc = {})
+      : Base(optional, desc), nargs_(nargs) {}
+
+  constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
   auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
@@ -72,12 +79,18 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
-  constexpr PositionalArgument(Requirement requirement = optional) : requirement_(requirement) {}
+  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+      : requirement_(req), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc)
+      : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
+  }
+  [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
+    return description_;
   }
 
   template <class>
@@ -93,6 +106,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
 
  private:
   Requirement requirement_ = optional;
+  std::string_view description_;
   std::string value_;
   bool provided_ = false;
 };

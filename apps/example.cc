@@ -1,6 +1,7 @@
 // example.cc — argon argument parsing demo
 //
 // Try it:
+//   ./example --help
 //   ./example --verbose -j 4 build --target release --jobs 8 --feature sse4 avx2
 //   ./example push --remote origin --force
 //   ./example --config myconf.toml push -r upstream
@@ -20,77 +21,69 @@
 // Sub-command argument structs
 // ---------------------------------------------------------------------------
 
-// `build` sub-command
 struct BuildArgs {
-  // --target / -t <string>  : build target  (optional, default empty)
-  argon::StrArg<"target", 't'> target;
-
-  // --jobs / -j <int>       : parallel job count
-  argon::IntArg<"jobs", 'j'> jobs;
-
-  // --feature <str...>      : features to enable (zero or more)
-  argon::StrListArg<"feature", 'f'> features{argon::nargs::zero_or_more};
-
-  // --dry-run               : print what would happen, don't build
-  argon::FlagArg<"dry-run"> dry_run;
+  argon::StrArg<"target", 't'>     target{"Build target (e.g. release, debug)"};
+  argon::IntArg<"jobs", 'j'>       jobs{"Number of parallel jobs"};
+  argon::StrListArg<"feature", 'f'> features{argon::nargs::zero_or_more,
+                                              "Features to enable (repeatable)"};
+  argon::FlagArg<"dry-run">        dry_run{"Print what would happen without building"};
 };
 
-// `push` sub-command  — --remote is required
 struct PushArgs {
-  argon::StrArg<"remote", 'r'> remote{argon::required};
-  argon::FlagArg<"force", 'f'> force;
-  argon::IntArg<"depth"> depth;
+  argon::StrArg<"remote", 'r'> remote{argon::required, "Remote name (required)"};
+  argon::FlagArg<"force", 'f'> force{"Force push even if not fast-forward"};
+  argon::IntArg<"depth">       depth{"Shallow-clone depth"};
 };
 
-// `cp` sub-command  — both positionals are required
 struct CpArgs {
-  argon::StrPositional src{argon::required};
-  argon::StrPositional dst{argon::required};
-  argon::FlagArg<"recursive", 'r'> recursive;
+  argon::StrPositional src{argon::required, "Source file"};
+  argon::StrPositional dst{argon::required, "Destination file"};
+  argon::FlagArg<"recursive", 'r'> recursive{"Copy directories recursively"};
 };
 
 // ---------------------------------------------------------------------------
-// Top-level argument struct  ← the struct IS the schema
+// Top-level argument struct
 // ---------------------------------------------------------------------------
 
 struct Args {
-  argon::FlagArg<"verbose", 'v'> verbose;
-  argon::IntArg<"jobs", 'j'> jobs;
-  argon::StrArg<"config", 'c'> config;
-  argon::BoolArg<"color"> color;  // --color true/false
+  argon::HelpFlag<>              help{"Show this help message and exit"};
+  argon::FlagArg<"verbose", 'v'> verbose{"Enable verbose output"};
+  argon::IntArg<"jobs", 'j'>     jobs{"Global job limit"};
+  argon::StrArg<"config", 'c'>   config{"Path to configuration file"};
+  argon::BoolArg<"color">        color{"Enable or disable color output (true/false)"};
 
-  argon::Command<BuildArgs, "build"> build;
-  argon::Command<PushArgs, "push"> push;
-  argon::Command<CpArgs, "cp"> cp;
+  argon::Command<BuildArgs, "build"> build{"Compile the project"};
+  argon::Command<PushArgs,  "push">  push{"Push commits to a remote"};
+  argon::Command<CpArgs,    "cp">    cp{"Copy a file"};
 };
 
 // ---------------------------------------------------------------------------
-// main  — uses argon::parse<Args> free function
+// main
 // ---------------------------------------------------------------------------
 
 auto main(int argc, char** argv) -> int {
-  auto res = argon::parse<Args>(argc, argv);
+  argon::Parser<Args> parser;
+  auto res = parser.parse(argc, argv);
 
   if (!res) {
     std::cerr << "error: " << res.error().message() << '\n';
+    std::cerr << '\n' << parser.formatHelp();
     return 1;
   }
 
   const auto& a = *res;
 
+  // --help: print help and exit successfully
+  if (a.help.provided()) {
+    std::cout << parser.formatHelp(argon::recurseHelp);
+    return 0;
+  }
+
   // ---- global options ----
-  if (a.verbose.provided()) {
-    std::cout << "[global] verbose = true\n";
-  }
-  if (a.jobs.provided()) {
-    std::cout << "[global] jobs    = " << a.jobs.value() << '\n';
-  }
-  if (a.config.provided()) {
-    std::cout << "[global] config  = " << a.config.value() << '\n';
-  }
-  if (a.color.provided()) {
-    std::cout << "[global] color   = " << (a.color.value() ? "true" : "false") << '\n';
-  }
+  if (a.verbose.provided()) std::cout << "[global] verbose = true\n";
+  if (a.jobs.provided())    std::cout << "[global] jobs    = " << a.jobs.value() << '\n';
+  if (a.config.provided())  std::cout << "[global] config  = " << a.config.value() << '\n';
+  if (a.color.provided())   std::cout << "[global] color   = " << (a.color.value() ? "true" : "false") << '\n';
 
   // ---- build sub-command ----
   if (a.build.provided()) {
@@ -100,17 +93,14 @@ auto main(int argc, char** argv) -> int {
     } else {
       std::cout << "[build] target   = (default)\n";
     }
-    if (a.build.jobs.provided()) {
+    if (a.build.jobs.provided())
       std::cout << "[build] jobs     = " << a.build.jobs.value() << '\n';
-    }
     if (!a.build.features.value().empty()) {
       std::cout << "[build] features =";
       for (const auto& f : a.build.features.value()) std::cout << ' ' << f;
       std::cout << '\n';
     }
-    if (a.build.dry_run.provided()) {
-      std::cout << "[build] dry-run  = true\n";
-    }
+    if (a.build.dry_run.provided()) std::cout << "[build] dry-run  = true\n";
   }
 
   // ---- push sub-command ----
@@ -128,7 +118,7 @@ auto main(int argc, char** argv) -> int {
   }
 
   if (!a.build.provided() && !a.push.provided() && !a.cp.provided()) {
-    std::cout << "(no sub-command given)\n";
+    std::cout << "(no sub-command given — try --help)\n";
   }
 
   return 0;
