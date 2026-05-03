@@ -121,8 +121,7 @@ struct ArgBase : ArgumentTag {
 
   constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
-  constexpr explicit ArgBase(std::string_view desc)
-      : requirement_(optional), description_(desc) {}
+  constexpr explicit ArgBase(std::string_view desc) : description_(desc) {}
 
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
     return LongOpt.view();
@@ -159,8 +158,7 @@ struct PositionalArgument : ArgumentTag {
 
   constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
-  constexpr PositionalArgument(std::string_view desc)
-      : requirement_(optional), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }

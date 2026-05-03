@@ -29,7 +29,6 @@ inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, Par
 }  // namespace detail
 
 // ---- Arg<bool, ...> (single value, accepts "true" or "false") ----
-
 template <StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
@@ -50,7 +49,6 @@ struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
 };
 
 // ---- PositionalArgument<bool> ----
-
 template <>
 struct PositionalArgument<bool> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
@@ -58,8 +56,7 @@ struct PositionalArgument<bool> : ArgumentTag {
 
   constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
-  constexpr PositionalArgument(std::string_view desc)
-      : requirement_(optional), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -88,7 +85,6 @@ struct PositionalArgument<bool> : ArgumentTag {
 };
 
 // ---- Arg<std::vector<bool>, ...> (one-or-more values) ----
-
 template <StringLiteral LongOpt, char ShortOpt>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 struct Arg<std::vector<bool>, LongOpt, ShortOpt>
@@ -101,7 +97,7 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
   constexpr Arg() = default;
 
   constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -130,7 +126,6 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
 };
 
 // ---- Aliases ----
-
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using BoolArg = Arg<bool, LongOpt, ShortOpt>;

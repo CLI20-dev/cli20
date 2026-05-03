@@ -13,6 +13,12 @@
 
 namespace argon {
 
+struct ArgumentParam {
+  std::string_view description;
+  Requirement requirement = optional;
+  detail::Nargs nargs = nargs::one;
+};
+
 namespace detail {
 
 // Parse a single arithmetic value from a string_view via std::from_chars.
@@ -63,8 +69,7 @@ struct ArithmeticPositionalImpl : ArgumentTag {
 
   constexpr ArithmeticPositionalImpl(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
-  constexpr ArithmeticPositionalImpl(std::string_view desc)
-      : requirement_(optional), description_(desc) {}
+  constexpr ArithmeticPositionalImpl(std::string_view desc) : description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const T& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
@@ -162,7 +167,7 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
   constexpr Arg() = default;
 
   constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -191,7 +196,6 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
 };
 
 // ---- Single-value aliases ----
-
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
   requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
 using IntArg = Arg<int, LongOpt, ShortOpt>;

@@ -46,7 +46,7 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
   constexpr Arg() = default;
 
   constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -81,8 +81,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
 
   constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
       : requirement_(req), description_(desc) {}
-  constexpr PositionalArgument(std::string_view desc)
-      : requirement_(optional), description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
