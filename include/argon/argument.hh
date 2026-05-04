@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -95,13 +96,38 @@ struct Nargs {
   std::optional<std::size_t> max;
 };
 
+// Type-erased validator interface stored in Arg/PositionalArgument members.
+//
+// Using std::unique_ptr<ValidatorBase<T>> rather than std::optional<std::function<...>>
+// preserves the constexpr default-constructibility of all Arg types (a null
+// unique_ptr is constexpr in C++23+), which is required by Parser's
+// compile-time duplicate-option detection.
+template <typename T>
+struct ValidatorBase {
+  virtual ~ValidatorBase() = default;
+  virtual auto call(const T& val) -> std::expected<void, std::string> = 0;
+};
+
+template <typename T, typename Fn>
+struct ValidatorImpl final : ValidatorBase<T> {
+  explicit ValidatorImpl(Fn fn) : fn_(std::move(fn)) {}
+  auto call(const T& val) -> std::expected<void, std::string> override { return fn_(val); }
+  Fn fn_;
+};
+
+// Wrap any callable into a heap-allocated ValidatorBase<T>.
+template <typename T, typename Fn>
+auto makeValidator(Fn&& fn) -> std::unique_ptr<ValidatorBase<T>> {
+  return std::make_unique<ValidatorImpl<T, std::decay_t<Fn>>>(std::forward<Fn>(fn));
+}
+
 }  // namespace detail
 
 namespace nargs {
 
 inline constexpr detail::Nargs none{.min = 0, .max = 0};
 inline constexpr detail::Nargs one{.min = 1, .max = 1};
-inline constexpr detail::Nargs optional{.min = 0, .max = 1};
+inline constexpr detail::Nargs zero_or_one{.min = 0, .max = 1};
 inline constexpr detail::Nargs zero_or_more{.min = 0, .max = std::nullopt};
 inline constexpr detail::Nargs one_or_more{.min = 1, .max = std::nullopt};
 
@@ -173,7 +199,7 @@ struct Param<std::vector<T>> {
 struct Description : ArgumentTag {
   static constexpr auto type = ArgumentType::description;
 
-  constexpr Description(std::string_view text = {}) : text_(text) {}
+  constexpr Description(std::string_view text = {}) noexcept : text_(text) {}
 
   [[nodiscard]] constexpr auto text() const noexcept -> std::string_view { return text_; }
 
@@ -192,13 +218,12 @@ struct ArgBase : ArgumentTag {
   static constexpr auto long_opt = LongOpt;
   static constexpr char short_opt = ShortOpt;
 
-  constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
+  constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {}) noexcept
       : requirement_(req), description_(desc) {}
-  constexpr explicit ArgBase(std::string_view desc) : description_(desc) {}
+  constexpr explicit ArgBase(std::string_view desc) noexcept : description_(desc) {}
   explicit ArgBase(Param<ValueT> p)
-      : requirement_(p.requirement), description_(p.description),
-        nargs_override_(p.nargs) {
-    if (p.validator) validator_ = std::move(p.validator);
+      : nargs_override_(p.nargs), requirement_(p.requirement), description_(p.description) {
+    if (p.validator) validator_ = detail::makeValidator<ValueT>(std::move(p.validator));
   }
 
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
@@ -225,8 +250,8 @@ struct ArgBase : ArgumentTag {
   std::optional<detail::Nargs> nargs_override_;
 
   auto validate() -> std::expected<void, ParseError> {
-    if (!validator_ || !*validator_) return {};
-    auto r = (*validator_)(value_);
+    if (!validator_) return {};
+    auto r = validator_->call(value_);
     if (!r)
       return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
                                         .kind = ErrorKind::validation,
@@ -240,9 +265,9 @@ struct ArgBase : ArgumentTag {
   std::string_view description_;
   std::size_t occurrence_count_ = 0;
   ValueT value_ = {};
-  // std::optional used here so the default constructor is constexpr (empty
-  // optional does not construct std::function, which has no constexpr ctor).
-  std::optional<std::function<std::expected<void, std::string>(const ValueT&)>> validator_;
+  // std::unique_ptr default-constructs to null (constexpr in C++23+), so
+  // ArgBase remains constexpr-constructible for Parser's compile-time checks.
+  std::unique_ptr<detail::ValidatorBase<ValueT>> validator_;
 };
 
 template <typename ValueT>
@@ -296,7 +321,7 @@ struct Command : ArgumentTag, public T {
   // Simple one-line summary shown in the parent's "Commands:" listing.
   // For a detailed multi-sentence description rendered in the sub-command's
   // own help output, add an argon::description member to T instead.
-  constexpr Command(std::string_view desc = {}) : description_(desc) {}
+  constexpr Command(std::string_view desc = {}) noexcept : description_(desc) {}
 
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {

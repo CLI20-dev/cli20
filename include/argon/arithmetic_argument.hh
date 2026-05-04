@@ -61,12 +61,13 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = T;
 
-  constexpr ArithmeticPositionalImpl(Requirement req = optional, std::string_view desc = {})
+  constexpr ArithmeticPositionalImpl(Requirement req = optional,
+                                     std::string_view desc = {}) noexcept
       : requirement_(req), description_(desc) {}
-  constexpr ArithmeticPositionalImpl(std::string_view desc) : description_(desc) {}
+  constexpr ArithmeticPositionalImpl(std::string_view desc) noexcept : description_(desc) {}
   explicit ArithmeticPositionalImpl(Param<T> p)
       : requirement_(p.requirement), description_(p.description) {
-    if (p.validator) validator_ = std::move(p.validator);
+    if (p.validator) validator_ = detail::makeValidator<T>(std::move(p.validator));
   }
 
   [[nodiscard]] constexpr auto value() const noexcept -> const T& { return value_; }
@@ -90,8 +91,8 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   }
 
   auto validate() -> std::expected<void, ParseError> {
-    if (!validator_ || !*validator_) return {};
-    auto r = (*validator_)(value_);
+    if (!validator_) return {};
+    auto r = validator_->call(value_);
     if (!r)
       return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
                                         .kind = ErrorKind::validation,
@@ -104,7 +105,7 @@ struct ArithmeticPositionalImpl : ArgumentTag {
   std::string_view description_;
   T value_{};
   bool provided_ = false;
-  std::optional<std::function<std::expected<void, std::string>(const T&)>> validator_;
+  std::unique_ptr<detail::ValidatorBase<T>> validator_;
 };
 
 }  // namespace detail

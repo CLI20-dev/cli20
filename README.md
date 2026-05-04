@@ -214,7 +214,7 @@ prog --output out.txt -- --not-an-option
 |----------|---------|
 | `nargs::one` | exactly 1 (default for single-value options) |
 | `nargs::none` | 0 (default for flags) |
-| `nargs::optional` | 0 or 1 |
+| `nargs::zero_or_one` | 0 or 1 |
 | `nargs::zero_or_more` | 0 … ∞ |
 | `nargs::one_or_more` | 1 … ∞ |
 | `nargs::exactly<N>` | exactly N |

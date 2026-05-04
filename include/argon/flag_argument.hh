@@ -9,7 +9,7 @@ template <StringLiteral LongOpt, char ShortOpt>
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
-  constexpr Flag(std::string_view desc = {}) : description_(desc) {}
+  constexpr Flag(std::string_view desc = {}) noexcept : description_(desc) {}
 
   [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
   [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {

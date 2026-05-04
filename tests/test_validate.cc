@@ -49,17 +49,22 @@ TEST(ValidateNonNegative, RejectsNegative) {
 // ---- Built-in validators: argon::validate::range ----
 
 TEST(ValidateRange, AcceptsValueInRange) {
-  EXPECT_TRUE(validate::range<1, 65535>(1));
-  EXPECT_TRUE(validate::range<1, 65535>(8080));
-  EXPECT_TRUE(validate::range<1, 65535>(65535));
+  auto r1 = validate::range<1, 65535>(1);
+  auto r2 = validate::range<1, 65535>(8080);
+  auto r3 = validate::range<1, 65535>(65535);
+  EXPECT_TRUE(r1);
+  EXPECT_TRUE(r2);
+  EXPECT_TRUE(r3);
 }
 
 TEST(ValidateRange, RejectsBelowMin) {
-  EXPECT_FALSE(validate::range<1, 65535>(0));
+  auto r = validate::range<1, 65535>(0);
+  EXPECT_FALSE(r);
 }
 
 TEST(ValidateRange, RejectsAboveMax) {
-  EXPECT_FALSE(validate::range<1, 65535>(65536));
+  auto r = validate::range<1, 65535>(65536);
+  EXPECT_FALSE(r);
 }
 
 TEST(ValidateRange, ErrorMessageContainsBounds) {
@@ -119,28 +124,28 @@ struct PortArgs {
 
 TEST(ValidatorIntegration, AcceptsValidPort) {
   Parser<PortArgs> parser;
-  auto r = parser.parse({"--port", "8080"});
-  ASSERT_TRUE(r) << r.error().what();
+  auto r = parser.parse({"prog", "--port", "8080"});
+  ASSERT_TRUE(r) << r.error().message();
   EXPECT_EQ(r->port.value(), 8080);
 }
 
 TEST(ValidatorIntegration, RejectsPortZero) {
   Parser<PortArgs> parser;
-  auto r = parser.parse({"--port", "0"});
+  auto r = parser.parse({"prog", "--port", "0"});
   ASSERT_FALSE(r);
   EXPECT_EQ(r.error().code, ErrorCode::validation_failed);
 }
 
 TEST(ValidatorIntegration, RejectsPortTooLarge) {
   Parser<PortArgs> parser;
-  auto r = parser.parse({"--port", "65536"});
+  auto r = parser.parse({"prog", "--port", "65536"});
   ASSERT_FALSE(r);
   EXPECT_EQ(r.error().code, ErrorCode::validation_failed);
 }
 
 TEST(ValidatorIntegration, ValidationErrorDetailContainsMessage) {
   Parser<PortArgs> parser;
-  auto r = parser.parse({"--port", "0"});
+  auto r = parser.parse({"prog", "--port", "0"});
   ASSERT_FALSE(r);
   EXPECT_FALSE(r.error().detail.empty());
 }
@@ -149,38 +154,44 @@ TEST(ValidatorIntegration, ValidationErrorDetailContainsMessage) {
 
 struct OptionalWithValidator {
   IntArg<"count"> count{{
+      .requirement = optional,
+      .nargs = nargs::one,
       .validator = validate::positive<int>,
+      .description = {},
   }};
 };
 
 TEST(ValidatorIntegration, NotCalledWhenNotProvided) {
   Parser<OptionalWithValidator> parser;
   // count not provided, validator should not fire (value stays 0 which is invalid)
-  auto r = parser.parse({});
-  EXPECT_TRUE(r) << r.error().what();
+  auto r = parser.parse({"prog"});
+  EXPECT_TRUE(r) << r.error().message();
 }
 
 // ---- Custom lambda validator ----
 
 struct EvenArgs {
   IntArg<"n"> n{{
+      .requirement = optional,
+      .nargs = nargs::one,
       .validator = [](const int& v) -> std::expected<void, std::string> {
         if (v % 2 == 0) return {};
         return std::unexpected("must be even");
       },
+      .description = {},
   }};
 };
 
 TEST(ValidatorIntegration, CustomLambdaAcceptsEven) {
   Parser<EvenArgs> parser;
-  auto r = parser.parse({"--n", "4"});
-  ASSERT_TRUE(r) << r.error().what();
+  auto r = parser.parse({"prog", "--n", "4"});
+  ASSERT_TRUE(r) << r.error().message();
   EXPECT_EQ(r->n.value(), 4);
 }
 
 TEST(ValidatorIntegration, CustomLambdaRejectsOdd) {
   Parser<EvenArgs> parser;
-  auto r = parser.parse({"--n", "3"});
+  auto r = parser.parse({"prog", "--n", "3"});
   ASSERT_FALSE(r);
   EXPECT_EQ(r.error().code, ErrorCode::validation_failed);
   EXPECT_EQ(r.error().detail, "must be even");
@@ -197,14 +208,14 @@ struct LevelArgs {
 
 TEST(ValidatorIntegration, StringOneOfAcceptsValid) {
   Parser<LevelArgs> parser;
-  auto r = parser.parse({"--level", "info"});
-  ASSERT_TRUE(r) << r.error().what();
+  auto r = parser.parse({"prog", "--level", "info"});
+  ASSERT_TRUE(r) << r.error().message();
   EXPECT_EQ(r->level.value(), "info");
 }
 
 TEST(ValidatorIntegration, StringOneOfRejectsInvalid) {
   Parser<LevelArgs> parser;
-  auto r = parser.parse({"--level", "trace"});
+  auto r = parser.parse({"prog", "--level", "trace"});
   ASSERT_FALSE(r);
   EXPECT_EQ(r.error().code, ErrorCode::validation_failed);
 }
@@ -221,14 +232,15 @@ struct PosArgs {
 
 TEST(ValidatorIntegration, PositionalAcceptsValid) {
   Parser<PosArgs> parser;
-  auto r = parser.parse({"5"});
-  ASSERT_TRUE(r) << r.error().what();
+  auto r = parser.parse({"prog", "5"});
+  ASSERT_TRUE(r) << r.error().message();
   EXPECT_EQ(r->n.value(), 5);
 }
 
 TEST(ValidatorIntegration, PositionalRejectsInvalid) {
   Parser<PosArgs> parser;
-  auto r = parser.parse({"-1"});
+  // Use "--" to pass a negative number as a positional argument
+  auto r = parser.parse({"prog", "--", "-1"});
   ASSERT_FALSE(r);
   EXPECT_EQ(r.error().code, ErrorCode::validation_failed);
 }
@@ -238,13 +250,15 @@ TEST(ValidatorIntegration, PositionalRejectsInvalid) {
 struct RequiredPort {
   IntArg<"port"> port{{
       .requirement = required,
+      .nargs = nargs::one,
       .validator = validate::range<1, 65535>,
+      .description = {},
   }};
 };
 
 TEST(ValidatorIntegration, RequiredArgMissingGivesMissingError) {
   Parser<RequiredPort> parser;
-  auto r = parser.parse({});
+  auto r = parser.parse({"prog"});
   ASSERT_FALSE(r);
-  EXPECT_EQ(r.error().code, ErrorCode::missing_argument);
+  EXPECT_EQ(r.error().code, ErrorCode::missing_value);
 }

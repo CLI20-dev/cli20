@@ -83,12 +83,13 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
-  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+  constexpr PositionalArgument(Requirement req = optional,
+                               std::string_view desc = {}) noexcept
       : requirement_(req), description_(desc) {}
-  constexpr PositionalArgument(std::string_view desc) : description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc) noexcept : description_(desc) {}
   explicit PositionalArgument(Param<std::string> p)
       : requirement_(p.requirement), description_(p.description) {
-    if (p.validator) validator_ = std::move(p.validator);
+    if (p.validator) validator_ = detail::makeValidator<std::string>(std::move(p.validator));
   }
 
   [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
@@ -110,8 +111,8 @@ struct PositionalArgument<std::string> : ArgumentTag {
   }
 
   auto validate() -> std::expected<void, ParseError> {
-    if (!validator_ || !*validator_) return {};
-    auto r = (*validator_)(value_);
+    if (!validator_) return {};
+    auto r = validator_->call(value_);
     if (!r)
       return std::unexpected(ParseError{.code = ErrorCode::validation_failed,
                                         .kind = ErrorKind::validation,
@@ -126,7 +127,7 @@ struct PositionalArgument<std::string> : ArgumentTag {
   std::string_view description_;
   std::string value_;
   bool provided_ = false;
-  std::optional<std::function<std::expected<void, std::string>(const std::string&)>> validator_;
+  std::unique_ptr<detail::ValidatorBase<std::string>> validator_;
 };
 
 // ---- Aliases ----

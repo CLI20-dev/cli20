@@ -6,6 +6,7 @@
 #include <format>
 #include <functional>
 #include <span>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -65,14 +66,32 @@ auto getStructDescription() -> std::string_view {
   return desc;
 }
 
+// True iff T can be default-constructed without risk of an exception.
+// Used to guard consteval checks that do `T{}` — those checks are only
+// meaningful when all member constructors are noexcept (which means no
+// std::function construction from Param<T> member initializers).
+// Non-Param ArgBase constructors are explicitly marked noexcept so that
+// ordinary Arguments structs qualify, while structs containing validator
+// initializers do not.
+template <typename T>
+inline constexpr bool constexpr_default_constructible_v =
+    std::is_nothrow_default_constructible_v<T>;
+
 template <class Arguments>
 struct isValidArgumentsType {
   static constexpr bool value = [] -> bool {
-    if constexpr (!std::derived_from<std::remove_cvref_t<Arguments>, ArgumentTag>) {
-      auto&& [... options] = Arguments{};
+    using A = std::remove_cvref_t<Arguments>;
+    if constexpr (std::derived_from<A, ArgumentTag>) {
+      return false;
+    }
+    if constexpr (constexpr_default_constructible_v<A>) {
+      auto&& [... options] = A{};
       return (... && (std::derived_from<std::remove_cvref_t<decltype(options)>, ArgumentTag>));
     }
-    return false;
+    // Aggregate that isn't itself an ArgumentTag, but can't be constexpr-
+    // constructed (e.g. has Param<T>-initialized members).  Accept it; the
+    // parser templates will reject non-conforming members at the point of use.
+    return std::is_aggregate_v<A>;
   }();
 };
 
@@ -194,9 +213,12 @@ class Parser {
  private:
   template <class T = Arguments>
   static consteval auto hasDuplicateOptions() -> bool {
+    if constexpr (!detail::constexpr_default_constructible_v<T>) {
+      return false;  // skip: Param<T>-initialized members prevent constexpr T{}
+    } else {
     std::vector<std::string> options;
     auto t = T{};
-    auto [... args] = detail::castBaseIfCommand(t);
+    auto& [... args] = detail::castBaseIfCommand(t);
 
     if ((... || [&args] -> bool {
           if constexpr (args.type == ArgumentType::command) {
@@ -221,6 +243,7 @@ class Parser {
 
     std::ranges::sort(options);
     return std::ranges::adjacent_find(options) != options.end();
+    }  // else (constexpr_default_constructible)
   }
 
   static_assert(!hasDuplicateOptions(),
@@ -566,7 +589,7 @@ class Parser {
  private:
   // Build a spec map for options and flags only (commands are handled separately).
   auto makeOptionSpecMap(const Arguments& args) const {
-    auto [... options] = args;
+    auto& [... options] = args;
 
     std::unordered_map<std::string, detail::Nargs> specMap;
 
@@ -583,7 +606,7 @@ class Parser {
 
   // Collect bare command name strings (no "--" prefix).
   auto makeCommandNamesSet(const Arguments& args) const {
-    auto [... options] = args;
+    auto& [... options] = args;
 
     std::unordered_set<std::string> cmdNames;
 

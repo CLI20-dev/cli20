@@ -153,7 +153,7 @@ namespace nargs {
 
 inline constexpr detail::Nargs none{.min = 0, .max = 0};
 inline constexpr detail::Nargs one{.min = 1, .max = 1};
-inline constexpr detail::Nargs optional{.min = 0, .max = 1};
+inline constexpr detail::Nargs zero_or_one{.min = 0, .max = 1};
 inline constexpr detail::Nargs zero_or_more{.min = 0, .max = std::nullopt};
 inline constexpr detail::Nargs one_or_more{.min = 1, .max = std::nullopt};
 

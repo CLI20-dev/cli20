@@ -187,7 +187,6 @@ struct RecurseTopArgs {
 
 TEST(FormatHelpRecurse, ContainsSubCommandSection) {
   argon::Parser<RecurseTopArgs> parser;
-  parser.parse(sv({"prog"}));
   const auto h = parser.formatHelp(argon::ColorMode::never, argon::recurseHelp);
   EXPECT_NE(h.find("build"), std::string::npos);
   EXPECT_NE(h.find("target"), std::string::npos);
@@ -196,7 +195,6 @@ TEST(FormatHelpRecurse, ContainsSubCommandSection) {
 
 TEST(FormatHelpRecurse, SubCommandProgramNameIncludesParent) {
   argon::Parser<RecurseTopArgs> parser;
-  parser.parse(sv({"prog"}));
   const auto h = parser.formatHelp(argon::ColorMode::never, argon::recurseHelp);
   // The sub-command usage line should say "prog build"
   EXPECT_NE(h.find("prog build"), std::string::npos);
@@ -204,7 +202,6 @@ TEST(FormatHelpRecurse, SubCommandProgramNameIncludesParent) {
 
 TEST(FormatHelpRecurse, NonRecurseDoesNotContainSubArgs) {
   argon::Parser<RecurseTopArgs> parser;
-  parser.parse(sv({"prog"}));
   const auto h = parser.formatHelp(argon::ColorMode::never);
   // Without recurse, --target from sub-command should NOT appear.
   EXPECT_EQ(h.find("--target"), std::string::npos);
@@ -213,7 +210,6 @@ TEST(FormatHelpRecurse, NonRecurseDoesNotContainSubArgs) {
 
 TEST(FormatHelpRecurse, ContainsCommandSectionHeader) {
   argon::Parser<RecurseTopArgs> parser;
-  parser.parse(sv({"prog"}));
   const auto h = parser.formatHelp(argon::ColorMode::never, argon::recurseHelp);
   // Should contain a separator line with the command name (─── build ───)
   EXPECT_NE(h.find(" build "), std::string::npos);

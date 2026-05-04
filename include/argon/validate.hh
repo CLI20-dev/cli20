@@ -66,7 +66,13 @@ auto one_of(std::initializer_list<T> choices) {
       if (value == c) return {};
     }
     std::string msg = "must be one of:";
-    for (const auto& c : choices) msg += " " + std::string(c);
+    for (const auto& c : choices) {
+      if constexpr (std::convertible_to<T, std::string>) {
+        msg += " " + std::string(c);
+      } else {
+        msg += " " + std::to_string(c);
+      }
+    }
     return std::unexpected(msg);
   };
 }
