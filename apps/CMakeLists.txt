@@ -1,13 +1,22 @@
+function(add_argon_app app_source suffix cxx_std)
+  get_filename_component(app_name ${app_source} NAME_WE)
+  set(target_name ${app_name}${suffix})
+
+  add_executable(${target_name} ${app_source})
+
+  if(app_name STREQUAL "example_single_header")
+    target_include_directories(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}/single_header)
+  else()
+    target_link_libraries(${target_name} PRIVATE argon)
+  endif()
+
+  target_compile_features(${target_name} PUBLIC ${cxx_std})
+  target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endfunction()
+
 file(GLOB APP_SOURCES CONFIGURE_DEPENDS "*.cc")
 
 foreach(app_source ${APP_SOURCES})
-  get_filename_component(app_name ${app_source} NAME_WE)
-  add_executable(${app_name} ${app_source})
-  if(app_name STREQUAL "example_single_header")
-    target_include_directories(${app_name} PRIVATE ${CMAKE_SOURCE_DIR}/single_header)
-  else()
-    target_link_libraries(${app_name} PRIVATE argon)
-  endif()
-  target_compile_features(${app_name} PRIVATE cxx_std_26)
-  target_compile_options(${app_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  add_argon_app(${app_source} "" cxx_std_20)
+  add_argon_app(${app_source} "_cxx26" cxx_std_26)
 endforeach()

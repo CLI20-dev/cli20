@@ -9,7 +9,7 @@ target_include_directories(
          $<INSTALL_INTERFACE:include>
 )
 
-target_compile_features(argon PUBLIC cxx_std_26)
+# target_compile_features(argon PUBLIC cxx_std_20)
 target_compile_options(argon PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
 install(TARGETS argon LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)

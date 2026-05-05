@@ -87,7 +87,6 @@
                 if [ ! -d build ]; then
                   nix develop --command cmake -S . -B build -G Ninja \
                     -DCMAKE_BUILD_TYPE=Debug \
-                    -DCXX_ARGON_ENABLE_TEST=ON \
                     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
                 fi
                 nix develop --command cmake --build build

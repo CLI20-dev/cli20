@@ -18,7 +18,21 @@ if(CXX_ARGON_ENABLE_SANITIZERS)
   add_link_options(-fsanitize=address,undefined)
 endif()
 
-add_subdirectory(src)
+# add_subdirectory(src)
+
+add_library(argon INTERFACE)
+
+target_include_directories(argon
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_compile_features(argon
+    INTERFACE
+        cxx_std_20
+)
+
+
 add_subdirectory(apps)
 
 if(CXX_ARGON_ENABLE_TEST)
