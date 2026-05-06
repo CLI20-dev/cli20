@@ -1,70 +1,48 @@
-#include <argon/argument.hh>
 #include <iostream>
 
+#include "argon/argument.hh"
 #include "argon/parser.hh"
 
-struct Argument {
+struct Args {
   argon::Description description{
-      "This is an example of using argon to parse command-line arguments."};
-
-  argon::PositionalImpl<{.min = 1, .max = 1},
-                        argon::Action<>{} |
-                            argon::Action<argon::conversion::Integer<int>{}>{} |
-                            argon::Action<argon::validation::Range<0, 100>{}>{} |
-                            argon::Action<argon::pack::Push{}>{}>
-      input_files{{.help = "The input files to process",
-                   .presence = argon::Presence::required}};
+      "Small example used by the README and by CI to exercise the public API."};
 
   argon::ArgImpl<"help", 'h', {.min = 0, .max = 0},
-                 argon::Action<>{} | argon::Action<argon::pack::Ignore{}>{}>
-      help{{.help = "Show this help message and exit.",
-            .presence = argon::Presence::optional,
-            .default_value = {}}};
+                 argon::Action<argon::pack::set_true>{}>
+      help{{.help = "Show help", .presence = argon::Presence::optional}};
 
-  // struct Build {
-  //   argon::ArgImpl<"config", 'c', {.min = 0, .max = 0},
-  //                  argon::action<int> | argon::always_true |
-  //                      argon::always_string>
-  //       config{{
-  //           .help = "The configuration file for the build",
-  //           .presence = argon::Presence::required,
-  //       }};
-  //
-  //   argon::ArgImpl<"config2", 'd', {.min = 0, .max = 0},
-  //                  argon::action<int> | argon::always_true |
-  //                      argon::always_string>
-  //       confi{{
-  //           .help = "The configuration file for the build",
-  //           .presence = argon::Presence::required,
-  //       }};
-  // };
-  //
-  // argon::Command<"build", Build> build{{
-  //     .help = "Build the project with the specified configuration",
-  // }};
+  argon::ArgImpl<
+      "port", 'p', {.min = 1, .max = 1},
+      argon::Action<argon::conversion::integer<int>, argon::validation::min<1>,
+                    argon::validation::max<65535>, argon::pack::set_once>{}>
+      port{{.help = "TCP port number", .presence = argon::Presence::optional}};
+
+  argon::PositionalImpl<
+      {.min = 1, .max = -1},
+      argon::Action<argon::conversion::string, argon::validation::not_blank,
+                    argon::pack::push>{}>
+      files{{.help = "One or more input files",
+             .presence = argon::Presence::required}};
 };
 
-template <argon::ArgumentSpec T>
-struct test {};
-
-// constexpr auto a = argon::Action<>{} |
-//                    argon::Action<argon::conversion::Integer<int>{}>{} |
-//                    argon::Action<argon::pack::Count{}>{};
-
 auto main(int argc, char* argv[]) -> int {
-  auto p = argon::Parser<Argument>{}.parse(argc, argv);
+  auto parsed = argon::parse<Args>(argc, argv);
+  if (!parsed) {
+    std::cerr << parsed.error.message() << '\n';
+    return 1;
+  }
 
-  // size_t x{};
-  // auto ctx = argon::ActionCtx<size_t>{.arg = std::ref(x)};
-  // auto res = argon::ActionResult<std::string_view>{.value = "42"};
-  // std::ignore = a.invoke(ctx, res);
-  // std::ignore = a.invoke(ctx, res);
-  // std::ignore = a.invoke(ctx, res);
-  // std::ignore = a.invoke(ctx, res);
-  // std::cout << decltype(a)::validate().first << "\n";
-  // std::print("x = {}\n", x);
-  // for (int i : x) {
-  //   std::cout << i << "\n";
-  // }
+  const auto& args = parsed.value;
+  std::cout << "help: " << std::boolalpha << args.help.value() << '\n';
+  if (args.port.value().has_value()) {
+    std::cout << "port: " << *args.port.value() << '\n';
+  }
+
+  std::cout << "files:";
+  for (const auto& file : args.files.value()) {
+    std::cout << ' ' << file;
+  }
+  std::cout << '\n';
+
   return 0;
 }

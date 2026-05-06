@@ -438,9 +438,8 @@ TEST(Tokenize, ErrorInlineSyntaxCannotSatisfyMinTwo) {
 // ---- multi-prefix (TokenizerConfig) ---------------------------------------
 
 static auto tokenize_cfg(std::initializer_list<std::string_view> args,
-                          const SpecMap& spec,
-                          const argon::TokenizerConfig& cfg,
-                          const CmdSet& cmds = {}) -> TokenizeResult {
+                         const SpecMap& spec, const argon::TokenizerConfig& cfg,
+                         const CmdSet& cmds = {}) -> TokenizeResult {
   return argon::tokenize(tok(args), spec, cmds, cfg);
 }
 

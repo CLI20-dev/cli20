@@ -23,7 +23,8 @@ enum class TokenType {
 struct Token {
   TokenType type;
   std::string_view text;
-  std::string_view matched_prefix;  // the option prefix that was matched; empty for non-option tokens
+  std::string_view matched_prefix;  // the option prefix that was matched; empty
+                                    // for non-option tokens
   std::size_t position;             // index into original args
 };
 
@@ -61,10 +62,11 @@ struct TokenizeResult {
 };
 
 struct TokenizerConfig {
-  std::vector<std::string> option_prefixes         = {"--"};
-  std::string short_option_prefix                  = "-";
-  std::string end_of_options_separator             = "--";
-  char        inline_value_separator               = '=';   // e.g. '=' for --opt=val, ':' for --opt:val
+  std::vector<std::string> option_prefixes = {"--"};
+  std::string short_option_prefix = "-";
+  std::string end_of_options_separator = "--";
+  char inline_value_separator =
+      '=';  // e.g. '=' for --opt=val, ':' for --opt:val
 };
 
 // spec_map      : option/flag keys → nargs  (does NOT contain command names)
@@ -94,13 +96,10 @@ inline auto tokenize(std::span<const std::string_view> args,
     return {};
   };
 
-  const auto push = [&](TokenType type, std::string_view text,
-                        std::size_t pos,
+  const auto push = [&](TokenType type, std::string_view text, std::size_t pos,
                         std::string_view prefix = {}) -> void {
-    result.tokens.push_back({.type           = type,
-                             .text           = text,
-                             .matched_prefix = prefix,
-                             .position       = pos});
+    result.tokens.push_back(
+        {.type = type, .text = text, .matched_prefix = prefix, .position = pos});
   };
 
   bool post_separator = false;
@@ -250,7 +249,7 @@ struct ParseResult {
   }
 };
 
-template <class T>
+template <ArgumentSpec T>
 struct Parser {
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> ParseResult<T> {
@@ -262,14 +261,17 @@ struct Parser {
     return this->parse(std::span<const std::string_view>(args), 1);
   }
 
-  auto parse(std::span<const std::string_view> args,
-             std::size_t first_index = 0) -> ParseResult<T> {
+  auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
+      -> ParseResult<T> {
     ParseResult<T> result;
 
     auto [spec_map, command_names] = getOptionSpecMap(result.value);
     auto tokenized = tokenize(args.subspan(std::min(first_index, args.size())),
                               spec_map, command_names, cfg_);
     if (tokenized.has_error()) {
+      if (tokenized.error.hasPosition()) {
+        tokenized.error.position += static_cast<int>(first_index);
+      }
       result.error = std::move(tokenized.error);
       return result;
     }
@@ -285,25 +287,41 @@ struct Parser {
         while (j < tokens.size() && tokens[j].type == TokenType::value) ++j;
         auto err = dispatchOption(result.value, tok.matched_prefix,
                                   tok.text.substr(tok.matched_prefix.size()),
-                                  std::span(tokens).subspan(i + 1, j - i - 1));
-        if (err.has_error()) { result.error = std::move(err.error); return result; }
+                                  std::span(tokens).subspan(i + 1, j - i - 1),
+                                  first_index, tok.position);
+        if (err.has_error()) {
+          result.error = std::move(err.error);
+          return result;
+        }
         i = j;
 
       } else if (tok.type == TokenType::positional) {
-        auto err = dispatchPositional(result.value, pos_idx, pos_cnt,
-                                      tok.text, tok.position);
-        if (err.has_error()) { result.error = std::move(err.error); return result; }
+        auto err = dispatchPositional(result.value, pos_idx, pos_cnt, tok.text,
+                                      tok.position + first_index);
+        if (err.has_error()) {
+          result.error = std::move(err.error);
+          return result;
+        }
         ++i;
 
       } else if (tok.type == TokenType::command) {
-        break;  // TODO: sub-parser delegation
+        auto err = dispatchCommand(result.value, tok.text, args,
+                                   tok.position + first_index + 1);
+        if (err.has_error()) {
+          result.error = std::move(err.error);
+          return result;
+        }
+        break;
 
       } else {
         ++i;
       }
     }
 
-    // TODO: validate Presence::required fields
+    if (auto err = validateRequired(result.value); err.has_error()) {
+      result.error = std::move(err.error);
+      return result;
+    }
 
     return result;
   }
@@ -312,10 +330,12 @@ struct Parser {
   TokenizerConfig cfg_;
 
   // Iterate every field of val, calling fn(field) for each.
-  template <class Fn> static auto forEachField(T& val, Fn fn) -> void {
+  template <class Fn>
+  static auto forEachField(T& val, Fn fn) -> void {
     std::apply([&fn](auto&... f) { (..., fn(f)); }, as_tuple(val));
   }
-  template <class Fn> static auto forEachField(const T& val, Fn fn) -> void {
+  template <class Fn>
+  static auto forEachField(const T& val, Fn fn) -> void {
     std::apply([&fn](const auto&... f) { (..., fn(f)); }, as_tuple(val));
   }
 
@@ -331,8 +351,9 @@ struct Parser {
         for (const auto& p : cfg_.option_prefixes)
           spec_map.emplace(p + std::string(F::name.view()), F::nargs);
         if (F::short_name != '\0')
-          spec_map.emplace(cfg_.short_option_prefix + std::string(1, F::short_name),
-                           F::nargs);
+          spec_map.emplace(
+              cfg_.short_option_prefix + std::string(1, F::short_name),
+              F::nargs);
       }
       if constexpr (std::derived_from<F, CommandTag>)
         command_names.emplace(std::string(F::commandName()));
@@ -341,10 +362,11 @@ struct Parser {
   }
 
   // Find the ArgImpl field matching (prefix, bare), notify it, and invoke its
-  // action on each value token.  notify_option_seen() is called once; invoke_action()
-  // (or invoke_flag() for nargs={0,0}) once per value token.
+  // action on each value token.  notify_option_seen() is called once;
+  // invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.
   auto dispatchOption(T& val, std::string_view prefix, std::string_view bare,
-                      std::span<const Token> vals) -> ActionResult<void> {
+                      std::span<const Token> vals, std::size_t first_index,
+                      std::size_t option_position) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
     bool found = false;
     forEachField(val, [&](auto& f) {
@@ -353,19 +375,23 @@ struct Parser {
         if (found) return;
         bool match = false;
         for (const auto& p : cfg_.option_prefixes)
-          if (p == prefix && F::name.view() == bare) { match = true; break; }
-        if (!match && F::short_name != '\0' && cfg_.short_option_prefix == prefix
-            && bare.size() == 1 && bare[0] == F::short_name)
+          if (p == prefix && F::name.view() == bare) {
+            match = true;
+            break;
+          }
+        if (!match && F::short_name != '\0' &&
+            cfg_.short_option_prefix == prefix && bare.size() == 1 &&
+            bare[0] == F::short_name)
           match = true;
         if (!match) return;
         found = true;
         f.notify_option_seen();
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag();
+          res = f.invoke_flag(option_position + first_index);
         } else {
           for (const auto& vt : vals) {
             if (res.has_error()) break;
-            res = f.invoke_action(vt.text, vt.position);
+            res = f.invoke_action(vt.text, vt.position + first_index);
           }
         }
       }
@@ -375,9 +401,9 @@ struct Parser {
 
   // Fill the pos_idx-th positional field with text.  Advances pos_idx/pos_cnt
   // when the current field reaches its nargs.max.
-  static auto dispatchPositional(T& val, std::size_t& pos_idx, std::size_t& pos_cnt,
-                                  std::string_view text, std::size_t position)
-      -> ActionResult<void> {
+  static auto dispatchPositional(T& val, std::size_t& pos_idx,
+                                 std::size_t& pos_cnt, std::string_view text,
+                                 std::size_t position) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
     bool invoked = false;
     std::size_t cur = 0;
@@ -389,18 +415,87 @@ struct Parser {
         res = f.invoke_action(text, position);
         if (res.has_value()) {
           ++pos_cnt;
-          if (F::nargs.max != -1 && pos_cnt >= static_cast<std::size_t>(F::nargs.max))
-            { ++pos_idx; pos_cnt = 0; }
+          if (F::nargs.max != -1 &&
+              pos_cnt >= static_cast<std::size_t>(F::nargs.max)) {
+            ++pos_idx;
+            pos_cnt = 0;
+          }
         }
       }
     });
     if (!invoked)
-      return ActionResult<void>::fail(ParseError{.code     = ErrorCode::unexpected_argument,
-                                                  .kind     = ErrorKind::parse,
-                                                  .position = static_cast<int>(position),
-                                                  .subject  = std::string(text)});
+      return ActionResult<void>::fail(
+          ParseError{.code = ErrorCode::unexpected_argument,
+                     .kind = ErrorKind::parse,
+                     .position = static_cast<int>(position),
+                     .subject = std::string(text)});
+    return res;
+  }
+
+  auto dispatchCommand(T& val, std::string_view name,
+                       std::span<const std::string_view> args,
+                       std::size_t first_index) -> ActionResult<void> {
+    ActionResult<void> res = ActionResult<void>::ok();
+    bool found = false;
+    forEachField(val, [&](auto& f) {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, CommandTag>) {
+        if (found || F::commandName() != name) {
+          return;
+        }
+        found = true;
+        f.mark_provided();
+        auto sub = Parser<typename F::argument_type>{}.parse(args, first_index);
+        if (sub.has_error()) {
+          res = ActionResult<void>::fail(std::move(sub.error));
+        } else {
+          static_cast<typename F::argument_type&>(f) = std::move(sub.value);
+          f.mark_provided();
+        }
+      }
+    });
+    if (!found) {
+      return ActionResult<void>::fail(ParseError{
+          .code = ErrorCode::unknown_command,
+          .kind = ErrorKind::parse,
+          .position = static_cast<int>(first_index - 1),
+          .subject = std::string(name),
+      });
+    }
+    return res;
+  }
+
+  static auto validateRequired(T& val) -> ActionResult<void> {
+    ActionResult<void> res = ActionResult<void>::ok();
+    forEachField(val, [&](auto& f) {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, OptionTag> ||
+                    std::derived_from<F, PositionalTag>) {
+        if (res.has_error()) {
+          return;
+        }
+        if (f.presence == Presence::required && !f.provided()) {
+          std::string subject;
+          if constexpr (std::derived_from<F, OptionTag>) {
+            subject = std::string(F::name.view());
+          } else {
+            subject = "<positional>";
+          }
+          res = ActionResult<void>::fail(ParseError{
+              .code = ErrorCode::missing_required,
+              .kind = ErrorKind::parse,
+              .subject = std::move(subject),
+          });
+        }
+      }
+    });
     return res;
   }
 };
+
+template <ArgumentSpec T>
+auto parse(int argc, char* argv[]) -> ParseResult<T> {
+  return Parser<T>{}.parse(argc, argv);
+}
 
 };  // namespace argon

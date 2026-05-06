@@ -227,38 +227,43 @@ struct ArgImpl : public OptionTag {
   // Called once per value token associated with this option.
   auto invoke_action(std::string_view text, std::size_t arg_index)
       -> ActionResult<void> {
+    provided_ = true;
     ActionCtx<value_type> ctx{
-        .index        = arg_index,
-        .occurrences  = option_occurrences_,
+        .index = arg_index,
+        .occurrences = option_occurrences_,
         .invoke_count = invoke_count_,
-        .arg          = std::ref(value_),
+        .arg = std::ref(value_),
     };
     ++invoke_count_;
-    return decltype(A)::invoke(ctx,
-                               ActionResult<std::string_view>::ok(text));
+    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag() -> ActionResult<void> {
+  auto invoke_flag(std::size_t arg_index) -> ActionResult<void> {
+    provided_ = true;
     ActionCtx<value_type> ctx{
-        .index        = 0,
-        .occurrences  = option_occurrences_,
+        .index = arg_index,
+        .occurrences = option_occurrences_,
         .invoke_count = invoke_count_,
-        .arg          = std::ref(value_),
+        .arg = std::ref(value_),
     };
     ++invoke_count_;
-    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(std::string_view{}));
+    return decltype(A)::invoke(
+        ctx, ActionResult<std::string_view>::ok(std::string_view{}));
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
-  [[nodiscard]] auto value()       ->       value_type& { return value_; }
+  [[nodiscard]] auto value() -> value_type& { return value_; }
+  [[nodiscard]] auto provided() const -> bool { return provided_; }
 
  private:
-  template <class> friend struct Parser;
+  template <ArgumentSpec>
+  friend struct Parser;
 
-  value_type  value_{};
+  value_type value_{};
   std::size_t option_occurrences_{};  // times the option token appeared
   std::size_t invoke_count_{};        // times invoke_action/invoke_flag called
+  bool provided_{};
 };
 
 template <Nargs N, Action A>
@@ -287,27 +292,31 @@ struct PositionalImpl : public PositionalTag {
   // Called once per value token for this positional.
   auto invoke_action(std::string_view text, std::size_t arg_index)
       -> ActionResult<void> {
+    provided_ = true;
     ActionCtx<value_type> ctx{
-        .index        = arg_index,
-        .occurrences  = occurrence_count_,
+        .index = arg_index,
+        .occurrences = occurrence_count_,
         .invoke_count = invoke_count_,
-        .arg          = std::ref(value_),
+        .arg = std::ref(value_),
     };
     ++occurrence_count_;
     ++invoke_count_;
-    return decltype(A)::invoke(ctx,
-                               ActionResult<std::string_view>::ok(text));
+    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
-  [[nodiscard]] auto value()       ->       value_type& { return value_; }
+  [[nodiscard]] auto value() -> value_type& { return value_; }
+  [[nodiscard]] auto provided() const -> bool { return provided_; }
 
  private:
-  template <class> friend struct Parser;
+  template <ArgumentSpec>
+  friend struct Parser;
 
-  value_type  value_{};
+  value_type value_{};
   std::size_t occurrence_count_{};  // times a value was provided
-  std::size_t invoke_count_{};      // times invoke_action was called (same for positionals)
+  std::size_t
+      invoke_count_{};  // times invoke_action was called (same for positionals)
+  bool provided_{};
 };
 
 struct Description : public std::string, DescriptionTag {};
@@ -320,12 +329,17 @@ template <StringLiteral Name, ArgumentSpec T>
   requires requires { detail::is_valid_command_name<Name>(); }
 struct Command : public T, public CommandTag {
   using T::T;
+  using argument_type = T;
 
   Command(CommandParameter param) : help(param.help) {}
   static constexpr auto name = Name;
+  static constexpr auto commandName() -> std::string_view { return Name.view(); }
+  [[nodiscard]] auto provided() const -> bool { return provided_; }
+  auto mark_provided() -> void { provided_ = true; }
 
  private:
   std::string_view help{};
+  bool provided_{};
 };
 
 }  // namespace argon
