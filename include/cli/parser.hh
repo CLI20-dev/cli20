@@ -381,7 +381,7 @@ struct Parser {
       if constexpr (std::derived_from<F, OptionTag>) {
         for (const auto& p : cfg_.option_prefixes)
           spec_map.emplace(p + std::string(F::name.view()), F::nargs);
-        if (F::short_name != '\0')
+        if constexpr (F::short_name != '\0')
           spec_map.emplace(
               cfg_.short_option_prefix + std::string(1, F::short_name),
               F::nargs);

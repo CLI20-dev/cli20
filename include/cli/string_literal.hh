@@ -30,7 +30,7 @@ struct StringLiteral {
   }
 
   [[nodiscard]]
-  consteval auto operator[](std::size_t i) const noexcept -> char {
+  constexpr auto operator[](std::size_t i) const noexcept -> char {
     return value[i];
   }
 

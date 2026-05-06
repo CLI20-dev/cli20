@@ -85,7 +85,7 @@ consteval auto options_have_unique_short_name() -> bool {
         [&]() consteval -> auto {
           if constexpr (std::derived_from<std::remove_cvref_t<Args>,
                                           OptionTag>) {
-            if (std::remove_cvref_t<Args>::short_name != '\0') {
+            if constexpr (std::remove_cvref_t<Args>::short_name != '\0') {
               names.push_back(std::remove_cvref_t<Args>::short_name);
             }
           }
@@ -149,11 +149,11 @@ constexpr auto is_valid_long_option_name() noexcept -> bool {
   if constexpr (size == 0) {
     return false;
   }
-  auto is_alpha = [](char c) consteval -> bool {
+  auto is_alpha = [](char c) constexpr -> bool {
     return ('a' <= c && c <= 'z');
   };
-  auto is_digit = [](char c) consteval -> bool { return '0' <= c && c <= '9'; };
-  auto is_alnum = [&](char c) consteval -> bool {
+  auto is_digit = [](char c) constexpr -> bool { return '0' <= c && c <= '9'; };
+  auto is_alnum = [&](char c) constexpr -> bool {
     return is_alpha(c) || is_digit(c);
   };
 
