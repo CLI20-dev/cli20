@@ -5,19 +5,24 @@
 namespace argon {
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::is_valid_long_option_name<LongOpt>() &&
+           detail::is_valid_short_option_name(ShortOpt))
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
   constexpr Flag(std::string_view desc = {}) noexcept : description_(desc) {}
 
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
     return description_;
   }
 
  protected:
-  [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
+  [[nodiscard]] static constexpr auto longOpt() -> std::string_view {
+    return LongOpt.view();
+  }
   [[nodiscard]] static constexpr auto shortOpt() -> char { return ShortOpt; }
 
   template <class>
@@ -33,7 +38,8 @@ struct Flag : ArgumentTag {
 };
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using FlagArg = Flag<LongOpt, ShortOpt>;
 
 // A flag that signals "show help".  When the parser detects this flag anywhere
@@ -46,7 +52,8 @@ using FlagArg = Flag<LongOpt, ShortOpt>;
 //   argon::HelpFlag<"version", 'V'>      // --version, -V
 //   argon::HelpFlag<"info">              // --info, no short opt
 template <StringLiteral LongOpt = "help", char ShortOpt = 'h'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::is_valid_long_option_name<LongOpt>() &&
+           detail::is_valid_short_option_name(ShortOpt))
 struct HelpFlag : public Flag<LongOpt, ShortOpt> {
   using Flag<LongOpt, ShortOpt>::Flag;
   // Compile-time sentinel detected by Parser::parse() for early-exit logic.

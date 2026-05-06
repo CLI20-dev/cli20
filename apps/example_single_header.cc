@@ -55,7 +55,8 @@ auto main() -> int { return 0; }
 //     std::cout << "[global] config  = " << a.config.value() << '\n';
 //   }
 //   if (a.color.provided()) {
-//     std::cout << "[global] color   = " << (a.color.value() ? "true" : "false") << '\n';
+//     std::cout << "[global] color   = " << (a.color.value() ? "true" : "false")
+//     << '\n';
 //   }
 //
 //   if (a.build.provided()) {
@@ -81,7 +82,8 @@ auto main() -> int { return 0; }
 //   if (a.push.provided()) {
 //     std::cout << "[push]  remote   = " << a.push.remote.value() << '\n';
 //     if (a.push.force.provided()) std::cout << "[push]  force    = true\n";
-//     if (a.push.depth.provided()) std::cout << "[push]  depth    = " << a.push.depth.value() <<
+//     if (a.push.depth.provided()) std::cout << "[push]  depth    = " <<
+//     a.push.depth.value() <<
 //     '\n';
 //   }
 //

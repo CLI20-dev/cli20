@@ -10,7 +10,9 @@ struct StringLiteral {
   std::array<char, N> value{};
 
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-  consteval StringLiteral(const char (&str)[N]) noexcept { std::copy_n(str, N, value.begin()); }
+  consteval StringLiteral(const char (&str)[N]) noexcept {
+    std::copy_n(str, N, value.begin());
+  }
 
   [[nodiscard]]
   consteval auto size() const noexcept -> std::size_t {
@@ -32,7 +34,8 @@ struct StringLiteral {
     return value[i];
   }
 
-  consteval auto operator==(const StringLiteral&) const noexcept -> bool = default;
+  consteval auto operator==(const StringLiteral&) const noexcept
+      -> bool = default;
 };
 
 template <std::size_t N>

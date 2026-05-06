@@ -8,29 +8,32 @@ namespace fs = std::filesystem;
 
 struct Args {
   // positional argument: フィールドの宣言順に割り当てられる
-  argon::Positional<                                    //
-      argon::nargs::one_or_more, argon::action(argon::conversion::integer)       //
-            .validate(argon::validation::range<1, 10>)  //
+  argon::Positional<  //
+      argon::nargs::one_or_more,
+      argon::action(argon::conversion::integer)       //
+          .validate(argon::validation::range<1, 10>)  //
       >
       numbers{
           .help = "One or more integers between 1 and 10",
           .presence = argon::presence::required,
       };
 
-  argon::Arg<"filename", 'f',
-             argon::nargs::one_or_more, argon::action(argon::conversion::path)
-                                             .validate(argon::validation::file_exists)
-                                             .validate(argon::validation::readable)
-                                             .validate(argon::validation::extension<".txt">)>
+  argon::Arg<"filename", 'f', argon::nargs::one_or_more,
+             argon::action(argon::conversion::path)
+                 .validate(argon::validation::file_exists)
+                 .validate(argon::validation::readable)
+                 .validate(argon::validation::extension<".txt">)>
       filename{
           .help = "The input files to process",
           .presence = argon::presence::required,
       };
 
   // short name なしのオプション引数
-  argon::Arg<"output", argon::nargs::one | argon::action(argon::conversion::path)
-                                               .validate(argon::validation::parent_directory_exists)
-                                               .validate(argon::validation::writable_target)>
+  argon::Arg<"output",
+             argon::nargs::one |
+                 argon::action(argon::conversion::path)
+                     .validate(argon::validation::parent_directory_exists)
+                     .validate(argon::validation::writable_target)>
       output{
           .help = "The output file",
           .presence = argon::presence::optional,
@@ -47,10 +50,12 @@ struct Args {
       };
 
   // flag: nargs::none で bool に変換される
-  argon::Arg<"verbose", 'v', argon::nargs::none | argon::action(argon::conversion::flag)> verbose{
-      .help = "Enable verbose logging",
-      .presence = argon::presence::optional,
-  };
+  argon::Arg<"verbose", 'v',
+             argon::nargs::none | argon::action(argon::conversion::flag)>
+      verbose{
+          .help = "Enable verbose logging",
+          .presence = argon::presence::optional,
+      };
 
   argon::Arg<"help", 'h',
              argon::nargs::none | argon::action(argon::conversion::flag)
@@ -71,10 +76,12 @@ struct Args {
             .presence = argon::presence::required,
         };
 
-    argon::Arg<"release", argon::nargs::none | argon::action(argon::conversion::flag)> release{
-        .help = "Build in release mode",
-        .presence = argon::presence::optional,
-    };
+    argon::Arg<"release",
+               argon::nargs::none | argon::action(argon::conversion::flag)>
+        release{
+            .help = "Build in release mode",
+            .presence = argon::presence::optional,
+        };
   };
 
   // Command はオプショナル: args.build が nullopt なら build サブコマンド未使用

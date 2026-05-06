@@ -6,6 +6,8 @@
 #include <optional>
 #include <vector>
 
+#include "argon/action.hh"
+
 namespace argon {
 
 struct SpecMemberTag {};
@@ -15,27 +17,39 @@ struct PositionalTag : SpecMemberTag {};
 struct CommandTag : SpecMemberTag {};
 struct DescriptionTag : SpecMemberTag {};
 
+struct Nargs {
+  int min = -1;
+  int max = -1;
+};
+
+enum class Presence { required, optional };
+
 namespace detail {
 
 template <class T>
 consteval auto members_are_derived_from_valid_argon_class() -> bool {
-  return []<class... Args>(std::type_identity<std::tuple<Args...>>) consteval -> auto {
+  return []<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
+             -> auto {
     return (std::derived_from<std::remove_cvref_t<Args>, SpecMemberTag> && ...);
-  }(std::type_identity<std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
+  }(std::type_identity<
+                 std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
 }
 
 template <class T>
 consteval auto options_have_unique_long_name() -> bool {
   std::vector<std::string_view> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval -> auto {
+  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
+      -> auto {
     (
         [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>, OptionTag>) {
+          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
+                                          OptionTag>) {
             names.push_back(std::remove_cvref_t<Args>::name.view());
           }
         }(),
         ...);
-  }(std::type_identity<std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
+  }(std::type_identity<
+          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
   std::ranges::sort(names);
   return std::ranges::adjacent_find(names) == names.end();
 }
@@ -43,17 +57,20 @@ consteval auto options_have_unique_long_name() -> bool {
 template <class T>
 consteval auto options_have_unique_short_name() -> bool {
   std::vector<char> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval -> auto {
+  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
+      -> auto {
     (
         [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>, OptionTag>) {
+          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
+                                          OptionTag>) {
             if (std::remove_cvref_t<Args>::short_name != '\0') {
               names.push_back(std::remove_cvref_t<Args>::short_name);
             }
           }
         }(),
         ...);
-  }(std::type_identity<std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
+  }(std::type_identity<
+          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
   std::ranges::sort(names);
   return std::ranges::adjacent_find(names) == names.end();
 }
@@ -61,15 +78,18 @@ consteval auto options_have_unique_short_name() -> bool {
 template <class T>
 consteval auto commands_have_unique_long_name() -> bool {
   std::vector<std::string_view> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval -> auto {
+  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
+      -> auto {
     (
         [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>, CommandTag>) {
+          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
+                                          CommandTag>) {
             names.push_back(std::remove_cvref_t<Args>::name.view());
           }
         }(),
         ...);
-  }(std::type_identity<std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
+  }(std::type_identity<
+          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
   std::ranges::sort(names);
   return std::ranges::adjacent_find(names) == names.end();
 }
@@ -78,25 +98,84 @@ template <class T>
 consteval auto positionals_have_variadic_at_end() {
   bool found_variadic = false;
   bool found_positional_after_variadic = false;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval -> auto {
+  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
+      -> auto {
     (
         [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>, PositionalTag>) {
+          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
+                                          PositionalTag>) {
             if (found_variadic) {
               found_positional_after_variadic = true;
             }
-            if (std::remove_cvref_t<Args>::nargs.max != std::remove_cvref_t<Args>::nargs.min) {
+            if (std::remove_cvref_t<Args>::nargs.max !=
+                std::remove_cvref_t<Args>::nargs.min) {
               found_variadic = true;
             }
           }
         }(),
         ...);
-  }(std::type_identity<std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
+  }(std::type_identity<
+          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
   return !found_positional_after_variadic;
 }
 
+template <StringLiteral Name>
+[[nodiscard]]
+constexpr auto is_valid_long_option_name() noexcept -> bool {
+  constexpr auto size = Name.size();
 
+  if constexpr (size == 0) {
+    return false;
+  }
+  auto is_alpha = [](char c) consteval -> bool {
+    return ('a' <= c && c <= 'z');
+  };
+  auto is_digit = [](char c) consteval -> bool { return '0' <= c && c <= '9'; };
+  auto is_alnum = [&](char c) consteval -> bool {
+    return is_alpha(c) || is_digit(c);
+  };
 
+  if (!is_alpha(Name[0])) {
+    return false;
+  }
+  bool previous_is_hyphen = false;
+  for (std::size_t i = 1; i < size; ++i) {
+    const char c = Name[i];
+    if (c == '-') {
+      if (previous_is_hyphen) {
+        return false;
+      }
+      previous_is_hyphen = true;
+      continue;
+    }
+    if (!is_alnum(c)) {
+      return false;
+    }
+    previous_is_hyphen = false;
+  }
+
+  return !previous_is_hyphen;
+}
+
+constexpr auto is_valid_short_option_name(char Name) noexcept -> bool {
+  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') ||
+         Name == '\0';
+}
+
+template <StringLiteral Name>
+[[nodiscard]]
+consteval auto is_valid_command_name() noexcept {
+  return is_valid_long_option_name<Name>();
+}
+
+template <Nargs nargs>
+[[nodiscard]]
+consteval auto is_valid_nargs() noexcept -> bool {
+  if (nargs.max == -1 && nargs.min == -1) {
+    return false;
+  }
+  return true;
+}
 
 }  // namespace detail
 
@@ -109,52 +188,6 @@ concept ArgumentSpec = requires {
   requires detail::positionals_have_variadic_at_end<T>();
 };
 
-struct Nargs {
-  int min = -1;
-  int max = -1;
-};
-
-enum class Presence { required, optional };
-
-template <class T>
-struct ActionResult {
-  bool success{};
-  size_t index{};
-  T value{};
-  using value_type = T;
-};
-
-template <auto FnHead, auto... FnTail>
-  requires std::invocable<decltype(FnHead), ActionResult<std::string_view>>
-struct Action {
-  template <auto... Fns>
-  static constexpr auto then(Action<Fns...>) {
-    return Action<FnHead, Fns...>{};
-  }
-
-  template <class T>
-  static inline auto invoke(ActionResult<T> input) {
-    if constexpr (sizeof...(FnTail) == 0) {
-      return FnHead(input);
-    } else {
-      return Action<FnTail...>::invoke(FnHead(input));
-    }
-  };
-};
-
-constexpr auto action = Action<[](auto input) -> auto { return input; }>{};
-constexpr auto always_true = Action<[](auto) -> ActionResult<bool> {
-  return {.success = true, .index = 0, .value = true};
-}>{};
-constexpr auto always_string = Action<[](auto) -> ActionResult<std::string> {
-  return {.success = true, .index = 0, .value = "hello"};
-}>{};
-
-template <auto Fn, auto... Fns>
-constexpr auto operator|(Action<Fns...> lhs, Action<Fn>) {
-  return lhs;
-}
-
 template <class T>
 struct ArgParameter {
   std::string_view help{};
@@ -162,16 +195,21 @@ struct ArgParameter {
   T default_value{};
 };
 
-template <StringLiteral Name, char ShortName, Nargs nargs, Action action>
+template <StringLiteral Name, char ShortName, Nargs N, Action A>
+  requires requires {
+    detail::is_valid_long_option_name<Name>();
+    detail::is_valid_short_option_name(ShortName);
+    0 <= N.min;
+    -1 <= N.max;
+    (N.max == -1 || N.min <= N.max);
+  }
 struct ArgImpl : public OptionTag {
-  using action_result_type = decltype(action.invoke(ActionResult<std::string_view>{}))::value_type;
-  using value_type = std::conditional_t<
-      nargs.max == 0, bool,
-      std::conditional_t<nargs.min == 0 && nargs.max == 1, std::optional<action_result_type>,
-                         std::conditional_t<nargs.min == 1 && nargs.max == 1, action_result_type,
-                                            std::vector<action_result_type>>>>;
+  using value_type =
+      typename std::remove_cvref_t<decltype(A.validate().second)>::type;
   ArgImpl(ArgParameter<value_type> param)
-      : help(param.help), presence(param.presence), value_(param.default_value) {}
+      : help(param.help),
+        presence(param.presence),
+        value_(param.default_value) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help;
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -181,22 +219,27 @@ struct ArgImpl : public OptionTag {
 
   static constexpr auto name = Name;
   static constexpr auto short_name = ShortName;
+  static constexpr auto nargs = N;
 
  private:
   value_type value_{};
   int occurrences_{};
 };
 
-template <Nargs Nargs, Action action>
+template <Nargs N, Action A>
+  requires requires {
+    0 <= N.min;
+    -1 <= N.max;
+    (N.max == -1 || N.min <= N.max);
+  }
 struct PositionalImpl : public PositionalTag {
-  using action_result_type = decltype(action.invoke(ActionResult<std::string_view>{}))::value_type;
-  using value_type = std::conditional_t<
-      Nargs.max == 0, bool,
-      std::conditional_t<Nargs.min == 0 && Nargs.max == 1, std::optional<action_result_type>,
-                         std::conditional_t<Nargs.min == 1 && Nargs.max == 1, action_result_type,
-                                            std::vector<action_result_type>>>>;
+  using value_type =
+      typename std::remove_cvref_t<decltype(A.validate().second)>::type;
+
   PositionalImpl(ArgParameter<value_type> param)
-      : help(param.help), presence(param.presence), value_(param.default_value) {}
+      : help(param.help),
+        presence(param.presence),
+        value_(param.default_value) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help;
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -204,7 +247,7 @@ struct PositionalImpl : public PositionalTag {
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   value_type default_value;
 
-  static constexpr auto nargs = Nargs;
+  static constexpr auto nargs = N;
 
  private:
   value_type value_{};
@@ -218,11 +261,11 @@ struct CommandParameter {
 };
 
 template <StringLiteral Name, ArgumentSpec T>
+  requires requires { detail::is_valid_command_name<Name>(); }
 struct Command : public T, public CommandTag {
   using T::T;
 
-  Command(CommandParameter param) : T(param) {}
-
+  Command(CommandParameter param) : help(param.help) {}
   static constexpr auto name = Name;
 
  private:

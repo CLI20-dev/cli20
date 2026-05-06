@@ -25,7 +25,8 @@
 
 namespace argon::validate {
 
-// Passes iff value > 0 (for any type with operator> and default-constructible zero).
+// Passes iff value > 0 (for any type with operator> and default-constructible
+// zero).
 template <typename T>
 auto positive(const T& value) -> std::expected<void, std::string> {
   if (value > T{}) return {};
@@ -51,7 +52,8 @@ auto range(const decltype(Min)& value) -> std::expected<void, std::string> {
 }
 
 // Passes iff the string is non-empty.
-inline auto non_empty(const std::string& value) -> std::expected<void, std::string> {
+inline auto non_empty(const std::string& value)
+    -> std::expected<void, std::string> {
   if (!value.empty()) return {};
   return std::unexpected(std::string("must not be empty"));
 }
@@ -61,7 +63,8 @@ inline auto non_empty(const std::string& value) -> std::expected<void, std::stri
 //   .validator = argon::validate::one_of({"debug", "info", "warn", "error"})
 template <typename T>
 auto one_of(std::initializer_list<T> choices) {
-  return [choices = std::vector<T>(choices)](const T& value) -> std::expected<void, std::string> {
+  return [choices = std::vector<T>(choices)](
+             const T& value) -> std::expected<void, std::string> {
     for (const auto& c : choices) {
       if (value == c) return {};
     }

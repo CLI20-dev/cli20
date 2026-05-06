@@ -3,24 +3,24 @@
 
 #pragma once
 
+#include <unistd.h>
+
 #include <algorithm>
 #include <array>
-#include <string_view>
-#include <cstdint>
-#include <string>
-#include <vector>
 #include <charconv>
+#include <cstdint>
 #include <expected>
-#include <span>
-#include <system_error>
-#include <unistd.h>
 #include <format>
 #include <functional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <system_error>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 // ---- begin: include/argon/string_literal.hh ----
-
 
 namespace argon {
 template <std::size_t N>
@@ -28,7 +28,9 @@ struct StringLiteral {
   std::array<char, N> value{};
 
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-  consteval StringLiteral(const char (&str)[N]) noexcept { std::copy_n(str, N, value.begin()); }
+  consteval StringLiteral(const char (&str)[N]) noexcept {
+    std::copy_n(str, N, value.begin());
+  }
 
   [[nodiscard]]
   consteval auto size() const noexcept -> std::size_t {
@@ -50,7 +52,8 @@ struct StringLiteral {
     return value[i];
   }
 
-  consteval auto operator==(const StringLiteral&) const noexcept -> bool = default;
+  consteval auto operator==(const StringLiteral&) const noexcept
+      -> bool = default;
 };
 
 template <std::size_t N>
@@ -62,7 +65,6 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 
 // ---- begin: include/argon/argument.hh ----
 
-
 namespace argon {
 
 template <class>
@@ -73,12 +75,16 @@ class Parser;
 // fires a static_assert for truly unsupported types.
 template <typename T>
 concept parsable_type =
-    std::same_as<T, int> || std::same_as<T, int32_t> || std::same_as<T, int64_t> ||
-    std::same_as<T, uint32_t> || std::same_as<T, uint64_t> || std::same_as<T, float> ||
-    std::same_as<T, double> || std::same_as<T, bool> || std::same_as<T, std::string> ||
-    std::same_as<T, std::vector<int>> || std::same_as<T, std::vector<int32_t>> ||
-    std::same_as<T, std::vector<int64_t>> || std::same_as<T, std::vector<uint32_t>> ||
-    std::same_as<T, std::vector<uint64_t>> || std::same_as<T, std::vector<float>> ||
+    std::same_as<T, int> || std::same_as<T, int32_t> ||
+    std::same_as<T, int64_t> || std::same_as<T, uint32_t> ||
+    std::same_as<T, uint64_t> || std::same_as<T, float> ||
+    std::same_as<T, double> || std::same_as<T, bool> ||
+    std::same_as<T, std::string> || std::same_as<T, std::vector<int>> ||
+    std::same_as<T, std::vector<int32_t>> ||
+    std::same_as<T, std::vector<int64_t>> ||
+    std::same_as<T, std::vector<uint32_t>> ||
+    std::same_as<T, std::vector<uint64_t>> ||
+    std::same_as<T, std::vector<float>> ||
     std::same_as<T, std::vector<double>> || std::same_as<T, std::vector<bool>> ||
     std::same_as<T, std::vector<std::string>>;
 
@@ -100,15 +106,19 @@ namespace detail {
 
 template <StringLiteral Name>
 [[nodiscard]]
-constexpr auto IsValidLongOpt() noexcept -> bool {
+constexpr auto is_valid_long_option_name() noexcept -> bool {
   constexpr auto size = Name.size();
 
   if constexpr (size == 0) {
     return false;
   }
-  auto is_alpha = [&](char c) consteval -> bool { return ('a' <= c && c <= 'z'); };
+  auto is_alpha = [&](char c) consteval -> bool {
+    return ('a' <= c && c <= 'z');
+  };
   auto is_digit = [](char c) consteval -> bool { return '0' <= c && c <= '9'; };
-  auto is_alnum = [&](char c) consteval -> bool { return is_alpha(c) || is_digit(c); };
+  auto is_alnum = [&](char c) consteval -> bool {
+    return is_alpha(c) || is_digit(c);
+  };
 
   if (!is_alpha(Name[0])) {
     return false;
@@ -132,14 +142,15 @@ constexpr auto IsValidLongOpt() noexcept -> bool {
   return !previous_is_hyphen;
 }
 
-constexpr auto IsValidShortOpt(char Name) noexcept -> bool {
-  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') || Name == '\0';
+constexpr auto is_valid_short_option_name(char Name) noexcept -> bool {
+  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') ||
+         Name == '\0';
 }
 
 template <StringLiteral Name>
 [[nodiscard]]
-consteval auto IsCommandName() noexcept {
-  return IsValidLongOpt<Name>();
+consteval auto is_valid_command_name() noexcept {
+  return is_valid_long_option_name<Name>();
 }
 
 struct Nargs {
@@ -169,7 +180,8 @@ inline constexpr Requirement optional = Requirement::optional;
 inline constexpr Requirement required = Requirement::required;
 
 template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidShortOpt(ShortOpt) && detail::IsValidLongOpt<LongOpt>())
+  requires(detail::is_valid_short_option_name(ShortOpt) &&
+           detail::is_valid_long_option_name<LongOpt>())
 struct ArgBase : ArgumentTag {
   static constexpr auto type = ArgumentType::option;
   using value_type = ValueT;
@@ -177,7 +189,8 @@ struct ArgBase : ArgumentTag {
   static constexpr auto long_opt = LongOpt;
   static constexpr char short_opt = ShortOpt;
 
-  constexpr explicit ArgBase(Requirement req = optional, std::string_view desc = {})
+  constexpr explicit ArgBase(Requirement req = optional,
+                             std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr explicit ArgBase(std::string_view desc)
       : requirement_(optional), description_(desc) {}
@@ -185,13 +198,21 @@ struct ArgBase : ArgumentTag {
   [[nodiscard]] static constexpr auto longOpt() noexcept -> std::string_view {
     return LongOpt.view();
   }
-  [[nodiscard]] static constexpr auto shortOpt() noexcept -> char { return ShortOpt; }
-  [[nodiscard]] constexpr auto requirement() const noexcept -> Requirement { return requirement_; }
+  [[nodiscard]] static constexpr auto shortOpt() noexcept -> char {
+    return ShortOpt;
+  }
+  [[nodiscard]] constexpr auto requirement() const noexcept -> Requirement {
+    return requirement_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == required;
   }
-  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return occurrence_count_ != 0; }
+  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& {
+    return value_;
+  }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return occurrence_count_ != 0;
+  }
   [[nodiscard]] constexpr auto occurrenceCount() const noexcept -> std::size_t {
     return occurrence_count_;
   }
@@ -215,13 +236,18 @@ struct PositionalArgument : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = ValueT;
 
-  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+  constexpr PositionalArgument(Requirement req = optional,
+                               std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr PositionalArgument(std::string_view desc)
       : requirement_(optional), description_(desc) {}
 
-  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto value() const noexcept -> const ValueT& {
+    return value_;
+  }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
   }
@@ -244,9 +270,11 @@ struct PositionalArgument : ArgumentTag {
 };
 
 template <typename ValueT, StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::is_valid_long_option_name<LongOpt>() &&
+           detail::is_valid_short_option_name(ShortOpt))
 struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
-  static_assert([]<typename T = ValueT>() consteval -> auto { return parsable_type<T>; }(),
+  static_assert([]<typename T = ValueT>() consteval
+                    -> auto { return parsable_type<T>; }(),
                 "Arg<ValueT>: unsupported value type. "
                 "Supported: int/int32_t/int64_t/uint32_t/uint64_t/float/double "
                 "(arithmetic_argument.hh); std::string (string_argument.hh); "
@@ -254,14 +282,16 @@ struct Arg : public ArgBase<ValueT, LongOpt, ShortOpt> {
 };
 
 template <class T, StringLiteral CommandName>
-  requires(detail::IsCommandName<CommandName>())
+  requires(detail::is_valid_command_name<CommandName>())
 struct Command : ArgumentTag, public T {
   using args_type = T;
   static constexpr auto type = ArgumentType::command;
 
   constexpr Command(std::string_view desc = {}) : description_(desc) {}
 
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
     return description_;
   }
@@ -284,7 +314,6 @@ struct Command : ArgumentTag, public T {
 // ---- end: include/argon/argument.hh ----
 
 // ---- begin: include/argon/error.hh ----
-
 
 namespace argon {
 
@@ -312,7 +341,8 @@ enum class ErrorKind {
   validation,
 };
 
-[[nodiscard]] constexpr auto toString(ErrorCode code) noexcept -> std::string_view {
+[[nodiscard]] constexpr auto toString(ErrorCode code) noexcept
+    -> std::string_view {
   switch (code) {
     case ErrorCode::unknown_option:
       return "unknown option";
@@ -356,7 +386,9 @@ struct ParseError {
   std::string subject{};
   std::string detail{};
 
-  [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool { return position >= 0; }
+  [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool {
+    return position >= 0;
+  }
 
   [[nodiscard]] auto message() const -> std::string {
     std::string out{toString(code)};
@@ -380,7 +412,9 @@ struct ParseError {
     return out;
   }
 
-  [[nodiscard]] auto hasError() const noexcept -> bool { return code != ErrorCode::unknown_error; }
+  [[nodiscard]] auto hasError() const noexcept -> bool {
+    return code != ErrorCode::unknown_error;
+  }
 };
 
 }  // namespace argon
@@ -388,17 +422,18 @@ struct ParseError {
 
 // ---- begin: include/argon/arithmetic_argument.hh ----
 
-
-
 namespace argon {
 
 namespace detail {
 
 // Parse a single arithmetic value from a string_view via std::from_chars.
-// Returns result_out_of_range on overflow, invalid_argument on bad input / partial parse.
+// Returns result_out_of_range on overflow, invalid_argument on bad input /
+// partial parse.
 template <typename T>
-  requires((std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) || std::floating_point<T>)
-auto parseArithmetic(std::string_view sv, T& out) -> std::expected<void, ParseError> {
+  requires((std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) ||
+           std::floating_point<T>)
+auto parseArithmetic(std::string_view sv, T& out)
+    -> std::expected<void, ParseError> {
   const char* first = sv.data();
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   const char* last = first + sv.size();
@@ -424,7 +459,8 @@ struct ArithmeticArgImpl : public ArgBase<T, LongOpt, ShortOpt> {
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     return parseArithmetic(sv[0], this->valueRef());
   }
 
@@ -434,19 +470,25 @@ struct ArithmeticArgImpl : public ArgBase<T, LongOpt, ShortOpt> {
   Nargs nargs_ = nargs::one;
 };
 
-// Shared implementation base for single-value arithmetic PositionalArgument specializations.
+// Shared implementation base for single-value arithmetic PositionalArgument
+// specializations.
 template <typename T>
 struct ArithmeticPositionalImpl : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = T;
 
-  constexpr ArithmeticPositionalImpl(Requirement req = optional, std::string_view desc = {})
+  constexpr ArithmeticPositionalImpl(Requirement req = optional,
+                                     std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr ArithmeticPositionalImpl(std::string_view desc)
       : requirement_(optional), description_(desc) {}
 
-  [[nodiscard]] constexpr auto value() const noexcept -> const T& { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto value() const noexcept -> const T& {
+    return value_;
+  }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
   }
@@ -476,21 +518,24 @@ struct ArithmeticPositionalImpl : ArgumentTag {
 
 // ---- Arg<T, ...> explicit specializations for each arithmetic type ----
 //
-// Specializations are defined for the underlying fundamental C++ types rather than
-// fixed-width typedef aliases (e.g. int rather than int32_t), since typedefs may alias
-// the same underlying type on a given platform (int32_t == int on most 64-bit targets)
-// and two specializations for the same type would be a redefinition error.
-// The public aliases (Int32Arg, Int64Arg, etc.) resolve correctly because int32_t,
-// int64_t, etc. are guaranteed to alias one of the fundamental types below.
+// Specializations are defined for the underlying fundamental C++ types rather
+// than fixed-width typedef aliases (e.g. int rather than int32_t), since
+// typedefs may alias the same underlying type on a given platform (int32_t ==
+// int on most 64-bit targets) and two specializations for the same type would be
+// a redefinition error. The public aliases (Int32Arg, Int64Arg, etc.) resolve
+// correctly because int32_t, int64_t, etc. are guaranteed to alias one of the
+// fundamental types below.
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ARGON_ARITHMETIC_ARG_SPEC(T)                                                          \
-  template <StringLiteral LongOpt, char ShortOpt>                                             \
-    requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))          \
-  struct Arg<T, LongOpt, ShortOpt> : public detail::ArithmeticArgImpl<T, LongOpt, ShortOpt> { \
-    using detail::ArithmeticArgImpl<T, LongOpt, ShortOpt>::ArithmeticArgImpl;                 \
-    template <class> /* NOLINT(bugprone-forward-declaration-namespace) */                     \
-    friend class Parser;                                                                      \
+#define ARGON_ARITHMETIC_ARG_SPEC(T)                                          \
+  template <StringLiteral LongOpt, char ShortOpt>                             \
+    requires(detail::IsValidLongOpt<LongOpt>() &&                             \
+             detail::IsValidShortOpt(ShortOpt))                               \
+  struct Arg<T, LongOpt, ShortOpt>                                            \
+      : public detail::ArithmeticArgImpl<T, LongOpt, ShortOpt> {              \
+    using detail::ArithmeticArgImpl<T, LongOpt, ShortOpt>::ArithmeticArgImpl; \
+    template <class> /* NOLINT(bugprone-forward-declaration-namespace) */     \
+    friend class Parser;                                                      \
   };
 
 ARGON_ARITHMETIC_ARG_SPEC(int)
@@ -504,7 +549,8 @@ ARGON_ARITHMETIC_ARG_SPEC(double)
 
 #undef ARGON_ARITHMETIC_ARG_SPEC
 
-// ---- PositionalArgument<T> explicit specializations for each arithmetic type ----
+// ---- PositionalArgument<T> explicit specializations for each arithmetic type
+// ----
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ARGON_ARITHMETIC_POSITIONAL_SPEC(T)                                   \
@@ -519,29 +565,35 @@ ARGON_ARITHMETIC_POSITIONAL_SPEC(int)
 ARGON_ARITHMETIC_POSITIONAL_SPEC(long)       // NOLINT(google-runtime-int)
 ARGON_ARITHMETIC_POSITIONAL_SPEC(long long)  // NOLINT(google-runtime-int)
 ARGON_ARITHMETIC_POSITIONAL_SPEC(unsigned int)
-ARGON_ARITHMETIC_POSITIONAL_SPEC(unsigned long)       // NOLINT(google-runtime-int)
-ARGON_ARITHMETIC_POSITIONAL_SPEC(unsigned long long)  // NOLINT(google-runtime-int)
+ARGON_ARITHMETIC_POSITIONAL_SPEC(unsigned long)  // NOLINT(google-runtime-int)
+ARGON_ARITHMETIC_POSITIONAL_SPEC(
+    unsigned long long)  // NOLINT(google-runtime-int)
 ARGON_ARITHMETIC_POSITIONAL_SPEC(float)
 ARGON_ARITHMETIC_POSITIONAL_SPEC(double)
 
 #undef ARGON_ARITHMETIC_POSITIONAL_SPEC
 
-// ---- Arg<std::vector<T>, ...> for arithmetic element types (one-or-more values) ----
+// ---- Arg<std::vector<T>, ...> for arithmetic element types (one-or-more
+// values) ----
 
 template <typename T, StringLiteral LongOpt, char ShortOpt>
   requires((std::integral<T> && !std::same_as<std::remove_cv_t<T>, bool>) ||
            std::floating_point<T>) &&
-          (detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
-struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, LongOpt, ShortOpt> {
+          (detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
+struct Arg<std::vector<T>, LongOpt, ShortOpt>
+    : public ArgBase<std::vector<T>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<T>, LongOpt, ShortOpt>;
   template <class>
   friend class Parser;
 
-  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  // Non-explicit default: allows copy-init from {} in aggregate member
+  // initialization.
   constexpr Arg() = default;
 
-  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+  constexpr explicit Arg(Requirement req,
+                         detail::Nargs nargs = nargs::one_or_more,
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -551,7 +603,8 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -572,61 +625,75 @@ struct Arg<std::vector<T>, LongOpt, ShortOpt> : public ArgBase<std::vector<T>, L
 // ---- Single-value aliases ----
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using IntArg = Arg<int, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Int32Arg = Arg<int32_t, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Int64Arg = Arg<int64_t, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Uint32Arg = Arg<uint32_t, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Uint64Arg = Arg<uint64_t, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using FloatArg = Arg<float, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using DoubleArg = Arg<double, LongOpt, ShortOpt>;
 
 // ---- List aliases ----
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using IntListArg = Arg<std::vector<int>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Int32ListArg = Arg<std::vector<int32_t>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Int64ListArg = Arg<std::vector<int64_t>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Uint32ListArg = Arg<std::vector<uint32_t>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using Uint64ListArg = Arg<std::vector<uint64_t>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using FloatListArg = Arg<std::vector<float>, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using DoubleListArg = Arg<std::vector<double>, LongOpt, ShortOpt>;
 
 // ---- Positional aliases ----
@@ -660,13 +727,12 @@ using DoublePosArg = DoublePositional;
 
 // ---- begin: include/argon/bool_argument.hh ----
 
-
-
 namespace argon {
 
 namespace detail {
 
-inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, ParseError> {
+inline auto parseBool(std::string_view sv, bool& out)
+    -> std::expected<void, ParseError> {
   if (sv == "true") {
     out = true;
     return {};
@@ -685,14 +751,16 @@ inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, Par
 // ---- Arg<bool, ...> (single value, accepts "true" or "false") ----
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
   using ArgBase<bool, LongOpt, ShortOpt>::ArgBase;
   template <class>
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     return detail::parseBool(sv[0], this->valueRef());
   }
 
@@ -710,13 +778,16 @@ struct PositionalArgument<bool> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = bool;
 
-  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+  constexpr PositionalArgument(Requirement req = optional,
+                               std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr PositionalArgument(std::string_view desc)
       : requirement_(optional), description_(desc) {}
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
   }
@@ -744,18 +815,21 @@ struct PositionalArgument<bool> : ArgumentTag {
 // ---- Arg<std::vector<bool>, ...> (one-or-more values) ----
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 struct Arg<std::vector<bool>, LongOpt, ShortOpt>
     : public ArgBase<std::vector<bool>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<bool>, LongOpt, ShortOpt>;
   template <class>
   friend class Parser;
 
-  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  // Non-explicit default: allows copy-init from {} in aggregate member
+  // initialization.
   constexpr Arg() = default;
 
-  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+  constexpr explicit Arg(Requirement req,
+                         detail::Nargs nargs = nargs::one_or_more,
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -765,7 +839,8 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -786,11 +861,13 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
 // ---- Aliases ----
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using BoolArg = Arg<bool, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using BoolListArg = Arg<std::vector<bool>, LongOpt, ShortOpt>;
 
 using BoolPositional = PositionalArgument<bool>;
@@ -802,7 +879,6 @@ using BoolPosArg = BoolPositional;
 
 // ---- begin: include/argon/color.hh ----
 
-
 namespace argon {
 
 // Controls whether ANSI escape codes are emitted by formatHelp().
@@ -813,7 +889,8 @@ enum class ColorMode { auto_, never, always };
 
 // Tag type passed to formatHelp() to request recursive sub-command output.
 //   parser.formatHelp(argon::recurseHelp)               // auto color + recurse
-//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color + recurse
+//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color
+//   + recurse
 struct RecurseHelpTag {};
 inline constexpr RecurseHelpTag recurseHelp{};
 
@@ -848,7 +925,8 @@ inline auto isTty() noexcept -> bool {
 
 // Resolves a ColorMode to a concrete AnsiStyle.
 inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
-  const bool on = (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
+  const bool on =
+      (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
   return AnsiStyle{on};
 }
 
@@ -863,23 +941,27 @@ namespace argon {};
 
 // ---- begin: include/argon/flag_argument.hh ----
 
-
 namespace argon {
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::is_valid_long_option_name<LongOpt>() &&
+           detail::is_valid_short_option_name(ShortOpt))
 struct Flag : ArgumentTag {
   static constexpr auto type = ArgumentType::flag;
 
   constexpr Flag(std::string_view desc = {}) : description_(desc) {}
 
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto description() const noexcept -> std::string_view {
     return description_;
   }
 
  protected:
-  [[nodiscard]] static constexpr auto longOpt() -> std::string_view { return LongOpt.view(); }
+  [[nodiscard]] static constexpr auto longOpt() -> std::string_view {
+    return LongOpt.view();
+  }
   [[nodiscard]] static constexpr auto shortOpt() -> char { return ShortOpt; }
 
   template <class>
@@ -895,7 +977,8 @@ struct Flag : ArgumentTag {
 };
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using FlagArg = Flag<LongOpt, ShortOpt>;
 
 // A flag that signals "show help".  When the parser detects this flag anywhere
@@ -908,7 +991,8 @@ using FlagArg = Flag<LongOpt, ShortOpt>;
 //   argon::HelpFlag<"version", 'V'>      // --version, -V
 //   argon::HelpFlag<"info">              // --info, no short opt
 template <StringLiteral LongOpt = "help", char ShortOpt = 'h'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::is_valid_long_option_name<LongOpt>() &&
+           detail::is_valid_short_option_name(ShortOpt))
 struct HelpFlag : public Flag<LongOpt, ShortOpt> {
   using Flag<LongOpt, ShortOpt>::Flag;
   // Compile-time sentinel detected by Parser::parse() for early-exit logic.
@@ -919,8 +1003,6 @@ struct HelpFlag : public Flag<LongOpt, ShortOpt> {
 // ---- end: include/argon/flag_argument.hh ----
 
 // ---- begin: include/argon/parser.hh ----
-
-
 
 namespace argon {
 
@@ -963,9 +1045,11 @@ constexpr auto castBaseIfCommand(Argument& arg) -> auto& {
 template <class Arguments>
 struct isValidArgumentsType {
   static constexpr bool value = [] -> bool {
-    if constexpr (!std::derived_from<std::remove_cvref_t<Arguments>, ArgumentTag>) {
+    if constexpr (!std::derived_from<std::remove_cvref_t<Arguments>,
+                                     ArgumentTag>) {
       auto&& [... options] = Arguments{};
-      return (... && (std::derived_from<std::remove_cvref_t<decltype(options)>, ArgumentTag>));
+      return (... && (std::derived_from<std::remove_cvref_t<decltype(options)>,
+                                        ArgumentTag>));
     }
     return false;
   }();
@@ -974,7 +1058,8 @@ struct isValidArgumentsType {
 struct TokenizeResult {
   std::unordered_map<std::string, std::vector<std::string_view>> named;
   std::vector<std::string_view> positional;
-  // Set when a command name is encountered; points from that token to end of args.
+  // Set when a command name is encountered; points from that token to end of
+  // args.
   std::optional<std::span<const std::string_view>> command_tail;
 };
 
@@ -1012,11 +1097,12 @@ inline auto tokenize(std::span<const std::string_view> args,
         if (it != spec_map.end() && it->second.min == 1 &&
             it->second.max == std::optional<std::size_t>{1}) {
           if (result.named.contains(key)) {
-            return std::unexpected(ParseError{.code = ErrorCode::duplicate_argument,
-                                              .kind = ErrorKind::parse,
-                                              .position = static_cast<int>(i),
-                                              .subject = key,
-                                              .detail = "option specified multiple times"});
+            return std::unexpected(
+                ParseError{.code = ErrorCode::duplicate_argument,
+                           .kind = ErrorKind::parse,
+                           .position = static_cast<int>(i),
+                           .subject = key,
+                           .detail = "option specified multiple times"});
           }
           result.named[key].push_back(val);
         } else {
@@ -1032,9 +1118,10 @@ inline auto tokenize(std::span<const std::string_view> args,
     // Look up the token in spec_map
     const auto it = spec_map.find(std::string(arg));
     if (it == spec_map.end()) {
-      // Arguments that look like options (start with '-') but are not in the spec are errors.
-      // Bare words without a leading '-' are positional arguments.
-      // To pass a '--'-prefixed string as a positional, use the '--' end-of-options separator.
+      // Arguments that look like options (start with '-') but are not in the
+      // spec are errors. Bare words without a leading '-' are positional
+      // arguments. To pass a '--'-prefixed string as a positional, use the '--'
+      // end-of-options separator.
       if (arg.size() > 1 && arg[0] == '-') {
         return std::unexpected(ParseError{.code = ErrorCode::unknown_option,
                                           .kind = ErrorKind::parse,
@@ -1047,18 +1134,20 @@ inline auto tokenize(std::span<const std::string_view> args,
 
     const auto key = std::string(arg);
     if (result.named.contains(key)) {
-      return std::unexpected(ParseError{.code = ErrorCode::duplicate_argument,
-                                        .kind = ErrorKind::parse,
-                                        .position = static_cast<int>(i),
-                                        .subject = key,
-                                        .detail = "option specified multiple times"});
+      return std::unexpected(
+          ParseError{.code = ErrorCode::duplicate_argument,
+                     .kind = ErrorKind::parse,
+                     .position = static_cast<int>(i),
+                     .subject = key,
+                     .detail = "option specified multiple times"});
     }
 
     // Collect values up to max, stopping at the next option/command/separator
     const auto& nargs_spec = it->second;
     auto& values = result.named[key];
     for (std::size_t count = 0;
-         i + 1 < args.size() && (!nargs_spec.max.has_value() || count < *nargs_spec.max) &&
+         i + 1 < args.size() &&
+         (!nargs_spec.max.has_value() || count < *nargs_spec.max) &&
          args[i + 1] != "--" && !spec_map.contains(std::string(args[i + 1])) &&
          !command_names.contains(std::string(args[i + 1]));
          ++count) {
@@ -1071,8 +1160,9 @@ inline auto tokenize(std::span<const std::string_view> args,
           .kind = ErrorKind::parse,
           .position = static_cast<int>(i),
           .subject = key,
-          .detail = std::format("option requires at least {} value(s), but only {} provided",
-                                nargs_spec.min, values.size())});
+          .detail = std::format(
+              "option requires at least {} value(s), but only {} provided",
+              nargs_spec.min, values.size())});
     }
   }
 
@@ -1084,7 +1174,8 @@ inline auto tokenize(std::span<const std::string_view> args,
 template <class Arguments>
 class Parser {
   static_assert(detail::isValidArgumentsType<Arguments>::value,
-                "Arguments must be a struct or nested struct containing only Argument types");
+                "Arguments must be a struct or nested struct containing only "
+                "Argument types");
 
  private:
   template <class T = Arguments>
@@ -1103,7 +1194,8 @@ class Parser {
     }
 
     (..., [&] -> auto {
-      if constexpr (args.type == ArgumentType::option || args.type == ArgumentType::flag) {
+      if constexpr (args.type == ArgumentType::option ||
+                    args.type == ArgumentType::flag) {
         options.emplace_back(std::string("--") + args.longOpt());
         if (args.shortOpt() != '\0') {
           options.emplace_back(std::string("-") + args.shortOpt());
@@ -1122,7 +1214,8 @@ class Parser {
                 "Arguments must not contain duplicate long or short options");
 
  public:
-  [[nodiscard]] auto formatHelp(ColorMode color = ColorMode::auto_) const -> std::string {
+  [[nodiscard]] auto formatHelp(ColorMode color = ColorMode::auto_) const
+      -> std::string {
     return formatHelpImpl(color, false);
   }
 
@@ -1130,20 +1223,23 @@ class Parser {
     return formatHelpImpl(ColorMode::auto_, true);
   }
 
-  [[nodiscard]] auto formatHelp(ColorMode color, RecurseHelpTag /*tag*/) const -> std::string {
+  [[nodiscard]] auto formatHelp(ColorMode color, RecurseHelpTag /*tag*/) const
+      -> std::string {
     return formatHelpImpl(color, true);
   }
 
  private:
-  [[nodiscard]] auto formatHelpImpl(ColorMode color, bool recurse) const -> std::string {
+  [[nodiscard]] auto formatHelpImpl(ColorMode color, bool recurse) const
+      -> std::string {
     const detail::AnsiStyle ansi = detail::resolveColor(color);
 
     Arguments defaults{};
     auto& [... opts] = defaults;
 
-    // Each entry stores the plain-text left column (used for alignment measurement)
-    // and the description.  ANSI codes are applied when printing, not stored here,
-    // so that col-width arithmetic works on visual character counts.
+    // Each entry stores the plain-text left column (used for alignment
+    // measurement) and the description.  ANSI codes are applied when printing,
+    // not stored here, so that col-width arithmetic works on visual character
+    // counts.
     struct Entry {
       std::string left;
       std::string_view desc;
@@ -1195,7 +1291,8 @@ class Parser {
         positionals_section.push_back({std::move(mv), opts.description()});
       }
       if constexpr (opts.type == ArgumentType::command) {
-        commands_section.push_back({std::string(opts.commandName()), opts.description()});
+        commands_section.push_back(
+            {std::string(opts.commandName()), opts.description()});
         has_commands = true;
       }
     }());
@@ -1216,12 +1313,16 @@ class Parser {
     // zero-width and must not be counted here).
     // col = 2 (indent) + max_left_width + 2 (gap)
     std::size_t max_left = 0;
-    for (const auto& e : options_section) max_left = std::max(max_left, e.left.size());
-    for (const auto& e : positionals_section) max_left = std::max(max_left, e.left.size());
-    for (const auto& e : commands_section) max_left = std::max(max_left, e.left.size());
+    for (const auto& e : options_section)
+      max_left = std::max(max_left, e.left.size());
+    for (const auto& e : positionals_section)
+      max_left = std::max(max_left, e.left.size());
+    for (const auto& e : commands_section)
+      max_left = std::max(max_left, e.left.size());
     const std::size_t col = max_left + 4;  // 2 indent + 2 gap
 
-    auto append_section = [&](std::string_view header, const std::vector<Entry>& entries) {
+    auto append_section = [&](std::string_view header,
+                              const std::vector<Entry>& entries) {
       if (entries.empty()) return;
       out += '\n';
       out += ansi.bold();
@@ -1250,9 +1351,11 @@ class Parser {
     if (recurse) {
       (..., [&] -> auto {
         if constexpr (opts.type == ArgumentType::command) {
-          using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
+          using SubArgs =
+              std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
           Parser<SubArgs> sub_parser;
-          sub_parser.program_name_ = program_name_ + " " + std::string(opts.commandName());
+          sub_parser.program_name_ =
+              program_name_ + " " + std::string(opts.commandName());
 
           // ── <name> ── separator
           constexpr std::size_t rule_width = 60;
@@ -1294,7 +1397,8 @@ class Parser {
     return parse(args);
   }
 
-  auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, ParseError> {
+  auto parse(std::span<const std::string_view> args)
+      -> std::expected<Arguments, ParseError> {
     Arguments result;
     if (auto r = parse(args, result); !r) {
       return std::unexpected(r.error());
@@ -1306,7 +1410,8 @@ class Parser {
       -> std::expected<void, ParseError> {
     program_name_ = args.empty() ? "program" : std::string(args[0]);
 
-    const auto rest = args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
+    const auto rest =
+        args.size() > 1 ? args.subspan(1) : std::span<const std::string_view>{};
 
     auto specMap = makeOptionSpecMap(out);
     auto cmdNames = makeCommandNamesSet(out);
@@ -1358,7 +1463,8 @@ class Parser {
                   .code = ErrorCode::missing_value,
                   .kind = ErrorKind::parse,
                   .position = static_cast<int>(args.size()),
-                  .subject = std::format("positional argument at position {}", pos_idx + 1)};
+                  .subject = std::format("positional argument at position {}",
+                                         pos_idx + 1)};
             }
           }
           ++pos_idx;
@@ -1375,18 +1481,20 @@ class Parser {
           .code = ErrorCode::unexpected_argument,
           .kind = ErrorKind::parse,
           .subject = std::string(tokenized->positional[pos_idx]),
-          .detail = std::format("{} positional argument(s) provided but only {} expected",
-                                tokenized->positional.size(), pos_idx)});
+          .detail = std::format(
+              "{} positional argument(s) provided but only {} expected",
+              tokenized->positional.size(), pos_idx)});
     }
     if (pos_error.hasError()) {
       return std::unexpected(pos_error);
     }
     if (!missing.empty()) {
-      return std::unexpected(ParseError{.code = ErrorCode::missing_value,
-                                        .kind = ErrorKind::parse,
-                                        .position = static_cast<int>(args.size()),
-                                        .subject = missing,
-                                        .detail = "required option was not provided"});
+      return std::unexpected(
+          ParseError{.code = ErrorCode::missing_value,
+                     .kind = ErrorKind::parse,
+                     .position = static_cast<int>(args.size()),
+                     .subject = missing,
+                     .detail = "required option was not provided"});
     }
 
     // Recursively parse sub-command if one was encountered
@@ -1395,10 +1503,13 @@ class Parser {
       (..., [&] -> auto {
         if constexpr (opts.type == ArgumentType::command) {
           const auto& tail = *tokenized->command_tail;
-          if (!tail.empty() && tail[0] == opts.commandName() && !cmd_error.hasError()) {
-            using SubArgs = std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
+          if (!tail.empty() && tail[0] == opts.commandName() &&
+              !cmd_error.hasError()) {
+            using SubArgs =
+                std::remove_cvref_t<decltype(detail::castBaseIfCommand(opts))>;
             Parser<SubArgs> sub_parser;
-            if (auto r = sub_parser.parse(tail, detail::castBaseIfCommand(opts)); !r) {
+            if (auto r = sub_parser.parse(tail, detail::castBaseIfCommand(opts));
+                !r) {
               cmd_error = r.error();
             } else {
               opts.markProvided();
@@ -1407,7 +1518,8 @@ class Parser {
         }
       }());
       if (cmd_error.hasError()) {
-        cmd_error.position += static_cast<int>(args.size() - tokenized->command_tail->size());
+        cmd_error.position +=
+            static_cast<int>(args.size() - tokenized->command_tail->size());
         return std::unexpected(cmd_error);
       }
     }
@@ -1416,17 +1528,20 @@ class Parser {
   }
 
  private:
-  // Build a spec map for options and flags only (commands are handled separately).
+  // Build a spec map for options and flags only (commands are handled
+  // separately).
   auto makeOptionSpecMap(const Arguments& args) const {
     auto [... options] = args;
 
     std::unordered_map<std::string, detail::Nargs> specMap;
 
     (..., [&] -> auto {
-      if constexpr (options.type == ArgumentType::option || options.type == ArgumentType::flag) {
+      if constexpr (options.type == ArgumentType::option ||
+                    options.type == ArgumentType::flag) {
         specMap.emplace(std::string("--") + options.longOpt(), options.nargs());
         if (options.shortOpt() != '\0') {
-          specMap.emplace(std::string("-") + std::string(1, options.shortOpt()), options.nargs());
+          specMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
+                          options.nargs());
         }
       }
     }());
@@ -1448,20 +1563,20 @@ class Parser {
   }
 
   // Build a map from option key (e.g. "--foo", "-f") to a callable that parses
-  // the tokenized values into the corresponding field of `args` and marks it as provided.
-  // `args` must remain alive for as long as the returned map is used.
+  // the tokenized values into the corresponding field of `args` and marks it as
+  // provided. `args` must remain alive for as long as the returned map is used.
   auto makeParseMap(Arguments& args) {
     auto& [... options] = args;
 
-    std::unordered_map<std::string, std::function<std::expected<void, ParseError>(
-                                        std::span<const std::string_view>)>>
+    std::unordered_map<std::string,
+                       std::function<std::expected<void, ParseError>(
+                           std::span<const std::string_view>)>>
         parseMap;
 
     (..., [&] -> auto {
       if constexpr (options.type == ArgumentType::option) {
-        auto make_fn =
-            [&options](
-                std::span<const std::string_view> values) -> std::expected<void, ParseError> {
+        auto make_fn = [&options](std::span<const std::string_view> values)
+            -> std::expected<void, ParseError> {
           auto r = options.parse(values);
           if (!r) {
             return std::unexpected(r.error());
@@ -1471,18 +1586,20 @@ class Parser {
         };
         parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
         if (options.shortOpt() != '\0') {
-          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()), make_fn);
+          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
+                           make_fn);
         }
       }
       if constexpr (options.type == ArgumentType::flag) {
-        auto make_fn =
-            [&options](std::span<const std::string_view>) -> std::expected<void, ParseError> {
+        auto make_fn = [&options](std::span<const std::string_view>)
+            -> std::expected<void, ParseError> {
           options.markProvided();
           return {};
         };
         parseMap.emplace(std::string("--") + options.longOpt(), make_fn);
         if (options.shortOpt() != '\0') {
-          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()), make_fn);
+          parseMap.emplace(std::string("-") + std::string(1, options.shortOpt()),
+                           make_fn);
         }
       }
     }());
@@ -1500,9 +1617,11 @@ class Parser {
     bool found = false;
     (..., [&] -> auto {
       if constexpr (requires { std::remove_cvref_t<decltype(opts)>::is_help; }) {
-        const std::string long_key = std::string("--") + std::string(opts.longOpt());
+        const std::string long_key =
+            std::string("--") + std::string(opts.longOpt());
         const char short_ch = opts.shortOpt();
-        const std::string short_key = short_ch != '\0' ? std::string("-") + short_ch : "";
+        const std::string short_key =
+            short_ch != '\0' ? std::string("-") + short_ch : "";
 
         for (const auto& tok : rest) {
           if (tok == "--") break;
@@ -1535,7 +1654,8 @@ auto parse(int argc, char* argv[]) -> std::expected<Arguments, ParseError> {
 
 template <class Arguments>
 [[nodiscard]]
-auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, ParseError> {
+auto parse(std::span<const std::string_view> args)
+    -> std::expected<Arguments, ParseError> {
   return Parser<Arguments>{}.parse(args);
 }
 
@@ -1544,21 +1664,22 @@ auto parse(std::span<const std::string_view> args) -> std::expected<Arguments, P
 
 // ---- begin: include/argon/string_argument.hh ----
 
-
-
 namespace argon {
 
 // ---- Arg<std::string, ...> (single value) ----
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
-struct Arg<std::string, LongOpt, ShortOpt> : public ArgBase<std::string, LongOpt, ShortOpt> {
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
+struct Arg<std::string, LongOpt, ShortOpt>
+    : public ArgBase<std::string, LongOpt, ShortOpt> {
   using ArgBase<std::string, LongOpt, ShortOpt>::ArgBase;
   template <class>
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     this->valueRef() = std::string(sv[0]);
     return {};
   }
@@ -1573,18 +1694,21 @@ struct Arg<std::string, LongOpt, ShortOpt> : public ArgBase<std::string, LongOpt
 // ---- Arg<std::vector<std::string>, ...> (one-or-more values) ----
 
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
     : public ArgBase<std::vector<std::string>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<std::string>, LongOpt, ShortOpt>;
   template <class>
   friend class Parser;
 
-  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  // Non-explicit default: allows copy-init from {} in aggregate member
+  // initialization.
   constexpr Arg() = default;
 
-  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
-                          std::string_view desc = {})
+  constexpr explicit Arg(Requirement req,
+                         detail::Nargs nargs = nargs::one_or_more,
+                         std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
   // nargs has no default to avoid ambiguity with Arg() above.
@@ -1594,7 +1718,8 @@ struct Arg<std::vector<std::string>, LongOpt, ShortOpt>
   constexpr explicit Arg(std::string_view desc) : Base(optional, desc) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -1617,13 +1742,18 @@ struct PositionalArgument<std::string> : ArgumentTag {
   static constexpr auto type = ArgumentType::positional;
   using value_type = std::string;
 
-  constexpr PositionalArgument(Requirement req = optional, std::string_view desc = {})
+  constexpr PositionalArgument(Requirement req = optional,
+                               std::string_view desc = {})
       : requirement_(req), description_(desc) {}
   constexpr PositionalArgument(std::string_view desc)
       : requirement_(optional), description_(desc) {}
 
-  [[nodiscard]] constexpr auto value() const noexcept -> const std::string& { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto value() const noexcept -> const std::string& {
+    return value_;
+  }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
   }
@@ -1652,22 +1782,26 @@ struct PositionalArgument<std::string> : ArgumentTag {
 // ---- Aliases ----
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using StringArg = Arg<std::string, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using StringListArg = Arg<std::vector<std::string>, LongOpt, ShortOpt>;
 
 using StringPositional = PositionalArgument<std::string>;
 
 // Short-form aliases
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using StrArg = StringArg<LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using StrListArg = StringListArg<LongOpt, ShortOpt>;
 
 using StrPositional = StringPositional;

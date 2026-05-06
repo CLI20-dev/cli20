@@ -12,7 +12,8 @@ enum class ColorMode { auto_, never, always };
 
 // Tag type passed to formatHelp() to request recursive sub-command output.
 //   parser.formatHelp(argon::recurseHelp)               // auto color + recurse
-//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color + recurse
+//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color
+//   + recurse
 struct RecurseHelpTag {};
 inline constexpr RecurseHelpTag recurseHelp{};
 
@@ -47,7 +48,8 @@ inline auto isTty() noexcept -> bool {
 
 // Resolves a ColorMode to a concrete AnsiStyle.
 inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
-  const bool on = (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
+  const bool on =
+      (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
   return AnsiStyle{on};
 }
 

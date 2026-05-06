@@ -1,4 +1,4 @@
-auto main () -> int {}
+auto main() -> int {}
 // example.cc — argon argument parsing demo
 //
 // Try it:
@@ -27,15 +27,18 @@ auto main () -> int {}
 //   argon::StrArg<"target", 't'> target{"Build target (e.g. release, debug)"};
 //   argon::IntArg<"jobs", 'j'> jobs{"Number of parallel jobs"};
 //   argon::StrListArg<"feature", 'f'> features{argon::nargs::zero_or_more,
-//                                              "Features to enable (repeatable)"};
-//   argon::FlagArg<"dry-run"> dry_run{"Print what would happen without building.\nNo files are written or deleted."
-//                                    "\nUseful for verifying flags before a real run."};
+//                                              "Features to enable
+//                                              (repeatable)"};
+//   argon::FlagArg<"dry-run"> dry_run{"Print what would happen without
+//   building.\nNo files are written or deleted."
+//                                    "\nUseful for verifying flags before a real
+//                                    run."};
 // };
 //
 // struct PushArgs {
-//   argon::StrArg<"remote", 'r'> remote{argon::required, "Remote name (required)"};
-//   argon::FlagArg<"force", 'f'> force{"Force push even if not fast-forward"};
-//   argon::IntArg<"depth"> depth{"Shallow-clone depth"};
+//   argon::StrArg<"remote", 'r'> remote{argon::required, "Remote name
+//   (required)"}; argon::FlagArg<"force", 'f'> force{"Force push even if not
+//   fast-forward"}; argon::IntArg<"depth"> depth{"Shallow-clone depth"};
 // };
 //
 // struct CpArgs {
@@ -53,7 +56,8 @@ auto main () -> int {}
 //   argon::FlagArg<"verbose", 'v'> verbose{"Enable verbose output"};
 //   argon::IntArg<"jobs", 'j'> jobs{"Global job limit"};
 //   argon::StrArg<"config", 'c'> config{"Path to configuration file"};
-//   argon::BoolArg<"color"> color{"Enable or disable color output (true/false)"};
+//   argon::BoolArg<"color"> color{"Enable or disable color output
+//   (true/false)"};
 //
 //   argon::Command<BuildArgs, "build"> build;
 //   argon::Command<PushArgs, "push"> push{"Push commits to a remote"};
@@ -84,10 +88,11 @@ auto main () -> int {}
 //
 //   // ---- global options ----
 //   if (a.verbose.provided()) std::cout << "[global] verbose = true\n";
-//   if (a.jobs.provided()) std::cout << "[global] jobs    = " << a.jobs.value() << '\n';
-//   if (a.config.provided()) std::cout << "[global] config  = " << a.config.value() << '\n';
-//   if (a.color.provided())
-//     std::cout << "[global] color   = " << (a.color.value() ? "true" : "false") << '\n';
+//   if (a.jobs.provided()) std::cout << "[global] jobs    = " << a.jobs.value()
+//   << '\n'; if (a.config.provided()) std::cout << "[global] config  = " <<
+//   a.config.value() << '\n'; if (a.color.provided())
+//     std::cout << "[global] color   = " << (a.color.value() ? "true" : "false")
+//     << '\n';
 //
 //   // ---- build sub-command ----
 //   if (a.build.provided()) {
@@ -97,8 +102,8 @@ auto main () -> int {}
 //     } else {
 //       std::cout << "[build] target   = (default)\n";
 //     }
-//     if (a.build.jobs.provided()) std::cout << "[build] jobs     = " << a.build.jobs.value() << '\n';
-//     if (!a.build.features.value().empty()) {
+//     if (a.build.jobs.provided()) std::cout << "[build] jobs     = " <<
+//     a.build.jobs.value() << '\n'; if (!a.build.features.value().empty()) {
 //       std::cout << "[build] features =";
 //       for (const auto& f : a.build.features.value()) std::cout << ' ' << f;
 //       std::cout << '\n';
@@ -110,7 +115,8 @@ auto main () -> int {}
 //   if (a.push.provided()) {
 //     std::cout << "[push]  remote   = " << a.push.remote.value() << '\n';
 //     if (a.push.force.provided()) std::cout << "[push]  force    = true\n";
-//     if (a.push.depth.provided()) std::cout << "[push]  depth    = " << a.push.depth.value() << '\n';
+//     if (a.push.depth.provided()) std::cout << "[push]  depth    = " <<
+//     a.push.depth.value() << '\n';
 //   }
 //
 //   // ---- cp sub-command ----

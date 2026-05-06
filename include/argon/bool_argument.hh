@@ -13,7 +13,8 @@ namespace argon {
 
 namespace detail {
 
-inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, ParseError> {
+inline auto parseBool(std::string_view sv, bool& out)
+    -> std::expected<void, ParseError> {
   if (sv == "true") {
     out = true;
     return {};
@@ -31,14 +32,16 @@ inline auto parseBool(std::string_view sv, bool& out) -> std::expected<void, Par
 
 // ---- Arg<bool, ...> (single value, accepts "true" or "false") ----
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 struct Arg<bool, LongOpt, ShortOpt> : public ArgBase<bool, LongOpt, ShortOpt> {
   using ArgBase<bool, LongOpt, ShortOpt>::ArgBase;
   template <class>
   friend class Parser;
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     return detail::parseBool(sv[0], this->valueRef());
   }
 
@@ -57,14 +60,18 @@ struct PositionalArgument<bool> : ArgumentTag {
   constexpr PositionalArgument(Requirement req = optional,
                                std::string_view desc = {}) noexcept
       : requirement_(req), description_(desc) {}
-  constexpr PositionalArgument(std::string_view desc) noexcept : description_(desc) {}
+  constexpr PositionalArgument(std::string_view desc) noexcept
+      : description_(desc) {}
   explicit PositionalArgument(Param<bool> p)
       : requirement_(p.requirement), description_(p.description) {
-    if (p.validator) validator_ = detail::makeValidator<bool>(std::move(p.validator));
+    if (p.validator)
+      validator_ = detail::makeValidator<bool>(std::move(p.validator));
   }
 
   [[nodiscard]] constexpr auto value() const noexcept -> bool { return value_; }
-  [[nodiscard]] constexpr auto provided() const noexcept -> bool { return provided_; }
+  [[nodiscard]] constexpr auto provided() const noexcept -> bool {
+    return provided_;
+  }
   [[nodiscard]] constexpr auto isRequired() const noexcept -> bool {
     return requirement_ == Requirement::required;
   }
@@ -102,17 +109,20 @@ struct PositionalArgument<bool> : ArgumentTag {
 
 // ---- Arg<std::vector<bool>, ...> (one-or-more values) ----
 template <StringLiteral LongOpt, char ShortOpt>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 struct Arg<std::vector<bool>, LongOpt, ShortOpt>
     : public ArgBase<std::vector<bool>, LongOpt, ShortOpt> {
   using Base = ArgBase<std::vector<bool>, LongOpt, ShortOpt>;
   template <class>
   friend class Parser;
 
-  // Non-explicit default: allows copy-init from {} in aggregate member initialization.
+  // Non-explicit default: allows copy-init from {} in aggregate member
+  // initialization.
   constexpr Arg() = default;
 
-  constexpr explicit Arg(Requirement req, detail::Nargs nargs = nargs::one_or_more,
+  constexpr explicit Arg(Requirement req,
+                         detail::Nargs nargs = nargs::one_or_more,
                          std::string_view desc = {})
       : Base(req, desc), nargs_(nargs) {}
 
@@ -125,7 +135,8 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
   constexpr explicit Arg(Param<std::vector<bool>> p) : Base(std::move(p)) {}
 
  protected:
-  auto parse(std::span<const std::string_view> sv) -> std::expected<void, ParseError> {
+  auto parse(std::span<const std::string_view> sv)
+      -> std::expected<void, ParseError> {
     auto& out = this->valueRef();
     out.clear();
     for (const auto& s : sv) {
@@ -147,11 +158,13 @@ struct Arg<std::vector<bool>, LongOpt, ShortOpt>
 
 // ---- Aliases ----
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using BoolArg = Arg<bool, LongOpt, ShortOpt>;
 
 template <StringLiteral LongOpt, char ShortOpt = '\0'>
-  requires(detail::IsValidLongOpt<LongOpt>() && detail::IsValidShortOpt(ShortOpt))
+  requires(detail::IsValidLongOpt<LongOpt>() &&
+           detail::IsValidShortOpt(ShortOpt))
 using BoolListArg = Arg<std::vector<bool>, LongOpt, ShortOpt>;
 
 using BoolPositional = PositionalArgument<bool>;
