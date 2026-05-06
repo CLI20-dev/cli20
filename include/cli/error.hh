@@ -93,7 +93,7 @@ struct ParseError {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success;
   }
 
-  [[nodiscard]] auto message() const -> std::string {
+  [[nodiscard]] constexpr auto message() const -> std::string {
     if (code == ErrorCode::help_requested) {
       return detail;
     }
@@ -123,7 +123,7 @@ struct ParseError {
     return out;
   }
 
-  [[nodiscard]] auto hasError() const noexcept -> bool {
+  [[nodiscard]] constexpr auto hasError() const noexcept -> bool {
     return code != ErrorCode::unknown_error;
   }
 };

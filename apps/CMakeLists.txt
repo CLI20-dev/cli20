@@ -11,7 +11,11 @@ function(add_cli20_app app_source suffix cxx_std)
     target_link_libraries(${target_name} PRIVATE cli20)
   endif()
 
-  target_compile_features(${target_name} PUBLIC ${cxx_std})
+  string(REGEX REPLACE "cxx_std_" "" cxx_std_num ${cxx_std})
+  set_target_properties(${target_name} PROPERTIES
+    CXX_STANDARD ${cxx_std_num}
+    CXX_STANDARD_REQUIRED ON
+  )
   target_compile_options(${target_name} PRIVATE
     $<IF:$<CXX_COMPILER_ID:MSVC>,/W4;/WX,-Wall;-Wextra;-Wpedantic;-Werror>
   )
