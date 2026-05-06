@@ -221,9 +221,44 @@ struct ArgImpl : public OptionTag {
   static constexpr auto short_name = ShortName;
   static constexpr auto nargs = N;
 
+  // Called once when the option token is seen (before processing its values).
+  auto notify_option_seen() -> void { ++option_occurrences_; }
+
+  // Called once per value token associated with this option.
+  auto invoke_action(std::string_view text, std::size_t arg_index)
+      -> ActionResult<void> {
+    ActionCtx<value_type> ctx{
+        .index        = arg_index,
+        .occurrences  = option_occurrences_,
+        .invoke_count = invoke_count_,
+        .arg          = std::ref(value_),
+    };
+    ++invoke_count_;
+    return decltype(A)::invoke(ctx,
+                               ActionResult<std::string_view>::ok(text));
+  }
+
+  // Called once for flags (nargs = {0,0}) after the option token is seen.
+  auto invoke_flag() -> ActionResult<void> {
+    ActionCtx<value_type> ctx{
+        .index        = 0,
+        .occurrences  = option_occurrences_,
+        .invoke_count = invoke_count_,
+        .arg          = std::ref(value_),
+    };
+    ++invoke_count_;
+    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(std::string_view{}));
+  }
+
+  [[nodiscard]] auto value() const -> const value_type& { return value_; }
+  [[nodiscard]] auto value()       ->       value_type& { return value_; }
+
  private:
-  value_type value_{};
-  int occurrences_{};
+  template <class> friend struct Parser;
+
+  value_type  value_{};
+  std::size_t option_occurrences_{};  // times the option token appeared
+  std::size_t invoke_count_{};        // times invoke_action/invoke_flag called
 };
 
 template <Nargs N, Action A>
@@ -249,9 +284,30 @@ struct PositionalImpl : public PositionalTag {
 
   static constexpr auto nargs = N;
 
+  // Called once per value token for this positional.
+  auto invoke_action(std::string_view text, std::size_t arg_index)
+      -> ActionResult<void> {
+    ActionCtx<value_type> ctx{
+        .index        = arg_index,
+        .occurrences  = occurrence_count_,
+        .invoke_count = invoke_count_,
+        .arg          = std::ref(value_),
+    };
+    ++occurrence_count_;
+    ++invoke_count_;
+    return decltype(A)::invoke(ctx,
+                               ActionResult<std::string_view>::ok(text));
+  }
+
+  [[nodiscard]] auto value() const -> const value_type& { return value_; }
+  [[nodiscard]] auto value()       ->       value_type& { return value_; }
+
  private:
-  value_type value_{};
-  int occurrences_{};
+  template <class> friend struct Parser;
+
+  value_type  value_{};
+  std::size_t occurrence_count_{};  // times a value was provided
+  std::size_t invoke_count_{};      // times invoke_action was called (same for positionals)
 };
 
 struct Description : public std::string, DescriptionTag {};

@@ -93,17 +93,23 @@ struct ActionResult<void> {
 template <class T = void>
 struct ActionCtx {
   size_t index{};
-  size_t occurrences{};
+  size_t occurrences{};  // how many times the option token appeared on the CLI
+  size_t
+      invoke_count{};  // how many times invoke has been called for this option
   std::reference_wrapper<T> arg{};
 };
 
 template <>
 struct ActionCtx<void> {
   size_t index{};
-  size_t occurrences{};
+  size_t occurrences{};  // how many times the option token appeared on the CLI
+  size_t
+      invoke_count{};  // how many times invoke has been called for this option
   template <class T>
   ActionCtx(const ActionCtx<T>& other)
-      : index(other.index), occurrences(other.occurrences) {}
+      : index(other.index),
+        occurrences(other.occurrences),
+        invoke_count(other.invoke_count) {}
 
   ActionCtx() = default;
 };
@@ -134,6 +140,17 @@ struct Action {
     return
         []<auto FnHead, auto... FnTail>(
             ActionCtx<Arg>& ctx, ActionResult<Result> input) -> decltype(auto) {
+          if (!input) {
+            using Next = typename std::remove_cvref_t<
+                decltype(FnHead)>::template after_type<Result>;
+            if constexpr (sizeof...(FnTail) == 0) {
+              return ActionResult<Next>::fail(input.error);
+            } else {
+              return Action<FnTail...>::invoke(
+                  ctx, ActionResult<Next>::fail(input.error));
+            }
+          }
+
           auto next = FnHead(ctx, std::move(input));
           if constexpr (sizeof...(FnTail) == 0) {
             return next;
@@ -195,7 +212,8 @@ template <std::integral T>
 struct Integer {
   template <class Input>
   static constexpr bool accepts_input =
-      std::same_as<std::remove_cvref_t<Input>, std::string_view>;
+      std::same_as<std::remove_cvref_t<Input>, std::string_view> ||
+      std::same_as<std::remove_cvref_t<Input>, std::string>;
   template <class Input>
   using after_type = T;
   template <class Prev>
@@ -222,19 +240,81 @@ struct Integer {
                      .position = static_cast<int>(ctx.index),
                      .subject = std::string(input.value)});
     }
+    if (r.ec == std::errc{} &&
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        r.ptr != input.value.data() + input.value.size()) {
+      return ActionResult<T>::fail(
+          ParseError{.code = ErrorCode::invalid_value,
+                     .kind = ErrorKind::conversion,
+                     .position = static_cast<int>(ctx.index),
+                     .subject = std::string(input.value),
+                     .detail = "unexpected trailing characters"});
+    }
     return ActionResult<T>::ok(result);
   };
 };
+
+struct String {
+  template <class Input>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Input>, std::string_view> ||
+      std::same_as<std::remove_cvref_t<Input>, std::string>;
+  template <class Input>
+  using after_type = std::string;
+  template <class Prev>
+  using storage_type = void;
+
+  constexpr auto operator()(ActionCtx<void>,
+                            ActionResult<std::string_view> input) const
+      -> ActionResult<std::string> {
+    return ActionResult<std::string>::ok(std::string(input.value));
+  };
+};
+
+struct Bool {
+  template <class Input>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Input>, std::string_view> ||
+      std::same_as<std::remove_cvref_t<Input>, std::string>;
+  template <class Input>
+  using after_type = std::string;
+  template <class Prev>
+  using storage_type = void;
+
+  constexpr auto operator()(ActionCtx<void> ctx,
+                            ActionResult<std::string_view> input) const
+      -> ActionResult<bool> {
+    const std::string_view val = input.value;
+    if (val == "true" || val == "1") {
+      return ActionResult<bool>::ok(true);
+    } else if (val == "false" || val == "0") {
+      return ActionResult<bool>::ok(false);
+    } else {
+      return ActionResult<bool>::fail(
+          ParseError{.code = ErrorCode::invalid_value,
+                     .kind = ErrorKind::conversion,
+                     .position = static_cast<int>(ctx.index),
+                     .subject = std::string(input.value),
+                     .detail = "expected one of: true, false, 1, 0"});
+    }
+  };
+};
+
+template <std::integral T>
+static constexpr auto integer = Integer<T>{};
+static constexpr auto string = String{};
+static constexpr auto boolean = Bool{};
 
 };  // namespace conversion
 
 namespace validation {
 
-template <int Min, int Max>
+template <auto Min, auto Max>
+  requires std::is_same_v<decltype(Min), decltype(Max)>
 struct Range {
+  using value_type = decltype(Min);
   template <class Prev>
-  static constexpr bool accepts_input =
-      std::is_arithmetic_v<std::remove_cvref_t<Prev>>;
+  static constexpr bool accepts_input = std::is_convertible_v<Prev, value_type>;
   template <class Prev>
   using after_type = Prev;
   template <class Prev>
@@ -254,6 +334,9 @@ struct Range {
     return input;
   };
 };
+
+template <auto Min, auto Max>
+static constexpr auto range = Range<Min, Max>{};
 
 }  // namespace validation
 
@@ -385,6 +468,14 @@ struct Ignore {
     return ActionResult<void>::ok();
   }
 };
+
+static constexpr auto push = Push{};
+static constexpr auto overwrite = Overwrite{};
+static constexpr auto optional = Optional{};
+static constexpr auto last = Last{};
+static constexpr auto first = First{};
+static constexpr auto count = Count{};
+static constexpr auto ignore = Ignore{};
 
 }  // namespace pack
 

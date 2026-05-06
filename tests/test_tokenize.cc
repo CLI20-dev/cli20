@@ -434,3 +434,77 @@ TEST(Tokenize, ErrorInlineSyntaxCannotSatisfyMinTwo) {
   EXPECT_EQ(r.error.code, ErrorCode::missing_value);
   EXPECT_EQ(r.error.subject, "--range");
 }
+
+// ---- multi-prefix (TokenizerConfig) ---------------------------------------
+
+static auto tokenize_cfg(std::initializer_list<std::string_view> args,
+                          const SpecMap& spec,
+                          const argon::TokenizerConfig& cfg,
+                          const CmdSet& cmds = {}) -> TokenizeResult {
+  return argon::tokenize(tok(args), spec, cmds, cfg);
+}
+
+TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
+  // "+verbose" recognised as option when "+" is in option_prefixes
+  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  auto r = tokenize_cfg({"+verbose"}, {{"+verbose", kFlag}}, cfg);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 1u);
+  EXPECT_EQ(r.tokens[0].type, TokenType::option);
+  EXPECT_EQ(r.tokens[0].text, "+verbose");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "+");
+}
+
+TEST(TokenizeMultiPrefix, MatchedPrefixDistinguishesPrefixes) {
+  // "--foo" and "+foo" are different options; matched_prefix tells them apart
+  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  SpecMap spec{{"--foo", kFlag}, {"+foo", kFlag}};
+  auto r = tokenize_cfg({"--foo", "+foo"}, spec, cfg);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 2u);
+  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(r.tokens[1].matched_prefix, "+");
+}
+
+TEST(TokenizeMultiPrefix, DefaultPrefixStillWorks) {
+  // Default config ({"--"}) behaves identically to before
+  auto r = tokenize_cfg({"--name", "Alice"}, {{"--name", kOne}}, {});
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(r.tokens[1].text, "Alice");
+  EXPECT_TRUE(r.tokens[1].matched_prefix.empty());
+}
+
+TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
+  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  auto r = tokenize_cfg({"+unknown"}, {{"--foo", kFlag}}, cfg);
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error.code, ErrorCode::unknown_option);
+  EXPECT_EQ(r.error.subject, "+unknown");
+}
+
+// ---- inline_value_separator -----------------------------------------------
+
+TEST(TokenizeInlineSep, ColonSeparator) {
+  argon::TokenizerConfig cfg{.inline_value_separator = ':'};
+  auto r = tokenize_cfg({"--name:Alice"}, {{"--name", kOne}}, cfg);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 2u);
+  EXPECT_EQ(r.tokens[0].text, "--name");
+  EXPECT_EQ(r.tokens[1].text, "Alice");
+}
+
+TEST(TokenizeInlineSep, DefaultEqualsStillWorks) {
+  // Sanity: default '=' still splits correctly.
+  auto r = tokenize_cfg({"--name=Alice"}, {{"--name", kOne}}, {});
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.tokens[1].text, "Alice");
+}
+
+TEST(TokenizeInlineSep, EqualsTreatedAsValueWhenSepIsColon) {
+  // With sep=':', "--name=Alice" has no separator → entire token is option name.
+  argon::TokenizerConfig cfg{.inline_value_separator = ':'};
+  auto r = tokenize_cfg({"--name=Alice"}, {{"--name=Alice", kFlag}}, cfg);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.tokens[0].text, "--name=Alice");
+}
