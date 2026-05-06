@@ -3,39 +3,38 @@
 
 #pragma once
 
-#include <unistd.h>
-
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
-#include <cstdint>
-#include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <functional>
-#include <iostream>
 #include <map>
 #include <optional>
 #include <ranges>
 #include <regex>
 #include <set>
-#include <span>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
-#include <tuple>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
+#include <array>
+#include <tuple>
+#include <cstdint>
+#include <sstream>
+#include <cstdlib>
+#include <iostream>
+#include <span>
+#include <unordered_map>
+#include <unordered_set>
 
 // ---- begin: include/cli/error.hh ----
+
 
 namespace cli {
 
@@ -128,7 +127,7 @@ struct ParseError {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success;
   }
 
-  [[nodiscard]] auto message() const -> std::string {
+  [[nodiscard]] constexpr auto message() const -> std::string {
     if (code == ErrorCode::help_requested) {
       return detail;
     }
@@ -158,7 +157,7 @@ struct ParseError {
     return out;
   }
 
-  [[nodiscard]] auto hasError() const noexcept -> bool {
+  [[nodiscard]] constexpr auto hasError() const noexcept -> bool {
     return code != ErrorCode::unknown_error;
   }
 };
@@ -167,6 +166,7 @@ struct ParseError {
 // ---- end: include/cli/error.hh ----
 
 // ---- begin: include/cli/string_literal.hh ----
+
 
 namespace cli {
 template <std::size_t N>
@@ -194,7 +194,7 @@ struct StringLiteral {
   }
 
   [[nodiscard]]
-  consteval auto operator[](std::size_t i) const noexcept -> char {
+  constexpr auto operator[](std::size_t i) const noexcept -> char {
     return value[i];
   }
 
@@ -210,6 +210,8 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 // ---- end: include/cli/string_literal.hh ----
 
 // ---- begin: include/cli/action.hh ----
+
+
 
 namespace cli {
 
@@ -1452,6 +1454,7 @@ inline constexpr auto exit_success = ExitSuccess{};
 
 // ---- begin: include/cli/meta.hh ----
 
+
 namespace cli {
 
 namespace detail {
@@ -2040,6 +2043,8 @@ constexpr auto as_tuple (const T& t) {
 
 // ---- begin: include/cli/argument.hh ----
 
+
+
 namespace cli {
 
 struct SpecMemberTag {};
@@ -2114,7 +2119,7 @@ consteval auto options_have_unique_short_name() -> bool {
         [&]() consteval -> auto {
           if constexpr (std::derived_from<std::remove_cvref_t<Args>,
                                           OptionTag>) {
-            if (std::remove_cvref_t<Args>::short_name != '\0') {
+            if constexpr (std::remove_cvref_t<Args>::short_name != '\0') {
               names.push_back(std::remove_cvref_t<Args>::short_name);
             }
           }
@@ -2178,11 +2183,11 @@ constexpr auto is_valid_long_option_name() noexcept -> bool {
   if constexpr (size == 0) {
     return false;
   }
-  auto is_alpha = [](char c) consteval -> bool {
+  auto is_alpha = [](char c) constexpr -> bool {
     return ('a' <= c && c <= 'z');
   };
-  auto is_digit = [](char c) consteval -> bool { return '0' <= c && c <= '9'; };
-  auto is_alnum = [&](char c) consteval -> bool {
+  auto is_digit = [](char c) constexpr -> bool { return '0' <= c && c <= '9'; };
+  auto is_alnum = [&](char c) constexpr -> bool {
     return is_alpha(c) || is_digit(c);
   };
 
@@ -2455,7 +2460,7 @@ struct ActionFor<T> {
 
 template <class T, Nargs N>
 struct PositionalActionFor {
-  inline static constexpr auto value = [] {
+  inline static constexpr auto value = []() -> auto {
     if constexpr (N.max == 1) {
       return ActionFor<T>::set_once;
     } else {
@@ -2500,6 +2505,7 @@ template <StringLiteral Name, char ShortName = '\0',
 using StringListArg = StringListOption<Name, ShortName, N>;
 using StringPositional = Positional<std::string>;
 using StringPositionalArg = StringPositional;
+using StringListPositional = Positional<std::string, nargs::one_or_more>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using StrOption = StringOption<Name, ShortName>;
@@ -2514,6 +2520,8 @@ using StrListArg = StrListOption<Name, ShortName, N>;
 using StrPositional = StringPositional;
 using StrPositionalArg = StrPositional;
 using StrPosArg = StrPositional;
+using StrListPositional = Positional<std::string, nargs::one_or_more>;
+using StrListPosArg = StrListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using BoolOption = ScalarOption<bool, Name, ShortName>;
@@ -2528,6 +2536,8 @@ using BoolListArg = BoolListOption<Name, ShortName, N>;
 using BoolPositional = Positional<bool>;
 using BoolPositionalArg = BoolPositional;
 using BoolPosArg = BoolPositional;
+using BoolListPositional = Positional<bool, nargs::one_or_more>;
+using BoolListPosArg = BoolListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using IntOption = ScalarOption<int, Name, ShortName>;
@@ -2542,6 +2552,8 @@ using IntListArg = IntListOption<Name, ShortName, N>;
 using IntPositional = Positional<int>;
 using IntPositionalArg = IntPositional;
 using IntPosArg = IntPositional;
+using IntListPositional = Positional<int, nargs::one_or_more>;
+using IntListPosArg = IntListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Int32Option = ScalarOption<std::int32_t, Name, ShortName>;
@@ -2556,6 +2568,8 @@ using Int32ListArg = Int32ListOption<Name, ShortName, N>;
 using Int32Positional = Positional<std::int32_t>;
 using Int32PositionalArg = Int32Positional;
 using Int32PosArg = Int32Positional;
+using Int32ListPositional = Positional<std::int32_t, nargs::one_or_more>;
+using Int32ListPosArg = Int32ListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Int64Option = ScalarOption<std::int64_t, Name, ShortName>;
@@ -2570,6 +2584,8 @@ using Int64ListArg = Int64ListOption<Name, ShortName, N>;
 using Int64Positional = Positional<std::int64_t>;
 using Int64PositionalArg = Int64Positional;
 using Int64PosArg = Int64Positional;
+using Int64ListPositional = Positional<std::int64_t, nargs::one_or_more>;
+using Int64ListPosArg = Int64ListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Uint32Option = ScalarOption<std::uint32_t, Name, ShortName>;
@@ -2646,6 +2662,12 @@ using PathPosArg = PathPositional;
 
 // ---- begin: include/cli/color.hh ----
 
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 namespace cli {
 
 // Controls whether ANSI escape codes are emitted by formatHelp().
@@ -2702,6 +2724,8 @@ inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
 // ---- end: include/cli/color.hh ----
 
 // ---- begin: include/cli/help.hh ----
+
+
 
 namespace cli {
 
@@ -3070,6 +3094,7 @@ auto formatHelp(T& value, std::string_view program_name = "program",
 
 // #include <expected>
 
+
 namespace cli {
 
 enum class TokenType {
@@ -3437,7 +3462,7 @@ struct Parser {
       if constexpr (std::derived_from<F, OptionTag>) {
         for (const auto& p : cfg_.option_prefixes)
           spec_map.emplace(p + std::string(F::name.view()), F::nargs);
-        if (F::short_name != '\0')
+        if constexpr (F::short_name != '\0')
           spec_map.emplace(
               cfg_.short_option_prefix + std::string(1, F::short_name),
               F::nargs);

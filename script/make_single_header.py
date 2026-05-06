@@ -8,6 +8,8 @@ from pathlib import Path
 
 
 INCLUDE_RE = re.compile(r'^\s*#include\s*([<"])([^>"]+)[>"]\s*$')
+IF_RE = re.compile(r'^\s*#\s*(if|ifdef|ifndef)\b')
+ENDIF_RE = re.compile(r'^\s*#\s*endif\b')
 CLI20_PREFIX = "cli/"
 
 
@@ -38,7 +40,13 @@ def main() -> int:
             raise RuntimeError(f"cyclic include detected at {header}")
 
         visiting.add(name)
+        ifdef_depth = 0
         for line in header.read_text(encoding="utf-8").splitlines():
+            if IF_RE.match(line):
+                ifdef_depth += 1
+            elif ENDIF_RE.match(line):
+                ifdef_depth -= 1
+
             match = INCLUDE_RE.match(line)
             if not match:
                 continue
@@ -50,7 +58,8 @@ def main() -> int:
                 if dep is None:
                     raise RuntimeError(f"missing internal header referenced by {header}: {include_name}")
                 visit(dep)
-            elif delimiter == "<":
+            elif delimiter == "<" and ifdef_depth == 0:
+                # Only hoist unconditional system includes
                 system_includes.append(include_name)
 
         visiting.remove(name)
@@ -75,13 +84,24 @@ def main() -> int:
 
     for index, header in enumerate(ordered_headers):
         output_lines.append(f"// ---- begin: include/cli/{header.name} ----")
+        ifdef_depth = 0
         for line in header.read_text(encoding="utf-8").splitlines():
             stripped = line.strip()
+            if IF_RE.match(line):
+                ifdef_depth += 1
+            elif ENDIF_RE.match(line):
+                ifdef_depth -= 1
+
             if stripped == "#pragma once":
                 continue
             match = INCLUDE_RE.match(line)
             if match:
-                continue
+                _, include_name = match.groups()
+                if include_name.startswith(CLI20_PREFIX):
+                    continue  # inlined via ordered_headers
+                if ifdef_depth == 0:
+                    continue  # unconditional system include: hoisted to top
+                # Conditional system include: keep inline to preserve #ifdef context
             output_lines.append(line)
         output_lines.append(f"// ---- end: include/cli/{header.name} ----")
         if index != len(ordered_headers) - 1:
