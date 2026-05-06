@@ -7,15 +7,75 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  # ── Format check ──────────────────────────────────────────────────────────
+  check:
+    name: Format check
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - uses: cachix/install-nix-action@v27
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
 
-      - name: Build and test
-        run: nix build
+      - name: Check formatting
+        run: |
+          find include tests apps -name '*.hh' -o -name '*.cc' \
+            | xargs clang-format --dry-run --Werror
+
+  # ── Build + test matrix ───────────────────────────────────────────────────
+  test:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
+    needs: check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # x86-64 Linux
+          - {os: ubuntu-24.04,     compiler: gcc,   cc: gcc-14,   cxx: g++-14}
+          - {os: ubuntu-24.04,     compiler: clang, cc: clang-18, cxx: clang++-18}
+          # aarch64 Linux
+          - {os: ubuntu-24.04-arm, compiler: gcc,   cc: gcc-14,   cxx: g++-14}
+          - {os: ubuntu-24.04-arm, compiler: clang, cc: clang-18, cxx: clang++-18}
+          # Windows — MSVC only
+          - {os: windows-latest,   compiler: msvc,  cc: "",       cxx: ""}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ninja-build gcc-14 g++-14 clang-18
+
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Set up MSVC
+        if: matrix.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - uses: actions/cache@v4
+        with:
+          path: build/_deps
+          key: gtest-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Configure
+        shell: bash
+        run: |
+          COMPILER_FLAGS=""
+          if [[ -n "${{ matrix.cc }}" ]]; then
+            COMPILER_FLAGS="-DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}"
+          fi
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCXX_CLI20_ENABLE_TEST=ON \
+            $COMPILER_FLAGS
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
