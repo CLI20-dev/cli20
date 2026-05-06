@@ -14,7 +14,7 @@ struct BuildArgs {
 };
 
 struct ParseArgs {
-  cli::FlagOption<"verbose", 'v'> verbose{
+  cli::Flag<"verbose", 'v'> verbose{
       {.help = "Verbose output", .presence = cli::Presence::optional}};
 
   cli::IntOption<"count", 'c'> count{

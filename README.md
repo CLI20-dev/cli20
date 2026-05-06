@@ -8,7 +8,7 @@ Define your CLI as a type.
 #include "cli/parser.hh"
 
 struct Args {
-  cli::FlagOption<"verbose", 'v'> verbose;
+  cli::Flag<"verbose", 'v'> verbose;
   cli::StringOption<"output", 'o'> output;
   cli::Positional<std::string, cli::nargs::one_or_more> inputs;
 };
@@ -66,7 +66,7 @@ cli20:
 
 ```cpp
 struct Args {
-  cli::FlagOption<"verbose", 'v'> verbose;
+  cli::Flag<"verbose", 'v'> verbose;
   cli::StringOption<"output", 'o'> output;
 };
 
@@ -84,7 +84,7 @@ const auto args = cli::parseOrExit<Args>(argc, argv);
 #include "cli/parser.hh"
 
 struct BuildArgs {
-  cli::FlagOption<"release", 'r'> release{
+  cli::Flag<"release", 'r'> release{
       {.help = "Build with optimizations"}};
   cli::IntOption<"jobs", 'j'> jobs{
       {.help = "Parallel jobs", .presence = cli::required}};
@@ -93,8 +93,8 @@ struct BuildArgs {
 struct Args {
   cli::Description description{"A tiny build tool powered by cli20."};
 
-  cli::HelpFlag<> help{{.help = "Show help"}};
-  cli::FlagOption<"verbose", 'v'> verbose{{.help = "Enable verbose logging"}};
+  cli::Help<> help{{.help = "Show help"}};
+  cli::Flag<"verbose", 'v'> verbose{{.help = "Enable verbose logging"}};
   cli::StringOption<"output", 'o'> output{{.help = "Output path"}};
 
   cli::Positional<std::string, cli::nargs::one_or_more> inputs{
@@ -128,7 +128,7 @@ auto main(int argc, char* argv[]) -> int {
 Built-in help is one field:
 
 ```cpp
-cli::HelpFlag<> help;
+cli::Help<> help;
 ```
 
 That expands to `--help` and `-h`, prints generated help, and exits successfully. Combined with `cli::parseOrExit()`, help handling does not need parser-specific boilerplate.
@@ -146,7 +146,7 @@ cli::ArgImpl<
 
 ```cpp
 struct BuildArgs {
-  cli::FlagOption<"release", 'r'> release;
+  cli::Flag<"release", 'r'> release;
   cli::IntOption<"jobs", 'j'> jobs;
 };
 
@@ -187,44 +187,37 @@ The main API lives in [`include/cli/argument.hh`](include/cli/argument.hh).
 ### Flags
 
 ```cpp
-cli::FlagOption<"verbose", 'v'> verbose;
-cli::HelpFlag<> help;
-cli::HelpFlag<"usage", 'u'> usage;
+cli::Flag<"verbose", 'v'> verbose;   // stores bool
+cli::Help<> help;                     // --help / -h, print & exit
+cli::Help<"usage", 'u'> usage;        // custom name
 ```
 
-Ordinary flags store `bool`. `HelpFlag` is signal-only and exits through its action pipeline.
-
-### Scalar options
+### Options
 
 ```cpp
-cli::IntOption<"port", 'p'> port;
+// Generic form
+cli::Option<int, "port", 'p'> port;
+cli::ListOption<std::string, "include", 'I'> include_dirs;
+
+// Convenience aliases for common types
 cli::StringOption<"config", 'c'> config;
-cli::BoolOption<"color"> color;
+cli::IntOption<"port", 'p'> port;
+cli::DoubleOption<"ratio"> ratio;
 cli::PathOption<"output"> output;
 ```
 
-Storage type: `std::optional<T>`
-
-### List options
-
-```cpp
-cli::StringListOption<"include", 'I'> include_dirs;
-cli::IntListOption<"pair", '\0', cli::nargs::exactly<2>> pair;
-```
-
-Storage type: `std::vector<T>`
+Scalar options store `std::optional<T>`. List options store `std::vector<T>`.
 
 ### Positionals
 
 ```cpp
-cli::StringPositional src;
-cli::IntPositional count;
-cli::Positional<std::string, cli::nargs::one_or_more> files;
+cli::Positional<std::string> src;                          // optional<string>
+cli::Positional<std::string, cli::nargs::one_or_more> files; // vector<string>
+cli::Positional<int> count;
 ```
 
-If `nargs.max == 1`, the storage is `std::optional<T>`.
-
-If `nargs.max != 1`, the storage is `std::vector<T>`.
+If `nargs.max == 1`, storage is `std::optional<T>`.  
+If `nargs.max != 1`, storage is `std::vector<T>`.
 
 ## Philosophy
 

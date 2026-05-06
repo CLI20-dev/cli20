@@ -13,17 +13,17 @@ struct Args {
       "a subcommand."};
 
   /* -- Define the arguments. */
-  HelpFlag<> help;
-  FlagOption<"quiet", 'q'> verbose;
+  Help<> help;
+  Flag<"quiet", 'q'> verbose;
   IntOption<"count", 'n'> count;
 
   /* -- Define a positional argument that can be repeated. */
-  StrListPosArg input_files{};
+  Positional<std::string, nargs::one_or_more> input_files{};
 
   /* -- Define a subcommand with its own arguments. */
   struct BuildArgs {
-    StringArg<"config", 'c'> config;
-    FlagOption<"release", 'r'> release;
+    StringOption<"config", 'c'> config;
+    Flag<"release", 'r'> release;
   };
   Command<"build", BuildArgs> build{{.help = "Run the build subcommand"}};
 };

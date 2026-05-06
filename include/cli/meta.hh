@@ -37,7 +37,9 @@ consteval auto aggregate_initializable() -> std::size_t {
 
 }  // namespace detail
 
-#if defined(__cplusplus) && __cplusplus >= 202400L
+#if defined(__cpp_structured_bindings) &&                           \
+    __cpp_structured_bindings >= 202411L && defined(__cplusplus) && \
+    __cplusplus >= 202400L
 
 template <class T>
 constexpr auto as_tuple(T& t) {

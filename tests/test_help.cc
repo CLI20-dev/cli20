@@ -12,7 +12,7 @@ namespace {
 struct BuildArgs {
   cli::Description description{"Compile sources into an executable."};
 
-  cli::FlagOption<"release", 'r'> release{
+  cli::Flag<"release", 'r'> release{
       {.help = "Build with optimizations", .presence = cli::optional}};
   cli::IntOption<"jobs", 'j'> jobs{
       {.help = "Parallel job count", .presence = cli::required}};
@@ -22,18 +22,19 @@ struct HelpArgs {
   cli::Description description{
       "A small tool used to exercise the help generator."};
 
-  cli::FlagOption<"verbose", 'v'> verbose{
+  cli::Flag<"verbose", 'v'> verbose{
       {.help = "Enable verbose logging", .presence = cli::optional}};
   cli::IntOption<"count", 'c'> count{
       {.help = "Number of iterations", .presence = cli::optional}};
-  cli::StringListOption<"include", 'I', cli::nargs::exactly<2>> includes{
+  cli::ListOption<std::string, "include", 'I', cli::nargs::exactly<2>> includes{
       {.help = "Two include directories", .presence = cli::optional}};
-  cli::StringPositional input{{.help = "Input file", .presence = cli::required}};
+  cli::Positional<std::string> input{
+      {.help = "Input file", .presence = cli::required}};
   cli::Command<"build", BuildArgs> build{{.help = "Run the build step"}};
 };
 
 struct OptionsOnlyArgs {
-  cli::FlagOption<"verbose", 'v'> verbose{
+  cli::Flag<"verbose", 'v'> verbose{
       {.help = "Enable verbose logging", .presence = cli::optional}};
 };
 
@@ -42,11 +43,11 @@ struct CommandsOnlyArgs {
 };
 
 struct HelpFlagArgs {
-  cli::HelpFlag<> help;
+  cli::Help<> help;
 };
 
 struct CustomHelpFlagArgs {
-  cli::HelpFlag<"usage", 'u'> usage;
+  cli::Help<"usage", 'u'> usage;
 };
 
 struct ExitSuccessArgs {

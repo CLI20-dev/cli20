@@ -12,18 +12,18 @@
 namespace {
 
 struct BuildArgs {
-  cli::FlagOption<"release", 'r'> release{
+  cli::Flag<"release", 'r'> release{
       {.help = "Release mode", .presence = cli::optional}};
   cli::IntOption<"jobs", 'j'> jobs{
       {.help = "Parallel jobs", .presence = cli::required}};
 };
 
 struct SugarArgs {
-  cli::FlagOption<"verbose", 'v'> verbose{
+  cli::Flag<"verbose", 'v'> verbose{
       {.help = "Verbose output", .presence = cli::optional}};
   cli::IntOption<"count", 'c'> count{
       {.help = "Count", .presence = cli::optional}};
-  cli::StringListOption<"include", 'I', cli::nargs::exactly<2>> includes{
+  cli::ListOption<std::string, "include", 'I', cli::nargs::exactly<2>> includes{
       {.help = "Include directories", .presence = cli::optional}};
   cli::Positional<std::string, cli::nargs::one_or_more> files{
       {.help = "Input files", .presence = cli::required}};
@@ -48,10 +48,10 @@ static_assert(std::same_as<VerboseField::value_type, bool>);
 static_assert(std::same_as<CountField::value_type, std::optional<int>>);
 static_assert(std::same_as<IncludesField::value_type, std::vector<std::string>>);
 static_assert(std::same_as<FilesField::value_type, std::vector<std::string>>);
+static_assert(std::same_as<cli::Positional<std::string>::value_type,
+                           std::optional<std::string>>);
 static_assert(
-    std::same_as<cli::StringPositional::value_type, std::optional<std::string>>);
-static_assert(
-    std::same_as<cli::IntListArg<"ports">::value_type, std::vector<int>>);
+    std::same_as<cli::ListOption<int, "ports">::value_type, std::vector<int>>);
 
 }  // namespace
 
@@ -79,7 +79,7 @@ TEST(Sugar, ParsesConvenienceAliases) {
 
 TEST(Sugar, SinglePositionalStoresOptionalValue) {
   struct SinglePositionalArgs {
-    cli::StringPositional file{
+    cli::Positional<std::string> file{
         {.help = "Input file", .presence = cli::required}};
   };
 

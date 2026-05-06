@@ -4,37 +4,36 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <optional>
 #include <ranges>
 #include <regex>
 #include <set>
+#include <span>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <tuple>
 #include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
-#include <array>
-#include <tuple>
-#include <cstdint>
-#include <sstream>
-#include <cstdlib>
-#include <iostream>
-#include <span>
-#include <unordered_map>
-#include <unordered_set>
 
 // ---- begin: include/cli/error.hh ----
-
 
 namespace cli {
 
@@ -167,7 +166,6 @@ struct ParseError {
 
 // ---- begin: include/cli/string_literal.hh ----
 
-
 namespace cli {
 template <std::size_t N>
 struct StringLiteral {
@@ -210,8 +208,6 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 // ---- end: include/cli/string_literal.hh ----
 
 // ---- begin: include/cli/action.hh ----
-
-
 
 namespace cli {
 
@@ -1454,7 +1450,6 @@ inline constexpr auto exit_success = ExitSuccess{};
 
 // ---- begin: include/cli/meta.hh ----
 
-
 namespace cli {
 
 namespace detail {
@@ -1488,7 +1483,7 @@ consteval auto aggregate_initializable() -> std::size_t {
 
 }  // namespace detail
 
-#if defined(__cplusplus) && __cplusplus >= 202400L
+#if defined(__cpp_structured_bindings) && __cpp_structured_bindings >= 202411L
 
 template <class T>
 constexpr auto as_tuple(T& t) {
@@ -2043,8 +2038,6 @@ constexpr auto as_tuple (const T& t) {
 
 // ---- begin: include/cli/argument.hh ----
 
-
-
 namespace cli {
 
 struct SpecMemberTag {};
@@ -2471,19 +2464,17 @@ struct PositionalActionFor {
 
 }  // namespace detail
 
-template <StringLiteral Name, char ShortName = '\0'>
-using FlagOption =
-    ArgImpl<Name, ShortName, nargs::none, Action<pack::set_true>{}>;
+// ── Core public API ───────────────────────────────────────────────────────────
 
 template <StringLiteral Name, char ShortName = '\0'>
-using FlagArg = FlagOption<Name, ShortName>;
+using Flag = ArgImpl<Name, ShortName, nargs::none, Action<pack::set_true>{}>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
-using HelpFlag = ArgImpl<Name, ShortName, nargs::none,
-                         Action<action::print_help, action::exit_success>{}>;
+using Help = ArgImpl<Name, ShortName, nargs::none,
+                     Action<action::print_help, action::exit_success>{}>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using ScalarOption =
+using Option =
     ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
 
 template <class T, StringLiteral Name, char ShortName = '\0',
@@ -2493,169 +2484,19 @@ using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
 template <class T, Nargs N = nargs::one>
 using Positional = PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;
 
-template <StringLiteral Name, char ShortName = '\0'>
-using StringOption = ScalarOption<std::string, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using StringArg = StringOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using StringListOption = ListOption<std::string, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using StringListArg = StringListOption<Name, ShortName, N>;
-using StringPositional = Positional<std::string>;
-using StringPositionalArg = StringPositional;
-using StringListPositional = Positional<std::string, nargs::one_or_more>;
+// ── Convenience aliases for common types ─────────────────────────────────────
 
 template <StringLiteral Name, char ShortName = '\0'>
-using StrOption = StringOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using StrArg = StrOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using StrListOption = StringListOption<Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using StrListArg = StrListOption<Name, ShortName, N>;
-using StrPositional = StringPositional;
-using StrPositionalArg = StrPositional;
-using StrPosArg = StrPositional;
-using StrListPositional = Positional<std::string, nargs::one_or_more>;
-using StrListPosArg = StrListPositional;
+using StringOption = Option<std::string, Name, ShortName>;
 
 template <StringLiteral Name, char ShortName = '\0'>
-using BoolOption = ScalarOption<bool, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using BoolArg = BoolOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using BoolListOption = ListOption<bool, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using BoolListArg = BoolListOption<Name, ShortName, N>;
-using BoolPositional = Positional<bool>;
-using BoolPositionalArg = BoolPositional;
-using BoolPosArg = BoolPositional;
-using BoolListPositional = Positional<bool, nargs::one_or_more>;
-using BoolListPosArg = BoolListPositional;
+using IntOption = Option<int, Name, ShortName>;
 
 template <StringLiteral Name, char ShortName = '\0'>
-using IntOption = ScalarOption<int, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using IntArg = IntOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using IntListOption = ListOption<int, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using IntListArg = IntListOption<Name, ShortName, N>;
-using IntPositional = Positional<int>;
-using IntPositionalArg = IntPositional;
-using IntPosArg = IntPositional;
-using IntListPositional = Positional<int, nargs::one_or_more>;
-using IntListPosArg = IntListPositional;
+using DoubleOption = Option<double, Name, ShortName>;
 
 template <StringLiteral Name, char ShortName = '\0'>
-using Int32Option = ScalarOption<std::int32_t, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using Int32Arg = Int32Option<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Int32ListOption = ListOption<std::int32_t, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Int32ListArg = Int32ListOption<Name, ShortName, N>;
-using Int32Positional = Positional<std::int32_t>;
-using Int32PositionalArg = Int32Positional;
-using Int32PosArg = Int32Positional;
-using Int32ListPositional = Positional<std::int32_t, nargs::one_or_more>;
-using Int32ListPosArg = Int32ListPositional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using Int64Option = ScalarOption<std::int64_t, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using Int64Arg = Int64Option<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Int64ListOption = ListOption<std::int64_t, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Int64ListArg = Int64ListOption<Name, ShortName, N>;
-using Int64Positional = Positional<std::int64_t>;
-using Int64PositionalArg = Int64Positional;
-using Int64PosArg = Int64Positional;
-using Int64ListPositional = Positional<std::int64_t, nargs::one_or_more>;
-using Int64ListPosArg = Int64ListPositional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using Uint32Option = ScalarOption<std::uint32_t, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using Uint32Arg = Uint32Option<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Uint32ListOption = ListOption<std::uint32_t, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Uint32ListArg = Uint32ListOption<Name, ShortName, N>;
-using Uint32Positional = Positional<std::uint32_t>;
-using Uint32PositionalArg = Uint32Positional;
-using Uint32PosArg = Uint32Positional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using Uint64Option = ScalarOption<std::uint64_t, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using Uint64Arg = Uint64Option<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Uint64ListOption = ListOption<std::uint64_t, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using Uint64ListArg = Uint64ListOption<Name, ShortName, N>;
-using Uint64Positional = Positional<std::uint64_t>;
-using Uint64PositionalArg = Uint64Positional;
-using Uint64PosArg = Uint64Positional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using FloatOption = ScalarOption<float, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using FloatArg = FloatOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using FloatListOption = ListOption<float, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using FloatListArg = FloatListOption<Name, ShortName, N>;
-using FloatPositional = Positional<float>;
-using FloatPositionalArg = FloatPositional;
-using FloatPosArg = FloatPositional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using DoubleOption = ScalarOption<double, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using DoubleArg = DoubleOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using DoubleListOption = ListOption<double, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using DoubleListArg = DoubleListOption<Name, ShortName, N>;
-using DoublePositional = Positional<double>;
-using DoublePositionalArg = DoublePositional;
-using DoublePosArg = DoublePositional;
-
-template <StringLiteral Name, char ShortName = '\0'>
-using PathOption = ScalarOption<std::filesystem::path, Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0'>
-using PathArg = PathOption<Name, ShortName>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using PathListOption = ListOption<std::filesystem::path, Name, ShortName, N>;
-template <StringLiteral Name, char ShortName = '\0',
-          Nargs N = nargs::one_or_more>
-using PathListArg = PathListOption<Name, ShortName, N>;
-using PathPositional = Positional<std::filesystem::path>;
-using PathPositionalArg = PathPositional;
-using PathPosArg = PathPositional;
+using PathOption = Option<std::filesystem::path, Name, ShortName>;
 
 }  // namespace cli
 // ---- end: include/cli/argument.hh ----
@@ -2724,8 +2565,6 @@ inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
 // ---- end: include/cli/color.hh ----
 
 // ---- begin: include/cli/help.hh ----
-
-
 
 namespace cli {
 
@@ -3093,7 +2932,6 @@ auto formatHelp(T& value, std::string_view program_name = "program",
 // ---- begin: include/cli/parser.hh ----
 
 // #include <expected>
-
 
 namespace cli {
 

@@ -7,8 +7,7 @@ struct Args {
   cli::Description description{
       "Small example used by the README and by CI to exercise the public API."};
 
-  cli::HelpFlag<> help{
-      {.help = "Show help", .presence = cli::Presence::optional}};
+  cli::Help<> help{{.help = "Show help", .presence = cli::Presence::optional}};
 
   cli::IntOption<"port", 'p'> port{
       {.help = "TCP port number", .presence = cli::Presence::optional}};

@@ -16,9 +16,8 @@ struct BuildArgs {
       config{{.help = "Build configuration file",
               .presence = cli::Presence::required}};
 
-  cli::FlagOption<"release", 'r'> release{
-      {.help = "Build with release optimizations",
-       .presence = cli::Presence::optional}};
+  cli::Flag<"release", 'r'> release{{.help = "Build with release optimizations",
+                                     .presence = cli::Presence::optional}};
 };
 
 struct Args {
@@ -31,7 +30,7 @@ struct Args {
       help{{.help = "Show this help message and exit",
             .presence = cli::Presence::optional}};
 
-  cli::FlagOption<"verbose", 'v'> verbose{
+  cli::Flag<"verbose", 'v'> verbose{
       {.help = "Enable verbose output", .presence = cli::Presence::optional}};
 
   cli::IntOption<"count", 'n'> count{
