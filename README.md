@@ -283,6 +283,31 @@ target_include_directories(cli20 INTERFACE path/to/cli20/include)
 target_compile_features(cli20 INTERFACE cxx_std_20)
 ```
 
+If you install the library with CMake, you can link the exported target instead:
+
+```cmake
+find_package(cli20 CONFIG REQUIRED)
+
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE cli20::cli20)
+```
+
+If you want to fetch it directly from a source checkout, `FetchContent` also works:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  cli20
+  GIT_REPOSITORY https://github.com/gen740/CLI20.git
+  GIT_TAG v0.1
+)
+FetchContent_MakeAvailable(cli20)
+
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE cli20::cli20)
+```
+
 ## Development
 
 ```bash
