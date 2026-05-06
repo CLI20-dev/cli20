@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(cli20 VERSION 0.1 LANGUAGES CXX)
+project(cli20 VERSION 0.1.1 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

@@ -300,7 +300,7 @@ include(FetchContent)
 FetchContent_Declare(
   cli20
   GIT_REPOSITORY https://github.com/gen740/CLI20.git
-  GIT_TAG v0.1
+  GIT_TAG v0.1.1
 )
 FetchContent_MakeAvailable(cli20)
 
