@@ -5,7 +5,6 @@
 #include <cli/string_literal.hh>
 #include <cstdint>
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -427,7 +426,7 @@ struct ActionFor<T> {
 
 template <class T, Nargs N>
 struct PositionalActionFor {
-  inline static constexpr auto value = [] {
+  inline static constexpr auto value = []() -> auto {
     if constexpr (N.max == 1) {
       return ActionFor<T>::set_once;
     } else {
@@ -472,6 +471,7 @@ template <StringLiteral Name, char ShortName = '\0',
 using StringListArg = StringListOption<Name, ShortName, N>;
 using StringPositional = Positional<std::string>;
 using StringPositionalArg = StringPositional;
+using StringListPositional = Positional<std::string, nargs::one_or_more>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using StrOption = StringOption<Name, ShortName>;
@@ -486,6 +486,8 @@ using StrListArg = StrListOption<Name, ShortName, N>;
 using StrPositional = StringPositional;
 using StrPositionalArg = StrPositional;
 using StrPosArg = StrPositional;
+using StrListPositional = Positional<std::string, nargs::one_or_more>;
+using StrListPosArg = StrListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using BoolOption = ScalarOption<bool, Name, ShortName>;
@@ -500,6 +502,8 @@ using BoolListArg = BoolListOption<Name, ShortName, N>;
 using BoolPositional = Positional<bool>;
 using BoolPositionalArg = BoolPositional;
 using BoolPosArg = BoolPositional;
+using BoolListPositional = Positional<bool, nargs::one_or_more>;
+using BoolListPosArg = BoolListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using IntOption = ScalarOption<int, Name, ShortName>;
@@ -514,6 +518,8 @@ using IntListArg = IntListOption<Name, ShortName, N>;
 using IntPositional = Positional<int>;
 using IntPositionalArg = IntPositional;
 using IntPosArg = IntPositional;
+using IntListPositional = Positional<int, nargs::one_or_more>;
+using IntListPosArg = IntListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Int32Option = ScalarOption<std::int32_t, Name, ShortName>;
@@ -528,6 +534,8 @@ using Int32ListArg = Int32ListOption<Name, ShortName, N>;
 using Int32Positional = Positional<std::int32_t>;
 using Int32PositionalArg = Int32Positional;
 using Int32PosArg = Int32Positional;
+using Int32ListPositional = Positional<std::int32_t, nargs::one_or_more>;
+using Int32ListPosArg = Int32ListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Int64Option = ScalarOption<std::int64_t, Name, ShortName>;
@@ -542,6 +550,8 @@ using Int64ListArg = Int64ListOption<Name, ShortName, N>;
 using Int64Positional = Positional<std::int64_t>;
 using Int64PositionalArg = Int64Positional;
 using Int64PosArg = Int64Positional;
+using Int64ListPositional = Positional<std::int64_t, nargs::one_or_more>;
+using Int64ListPosArg = Int64ListPositional;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Uint32Option = ScalarOption<std::uint32_t, Name, ShortName>;
