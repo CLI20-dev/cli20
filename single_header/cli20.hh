@@ -3,39 +3,39 @@
 
 #pragma once
 
-#include <unistd.h>
-
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
-#include <cstdint>
-#include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <functional>
-#include <iostream>
 #include <map>
 #include <optional>
 #include <ranges>
 #include <regex>
 #include <set>
-#include <span>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
-#include <tuple>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <variant>
 #include <vector>
+#include <array>
+#include <tuple>
+#include <cstdint>
+#include <unistd.h>
+#include <sstream>
+#include <cstdlib>
+#include <iostream>
+#include <span>
+#include <unordered_map>
+#include <unordered_set>
 
 // ---- begin: include/cli/error.hh ----
+
 
 namespace cli {
 
@@ -168,6 +168,7 @@ struct ParseError {
 
 // ---- begin: include/cli/string_literal.hh ----
 
+
 namespace cli {
 template <std::size_t N>
 struct StringLiteral {
@@ -210,6 +211,8 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 // ---- end: include/cli/string_literal.hh ----
 
 // ---- begin: include/cli/action.hh ----
+
+
 
 namespace cli {
 
@@ -1452,6 +1455,7 @@ inline constexpr auto exit_success = ExitSuccess{};
 
 // ---- begin: include/cli/meta.hh ----
 
+
 namespace cli {
 
 namespace detail {
@@ -2039,6 +2043,8 @@ constexpr auto as_tuple (const T& t) {
 // ---- end: include/cli/meta.hh ----
 
 // ---- begin: include/cli/argument.hh ----
+
+
 
 namespace cli {
 
@@ -2646,6 +2652,7 @@ using PathPosArg = PathPositional;
 
 // ---- begin: include/cli/color.hh ----
 
+
 namespace cli {
 
 // Controls whether ANSI escape codes are emitted by formatHelp().
@@ -2702,6 +2709,8 @@ inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
 // ---- end: include/cli/color.hh ----
 
 // ---- begin: include/cli/help.hh ----
+
+
 
 namespace cli {
 
@@ -3069,6 +3078,7 @@ auto formatHelp(T& value, std::string_view program_name = "program",
 // ---- begin: include/cli/parser.hh ----
 
 // #include <expected>
+
 
 namespace cli {
 
