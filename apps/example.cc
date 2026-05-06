@@ -7,15 +7,15 @@
 namespace fs = std::filesystem;
 
 struct BuildArgs {
+  // `ArgImpl` remains available when you need validation beyond the sugar aliases.
   argon::ArgImpl<
-      "config", 'c', {.min = 1, .max = 1},
+      "config", 'c', argon::nargs::one,
       argon::Action<argon::conversion::path, argon::validation::exists,
                     argon::validation::is_regular_file, argon::pack::set_once>{}>
       config{{.help = "Build configuration file",
               .presence = argon::Presence::required}};
 
-  argon::ArgImpl<"release", 'r', {.min = 0, .max = 0},
-                 argon::Action<argon::pack::set_true>{}>
+  argon::FlagOption<"release", 'r'>
       release{{.help = "Build with release optimizations",
                .presence = argon::Presence::optional}};
 };
@@ -25,22 +25,21 @@ struct Args {
       "Demonstrates the current argon parser API with options, positionals, and "
       "a subcommand."};
 
-  argon::ArgImpl<"verbose", 'v', {.min = 0, .max = 0},
-                 argon::Action<argon::pack::set_true>{}>
+  argon::ArgImpl<"help", 'h', argon::nargs::none,
+                 argon::Action<argon::action::print_help,
+                               argon::action::exit_success>{}>
+      help{{.help = "Show this help message and exit",
+            .presence = argon::Presence::optional}};
+
+  argon::FlagOption<"verbose", 'v'>
       verbose{{.help = "Enable verbose output",
                .presence = argon::Presence::optional}};
 
-  argon::ArgImpl<
-      "count", 'n', {.min = 1, .max = 1},
-      argon::Action<argon::conversion::integer<int>, argon::validation::positive,
-                    argon::pack::set_once>{}>
+  argon::IntOption<"count", 'n'>
       count{{.help = "Positive iteration count",
              .presence = argon::Presence::optional}};
 
-  argon::PositionalImpl<
-      {.min = 1, .max = -1},
-      argon::Action<argon::conversion::string, argon::validation::not_blank,
-                    argon::pack::push>{}>
+  argon::Positional<std::string, argon::nargs::one_or_more>
       input_files{
           {.help = "Input files", .presence = argon::Presence::required}};
 
@@ -48,13 +47,7 @@ struct Args {
 };
 
 auto main(int argc, char* argv[]) -> int {
-  auto result = argon::parse<Args>(argc, argv);
-  if (!result) {
-    std::cerr << result.error.message() << '\n';
-    return 1;
-  }
-
-  const auto& args = result.value;
+  const auto args = argon::parseOrExit<Args>(argc, argv);
   std::cout << "verbose: " << std::boolalpha << args.verbose.value() << '\n';
   if (args.count.value().has_value()) {
     std::cout << "count: " << *args.count.value() << '\n';

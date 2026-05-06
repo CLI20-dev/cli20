@@ -1,260 +1,327 @@
 # argon
 
-A header-only C++26 argument parsing library. The argument struct you write **is** the schema — no registration, no macros.
+`argon` is a header-only C++ command-line parser where your struct is the schema.
+
+No registration tables. No macros. No separate builder DSL. You write a plain aggregate, and `argon` turns it into a parser.
+
+```cpp
+struct Args {
+  argon::FlagOption<"verbose", 'v'> verbose;
+  argon::IntOption<"port", 'p'> port;
+  argon::Positional<std::string, argon::nargs::one_or_more> files;
+};
+```
+
+That is the interface.
+
+## Why it is interesting
+
+- The type of each field defines how it parses.
+- Field order defines positional assignment.
+- Subcommands are just nested structs.
+- You can stay on the sugar API for common cases.
+- You can drop to `ArgImpl` and `Action<...>` when you need custom conversion, validation, or packing.
 
 ## Installation
 
-Copy the `include/` directory into your project and add it to your include path.
+Copy `include/` into your project and add it to your include path.
 
 ```cmake
-target_include_directories(your_target PRIVATE path/to/argon/include)
-target_compile_features(your_target PRIVATE cxx_std_26)
+add_library(argon INTERFACE)
+target_include_directories(argon INTERFACE path/to/argon/include)
+target_compile_features(argon INTERFACE cxx_std_20)
 ```
 
-## Quick start
+## Quick Start
 
 ```cpp
 #include <iostream>
 
-#include "argon/arithmetic_argument.hh"
-#include "argon/flag_argument.hh"
+#include "argon/argument.hh"
 #include "argon/parser.hh"
-#include "argon/string_argument.hh"
 
-struct Args {
-    argon::FlagArg<"help",    'h'> help   {"Show this help message"};
-    argon::FlagArg<"verbose", 'v'> verbose{"Enable verbose output"};
-    argon::IntArg<"count",    'n'> count  {"Number of iterations"};
-    argon::StrArg<"output",   'o'> output {"Output file path"};
-};
-
-int main(int argc, char** argv) {
-    argon::Parser<Args> parser;
-    auto res = parser.parse(argc, argv);
-
-    if (!res) {
-        std::cerr << "error: " << res.error().message() << '\n';
-        std::cerr << parser.formatHelp();
-        return 1;
-    }
-    if (res->help.provided()) {
-        std::cout << parser.formatHelp();
-        return 0;
-    }
-    if (res->verbose.provided()) { /* ... */ }
-    if (res->count.provided())   { int n = res->count.value(); }
-}
-```
-
-## The struct IS the schema
-
-Every field in your struct becomes one argument. The type of the field determines how the token is parsed. Field order determines positional assignment order.
-
-## Descriptions
-
-Pass a string literal as the first constructor argument to document any argument. Descriptions appear in `formatHelp()` output.
-
-```cpp
-struct Args {
-    argon::FlagArg<"verbose", 'v'> verbose{"Enable verbose output"};
-    argon::IntArg<"count",    'n'> count  {"Number of iterations"};
-    argon::StrArg<"remote",   'r'> remote {argon::required, "Remote name (required)"};
-    argon::IntPositional           port   {"Port number to connect to"};
-};
-```
-
-Constructor variants:
-
-| Usage | Description | Required? |
-|-------|-------------|-----------|
-| `Arg<...> x;` | no description | optional |
-| `Arg<...> x{"description"};` | description | optional |
-| `Arg<...> x{argon::required};` | no description | required |
-| `Arg<...> x{argon::required, "description"};` | description | required |
-
-## Generating help text
-
-```cpp
-argon::Parser<Args> parser;
-parser.parse(argc, argv);            // sets the program name from argv[0]
-
-std::cout << parser.formatHelp();    // auto-detect TTY for color
-std::cout << parser.formatHelp(argon::ColorMode::never);   // plain text
-std::cout << parser.formatHelp(argon::ColorMode::always);  // always ANSI
-```
-
-Example output:
-
-```
-Usage: example [options] [command]
-
-Options:
-  -h, --help             Show this help message
-  -v, --verbose          Enable verbose output
-  -n, --count <int>      Number of iterations
-  -o, --output <string>  Output file path
-
-Commands:
-  build                  Compile the project
-  push                   Push commits to a remote
-```
-
-### Color modes
-
-| `ColorMode` | Behaviour |
-|-------------|-----------|
-| `auto_` (default) | ANSI bold/underline when stdout is a TTY |
-| `never` | Plain text, no escape codes |
-| `always` | Always emit ANSI codes |
-
-Only the portable 8/16-color SGR sequences are used (`\033[1m` bold, `\033[4m` underline, `\033[0m` reset). No RGB/truecolor extensions.
-
-## Argument types
-
-### Options (take a value)
-
-| Type | C++ type | Header |
-|------|----------|--------|
-| `IntArg<"name", 'n'>` | `int` | `arithmetic_argument.hh` |
-| `Int32Arg<"name">` | `int32_t` | `arithmetic_argument.hh` |
-| `Int64Arg<"name">` | `int64_t` | `arithmetic_argument.hh` |
-| `Uint32Arg<"name">` | `uint32_t` | `arithmetic_argument.hh` |
-| `Uint64Arg<"name">` | `uint64_t` | `arithmetic_argument.hh` |
-| `FloatArg<"name">` | `float` | `arithmetic_argument.hh` |
-| `DoubleArg<"name">` | `double` | `arithmetic_argument.hh` |
-| `StrArg<"name", 'n'>` | `std::string` | `string_argument.hh` |
-| `BoolArg<"name">` | `bool` (`true`/`false` only) | `bool_argument.hh` |
-
-All options accept `--name value`, `-n value`, and `--name=value`. Short option is optional.
-
-### List options (one or more values)
-
-| Type | C++ type |
-|------|----------|
-| `IntListArg<"name">` | `std::vector<int>` |
-| `StrListArg<"name">` | `std::vector<std::string>` |
-| `BoolListArg<"name">` | `std::vector<bool>` |
-| *(other `*ListArg` variants follow the same pattern)* | |
-
-Collect multiple whitespace-separated values: `--names alice bob charlie`.  
-Control the count with `nargs`:
-
-```cpp
-argon::StrListArg<"feature", 'f'> features{argon::nargs::zero_or_more, "Features to enable"};
-argon::IntListArg<"ports">        ports{argon::nargs::one_or_more};
-argon::IntListArg<"range">        range{argon::nargs::exactly<2>};
-```
-
-### Flags (no value)
-
-```cpp
-argon::FlagArg<"verbose", 'v'> verbose{"Enable verbose output"};
-// usage: --verbose / -v
-// result->verbose.provided() == true if present
-```
-
-### Positional arguments
-
-Positionals are assigned left-to-right in field declaration order.
-
-```cpp
-argon::StrPositional src{"Source file"};   // first bare word
-argon::StrPositional dst{"Destination"};   // second bare word
-argon::IntPosArg     count{"Item count"};  // third, parsed as int
-```
-
-| Type | C++ type | Header |
-|------|----------|--------|
-| `StrPositional` / `StrPosArg` | `std::string` | `string_argument.hh` |
-| `IntPositional` / `IntPosArg` | `int` | `arithmetic_argument.hh` |
-| `Int64PosArg`, `Uint32PosArg`, … | fixed-width int | `arithmetic_argument.hh` |
-| `FloatPosArg`, `DoublePosArg` | float/double | `arithmetic_argument.hh` |
-| `BoolPositional` / `BoolPosArg` | `bool` (`true`/`false`) | `bool_argument.hh` |
-
-### Required options
-
-```cpp
-argon::StrArg<"remote", 'r'> remote{argon::required, "Remote name"};
-// parse() returns an error if --remote is not provided
-```
-
-### Sub-commands
-
-Nest a struct inside `Command<SubArgs, "name">`. Everything from the command token onwards is parsed by a recursive sub-parser — top-level options must appear **before** the command name.
-
-```cpp
 struct BuildArgs {
-    argon::StrArg<"target", 't'> target{"Build target"};
-    argon::FlagArg<"dry-run">    dry_run{"Simulate without building"};
+  argon::FlagOption<"release", 'r'> release{
+      {.help = "Build with optimizations"}};
+  argon::IntOption<"jobs", 'j'> jobs{
+      {.help = "Parallel jobs", .presence = argon::required}};
 };
 
 struct Args {
-    argon::FlagArg<"verbose", 'v'>       verbose{"Verbose output"};
-    argon::Command<BuildArgs, "build">   build{"Compile the project"};
-    argon::Command<PushArgs,  "push">    push{"Push to remote"};
+  argon::Description description{
+      "A tiny build tool powered by argon."};
+
+  argon::HelpFlag<> help{
+      {.help = "Show help"}};
+
+  argon::FlagOption<"verbose", 'v'> verbose{
+      {.help = "Enable verbose logging"}};
+
+  argon::StringOption<"output", 'o'> output{
+      {.help = "Output path"}};
+
+  argon::Positional<std::string, argon::nargs::one_or_more> inputs{
+      {.help = "Input files", .presence = argon::required}};
+
+  argon::Command<"build", BuildArgs> build{
+      {.help = "Run the build subcommand"}};
 };
 
-// usage: prog --verbose build --target release
-if (res->build.provided()) {
-    std::cout << res->build.target.value();
+int main(int argc, char* argv[]) {
+  const auto args = argon::parseOrExit<Args>(argc, argv);
+  if (args.verbose.value()) {
+    std::cout << "verbose enabled\n";
+  }
+
+  for (const auto& input : args.inputs.value()) {
+    std::cout << "input: " << input << '\n';
+  }
+
+  if (args.build.provided()) {
+    std::cout << "jobs: " << *args.build.jobs.value() << '\n';
+  }
 }
 ```
 
-### `--` end-of-options separator
+Example CLI:
 
-Everything after a bare `--` token is treated as a positional, even if it looks like an option:
-
-```
-prog --output out.txt -- --not-an-option
+```text
+tool --verbose src/a.cc src/b.cc build --jobs 8 --release
 ```
 
-## `nargs` reference
-
-| Constant | Meaning |
-|----------|---------|
-| `nargs::one` | exactly 1 (default for single-value options) |
-| `nargs::none` | 0 (default for flags) |
-| `nargs::zero_or_one` | 0 or 1 |
-| `nargs::zero_or_more` | 0 … ∞ |
-| `nargs::one_or_more` | 1 … ∞ |
-| `nargs::exactly<N>` | exactly N |
-| `nargs::between<Min, Max>` | Min … Max |
-
-## Argument API
-
-Every argument field exposes:
+Built-in help is one field:
 
 ```cpp
-arg.provided()       // bool  — was this argument given on the command line?
-arg.value()          // const T& — parsed value (default-constructed if not provided)
-arg.description()    // std::string_view — the description string (empty if none)
-arg.isRequired()     // bool  — was this declared required?
-arg.occurrenceCount() // std::size_t — how many times the option was seen
+argon::HelpFlag<> help;
 ```
 
-## Error handling
+That expands to `--help` / `-h`, prints generated help, and exits successfully. Together with `parseOrExit()`, a CLI can get built-in help with no error-handling boilerplate.
 
-`Parser::parse` returns `std::expected<Args, ParseError>`. On failure:
+## The Sugar API
+
+The main API lives in [`include/argon/argument.hh`](include/argon/argument.hh).
+
+### Flags
 
 ```cpp
-auto res = parser.parse(argc, argv);
-if (!res) {
-    std::cerr << "error: " << res.error().message() << '\n';
-    std::cerr << parser.formatHelp(argon::ColorMode::never);
-    return 1;
+argon::FlagOption<"verbose", 'v'> verbose;
+argon::HelpFlag<> help;
+argon::HelpFlag<"usage", 'u'> usage;
+argon::FlagArg<"dry-run"> dry_run;  // alias
+```
+
+Storage type: `bool` for ordinary flags. `HelpFlag` is signal-only and exits via its action pipeline.
+
+### Scalar options
+
+```cpp
+argon::IntOption<"port", 'p'> port;
+argon::StringOption<"config", 'c'> config;
+argon::BoolOption<"color"> color;
+argon::PathOption<"output"> output;
+```
+
+Storage type: `std::optional<T>`
+
+`Option` and `Arg` names are interchangeable aliases:
+
+```cpp
+argon::IntOption<"port", 'p'> a;
+argon::IntArg<"port", 'p'> b;
+```
+
+### List options
+
+```cpp
+argon::StringListOption<"include", 'I'> include_dirs;
+argon::IntListArg<"ports"> ports;
+```
+
+Default `nargs` is `argon::nargs::one_or_more`. You can override it:
+
+```cpp
+argon::StringListOption<"feature", 'f', argon::nargs::zero_or_more> features;
+argon::IntListOption<"pair", '\0', argon::nargs::exactly<2>> pair;
+```
+
+Storage type: `std::vector<T>`
+
+### Positionals
+
+```cpp
+argon::StringPositional src;
+argon::IntPositional count;
+argon::Positional<std::string, argon::nargs::one_or_more> files;
+```
+
+If `nargs.max == 1`, the storage is `std::optional<T>`.
+
+If `nargs.max != 1`, the storage is `std::vector<T>`.
+
+### Built-in families
+
+- `FlagOption`
+- `StringOption`, `StringArg`, `StrOption`, `StrArg`
+- `BoolOption`, `BoolArg`
+- `IntOption`, `IntArg`
+- `Int32Option`, `Int32Arg`
+- `Int64Option`, `Int64Arg`
+- `Uint32Option`, `Uint32Arg`
+- `Uint64Option`, `Uint64Arg`
+- `FloatOption`, `FloatArg`
+- `DoubleOption`, `DoubleArg`
+- `PathOption`, `PathArg`
+- `StringListOption`, `StringListArg`, `StrListOption`, `StrListArg`
+- `BoolListOption`, `BoolListArg`
+- `IntListOption`, `IntListArg`
+- `Int32ListOption`, `Int32ListArg`
+- `Int64ListOption`, `Int64ListArg`
+- `Uint32ListOption`, `Uint32ListArg`
+- `Uint64ListOption`, `Uint64ListArg`
+- `FloatListOption`, `FloatListArg`
+- `DoubleListOption`, `DoubleListArg`
+- `PathListOption`, `PathListArg`
+- `StringPositional`, `StrPositional`
+- `BoolPositional`
+- `IntPositional`, `Int32Positional`, `Int64Positional`
+- `Uint32Positional`, `Uint64Positional`
+- `FloatPositional`, `DoublePositional`
+- `PathPositional`
+
+## `nargs`
+
+`argon` ships named `Nargs` constants:
+
+```cpp
+argon::nargs::none
+argon::nargs::one
+argon::nargs::zero_or_one
+argon::nargs::zero_or_more
+argon::nargs::one_or_more
+argon::nargs::exactly<3>
+argon::nargs::between<2, 5>
+```
+
+## Presence
+
+Use `argon::required` and `argon::optional`:
+
+```cpp
+argon::StringOption<"config"> config{
+    {.help = "Path to config", .presence = argon::required}};
+```
+
+If a required option or positional is missing, `parse()` returns `missing_required`.
+
+## Subcommands
+
+Subcommands are nested parsers.
+
+```cpp
+struct ServeArgs {
+  argon::IntOption<"port", 'p'> port{
+      {.presence = argon::required}};
+};
+
+struct Args {
+  argon::Command<"serve", ServeArgs> serve{
+      {.help = "Start the HTTP server"}};
+};
+```
+
+Usage:
+
+```text
+app serve --port 8080
+```
+
+Check whether the subcommand was used:
+
+```cpp
+if (result.value.serve.provided()) {
+  std::cout << *result.value.serve.port.value() << '\n';
 }
 ```
 
-`ParseError` fields:
+## Going Beyond Sugar
+
+The sugar aliases are intentionally simple. When you need stronger behavior, use `ArgImpl` or `PositionalImpl` directly.
+
+Example: parse a path, require it to exist, require it to be a regular file.
 
 ```cpp
-res.error().code     // ErrorCode enum value
-res.error().subject  // option or argument name involved
-res.error().detail   // human-readable explanation
-res.error().message() // formatted string combining all fields
+argon::ArgImpl<
+    "config", 'c', argon::nargs::one,
+    argon::Action<
+        argon::conversion::path,
+        argon::validation::exists,
+        argon::validation::is_regular_file,
+        argon::pack::set_once>{}>
+    config{{.help = "Configuration file"}};
 ```
 
-## Requirements
+The `Action` pipeline is split into three layers:
 
-- C++26 (structured binding packs, `std::expected`)
-- Clang 19+ with libc++ (required for `std::from_chars` on floating-point types)
+- `conversion::*`
+- `validation::*`
+- `pack::*`
+
+This gives you a compact default API without closing off advanced composition.
+
+## Parse Result
+
+`argon::parse<T>()` and `argon::Parser<T>::parse()` return `ParseResult<T>`.
+
+```cpp
+auto result = argon::parse<Args>(argc, argv);
+if (!result) {
+  std::cerr << result.error.message() << '\n';
+  return 1;
+}
+```
+
+Useful pieces:
+
+- `result.value`
+- `result.error.code`
+- `result.error.subject`
+- `result.error.detail`
+- `result.error.position`
+- `result.error.message()`
+
+Each argument object exposes:
+
+- `arg.value()`
+- `arg.provided()`
+
+## Current Status
+
+What already works well:
+
+- tokenization
+- scalar options
+- list options
+- positionals
+- subcommands
+- conversion / validation / pack action pipelines
+
+What this project is good at:
+
+- small tools
+- internal CLIs
+- typed command schemas
+- projects that want compile-time structure instead of runtime registration
+
+## Examples
+
+- [`apps/example.cc`](apps/example.cc)
+- [`apps/readme_example.cc`](apps/readme_example.cc)
+- [`concept.cc`](concept.cc)
+
+## Development
+
+```bash
+cmake -S . -B build -DCXX_ARGON_ENABLE_TEST=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```

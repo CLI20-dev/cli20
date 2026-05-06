@@ -212,6 +212,17 @@ template <class T>
 using decay_t = std::remove_cvref_t<T>;
 
 template <class T>
+struct HelpRequested {
+  T value;
+};
+
+template <class T>
+struct is_help_requested : std::false_type {};
+
+template <class T>
+struct is_help_requested<HelpRequested<T>> : std::true_type {};
+
+template <class T>
 concept pair_like = requires {
   typename std::tuple_size<decay_t<T>>::type;
   requires std::tuple_size_v<decay_t<T>> == 2;
@@ -1194,5 +1205,59 @@ template <auto Fn>
 inline constexpr auto callback = Callback<Fn>{};
 
 }  // namespace pack
+
+namespace action {
+
+struct PrintHelp {
+  template <class Prev>
+  static constexpr bool accepts_input = true;
+
+  template <class Prev>
+  using after_type = detail::HelpRequested<Prev>;
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class Arg, class T>
+  auto operator()(ActionCtx<Arg>, ActionResult<T> input) const
+      -> ActionResult<after_type<T>> {
+    return ActionResult<after_type<T>>::ok(after_type<T>{.value = std::move(input.value)});
+  }
+};
+
+struct ExitSuccess {
+  template <class Prev>
+  static constexpr bool accepts_input = true;
+
+  template <class Prev>
+  using after_type = Prev;
+
+  template <class Prev>
+  using storage_type = std::monostate;
+
+  template <class Arg, class T>
+  auto operator()(ActionCtx<Arg> ctx, ActionResult<T>) const
+      -> ActionResult<T> {
+    using U = std::remove_cvref_t<T>;
+    if constexpr (detail::is_help_requested<U>::value) {
+      return ActionResult<T>::fail(ParseError{
+          .code = ErrorCode::help_requested,
+          .kind = ErrorKind::parse,
+          .position = static_cast<int>(ctx.index),
+      });
+    } else {
+      return ActionResult<T>::fail(ParseError{
+          .code = ErrorCode::exit_success,
+          .kind = ErrorKind::parse,
+          .position = static_cast<int>(ctx.index),
+      });
+    }
+  }
+};
+
+inline constexpr auto print_help = PrintHelp{};
+inline constexpr auto exit_success = ExitSuccess{};
+
+}  // namespace action
 
 }  // namespace argon

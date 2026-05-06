@@ -19,6 +19,8 @@ enum class ErrorCode {
   dependency_missing,
   invalid_choice,
   validation_failed,
+  help_requested,
+  exit_success,
   unknown_error,
 };
 
@@ -56,6 +58,10 @@ enum class ErrorKind {
       return "invalid choice";
     case ErrorCode::validation_failed:
       return "validation failed";
+    case ErrorCode::help_requested:
+      return "help requested";
+    case ErrorCode::exit_success:
+      return "exit success";
     case ErrorCode::unknown_error:
       return "unknown error";
   }
@@ -74,7 +80,24 @@ struct ParseError {
 
   [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool { return position >= 0; }
 
+  [[nodiscard]] constexpr auto exitCode() const noexcept -> int {
+    return code == ErrorCode::help_requested || code == ErrorCode::exit_success ? 0
+                                                                                : 1;
+  }
+
+  [[nodiscard]] constexpr auto useStdout() const noexcept -> bool {
+    return code == ErrorCode::help_requested || code == ErrorCode::exit_success;
+  }
+
   [[nodiscard]] auto message() const -> std::string {
+    if (code == ErrorCode::help_requested) {
+      return detail;
+    }
+
+    if (code == ErrorCode::exit_success) {
+      return detail;
+    }
+
     std::string out{toString(code)};
     if (!subject.empty()) {
       out += ": ";

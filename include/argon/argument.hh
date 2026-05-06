@@ -1,9 +1,13 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
+#include <filesystem>
 #include <argon/meta.hh>
 #include <argon/string_literal.hh>
 #include <optional>
+#include <string>
+#include <type_traits>
 #include <vector>
 
 #include "argon/action.hh"
@@ -23,6 +27,25 @@ struct Nargs {
 };
 
 enum class Presence { required, optional };
+
+inline constexpr auto required = Presence::required;
+inline constexpr auto optional = Presence::optional;
+
+namespace nargs {
+
+inline constexpr Nargs none{.min = 0, .max = 0};
+inline constexpr Nargs one{.min = 1, .max = 1};
+inline constexpr Nargs zero_or_one{.min = 0, .max = 1};
+inline constexpr Nargs zero_or_more{.min = 0, .max = -1};
+inline constexpr Nargs one_or_more{.min = 1, .max = -1};
+
+template <int N>
+inline constexpr Nargs exactly{.min = N, .max = N};
+
+template <int Min, int Max>
+inline constexpr Nargs between{.min = Min, .max = Max};
+
+}  // namespace nargs
 
 namespace detail {
 
@@ -191,7 +214,7 @@ concept ArgumentSpec = requires {
 template <class T>
 struct ArgParameter {
   std::string_view help{};
-  Presence presence{};
+  Presence presence{Presence::optional};
   T default_value{};
 };
 
@@ -206,16 +229,17 @@ template <StringLiteral Name, char ShortName, Nargs N, Action A>
 struct ArgImpl : public OptionTag {
   using value_type =
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
+  ArgImpl() = default;
   ArgImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
         value_(param.default_value) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::string_view help;
+  std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  argon::Presence presence;
+  argon::Presence presence{Presence::optional};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  value_type default_value;
+  value_type default_value{};
 
   static constexpr auto name = Name;
   static constexpr auto short_name = ShortName;
@@ -235,7 +259,12 @@ struct ArgImpl : public OptionTag {
         .arg = std::ref(value_),
     };
     ++invoke_count_;
-    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+    auto result =
+        decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+    if (result.has_error()) {
+      return ActionResult<void>::fail(std::move(result.error));
+    }
+    return ActionResult<void>::ok();
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
@@ -248,8 +277,12 @@ struct ArgImpl : public OptionTag {
         .arg = std::ref(value_),
     };
     ++invoke_count_;
-    return decltype(A)::invoke(
+    auto result = decltype(A)::invoke(
         ctx, ActionResult<std::string_view>::ok(std::string_view{}));
+    if (result.has_error()) {
+      return ActionResult<void>::fail(std::move(result.error));
+    }
+    return ActionResult<void>::ok();
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
@@ -276,16 +309,17 @@ struct PositionalImpl : public PositionalTag {
   using value_type =
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
 
+  PositionalImpl() = default;
   PositionalImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
         value_(param.default_value) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::string_view help;
+  std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  argon::Presence presence;
+  argon::Presence presence{Presence::optional};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  value_type default_value;
+  value_type default_value{};
 
   static constexpr auto nargs = N;
 
@@ -301,7 +335,12 @@ struct PositionalImpl : public PositionalTag {
     };
     ++occurrence_count_;
     ++invoke_count_;
-    return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+    auto result =
+        decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+    if (result.has_error()) {
+      return ActionResult<void>::fail(std::move(result.error));
+    }
+    return ActionResult<void>::ok();
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
@@ -331,15 +370,254 @@ struct Command : public T, public CommandTag {
   using T::T;
   using argument_type = T;
 
+  Command() = default;
   Command(CommandParameter param) : help(param.help) {}
   static constexpr auto name = Name;
   static constexpr auto commandName() -> std::string_view { return Name.view(); }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
+  [[nodiscard]] auto helpText() const -> std::string_view { return help; }
   auto mark_provided() -> void { provided_ = true; }
 
  private:
   std::string_view help{};
   bool provided_{};
 };
+
+namespace detail {
+
+template <class T>
+struct ActionFor;
+
+template <>
+struct ActionFor<std::string> {
+  inline static constexpr auto set_once =
+      Action<conversion::string, pack::set_once>{};
+  inline static constexpr auto push =
+      Action<conversion::string, pack::push>{};
+};
+
+template <>
+struct ActionFor<bool> {
+  inline static constexpr auto set_once =
+      Action<conversion::boolean, pack::set_once>{};
+  inline static constexpr auto push =
+      Action<conversion::boolean, pack::push>{};
+};
+
+template <>
+struct ActionFor<std::filesystem::path> {
+  inline static constexpr auto set_once =
+      Action<conversion::path, pack::set_once>{};
+  inline static constexpr auto push =
+      Action<conversion::path, pack::push>{};
+};
+
+template <std::integral T>
+struct ActionFor<T> {
+  inline static constexpr auto set_once =
+      Action<conversion::integer<T>, pack::set_once>{};
+  inline static constexpr auto push =
+      Action<conversion::integer<T>, pack::push>{};
+};
+
+template <std::floating_point T>
+struct ActionFor<T> {
+  inline static constexpr auto set_once =
+      Action<conversion::floating<T>, pack::set_once>{};
+  inline static constexpr auto push =
+      Action<conversion::floating<T>, pack::push>{};
+};
+
+template <class T, Nargs N>
+struct PositionalActionFor {
+  inline static constexpr auto value =
+      [] {
+        if constexpr (N.max == 1) {
+          return ActionFor<T>::set_once;
+        } else {
+          return ActionFor<T>::push;
+        }
+      }();
+};
+
+}  // namespace detail
+
+template <StringLiteral Name, char ShortName = '\0'>
+using FlagOption = ArgImpl<Name, ShortName, nargs::none,
+                           Action<pack::set_true>{}>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using FlagArg = FlagOption<Name, ShortName>;
+
+template <StringLiteral Name = "help", char ShortName = 'h'>
+using HelpFlag =
+    ArgImpl<Name, ShortName, nargs::none,
+            Action<action::print_help, action::exit_success>{}>;
+
+template <class T, StringLiteral Name, char ShortName = '\0'>
+using ScalarOption =
+    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
+
+template <class T, StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using ListOption = ArgImpl<Name, ShortName, N,
+                           detail::ActionFor<T>::push>;
+
+template <class T, Nargs N = nargs::one>
+using Positional =
+    PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using StringOption = ScalarOption<std::string, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using StringArg = StringOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using StringListOption = ListOption<std::string, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using StringListArg = StringListOption<Name, ShortName, N>;
+using StringPositional = Positional<std::string>;
+using StringPositionalArg = StringPositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using StrOption = StringOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using StrArg = StrOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using StrListOption = StringListOption<Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using StrListArg = StrListOption<Name, ShortName, N>;
+using StrPositional = StringPositional;
+using StrPositionalArg = StrPositional;
+using StrPosArg = StrPositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using BoolOption = ScalarOption<bool, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using BoolArg = BoolOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using BoolListOption = ListOption<bool, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using BoolListArg = BoolListOption<Name, ShortName, N>;
+using BoolPositional = Positional<bool>;
+using BoolPositionalArg = BoolPositional;
+using BoolPosArg = BoolPositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using IntOption = ScalarOption<int, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using IntArg = IntOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using IntListOption = ListOption<int, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using IntListArg = IntListOption<Name, ShortName, N>;
+using IntPositional = Positional<int>;
+using IntPositionalArg = IntPositional;
+using IntPosArg = IntPositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using Int32Option = ScalarOption<std::int32_t, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using Int32Arg = Int32Option<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Int32ListOption = ListOption<std::int32_t, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Int32ListArg = Int32ListOption<Name, ShortName, N>;
+using Int32Positional = Positional<std::int32_t>;
+using Int32PositionalArg = Int32Positional;
+using Int32PosArg = Int32Positional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using Int64Option = ScalarOption<std::int64_t, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using Int64Arg = Int64Option<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Int64ListOption = ListOption<std::int64_t, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Int64ListArg = Int64ListOption<Name, ShortName, N>;
+using Int64Positional = Positional<std::int64_t>;
+using Int64PositionalArg = Int64Positional;
+using Int64PosArg = Int64Positional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using Uint32Option = ScalarOption<std::uint32_t, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using Uint32Arg = Uint32Option<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Uint32ListOption = ListOption<std::uint32_t, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Uint32ListArg = Uint32ListOption<Name, ShortName, N>;
+using Uint32Positional = Positional<std::uint32_t>;
+using Uint32PositionalArg = Uint32Positional;
+using Uint32PosArg = Uint32Positional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using Uint64Option = ScalarOption<std::uint64_t, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using Uint64Arg = Uint64Option<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Uint64ListOption = ListOption<std::uint64_t, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using Uint64ListArg = Uint64ListOption<Name, ShortName, N>;
+using Uint64Positional = Positional<std::uint64_t>;
+using Uint64PositionalArg = Uint64Positional;
+using Uint64PosArg = Uint64Positional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using FloatOption = ScalarOption<float, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using FloatArg = FloatOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using FloatListOption = ListOption<float, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using FloatListArg = FloatListOption<Name, ShortName, N>;
+using FloatPositional = Positional<float>;
+using FloatPositionalArg = FloatPositional;
+using FloatPosArg = FloatPositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using DoubleOption = ScalarOption<double, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using DoubleArg = DoubleOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using DoubleListOption = ListOption<double, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using DoubleListArg = DoubleListOption<Name, ShortName, N>;
+using DoublePositional = Positional<double>;
+using DoublePositionalArg = DoublePositional;
+using DoublePosArg = DoublePositional;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using PathOption = ScalarOption<std::filesystem::path, Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0'>
+using PathArg = PathOption<Name, ShortName>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using PathListOption = ListOption<std::filesystem::path, Name, ShortName, N>;
+template <StringLiteral Name, char ShortName = '\0',
+          Nargs N = nargs::one_or_more>
+using PathListArg = PathListOption<Name, ShortName, N>;
+using PathPositional = Positional<std::filesystem::path>;
+using PathPositionalArg = PathPositional;
+using PathPosArg = PathPositional;
 
 }  // namespace argon

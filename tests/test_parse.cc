@@ -9,28 +9,18 @@
 namespace {
 
 struct BuildArgs {
-  argon::ArgImpl<
-      "threads", 't', {.min = 1, .max = 1},
-      argon::Action<argon::conversion::integer<int>, argon::validation::positive,
-                    argon::pack::set_once>{}>
+  argon::IntOption<"threads", 't'>
       threads{{.help = "Worker threads", .presence = argon::Presence::required}};
 };
 
 struct ParseArgs {
-  argon::ArgImpl<"verbose", 'v', {.min = 0, .max = 0},
-                 argon::Action<argon::pack::set_true>{}>
+  argon::FlagOption<"verbose", 'v'>
       verbose{{.help = "Verbose output", .presence = argon::Presence::optional}};
 
-  argon::ArgImpl<
-      "count", 'c', {.min = 1, .max = 1},
-      argon::Action<argon::conversion::integer<int>, argon::validation::positive,
-                    argon::pack::set_once>{}>
+  argon::IntOption<"count", 'c'>
       count{{.help = "Positive count", .presence = argon::Presence::required}};
 
-  argon::PositionalImpl<
-      {.min = 1, .max = -1},
-      argon::Action<argon::conversion::string, argon::validation::not_blank,
-                    argon::pack::push>{}>
+  argon::Positional<std::string, argon::nargs::one_or_more>
       files{{.help = "Input files", .presence = argon::Presence::required}};
 
   argon::Command<"build", BuildArgs> build{{.help = "Build subcommand"}};

@@ -1,7 +1,9 @@
 #pragma once
 
 // #include <expected>
+#include <cstdlib>
 #include <format>
+#include <iostream>
 #include <span>
 #include <tuple>
 #include <unordered_map>
@@ -10,6 +12,7 @@
 
 #include "argon/argument.hh"
 #include "argon/error.hh"
+#include "argon/help.hh"
 
 namespace argon {
 
@@ -92,6 +95,10 @@ inline auto tokenize(std::span<const std::string_view> args,
   const auto find_prefix = [&](std::string_view tok) -> std::string_view {
     for (const auto& p : cfg.option_prefixes) {
       if (tok.size() > p.size() && tok.starts_with(p)) return p;
+    }
+    if (tok.size() > cfg.short_option_prefix.size() &&
+        tok.starts_with(cfg.short_option_prefix)) {
+      return cfg.short_option_prefix;
     }
     return {};
   };
@@ -251,12 +258,19 @@ struct ParseResult {
 
 template <ArgumentSpec T>
 struct Parser {
+  template <ArgumentSpec>
+  friend struct Parser;
+
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> ParseResult<T> {
     std::vector<std::string_view> args;
     for (int i = 0; i < argc; ++i) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       args.emplace_back(argv[i]);
+    }
+    if (argc > 0) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      program_name_ = argv[0];
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
@@ -290,7 +304,7 @@ struct Parser {
                                   std::span(tokens).subspan(i + 1, j - i - 1),
                                   first_index, tok.position);
         if (err.has_error()) {
-          result.error = std::move(err.error);
+          result.error = finalizeSpecialError(std::move(err.error));
           return result;
         }
         i = j;
@@ -299,7 +313,7 @@ struct Parser {
         auto err = dispatchPositional(result.value, pos_idx, pos_cnt, tok.text,
                                       tok.position + first_index);
         if (err.has_error()) {
-          result.error = std::move(err.error);
+          result.error = finalizeSpecialError(std::move(err.error));
           return result;
         }
         ++i;
@@ -308,7 +322,7 @@ struct Parser {
         auto err = dispatchCommand(result.value, tok.text, args,
                                    tok.position + first_index + 1);
         if (err.has_error()) {
-          result.error = std::move(err.error);
+          result.error = finalizeSpecialError(std::move(err.error));
           return result;
         }
         break;
@@ -328,6 +342,23 @@ struct Parser {
 
  private:
   TokenizerConfig cfg_;
+  std::string program_name_ = "program";
+
+ public:
+  auto formatHelp(ColorMode color_mode = ColorMode::auto_) -> std::string {
+    return argon::formatHelp<T>(scratch_, program_name_, color_mode, false);
+  }
+
+  auto formatHelp(RecurseHelpTag) -> std::string {
+    return formatHelp(ColorMode::auto_, recurseHelp);
+  }
+
+  auto formatHelp(ColorMode color_mode, RecurseHelpTag) -> std::string {
+    return argon::formatHelp<T>(scratch_, program_name_, color_mode, true);
+  }
+
+ private:
+  T scratch_{};
 
   // Iterate every field of val, calling fn(field) for each.
   template <class Fn>
@@ -445,7 +476,9 @@ struct Parser {
         }
         found = true;
         f.mark_provided();
-        auto sub = Parser<typename F::argument_type>{}.parse(args, first_index);
+        auto sub_parser = Parser<typename F::argument_type>{};
+        sub_parser.program_name_ = program_name_;
+        auto sub = sub_parser.parse(args, first_index);
         if (sub.has_error()) {
           res = ActionResult<void>::fail(std::move(sub.error));
         } else {
@@ -491,11 +524,32 @@ struct Parser {
     });
     return res;
   }
+
+  auto finalizeSpecialError(ParseError error) -> ParseError {
+    if (error.code == ErrorCode::help_requested && error.detail.empty()) {
+      error.detail = formatHelp(ColorMode::never);
+    }
+    return error;
+  }
 };
 
 template <ArgumentSpec T>
 auto parse(int argc, char* argv[]) -> ParseResult<T> {
   return Parser<T>{}.parse(argc, argv);
+}
+
+template <ArgumentSpec T>
+auto parseOrExit(int argc, char* argv[], std::ostream& out = std::cout,
+                 std::ostream& err = std::cerr) -> T {
+  auto result = parse<T>(argc, argv);
+  if (!result) {
+    if (const auto message = result.error.message(); !message.empty()) {
+      auto& stream = result.error.useStdout() ? out : err;
+      stream << message << '\n';
+    }
+    std::exit(result.error.exitCode());
+  }
+  return std::move(result.value);
 }
 
 };  // namespace argon
