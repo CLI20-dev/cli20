@@ -205,10 +205,10 @@ struct Integer {
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
     T result = 0;
-    std::from_chars_result r =
+    std::from_chars_result r = std::from_chars(
+        input.value.data(),
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::from_chars(input.value.data(),
-                        input.value.data() + input.value.size(), result);
+        input.value.data() + input.value.size(), result);
     if (r.ec == std::errc::invalid_argument) {
       return ActionResult<T>::fail(
           ParseError{.code = ErrorCode::invalid_value,

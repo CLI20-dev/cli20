@@ -1,18 +1,20 @@
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-file(GLOB TEST_SOURCES "*.cc")
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "*.cc")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}")
-add_executable(argon_tests ${TEST_SOURCES})
 
-target_link_libraries(
-  argon_tests PRIVATE argon GTest::gtest GTest::gtest_main
-)
+function(add_argon_tests suffix cxx_std)
+  set(target_name argon_tests${suffix})
+  add_executable(${target_name} ${TEST_SOURCES})
+  target_link_libraries(${target_name} PRIVATE argon GTest::gtest GTest::gtest_main)
+  target_compile_features(${target_name} PRIVATE ${cxx_std})
+  target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  gtest_discover_tests(${target_name})
+endfunction()
 
-target_compile_features(argon_tests PRIVATE cxx_std_26)
-target_compile_options(argon_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
-
-gtest_discover_tests(argon_tests)
+add_argon_tests("_cxx20" cxx_std_20)
+add_argon_tests("_cxx26" cxx_std_26)
 
 # Compile-fail tests: verify that duplicate options are rejected at compile time
 function(add_compile_fail_test name source)

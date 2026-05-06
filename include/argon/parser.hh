@@ -44,6 +44,19 @@ struct TokenizeResult {
   constexpr auto has_error() const noexcept -> bool {
     return error.hasError();
   }
+
+  // Set the error and return *this so callers can write: return result.fail(...)
+  auto fail(ErrorCode code, std::size_t pos, std::string subject,
+            std::string detail = {}) -> TokenizeResult& {
+    error = ParseError{
+        .code     = code,
+        .kind     = ErrorKind::parse,
+        .position = static_cast<int>(pos),
+        .subject  = std::move(subject),
+        .detail   = std::move(detail),
+    };
+    return *this;
+  }
 };
 
 // Returns true iff tok starts with "--" and is not exactly "--".
@@ -63,28 +76,14 @@ static auto is_option_looking(std::string_view tok) noexcept -> bool {
 //
 // --opt=val is split into {option,"--opt",i} + {value,"val",i} at the same
 // position so that downstream code can treat all value tokens uniformly.
-inline auto tokenize(
-    std::span<const std::string_view> args,
-    const std::unordered_map<std::string, Nargs>& spec_map,
-    const std::unordered_set<std::string>& command_names = {})
+inline auto tokenize(std::span<const std::string_view> args,
+                     const std::unordered_map<std::string, Nargs>& spec_map,
+                     const std::unordered_set<std::string>& command_names = {})
     -> TokenizeResult {
   TokenizeResult result;
 
-  const auto set_error = [&](ErrorCode code, std::size_t pos,
-                              std::string subject,
-                              std::string detail = {}) -> TokenizeResult& {
-    result.error = ParseError{
-        .code = code,
-        .kind = ErrorKind::parse,
-        .position = static_cast<int>(pos),
-        .subject = std::move(subject),
-        .detail = std::move(detail),
-    };
-    return result;
-  };
-
   const auto push = [&](TokenType type, std::string_view text,
-                        std::size_t pos) {
+                        std::size_t pos) -> void {
     result.tokens.push_back({type, text, pos});
   };
 
@@ -123,7 +122,7 @@ inline auto tokenize(
 
       const auto spec_it = spec_map.find(opt_name);
       if (spec_it == spec_map.end()) {
-        return set_error(ErrorCode::unknown_option, i, opt_name);
+        return result.fail(ErrorCode::unknown_option, i, opt_name);
       }
 
       const Nargs& nargs = spec_it->second;
@@ -134,11 +133,11 @@ inline auto tokenize(
       if (has_inline_val) {
         // --opt=value: flag rejects inline values; min>1 can't be satisfied
         if (is_flag) {
-          return set_error(ErrorCode::invalid_value, i, opt_name,
-                           "flag does not accept a value");
+          return result.fail(ErrorCode::invalid_value, i, opt_name,
+                             "flag does not accept a value");
         }
         if (nargs.min > 1) {
-          return set_error(
+          return result.fail(
               ErrorCode::missing_value, i, opt_name,
               std::format("option requires at least {} value(s), but = form "
                           "provides only 1",
@@ -179,7 +178,7 @@ inline auto tokenize(
       }
 
       if (count < nargs.min) {
-        return set_error(
+        return result.fail(
             ErrorCode::missing_value, i, opt_name,
             std::format("option requires at least {} value(s), but {} provided",
                         nargs.min, count));

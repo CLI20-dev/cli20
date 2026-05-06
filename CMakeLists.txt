@@ -24,13 +24,18 @@ add_library(argon INTERFACE)
 
 target_include_directories(argon
     INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(argon
     INTERFACE
         cxx_std_20
 )
+
+include(GNUInstallDirs)
+install(TARGETS argon EXPORT argon-targets)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 
 add_subdirectory(apps)
