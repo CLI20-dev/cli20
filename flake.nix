@@ -51,7 +51,8 @@
           };
 
           packages.default = pkgs.stdenvNoCC.mkDerivation {
-            name = "cli20";
+            pname = "cli20";
+            version = "v0.1";
             src = ./.;
             nativeBuildInputs = [
               pkgs.llvmPackages.libcxxClang
