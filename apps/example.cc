@@ -1,53 +1,50 @@
 #include <filesystem>
 #include <iostream>
 
-#include "argon/argument.hh"
-#include "argon/parser.hh"
+#include "cli/argument.hh"
+#include "cli/parser.hh"
 
 namespace fs = std::filesystem;
 
 struct BuildArgs {
-  // `ArgImpl` remains available when you need validation beyond the sugar aliases.
-  argon::ArgImpl<
-      "config", 'c', argon::nargs::one,
-      argon::Action<argon::conversion::path, argon::validation::exists,
-                    argon::validation::is_regular_file, argon::pack::set_once>{}>
+  // `ArgImpl` remains available when you need validation beyond the sugar
+  // aliases.
+  cli::ArgImpl<
+      "config", 'c', cli::nargs::one,
+      cli::Action<cli::conversion::path, cli::validation::exists,
+                  cli::validation::is_regular_file, cli::pack::set_once>{}>
       config{{.help = "Build configuration file",
-              .presence = argon::Presence::required}};
+              .presence = cli::Presence::required}};
 
-  argon::FlagOption<"release", 'r'>
-      release{{.help = "Build with release optimizations",
-               .presence = argon::Presence::optional}};
+  cli::FlagOption<"release", 'r'> release{
+      {.help = "Build with release optimizations",
+       .presence = cli::Presence::optional}};
 };
 
 struct Args {
-  argon::Description description{
-      "Demonstrates the current argon parser API with options, positionals, and "
+  cli::Description description{
+      "Demonstrates the current cli20 parser API with options, positionals, and "
       "a subcommand."};
 
-  argon::ArgImpl<"help", 'h', argon::nargs::none,
-                 argon::Action<argon::action::print_help,
-                               argon::action::exit_success>{}>
+  cli::ArgImpl<"help", 'h', cli::nargs::none,
+               cli::Action<cli::action::print_help, cli::action::exit_success>{}>
       help{{.help = "Show this help message and exit",
-            .presence = argon::Presence::optional}};
+            .presence = cli::Presence::optional}};
 
-  argon::FlagOption<"verbose", 'v'>
-      verbose{{.help = "Enable verbose output",
-               .presence = argon::Presence::optional}};
+  cli::FlagOption<"verbose", 'v'> verbose{
+      {.help = "Enable verbose output", .presence = cli::Presence::optional}};
 
-  argon::IntOption<"count", 'n'>
-      count{{.help = "Positive iteration count",
-             .presence = argon::Presence::optional}};
+  cli::IntOption<"count", 'n'> count{
+      {.help = "Positive iteration count", .presence = cli::Presence::optional}};
 
-  argon::Positional<std::string, argon::nargs::one_or_more>
-      input_files{
-          {.help = "Input files", .presence = argon::Presence::required}};
+  cli::Positional<std::string, cli::nargs::one_or_more> input_files{
+      {.help = "Input files", .presence = cli::Presence::required}};
 
-  argon::Command<"build", BuildArgs> build{{.help = "Run the build subcommand"}};
+  cli::Command<"build", BuildArgs> build{{.help = "Run the build subcommand"}};
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = argon::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parseOrExit<Args>(argc, argv);
   std::cout << "verbose: " << std::boolalpha << args.verbose.value() << '\n';
   if (args.count.value().has_value()) {
     std::cout << "count: " << *args.count.value() << '\n';

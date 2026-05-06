@@ -10,11 +10,11 @@
 #include <utility>
 #include <vector>
 
-#include "argon/argument.hh"
-#include "argon/color.hh"
-#include "argon/meta.hh"
+#include "cli/argument.hh"
+#include "cli/color.hh"
+#include "cli/meta.hh"
 
-namespace argon {
+namespace cli {
 
 namespace detail {
 
@@ -225,7 +225,8 @@ auto append_section(std::string& out, std::string_view title,
 }
 
 template <class Field>
-auto render_help_row(Field& field, std::string_view label, std::size_t width) -> std::string {
+auto render_help_row(Field& field, std::string_view label, std::size_t width)
+    -> std::string {
   std::string out = "  ";
   out += label;
   if (!field.help.empty()) {
@@ -259,8 +260,8 @@ auto find_description(T& value) -> std::string_view {
 
 template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
-                      ColorMode color_mode, bool recurse, std::string_view command_path)
-    -> std::string {
+                      ColorMode color_mode, bool recurse,
+                      std::string_view command_path) -> std::string {
   const auto style = resolveColor(color_mode);
   const std::string heading =
       std::string(style.bold()) + std::string(style.underline());
@@ -312,30 +313,31 @@ auto format_help_impl(T& value, std::string_view program_name,
       },
       as_tuple(value));
 
-  auto append_rows = [&](std::string_view title,
-                         const std::vector<std::pair<std::string, std::string_view>>& rows,
-                         std::size_t width) {
-    if (rows.empty()) {
-      return;
-    }
-    out += '\n';
-    out += heading;
-    out += title;
-    out += reset;
-    out += '\n';
-    for (const auto& [label, description] : rows) {
-      out += "  ";
-      out += option_color;
-      out += label;
-      out += reset;
-      if (!description.empty()) {
-        out.append(width - label.size() + 2, ' ');
-        append_wrapped_description(out, description, width + 4);
-      } else {
+  auto append_rows =
+      [&](std::string_view title,
+          const std::vector<std::pair<std::string, std::string_view>>& rows,
+          std::size_t width) {
+        if (rows.empty()) {
+          return;
+        }
         out += '\n';
-      }
-    }
-  };
+        out += heading;
+        out += title;
+        out += reset;
+        out += '\n';
+        for (const auto& [label, description] : rows) {
+          out += "  ";
+          out += option_color;
+          out += label;
+          out += reset;
+          if (!description.empty()) {
+            out.append(width - label.size() + 2, ' ');
+            append_wrapped_description(out, description, width + 4);
+          } else {
+            out += '\n';
+          }
+        }
+      };
 
   append_rows("Options:", option_rows, option_width);
   append_rows("Positional arguments:", positional_rows, positional_width);
@@ -350,8 +352,8 @@ auto format_help_impl(T& value, std::string_view program_name,
                 if constexpr (std::derived_from<F, CommandTag>) {
                   out += '\n';
                   out += format_help_impl<typename F::argument_type>(
-                      static_cast<typename F::argument_type&>(fields), program_name,
-                      color_mode, true, F::commandName());
+                      static_cast<typename F::argument_type&>(fields),
+                      program_name, color_mode, true, F::commandName());
                 }
               }(),
               ...);
@@ -366,10 +368,10 @@ auto format_help_impl(T& value, std::string_view program_name,
 
 template <ArgumentSpec T>
 auto formatHelp(T& value, std::string_view program_name = "program",
-                ColorMode color_mode = ColorMode::auto_,
-                bool recurse = false) -> std::string {
+                ColorMode color_mode = ColorMode::auto_, bool recurse = false)
+    -> std::string {
   return detail::format_help_impl<T>(value, program_name, color_mode, recurse,
                                      {});
 }
 
-}  // namespace argon
+}  // namespace cli

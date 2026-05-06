@@ -1,9 +1,9 @@
-#include <argon/flag_argument.hh>
-#include <argon/parser.hh>
+#include <cli/flag_argument.hh>
+#include <cli/parser.hh>
 
 // Plain int field is not an argument type — Parser<T> must reject this.
 struct Args {
   int x;
 };
 
-auto main() -> int { auto parser = argon::Parser<Args>{}; }
+auto main() -> int { auto parser = cli::Parser<Args>{}; }

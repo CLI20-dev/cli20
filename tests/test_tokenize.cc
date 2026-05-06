@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "argon/parser.hh"
+#include "cli/parser.hh"
 
 // ---- Test infrastructure --------------------------------------------------
 
-using argon::ErrorCode;
-using argon::Nargs;
-using argon::Token;
-using argon::TokenizeResult;
-using argon::TokenType;
+using cli::ErrorCode;
+using cli::Nargs;
+using cli::Token;
+using cli::TokenizeResult;
+using cli::TokenType;
 
 using SpecMap = std::unordered_map<std::string, Nargs>;
 using CmdSet = std::unordered_set<std::string>;
@@ -29,7 +29,7 @@ static auto tok(std::initializer_list<std::string_view> il) {
 static auto tokenize(std::initializer_list<std::string_view> args,
                      const SpecMap& spec, const CmdSet& cmds = {})
     -> TokenizeResult {
-  return argon::tokenize(tok(args), spec, cmds);
+  return cli::tokenize(tok(args), spec, cmds);
 }
 
 // Collect texts of tokens with the given type, in order.
@@ -438,14 +438,14 @@ TEST(Tokenize, ErrorInlineSyntaxCannotSatisfyMinTwo) {
 // ---- multi-prefix (TokenizerConfig) ---------------------------------------
 
 static auto tokenize_cfg(std::initializer_list<std::string_view> args,
-                         const SpecMap& spec, const argon::TokenizerConfig& cfg,
+                         const SpecMap& spec, const cli::TokenizerConfig& cfg,
                          const CmdSet& cmds = {}) -> TokenizeResult {
-  return argon::tokenize(tok(args), spec, cmds, cfg);
+  return cli::tokenize(tok(args), spec, cmds, cfg);
 }
 
 TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
   // "+verbose" recognised as option when "+" is in option_prefixes
-  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
   auto r = tokenize_cfg({"+verbose"}, {{"+verbose", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
@@ -456,7 +456,7 @@ TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
 
 TEST(TokenizeMultiPrefix, MatchedPrefixDistinguishesPrefixes) {
   // "--foo" and "+foo" are different options; matched_prefix tells them apart
-  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
   SpecMap spec{{"--foo", kFlag}, {"+foo", kFlag}};
   auto r = tokenize_cfg({"--foo", "+foo"}, spec, cfg);
   ASSERT_TRUE(r.has_value());
@@ -475,7 +475,7 @@ TEST(TokenizeMultiPrefix, DefaultPrefixStillWorks) {
 }
 
 TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
-  argon::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
   auto r = tokenize_cfg({"+unknown"}, {{"--foo", kFlag}}, cfg);
   ASSERT_FALSE(r.has_value());
   EXPECT_EQ(r.error.code, ErrorCode::unknown_option);
@@ -485,7 +485,7 @@ TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
 // ---- inline_value_separator -----------------------------------------------
 
 TEST(TokenizeInlineSep, ColonSeparator) {
-  argon::TokenizerConfig cfg{.inline_value_separator = ':'};
+  cli::TokenizerConfig cfg{.inline_value_separator = ':'};
   auto r = tokenize_cfg({"--name:Alice"}, {{"--name", kOne}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
@@ -502,7 +502,7 @@ TEST(TokenizeInlineSep, DefaultEqualsStillWorks) {
 
 TEST(TokenizeInlineSep, EqualsTreatedAsValueWhenSepIsColon) {
   // With sep=':', "--name=Alice" has no separator → entire token is option name.
-  argon::TokenizerConfig cfg{.inline_value_separator = ':'};
+  cli::TokenizerConfig cfg{.inline_value_separator = ':'};
   auto r = tokenize_cfg({"--name=Alice"}, {{"--name=Alice", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(r.tokens[0].text, "--name=Alice");

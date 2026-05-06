@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 INCLUDE_RE = re.compile(r'^\s*#include\s*([<"])([^>"]+)[>"]\s*$')
-ARGON_PREFIX = "argon/"
+CLI20_PREFIX = "cli/"
 
 
 def ordered_unique(items: list[str]) -> list[str]:
@@ -17,8 +17,8 @@ def ordered_unique(items: list[str]) -> list[str]:
 
 def main() -> int:
     repo_root = Path(__file__).resolve().parent.parent
-    include_dir = repo_root / "include" / "argon"
-    output_path = repo_root / "single_header" / "argon.hh"
+    include_dir = repo_root / "include" / "cli"
+    output_path = repo_root / "single_header" / "cli20.hh"
 
     headers = sorted(include_dir.glob("*.hh"))
     if not headers:
@@ -44,8 +44,8 @@ def main() -> int:
                 continue
 
             delimiter, include_name = match.groups()
-            if include_name.startswith(ARGON_PREFIX):
-                dep_name = include_name.removeprefix(ARGON_PREFIX)
+            if include_name.startswith(CLI20_PREFIX):
+                dep_name = include_name.removeprefix(CLI20_PREFIX)
                 dep = header_map.get(dep_name)
                 if dep is None:
                     raise RuntimeError(f"missing internal header referenced by {header}: {include_name}")
@@ -74,7 +74,7 @@ def main() -> int:
     output_lines.append("")
 
     for index, header in enumerate(ordered_headers):
-        output_lines.append(f"// ---- begin: include/argon/{header.name} ----")
+        output_lines.append(f"// ---- begin: include/cli/{header.name} ----")
         for line in header.read_text(encoding="utf-8").splitlines():
             stripped = line.strip()
             if stripped == "#pragma once":
@@ -83,7 +83,7 @@ def main() -> int:
             if match:
                 continue
             output_lines.append(line)
-        output_lines.append(f"// ---- end: include/argon/{header.name} ----")
+        output_lines.append(f"// ---- end: include/cli/{header.name} ----")
         if index != len(ordered_headers) - 1:
             output_lines.append("")
 

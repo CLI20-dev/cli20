@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-namespace argon {
+namespace cli {
 
 // Controls whether ANSI escape codes are emitted by formatHelp().
 //   auto_  : emit codes only when stdout is a TTY (default)
@@ -11,8 +11,8 @@ namespace argon {
 enum class ColorMode { auto_, never, always };
 
 // Tag type passed to formatHelp() to request recursive sub-command output.
-//   parser.formatHelp(argon::recurseHelp)               // auto color + recurse
-//   parser.formatHelp(argon::ColorMode::never, argon::recurseHelp)  // no color
+//   parser.formatHelp(cli::recurseHelp)               // auto color + recurse
+//   parser.formatHelp(cli::ColorMode::never, cli::recurseHelp)  // no color
 //   + recurse
 struct RecurseHelpTag {};
 inline constexpr RecurseHelpTag recurseHelp{};
@@ -54,4 +54,4 @@ inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
 }
 
 }  // namespace detail
-}  // namespace argon
+}  // namespace cli

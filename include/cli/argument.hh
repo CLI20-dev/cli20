@@ -1,18 +1,18 @@
 #pragma once
 
 #include <algorithm>
+#include <cli/meta.hh>
+#include <cli/string_literal.hh>
 #include <cstdint>
 #include <filesystem>
-#include <argon/meta.hh>
-#include <argon/string_literal.hh>
 #include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-#include "argon/action.hh"
+#include "cli/action.hh"
 
-namespace argon {
+namespace cli {
 
 struct SpecMemberTag {};
 
@@ -50,7 +50,7 @@ inline constexpr Nargs between{.min = Min, .max = Max};
 namespace detail {
 
 template <class T>
-consteval auto members_are_derived_from_valid_argon_class() -> bool {
+consteval auto members_are_derived_from_valid_cli_class() -> bool {
   return []<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
              -> auto {
     return (std::derived_from<std::remove_cvref_t<Args>, SpecMemberTag> && ...);
@@ -204,7 +204,7 @@ consteval auto is_valid_nargs() noexcept -> bool {
 
 template <class T>
 concept ArgumentSpec = requires {
-  requires detail::members_are_derived_from_valid_argon_class<T>();
+  requires detail::members_are_derived_from_valid_cli_class<T>();
   requires detail::options_have_unique_long_name<T>();
   requires detail::options_have_unique_short_name<T>();
   requires detail::commands_have_unique_long_name<T>();
@@ -237,7 +237,7 @@ struct ArgImpl : public OptionTag {
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  argon::Presence presence{Presence::optional};
+  cli::Presence presence{Presence::optional};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   value_type default_value{};
 
@@ -317,7 +317,7 @@ struct PositionalImpl : public PositionalTag {
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  argon::Presence presence{Presence::optional};
+  cli::Presence presence{Presence::optional};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   value_type default_value{};
 
@@ -392,24 +392,21 @@ template <>
 struct ActionFor<std::string> {
   inline static constexpr auto set_once =
       Action<conversion::string, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::string, pack::push>{};
+  inline static constexpr auto push = Action<conversion::string, pack::push>{};
 };
 
 template <>
 struct ActionFor<bool> {
   inline static constexpr auto set_once =
       Action<conversion::boolean, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::boolean, pack::push>{};
+  inline static constexpr auto push = Action<conversion::boolean, pack::push>{};
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
   inline static constexpr auto set_once =
       Action<conversion::path, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::path, pack::push>{};
+  inline static constexpr auto push = Action<conversion::path, pack::push>{};
 };
 
 template <std::integral T>
@@ -430,29 +427,27 @@ struct ActionFor<T> {
 
 template <class T, Nargs N>
 struct PositionalActionFor {
-  inline static constexpr auto value =
-      [] {
-        if constexpr (N.max == 1) {
-          return ActionFor<T>::set_once;
-        } else {
-          return ActionFor<T>::push;
-        }
-      }();
+  inline static constexpr auto value = [] {
+    if constexpr (N.max == 1) {
+      return ActionFor<T>::set_once;
+    } else {
+      return ActionFor<T>::push;
+    }
+  }();
 };
 
 }  // namespace detail
 
 template <StringLiteral Name, char ShortName = '\0'>
-using FlagOption = ArgImpl<Name, ShortName, nargs::none,
-                           Action<pack::set_true>{}>;
+using FlagOption =
+    ArgImpl<Name, ShortName, nargs::none, Action<pack::set_true>{}>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using FlagArg = FlagOption<Name, ShortName>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
-using HelpFlag =
-    ArgImpl<Name, ShortName, nargs::none,
-            Action<action::print_help, action::exit_success>{}>;
+using HelpFlag = ArgImpl<Name, ShortName, nargs::none,
+                         Action<action::print_help, action::exit_success>{}>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
 using ScalarOption =
@@ -460,12 +455,10 @@ using ScalarOption =
 
 template <class T, StringLiteral Name, char ShortName = '\0',
           Nargs N = nargs::one_or_more>
-using ListOption = ArgImpl<Name, ShortName, N,
-                           detail::ActionFor<T>::push>;
+using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
 
 template <class T, Nargs N = nargs::one>
-using Positional =
-    PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;
+using Positional = PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using StringOption = ScalarOption<std::string, Name, ShortName>;
@@ -620,4 +613,4 @@ using PathPositional = Positional<std::filesystem::path>;
 using PathPositionalArg = PathPositional;
 using PathPosArg = PathPositional;
 
-}  // namespace argon
+}  // namespace cli

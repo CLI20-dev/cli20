@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace argon {
+namespace cli {
 
 enum class ErrorCode {
   unknown_option,
@@ -30,7 +30,8 @@ enum class ErrorKind {
   validation,
 };
 
-[[nodiscard]] constexpr auto toString(ErrorCode code) noexcept -> std::string_view {
+[[nodiscard]] constexpr auto toString(ErrorCode code) noexcept
+    -> std::string_view {
   switch (code) {
     case ErrorCode::unknown_option:
       return "unknown option";
@@ -78,11 +79,14 @@ struct ParseError {
   std::string subject{};
   std::string detail{};
 
-  [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool { return position >= 0; }
+  [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool {
+    return position >= 0;
+  }
 
   [[nodiscard]] constexpr auto exitCode() const noexcept -> int {
-    return code == ErrorCode::help_requested || code == ErrorCode::exit_success ? 0
-                                                                                : 1;
+    return code == ErrorCode::help_requested || code == ErrorCode::exit_success
+               ? 0
+               : 1;
   }
 
   [[nodiscard]] constexpr auto useStdout() const noexcept -> bool {
@@ -119,7 +123,9 @@ struct ParseError {
     return out;
   }
 
-  [[nodiscard]] auto hasError() const noexcept -> bool { return code != ErrorCode::unknown_error; }
+  [[nodiscard]] auto hasError() const noexcept -> bool {
+    return code != ErrorCode::unknown_error;
+  }
 };
 
-}  // namespace argon
+}  // namespace cli

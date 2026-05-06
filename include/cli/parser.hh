@@ -10,11 +10,11 @@
 #include <unordered_set>
 #include <vector>
 
-#include "argon/argument.hh"
-#include "argon/error.hh"
-#include "argon/help.hh"
+#include "cli/argument.hh"
+#include "cli/error.hh"
+#include "cli/help.hh"
 
-namespace argon {
+namespace cli {
 
 enum class TokenType {
   option,
@@ -346,7 +346,7 @@ struct Parser {
 
  public:
   auto formatHelp(ColorMode color_mode = ColorMode::auto_) -> std::string {
-    return argon::formatHelp<T>(scratch_, program_name_, color_mode, false);
+    return cli::formatHelp<T>(scratch_, program_name_, color_mode, false);
   }
 
   auto formatHelp(RecurseHelpTag) -> std::string {
@@ -354,7 +354,7 @@ struct Parser {
   }
 
   auto formatHelp(ColorMode color_mode, RecurseHelpTag) -> std::string {
-    return argon::formatHelp<T>(scratch_, program_name_, color_mode, true);
+    return cli::formatHelp<T>(scratch_, program_name_, color_mode, true);
   }
 
  private:
@@ -552,4 +552,4 @@ auto parseOrExit(int argc, char* argv[], std::ostream& out = std::cout,
   return std::move(result.value);
 }
 
-};  // namespace argon
+};  // namespace cli

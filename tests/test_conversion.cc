@@ -5,20 +5,20 @@
 #include <optional>
 #include <string_view>
 
-#include "argon/action.hh"
+#include "cli/action.hh"
 
 namespace fs = std::filesystem;
 
 namespace {
 
-using argon::ActionCtx;
-using argon::ActionResult;
-using argon::ErrorCode;
-using argon::conversion::Bool;
-using argon::conversion::ExistingDirectory;
-using argon::conversion::ExistingFile;
-using argon::conversion::Floating;
-using argon::conversion::Integer;
+using cli::ActionCtx;
+using cli::ActionResult;
+using cli::ErrorCode;
+using cli::conversion::Bool;
+using cli::conversion::ExistingDirectory;
+using cli::conversion::ExistingFile;
+using cli::conversion::Floating;
+using cli::conversion::Integer;
 
 constexpr auto parse_mode = [](std::string_view value) -> std::optional<int> {
   if (value == "fast") {
@@ -83,7 +83,7 @@ TEST(Conversion, FloatingRejectsTrailingCharacters) {
 }
 
 TEST(Conversion, ChoiceUsesMapper) {
-  auto result = argon::conversion::choice<int, parse_mode>(
+  auto result = cli::conversion::choice<int, parse_mode>(
       ctx(2), ActionResult<std::string_view>::ok("fast"));
 
   ASSERT_TRUE(result.has_value());
@@ -91,7 +91,7 @@ TEST(Conversion, ChoiceUsesMapper) {
 }
 
 TEST(Conversion, ChoiceReportsInvalidChoice) {
-  auto result = argon::conversion::choice<int, parse_mode>(
+  auto result = cli::conversion::choice<int, parse_mode>(
       ctx(2), ActionResult<std::string_view>::ok("medium"));
 
   ASSERT_TRUE(result.has_error());
@@ -100,7 +100,7 @@ TEST(Conversion, ChoiceReportsInvalidChoice) {
 
 TEST(Conversion, ExistingFileRequiresRegularFile) {
   auto temp_root =
-      fs::temp_directory_path() / "argon_test_conversion_existing_file";
+      fs::temp_directory_path() / "cli20_test_conversion_existing_file";
   fs::create_directories(temp_root);
   TempPathGuard guard(temp_root);
 
@@ -120,7 +120,7 @@ TEST(Conversion, ExistingFileRequiresRegularFile) {
 
 TEST(Conversion, ExistingDirectoryRequiresDirectory) {
   auto temp_root =
-      fs::temp_directory_path() / "argon_test_conversion_existing_directory";
+      fs::temp_directory_path() / "cli20_test_conversion_existing_directory";
   fs::create_directories(temp_root);
   TempPathGuard guard(temp_root);
 

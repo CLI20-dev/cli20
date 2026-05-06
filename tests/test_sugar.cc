@@ -1,33 +1,33 @@
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
 
-#include <gtest/gtest.h>
-
-#include "argon/argument.hh"
-#include "argon/parser.hh"
+#include "cli/argument.hh"
+#include "cli/parser.hh"
 
 namespace {
 
 struct BuildArgs {
-  argon::FlagOption<"release", 'r'> release{
-      {.help = "Release mode", .presence = argon::optional}};
-  argon::IntOption<"jobs", 'j'> jobs{
-      {.help = "Parallel jobs", .presence = argon::required}};
+  cli::FlagOption<"release", 'r'> release{
+      {.help = "Release mode", .presence = cli::optional}};
+  cli::IntOption<"jobs", 'j'> jobs{
+      {.help = "Parallel jobs", .presence = cli::required}};
 };
 
 struct SugarArgs {
-  argon::FlagOption<"verbose", 'v'> verbose{
-      {.help = "Verbose output", .presence = argon::optional}};
-  argon::IntOption<"count", 'c'> count{
-      {.help = "Count", .presence = argon::optional}};
-  argon::StringListOption<"include", 'I', argon::nargs::exactly<2>> includes{
-      {.help = "Include directories", .presence = argon::optional}};
-  argon::Positional<std::string, argon::nargs::one_or_more> files{
-      {.help = "Input files", .presence = argon::required}};
-  argon::Command<"build", BuildArgs> build{{.help = "Build subcommand"}};
+  cli::FlagOption<"verbose", 'v'> verbose{
+      {.help = "Verbose output", .presence = cli::optional}};
+  cli::IntOption<"count", 'c'> count{
+      {.help = "Count", .presence = cli::optional}};
+  cli::StringListOption<"include", 'I', cli::nargs::exactly<2>> includes{
+      {.help = "Include directories", .presence = cli::optional}};
+  cli::Positional<std::string, cli::nargs::one_or_more> files{
+      {.help = "Input files", .presence = cli::required}};
+  cli::Command<"build", BuildArgs> build{{.help = "Build subcommand"}};
 };
 
 auto argv(std::initializer_list<std::string_view> values)
@@ -35,30 +35,33 @@ auto argv(std::initializer_list<std::string_view> values)
   return {values};
 }
 
-using VerboseField = std::remove_cvref_t<decltype(std::declval<SugarArgs>().verbose)>;
-using CountField = std::remove_cvref_t<decltype(std::declval<SugarArgs>().count)>;
+using VerboseField =
+    std::remove_cvref_t<decltype(std::declval<SugarArgs>().verbose)>;
+using CountField =
+    std::remove_cvref_t<decltype(std::declval<SugarArgs>().count)>;
 using IncludesField =
     std::remove_cvref_t<decltype(std::declval<SugarArgs>().includes)>;
-using FilesField = std::remove_cvref_t<decltype(std::declval<SugarArgs>().files)>;
+using FilesField =
+    std::remove_cvref_t<decltype(std::declval<SugarArgs>().files)>;
 
 static_assert(std::same_as<VerboseField::value_type, bool>);
 static_assert(std::same_as<CountField::value_type, std::optional<int>>);
 static_assert(std::same_as<IncludesField::value_type, std::vector<std::string>>);
 static_assert(std::same_as<FilesField::value_type, std::vector<std::string>>);
-static_assert(std::same_as<argon::StringPositional::value_type,
-                           std::optional<std::string>>);
-static_assert(std::same_as<argon::IntListArg<"ports">::value_type,
-                           std::vector<int>>);
+static_assert(
+    std::same_as<cli::StringPositional::value_type, std::optional<std::string>>);
+static_assert(
+    std::same_as<cli::IntListArg<"ports">::value_type, std::vector<int>>);
 
 }  // namespace
 
 TEST(Sugar, ParsesConvenienceAliases) {
-  auto args = argv({"prog", "--verbose", "--count", "3", "--include", "inc/a",
-                    "inc/b", "main.cc", "util.cc", "build", "--jobs", "8",
-                    "--release"});
+  auto args =
+      argv({"prog", "--verbose", "--count", "3", "--include", "inc/a", "inc/b",
+            "main.cc", "util.cc", "build", "--jobs", "8", "--release"});
 
-  auto result = argon::Parser<SugarArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<SugarArgs>{}.parse(std::span<const std::string_view>(args), 1);
 
   ASSERT_TRUE(result.has_value()) << result.error.message();
   EXPECT_TRUE(result.value.verbose.value());
@@ -76,12 +79,12 @@ TEST(Sugar, ParsesConvenienceAliases) {
 
 TEST(Sugar, SinglePositionalStoresOptionalValue) {
   struct SinglePositionalArgs {
-    argon::StringPositional file{
-        {.help = "Input file", .presence = argon::required}};
+    cli::StringPositional file{
+        {.help = "Input file", .presence = cli::required}};
   };
 
   auto args = argv({"prog", "input.txt"});
-  auto result = argon::Parser<SinglePositionalArgs>{}.parse(
+  auto result = cli::Parser<SinglePositionalArgs>{}.parse(
       std::span<const std::string_view>(args), 1);
 
   ASSERT_TRUE(result.has_value());
@@ -91,15 +94,15 @@ TEST(Sugar, SinglePositionalStoresOptionalValue) {
 
 TEST(Sugar, RequiredAliasStillEnforcesPresence) {
   struct RequiredArgs {
-    argon::IntOption<"port", 'p'> port{
-        {.help = "Port", .presence = argon::required}};
+    cli::IntOption<"port", 'p'> port{
+        {.help = "Port", .presence = cli::required}};
   };
 
   auto args = argv({"prog"});
-  auto result = argon::Parser<RequiredArgs>{}.parse(
+  auto result = cli::Parser<RequiredArgs>{}.parse(
       std::span<const std::string_view>(args), 1);
 
   ASSERT_TRUE(result.has_error());
-  EXPECT_EQ(result.error.code, argon::ErrorCode::missing_required);
+  EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
   EXPECT_EQ(result.error.subject, "port");
 }

@@ -4,7 +4,7 @@
 #include <array>
 #include <string_view>
 
-namespace argon {
+namespace cli {
 template <std::size_t N>
 struct StringLiteral {
   std::array<char, N> value{};
@@ -42,4 +42,4 @@ template <std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 
-}  // namespace argon
+}  // namespace cli

@@ -1,11 +1,11 @@
-#include <argon/arithmetic_argument.hh>
-#include <argon/flag_argument.hh>
-#include <argon/parser.hh>
+#include <cli/arithmetic_argument.hh>
+#include <cli/flag_argument.hh>
+#include <cli/parser.hh>
 
 // Mixing valid argument fields with a plain int must be rejected.
 struct Args {
-  argon::FlagArg<"verbose"> verbose;
+  cli::FlagArg<"verbose"> verbose;
   int count;  // not an argument type
 };
 
-auto main() -> int { auto parser = argon::Parser<Args>{}; }
+auto main() -> int { auto parser = cli::Parser<Args>{}; }

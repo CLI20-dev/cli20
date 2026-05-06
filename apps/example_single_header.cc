@@ -1,42 +1,42 @@
 auto main() -> int { return 0; }
-// // example_single_header.cc — argon single-header demo
+// // example_single_header.cc — cli20 single-header demo
 //
 // #include <iostream>
 //
-// #include "argon.hh"
+// #include "cli20.hh"
 //
 // struct BuildArgs {
-//   argon::StrArg<"target", 't'> target;
-//   argon::IntArg<"jobs", 'j'> jobs;
-//   argon::StrListArg<"feature", 'f'> features{argon::nargs::zero_or_more};
-//   argon::FlagArg<"dry-run"> dry_run;
+//   cli::StrArg<"target", 't'> target;
+//   cli::IntArg<"jobs", 'j'> jobs;
+//   cli::StrListArg<"feature", 'f'> features{cli::nargs::zero_or_more};
+//   cli::FlagArg<"dry-run"> dry_run;
 // };
 //
 // struct PushArgs {
-//   argon::StrArg<"remote", 'r'> remote{argon::required};
-//   argon::FlagArg<"force", 'f'> force;
-//   argon::IntArg<"depth"> depth;
+//   cli::StrArg<"remote", 'r'> remote{cli::required};
+//   cli::FlagArg<"force", 'f'> force;
+//   cli::IntArg<"depth"> depth;
 // };
 //
 // struct CpArgs {
-//   argon::StrPositional src{argon::required};
-//   argon::StrPositional dst{argon::required};
-//   argon::FlagArg<"recursive", 'r'> recursive;
+//   cli::StrPositional src{cli::required};
+//   cli::StrPositional dst{cli::required};
+//   cli::FlagArg<"recursive", 'r'> recursive;
 // };
 //
 // struct Args {
-//   argon::FlagArg<"verbose", 'v'> verbose;
-//   argon::IntArg<"jobs", 'j'> jobs;
-//   argon::StrArg<"config", 'c'> config;
-//   argon::BoolArg<"color"> color;
+//   cli::FlagArg<"verbose", 'v'> verbose;
+//   cli::IntArg<"jobs", 'j'> jobs;
+//   cli::StrArg<"config", 'c'> config;
+//   cli::BoolArg<"color"> color;
 //
-//   argon::Command<BuildArgs, "build"> build;
-//   argon::Command<PushArgs, "push"> push;
-//   argon::Command<CpArgs, "cp"> cp;
+//   cli::Command<BuildArgs, "build"> build;
+//   cli::Command<PushArgs, "push"> push;
+//   cli::Command<CpArgs, "cp"> cp;
 // };
 //
 // auto main(int argc, char** argv) -> int {
-//   auto res = argon::parse<Args>(argc, argv);
+//   auto res = cli::parse<Args>(argc, argv);
 //
 //   if (!res) {
 //     std::cerr << "error: " << res.error().message() << '\n';

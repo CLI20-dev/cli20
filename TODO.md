@@ -13,11 +13,11 @@ Add per-argument validation hooks that run after parsing, before the result is r
 **Example API sketch:**
 ```cpp
 struct Args {
-    IntArg<"port", 'p'> port{argon::validate([](int v) -> std::expected<void, std::string> {
+    IntArg<"port", 'p'> port{cli::validate([](int v) -> std::expected<void, std::string> {
         if (v < 1 || v > 65535) return std::unexpected("port must be 1–65535");
         return {};
     })};
-    StrArg<"level"> level{argon::one_of({"debug", "info", "warn", "error"})};
+    StrArg<"level"> level{cli::one_of({"debug", "info", "warn", "error"})};
 };
 ```
 
@@ -36,7 +36,7 @@ Express inter-argument dependencies at the type level or via runtime checks in `
 **API sketch:**
 ```cpp
 // At parse-call time (runtime constraint):
-auto res = argon::parse<Args>(argc, argv);
+auto res = cli::parse<Args>(argc, argv);
 if (res && res->format.provided() && !res->output.provided()) {
     return std::unexpected("--output is required when --format is given");
 }
@@ -61,10 +61,10 @@ struct Args {
 **Done:**
 - `formatHelp(ColorMode)` — usage line, Options / Positional arguments / Commands sections
 - Per-argument description strings passed via constructor
-- `argon::description` struct member for a detailed struct-level description shown after the usage line
+- `cli::description` struct member for a detailed struct-level description shown after the usage line
 - ANSI bold + underline section headers; bold option names; TTY auto-detection
 - `HelpFlag<LongOpt, ShortOpt>` — special flag (default `--help` / `-h`) that bypasses parse errors so callers can unconditionally check `.provided()`
-- `formatHelp(argon::recurseHelp)` — recursively appends each sub-command's help with a `─── name ───` separator
+- `formatHelp(cli::recurseHelp)` — recursively appends each sub-command's help with a `─── name ───` separator
 - User-controlled line wrapping: `\n` in a description indents continuation lines to the description column
 - `Command<SubArgs, "name">` description falls back to `SubArgs::description` member when not set explicitly
 
@@ -103,5 +103,5 @@ Return both the parsed `Arguments` and a `std::vector<std::string_view>` of unre
 
 Allow marking a `Command<>` field as required so that omitting the sub-command is an error:
 ```cpp
-argon::Command<BuildArgs, "build"> build{argon::required};
+cli::Command<BuildArgs, "build"> build{cli::required};
 ```

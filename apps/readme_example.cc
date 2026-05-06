@@ -1,25 +1,24 @@
 #include <iostream>
 
-#include "argon/argument.hh"
-#include "argon/parser.hh"
+#include "cli/argument.hh"
+#include "cli/parser.hh"
 
 struct Args {
-  argon::Description description{
+  cli::Description description{
       "Small example used by the README and by CI to exercise the public API."};
 
-  argon::HelpFlag<>
-      help{{.help = "Show help", .presence = argon::Presence::optional}};
+  cli::HelpFlag<> help{
+      {.help = "Show help", .presence = cli::Presence::optional}};
 
-  argon::IntOption<"port", 'p'>
-      port{{.help = "TCP port number", .presence = argon::Presence::optional}};
+  cli::IntOption<"port", 'p'> port{
+      {.help = "TCP port number", .presence = cli::Presence::optional}};
 
-  argon::Positional<std::string, argon::nargs::one_or_more>
-      files{{.help = "One or more input files",
-             .presence = argon::Presence::required}};
+  cli::Positional<std::string, cli::nargs::one_or_more> files{
+      {.help = "One or more input files", .presence = cli::Presence::required}};
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = argon::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parseOrExit<Args>(argc, argv);
   if (args.port.value().has_value()) {
     std::cout << "port: " << *args.port.value() << '\n';
   }

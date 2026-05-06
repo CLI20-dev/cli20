@@ -4,17 +4,21 @@ include(GoogleTest)
 file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "*.cc")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}")
 
-function(add_argon_tests suffix cxx_std)
-  set(target_name argon_tests${suffix})
+function(add_cli20_tests suffix cxx_std)
+  set(target_name cli20_tests${suffix})
   add_executable(${target_name} ${TEST_SOURCES})
-  target_link_libraries(${target_name} PRIVATE argon GTest::gtest GTest::gtest_main)
+  set_target_properties(${target_name} PROPERTIES CXX_CLANG_TIDY "")
+  target_link_libraries(${target_name} PRIVATE cli20 GTest::gtest GTest::gtest_main)
   target_compile_features(${target_name} PRIVATE ${cxx_std})
   target_compile_options(${target_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-  gtest_discover_tests(${target_name})
+  gtest_discover_tests(${target_name}
+    DISCOVERY_MODE PRE_TEST
+    DISCOVERY_TIMEOUT 60
+  )
 endfunction()
 
-add_argon_tests("_cxx20" cxx_std_20)
-add_argon_tests("_cxx26" cxx_std_26)
+add_cli20_tests("_cxx20" cxx_std_20)
+add_cli20_tests("_cxx26" cxx_std_26)
 
 # Compile-fail tests: verify that duplicate options are rejected at compile time
 function(add_compile_fail_test name source)
@@ -33,4 +37,3 @@ function(add_compile_fail_test name source)
     message(STATUS "Compile-fail test passed: ${name}")
   endif()
 endfunction()
-

@@ -1,7 +1,7 @@
 #include <string>
 
-namespace argon {
+namespace cli {
 
 auto hello() -> std::string { return "Hello, World!"; }
 
-}  // namespace argon
+}  // namespace cli

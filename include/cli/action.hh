@@ -21,10 +21,10 @@
 #include <variant>
 #include <vector>
 
-#include "argon/error.hh"
-#include "argon/string_literal.hh"
+#include "cli/error.hh"
+#include "cli/string_literal.hh"
 
-namespace argon {
+namespace cli {
 
 template <class T>
 struct ActionResult {
@@ -1221,7 +1221,8 @@ struct PrintHelp {
   template <class Arg, class T>
   auto operator()(ActionCtx<Arg>, ActionResult<T> input) const
       -> ActionResult<after_type<T>> {
-    return ActionResult<after_type<T>>::ok(after_type<T>{.value = std::move(input.value)});
+    return ActionResult<after_type<T>>::ok(
+        after_type<T>{.value = std::move(input.value)});
   }
 };
 
@@ -1236,8 +1237,7 @@ struct ExitSuccess {
   using storage_type = std::monostate;
 
   template <class Arg, class T>
-  auto operator()(ActionCtx<Arg> ctx, ActionResult<T>) const
-      -> ActionResult<T> {
+  auto operator()(ActionCtx<Arg> ctx, ActionResult<T>) const -> ActionResult<T> {
     using U = std::remove_cvref_t<T>;
     if constexpr (detail::is_help_requested<U>::value) {
       return ActionResult<T>::fail(ParseError{
@@ -1260,4 +1260,4 @@ inline constexpr auto exit_success = ExitSuccess{};
 
 }  // namespace action
 
-}  // namespace argon
+}  // namespace cli

@@ -1,74 +1,112 @@
-# argon
+# cli20
 
-`argon` is a header-only C++ command-line parser where your struct is the schema.
+A C++20-native command line parser.
+Define your CLI as a type.
 
-No registration tables. No macros. No separate builder DSL. You write a plain aggregate, and `argon` turns it into a parser.
+```cpp
+#include "cli/argument.hh"
+#include "cli/parser.hh"
+
+struct Args {
+  cli::FlagOption<"verbose", 'v'> verbose;
+  cli::StringOption<"output", 'o'> output;
+  cli::Positional<std::string, cli::nargs::one_or_more> inputs;
+};
+
+auto main(int argc, char* argv[]) -> int {
+  const auto args = cli::parseOrExit<Args>(argc, argv);
+}
+```
+
+CLI11 was great.  
+C++ has moved on.
+
+## cli20 in one line
+
+`cli20` is a header-only C++20 CLI parser that treats your command line as a typed schema, not a mutable runtime parser object.
+
+## Why cli20?
+
+Most C++ CLI parsers were designed around C++11 constraints:
+
+- runtime builder APIs
+- string-based option lookup
+- callback-oriented parsing
+- mutable parser graphs
+- macro-heavy configuration
+
+`cli20` takes a different approach.
+
+Instead of building a parser object, you define your CLI directly as a type.
+
+C++20 gives us:
+
+- compile-time string literals
+- concepts
+- constexpr-friendly APIs
+- typed schemas
+- cleaner metaprogramming
+
+`cli20` is built around those capabilities from the start.
+
+## CLI11 vs cli20
+
+CLI11:
+
+```cpp
+CLI::App app{"my app"};
+bool verbose = false;
+std::string output;
+
+app.add_flag("-v,--verbose", verbose);
+app.add_option("-o,--output", output);
+```
+
+cli20:
 
 ```cpp
 struct Args {
-  argon::FlagOption<"verbose", 'v'> verbose;
-  argon::IntOption<"port", 'p'> port;
-  argon::Positional<std::string, argon::nargs::one_or_more> files;
+  cli::FlagOption<"verbose", 'v'> verbose;
+  cli::StringOption<"output", 'o'> output;
 };
+
+const auto args = cli::parseOrExit<Args>(argc, argv);
 ```
 
-That is the interface.
-
-## Why it is interesting
-
-- The type of each field defines how it parses.
-- Field order defines positional assignment.
-- Subcommands are just nested structs.
-- You can stay on the sugar API for common cases.
-- You can drop to `ArgImpl` and `Action<...>` when you need custom conversion, validation, or packing.
-
-## Installation
-
-Copy `include/` into your project and add it to your include path.
-
-```cmake
-add_library(argon INTERFACE)
-target_include_directories(argon INTERFACE path/to/argon/include)
-target_compile_features(argon INTERFACE cxx_std_20)
-```
+`cli20` treats your CLI as a typed schema, not as a mutable runtime parser object.
 
 ## Quick Start
 
 ```cpp
 #include <iostream>
 
-#include "argon/argument.hh"
-#include "argon/parser.hh"
+#include "cli/argument.hh"
+#include "cli/parser.hh"
 
 struct BuildArgs {
-  argon::FlagOption<"release", 'r'> release{
+  cli::FlagOption<"release", 'r'> release{
       {.help = "Build with optimizations"}};
-  argon::IntOption<"jobs", 'j'> jobs{
-      {.help = "Parallel jobs", .presence = argon::required}};
+  cli::IntOption<"jobs", 'j'> jobs{
+      {.help = "Parallel jobs", .presence = cli::required}};
 };
 
 struct Args {
-  argon::Description description{
-      "A tiny build tool powered by argon."};
+  cli::Description description{"A tiny build tool powered by cli20."};
 
-  argon::HelpFlag<> help{
-      {.help = "Show help"}};
+  cli::HelpFlag<> help{{.help = "Show help"}};
+  cli::FlagOption<"verbose", 'v'> verbose{{.help = "Enable verbose logging"}};
+  cli::StringOption<"output", 'o'> output{{.help = "Output path"}};
 
-  argon::FlagOption<"verbose", 'v'> verbose{
-      {.help = "Enable verbose logging"}};
+  cli::Positional<std::string, cli::nargs::one_or_more> inputs{
+      {.help = "Input files", .presence = cli::required}};
 
-  argon::StringOption<"output", 'o'> output{
-      {.help = "Output path"}};
-
-  argon::Positional<std::string, argon::nargs::one_or_more> inputs{
-      {.help = "Input files", .presence = argon::required}};
-
-  argon::Command<"build", BuildArgs> build{
+  cli::Command<"build", BuildArgs> build{
       {.help = "Run the build subcommand"}};
 };
 
-int main(int argc, char* argv[]) {
-  const auto args = argon::parseOrExit<Args>(argc, argv);
+auto main(int argc, char* argv[]) -> int {
+  const auto args = cli::parseOrExit<Args>(argc, argv);
+
   if (args.verbose.value()) {
     std::cout << "verbose enabled\n";
   }
@@ -80,68 +118,98 @@ int main(int argc, char* argv[]) {
   if (args.build.provided()) {
     std::cout << "jobs: " << *args.build.jobs.value() << '\n';
   }
+
+  return 0;
 }
 ```
 
-Example CLI:
-
-```text
-tool --verbose src/a.cc src/b.cc build --jobs 8 --release
-```
+## Built-in Help
 
 Built-in help is one field:
 
 ```cpp
-argon::HelpFlag<> help;
+cli::HelpFlag<> help;
 ```
 
-That expands to `--help` / `-h`, prints generated help, and exits successfully. Together with `parseOrExit()`, a CLI can get built-in help with no error-handling boilerplate.
+That expands to `--help` and `-h`, prints generated help, and exits successfully. Combined with `cli::parseOrExit()`, help handling does not need parser-specific boilerplate.
 
-## The Sugar API
+If you want to wire help explicitly, the action pipeline is also available:
 
-The main API lives in [`include/argon/argument.hh`](include/argon/argument.hh).
+```cpp
+cli::ArgImpl<
+    "help", 'h', cli::nargs::none,
+    cli::Action<cli::action::print_help, cli::action::exit_success>{}>
+    help;
+```
+
+## Subcommands
+
+```cpp
+struct BuildArgs {
+  cli::FlagOption<"release", 'r'> release;
+  cli::IntOption<"jobs", 'j'> jobs;
+};
+
+struct Args {
+  cli::Command<"build", BuildArgs> build;
+};
+```
+
+Subcommands are just nested typed schemas.
+
+## Features
+
+- C++20-native API design
+- Header-only
+- Typed command schemas
+- Compile-time option names
+- Strongly typed positional arguments
+- Recursive subcommands
+- Zero runtime string registry
+- `ParseResult<T>`-based parsing
+- Custom validation and conversion pipelines
+- Automatic help generation
+- No macros
+
+## Core Design Principles
+
+- Your CLI is a type, not a builder script.
+- Field order defines positional structure.
+- Option names are compile-time data.
+- Subcommands compose by nesting structs.
+- The sugar API should cover the common case.
+- Lower-level action pipelines should remain available when needed.
+
+## Sugar API
+
+The main API lives in [`include/cli/argument.hh`](include/cli/argument.hh).
 
 ### Flags
 
 ```cpp
-argon::FlagOption<"verbose", 'v'> verbose;
-argon::HelpFlag<> help;
-argon::HelpFlag<"usage", 'u'> usage;
-argon::FlagArg<"dry-run"> dry_run;  // alias
+cli::FlagOption<"verbose", 'v'> verbose;
+cli::HelpFlag<> help;
+cli::HelpFlag<"usage", 'u'> usage;
 ```
 
-Storage type: `bool` for ordinary flags. `HelpFlag` is signal-only and exits via its action pipeline.
+Ordinary flags store `bool`. `HelpFlag` is signal-only and exits through its action pipeline.
 
 ### Scalar options
 
 ```cpp
-argon::IntOption<"port", 'p'> port;
-argon::StringOption<"config", 'c'> config;
-argon::BoolOption<"color"> color;
-argon::PathOption<"output"> output;
+cli::IntOption<"port", 'p'> port;
+cli::StringOption<"config", 'c'> config;
+cli::BoolOption<"color"> color;
+cli::PathOption<"output"> output;
 ```
 
 Storage type: `std::optional<T>`
 
-`Option` and `Arg` names are interchangeable aliases:
-
-```cpp
-argon::IntOption<"port", 'p'> a;
-argon::IntArg<"port", 'p'> b;
-```
-
 ### List options
 
 ```cpp
-argon::StringListOption<"include", 'I'> include_dirs;
-argon::IntListArg<"ports"> ports;
-```
-
-Default `nargs` is `argon::nargs::one_or_more`. You can override it:
-
-```cpp
-argon::StringListOption<"feature", 'f', argon::nargs::zero_or_more> features;
-argon::IntListOption<"pair", '\0', argon::nargs::exactly<2>> pair;
+cli::StringListOption<"include", 'I'> include_dirs;
+cli::IntListOption<"pair", '\0', cli::nargs::exactly<2>> pair;
 ```
 
 Storage type: `std::vector<T>`
@@ -149,179 +217,83 @@ Storage type: `std::vector<T>`
 ### Positionals
 
 ```cpp
-argon::StringPositional src;
-argon::IntPositional count;
-argon::Positional<std::string, argon::nargs::one_or_more> files;
+cli::StringPositional src;
+cli::IntPositional count;
+cli::Positional<std::string, cli::nargs::one_or_more> files;
 ```
 
 If `nargs.max == 1`, the storage is `std::optional<T>`.
 
 If `nargs.max != 1`, the storage is `std::vector<T>`.
 
-### Built-in families
+## Philosophy
 
-- `FlagOption`
-- `StringOption`, `StringArg`, `StrOption`, `StrArg`
-- `BoolOption`, `BoolArg`
-- `IntOption`, `IntArg`
-- `Int32Option`, `Int32Arg`
-- `Int64Option`, `Int64Arg`
-- `Uint32Option`, `Uint32Arg`
-- `Uint64Option`, `Uint64Arg`
-- `FloatOption`, `FloatArg`
-- `DoubleOption`, `DoubleArg`
-- `PathOption`, `PathArg`
-- `StringListOption`, `StringListArg`, `StrListOption`, `StrListArg`
-- `BoolListOption`, `BoolListArg`
-- `IntListOption`, `IntListArg`
-- `Int32ListOption`, `Int32ListArg`
-- `Int64ListOption`, `Int64ListArg`
-- `Uint32ListOption`, `Uint32ListArg`
-- `Uint64ListOption`, `Uint64ListArg`
-- `FloatListOption`, `FloatListArg`
-- `DoubleListOption`, `DoubleListArg`
-- `PathListOption`, `PathListArg`
-- `StringPositional`, `StrPositional`
-- `BoolPositional`
-- `IntPositional`, `Int32Positional`, `Int64Positional`
-- `Uint32Positional`, `Uint64Positional`
-- `FloatPositional`, `DoublePositional`
-- `PathPositional`
+`cli20` is built around one idea:
 
-## `nargs`
+Your command line interface is data.
 
-`argon` ships named `Nargs` constants:
+Not a mutable parser object.  
+Not a callback graph.  
+Not a string registry.  
+A typed schema.
 
-```cpp
-argon::nargs::none
-argon::nargs::one
-argon::nargs::zero_or_one
-argon::nargs::zero_or_more
-argon::nargs::one_or_more
-argon::nargs::exactly<3>
-argon::nargs::between<2, 5>
-```
+This enables:
 
-## Presence
-
-Use `argon::required` and `argon::optional`:
-
-```cpp
-argon::StringOption<"config"> config{
-    {.help = "Path to config", .presence = argon::required}};
-```
-
-If a required option or positional is missing, `parse()` returns `missing_required`.
-
-## Subcommands
-
-Subcommands are nested parsers.
-
-```cpp
-struct ServeArgs {
-  argon::IntOption<"port", 'p'> port{
-      {.presence = argon::required}};
-};
-
-struct Args {
-  argon::Command<"serve", ServeArgs> serve{
-      {.help = "Start the HTTP server"}};
-};
-```
-
-Usage:
-
-```text
-app serve --port 8080
-```
-
-Check whether the subcommand was used:
-
-```cpp
-if (result.value.serve.provided()) {
-  std::cout << *result.value.serve.port.value() << '\n';
-}
-```
+- cleaner APIs
+- better compile-time guarantees
+- easier tooling
+- simpler validation
+- more maintainable command structures
 
 ## Going Beyond Sugar
 
-The sugar aliases are intentionally simple. When you need stronger behavior, use `ArgImpl` or `PositionalImpl` directly.
-
-Example: parse a path, require it to exist, require it to be a regular file.
+When you need stronger behavior, use `ArgImpl` and `Action<...>` directly.
 
 ```cpp
-argon::ArgImpl<
-    "config", 'c', argon::nargs::one,
-    argon::Action<
-        argon::conversion::path,
-        argon::validation::exists,
-        argon::validation::is_regular_file,
-        argon::pack::set_once>{}>
+cli::ArgImpl<
+    "config", 'c', cli::nargs::one,
+    cli::Action<
+        cli::conversion::path,
+        cli::validation::exists,
+        cli::validation::is_regular_file,
+        cli::pack::set_once>{}>
     config{{.help = "Configuration file"}};
 ```
 
-The `Action` pipeline is split into three layers:
+The action pipeline is split into three layers:
 
 - `conversion::*`
 - `validation::*`
 - `pack::*`
 
-This gives you a compact default API without closing off advanced composition.
+## Comparison with CLI11
 
-## Parse Result
+CLI11 is a strong library from the C++11 era.
 
-`argon::parse<T>()` and `argon::Parser<T>::parse()` return `ParseResult<T>`.
+`cli20` is not trying to reproduce that design with newer syntax. It makes a different architectural choice:
 
-```cpp
-auto result = argon::parse<Args>(argc, argv);
-if (!result) {
-  std::cerr << result.error.message() << '\n';
-  return 1;
-}
+- schema types instead of builder objects
+- compile-time option metadata instead of runtime string registration
+- nested structs instead of parser graph mutation
+- typed fields instead of callback-oriented configuration
+
+CLI11 was designed around C++11 constraints.  
+`cli20` is what a CLI parser looks like when designed around C++20 from the beginning.
+
+## Installation
+
+Copy `include/` into your project and add it to your include path.
+
+```cmake
+add_library(cli20 INTERFACE)
+target_include_directories(cli20 INTERFACE path/to/cli20/include)
+target_compile_features(cli20 INTERFACE cxx_std_20)
 ```
-
-Useful pieces:
-
-- `result.value`
-- `result.error.code`
-- `result.error.subject`
-- `result.error.detail`
-- `result.error.position`
-- `result.error.message()`
-
-Each argument object exposes:
-
-- `arg.value()`
-- `arg.provided()`
-
-## Current Status
-
-What already works well:
-
-- tokenization
-- scalar options
-- list options
-- positionals
-- subcommands
-- conversion / validation / pack action pipelines
-
-What this project is good at:
-
-- small tools
-- internal CLIs
-- typed command schemas
-- projects that want compile-time structure instead of runtime registration
-
-## Examples
-
-- [`apps/example.cc`](apps/example.cc)
-- [`apps/readme_example.cc`](apps/readme_example.cc)
-- [`concept.cc`](concept.cc)
 
 ## Development
 
 ```bash
-cmake -S . -B build -DCXX_ARGON_ENABLE_TEST=ON
+cmake -S . -B build -DCXX_CLI20_ENABLE_TEST=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```

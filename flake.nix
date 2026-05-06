@@ -1,5 +1,5 @@
 {
-  description = "C++ template with CMake, Ninja, and Nix";
+  description = "cli20: a C++20-native command line parser";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -51,7 +51,7 @@
           };
 
           packages.default = pkgs.stdenvNoCC.mkDerivation {
-            name = "argon";
+            name = "cli20";
             src = ./.;
             nativeBuildInputs = [
               pkgs.llvmPackages.libcxxClang
@@ -67,9 +67,9 @@
             cmakeFlags = [
               "-G Ninja"
               "-DCMAKE_BUILD_TYPE=Release"
-              "-DCXX_ARGON_ENABLE_TEST=ON"
-              "-DCXX_TEMPLATE_ENABLE_CLANG_TIDY=ON"
-              "-DCXX_TEMPLATE_ENABLE_SANITIZERS=ON"
+              "-DCXX_CLI20_ENABLE_TEST=ON"
+              "-DCXX_CLI20_ENABLE_CLANG_TIDY=ON"
+              "-DCXX_CLI20_ENABLE_SANITIZERS=OFF"
             ];
             doCheck = true;
             checkPhase = ''
@@ -82,7 +82,7 @@
           apps.build = {
             type = "app";
             program =
-              (pkgs.writeShellScript "build-cxx-template" ''
+              (pkgs.writeShellScript "build-cli20" ''
                 set -euo pipefail
                 if [ ! -d build ]; then
                   nix develop --command cmake -S . -B build -G Ninja \

@@ -1,8 +1,8 @@
-#include <argon/parser.hh>
+#include <cli/parser.hh>
 
 struct Args {
-  argon::Arg<int, "foo", 'f'> a;
-  argon::Arg<int, "bar", 'f'> b;  // duplicate -f
+  cli::Arg<int, "foo", 'f'> a;
+  cli::Arg<int, "bar", 'f'> b;  // duplicate -f
 };
 
-auto main() -> int { auto parser = argon::Parser<Args>{}; }
+auto main() -> int { auto parser = cli::Parser<Args>{}; }

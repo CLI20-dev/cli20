@@ -4,7 +4,7 @@
 #include <tuple>
 #include <utility>
 
-namespace argon {
+namespace cli {
 
 namespace detail {
 
@@ -587,4 +587,4 @@ constexpr auto as_tuple (const T& t) {
 // clang-format on
 #endif
 
-}  // namespace argon
+}  // namespace cli
