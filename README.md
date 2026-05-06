@@ -1,7 +1,11 @@
-# cli20
+# CLI20 - A C++20 typed-schema command-line parser
 
-A C++20-native command line parser.
-Define your CLI as a type.
+[<img src="assets/logo.png" alt="cli20 logo" width="320">](assets/logo.png)
+
+[![CI](https://github.com/gen740/CLI20/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gen740/CLI20/actions/workflows/ci.yml)
+
+A C++20 typed-schema command-line parser.
+Define your CLI as a type, not as a builder.
 
 ```cpp
 #include "cli/argument.hh"
