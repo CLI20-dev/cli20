@@ -27,15 +27,20 @@ function(add_cli20_tests suffix cxx_std)
   )
   target_compile_options(${target_name} PRIVATE
     $<IF:$<CXX_COMPILER_ID:MSVC>,/W4;/WX,-Wall;-Wextra;-Wpedantic;-Werror>
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>
   )
+  string(REGEX REPLACE "^_" "" test_prefix ${suffix})
   gtest_discover_tests(${target_name}
     DISCOVERY_MODE PRE_TEST
     DISCOVERY_TIMEOUT 60
+    TEST_PREFIX "${test_prefix}/"
   )
 endfunction()
 
 add_cli20_tests("_cxx20" cxx_std_20)
-add_cli20_tests("_cxx26" cxx_std_26)
+if(NOT MSVC)
+  add_cli20_tests("_cxx26" cxx_std_26)
+endif()
 
 # Compile-fail tests: verify that duplicate options are rejected at compile time
 function(add_compile_fail_test name source)

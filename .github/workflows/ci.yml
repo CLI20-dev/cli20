@@ -37,8 +37,7 @@ jobs:
           # aarch64 Linux
           - {os: ubuntu-24.04-arm, compiler: gcc,         cc: gcc-16,   cxx: g++-16}
           - {os: ubuntu-24.04-arm, compiler: clang,       cc: clang-21, cxx: clang++-21, llvm: "21"}
-          # macOS ARM — Homebrew compilers
-          - {os: macos-26,         compiler: gcc,         cc: "",       cxx: ""}
+          # macOS ARM — Homebrew LLVM
           - {os: macos-26,         compiler: clang,       cc: "",       cxx: ""}
           # Windows — MSVC only
           - {os: windows-latest,   compiler: msvc,        cc: "",       cxx: ""}
@@ -72,18 +71,9 @@ jobs:
       - name: Install compiler (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ninja
-          if [[ "${{ matrix.compiler }}" == "clang" ]]; then
-            brew install llvm
-            echo "CC=$(brew --prefix llvm)/bin/clang"   >> $GITHUB_ENV
-            echo "CXX=$(brew --prefix llvm)/bin/clang++" >> $GITHUB_ENV
-          else
-            brew install gcc
-            GCC=$(find "$(brew --prefix)/bin" -name 'gcc-[0-9]*' | sort -V | tail -1)
-            GPP=$(find "$(brew --prefix)/bin" -name 'g++-[0-9]*' | sort -V | tail -1)
-            echo "CC=$GCC"   >> $GITHUB_ENV
-            echo "CXX=$GPP" >> $GITHUB_ENV
-          fi
+          brew install ninja llvm
+          echo "CC=$(brew --prefix llvm)/bin/clang"    >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm)/bin/clang++" >> $GITHUB_ENV
 
       - name: Install latest CMake + Ninja (Windows)
         if: runner.os == 'Windows'

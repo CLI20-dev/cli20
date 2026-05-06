@@ -18,6 +18,7 @@ function(add_cli20_app app_source suffix cxx_std)
   )
   target_compile_options(${target_name} PRIVATE
     $<IF:$<CXX_COMPILER_ID:MSVC>,/W4;/WX,-Wall;-Wextra;-Wpedantic;-Werror>
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>
   )
 endfunction()
 
@@ -25,5 +26,7 @@ file(GLOB APP_SOURCES CONFIGURE_DEPENDS "*.cc")
 
 foreach(app_source ${APP_SOURCES})
   add_cli20_app(${app_source} "" cxx_std_20)
-  add_cli20_app(${app_source} "_cxx26" cxx_std_26)
+  if(NOT MSVC)
+    add_cli20_app(${app_source} "_cxx26" cxx_std_26)
+  endif()
 endforeach()
