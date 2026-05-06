@@ -85,9 +85,9 @@ jobs:
             echo "CXX=$GPP" >> $GITHUB_ENV
           fi
 
-      - name: Install Ninja (Windows)
+      - name: Install latest CMake + Ninja (Windows)
         if: runner.os == 'Windows'
-        uses: seanmiddleditch/gha-setup-ninja@v5
+        uses: lukka/get-cmake@latest
 
       - name: Set up MSVC
         if: matrix.compiler == 'msvc'
