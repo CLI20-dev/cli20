@@ -20,7 +20,13 @@ jobs:
             experimental-features = nix-command flakes
 
       - name: Check formatting
-        run: nix fmt -- --ci
+        run: |
+          if ! nix fmt -- --ci; then
+            echo ""
+            echo "::error::Formatting check failed."
+            echo "Please run 'nix fmt' (or './format.sh') and push the result."
+            exit 1
+          fi
 
   # ── Build + test matrix ───────────────────────────────────────────────────
   test:
