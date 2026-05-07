@@ -6,20 +6,22 @@
 #include <unistd.h>
 #endif
 
+#include <string_view>
+
 namespace cli {
 
-// Controls whether ANSI escape codes are emitted by formatHelp().
+// Controls whether ANSI escape codes are emitted by format_help().
 //   auto_  : emit codes only when stdout is a TTY (default)
 //   never  : always plain text
 //   always : always emit codes regardless of terminal type
 enum class ColorMode { auto_, never, always };
 
-// Tag type passed to formatHelp() to request recursive sub-command output.
-//   parser.formatHelp(cli::recurseHelp)               // auto color + recurse
-//   parser.formatHelp(cli::ColorMode::never, cli::recurseHelp)  // no color
+// Tag type passed to format_help() to request recursive sub-command output.
+//   parser.format_help(cli::recurse_help)               // auto color + recurse
+//   parser.format_help(cli::ColorMode::never, cli::recurse_help)  // no color
 //   + recurse
 struct RecurseHelpTag {};
-inline constexpr RecurseHelpTag recurseHelp{};
+inline constexpr RecurseHelpTag recurse_help{};
 
 namespace detail {
 
@@ -42,7 +44,7 @@ struct AnsiStyle {
 };
 
 // Returns true when file descriptor 1 (stdout) is connected to a terminal.
-inline auto isTty() noexcept -> bool {
+inline auto is_tty() noexcept -> bool {
 #ifdef _WIN32
   return _isatty(1) != 0;
 #else
@@ -51,9 +53,9 @@ inline auto isTty() noexcept -> bool {
 }
 
 // Resolves a ColorMode to a concrete AnsiStyle.
-inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
+inline auto resolve_color(ColorMode mode) noexcept -> AnsiStyle {
   const bool on =
-      (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
+      (mode == ColorMode::always) || (mode == ColorMode::auto_ && is_tty());
   return AnsiStyle{on};
 }
 

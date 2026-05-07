@@ -29,7 +29,7 @@ struct Args {
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = cli::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parse_or_exit<Args>(argc, argv);
   std::cout << "verbose: " << std::boolalpha << args.verbose.value() << '\n';
   if (args.count.value().has_value()) {
     std::cout << "count: " << *args.count.value() << '\n';

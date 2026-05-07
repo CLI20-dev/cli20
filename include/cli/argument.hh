@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cli/meta.hh>
 #include <cli/string_literal.hh>
-#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <type_traits>
@@ -190,10 +189,10 @@ consteval auto is_valid_command_name() noexcept {
   return is_valid_long_option_name<Name>();
 }
 
-template <Nargs nargs>
+template <Nargs NargsValue>
 [[nodiscard]]
 consteval auto is_valid_nargs() noexcept -> bool {
-  if (nargs.max == -1 && nargs.min == -1) {
+  if (NargsValue.max == -1 && NargsValue.min == -1) {
     return false;
   }
   return true;
@@ -245,7 +244,7 @@ struct ArgImpl : public OptionTag {
   static constexpr auto nargs = N;
 
   // Called once when the option token is seen (before processing its values).
-  auto notify_option_seen() -> void { ++option_occurrences_; }
+  auto notify_option_seen() -> void { ++occurrence_count_; }
 
   // Called once per value token associated with this option.
   auto invoke_action(std::string_view text, std::size_t arg_index)
@@ -253,7 +252,7 @@ struct ArgImpl : public OptionTag {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
-        .occurrences = option_occurrences_,
+        .occurrences = occurrence_count_,
         .invoke_count = invoke_count_,
         .arg = std::ref(value_),
     };
@@ -271,7 +270,7 @@ struct ArgImpl : public OptionTag {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
-        .occurrences = option_occurrences_,
+        .occurrences = occurrence_count_,
         .invoke_count = invoke_count_,
         .arg = std::ref(value_),
     };
@@ -293,8 +292,8 @@ struct ArgImpl : public OptionTag {
   friend struct Parser;
 
   value_type value_{};
-  std::size_t option_occurrences_{};  // times the option token appeared
-  std::size_t invoke_count_{};        // times invoke_action/invoke_flag called
+  std::size_t occurrence_count_{};  // times the option token appeared
+  std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
   bool provided_{};
 };
 
@@ -372,9 +371,11 @@ struct Command : public T, public CommandTag {
   Command() = default;
   Command(CommandParameter param) : help(param.help) {}
   static constexpr auto name = Name;
-  static constexpr auto commandName() -> std::string_view { return Name.view(); }
+  static constexpr auto command_name() -> std::string_view {
+    return Name.view();
+  }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto helpText() const -> std::string_view { return help; }
+  [[nodiscard]] auto help_text() const -> std::string_view { return help; }
   auto mark_provided() -> void { provided_ = true; }
 
  private:

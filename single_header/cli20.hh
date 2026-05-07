@@ -9,7 +9,6 @@
 #include <charconv>
 #include <concepts>
 #include <cstddef>
-#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <format>
@@ -21,7 +20,6 @@
 #include <regex>
 #include <set>
 #include <span>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -63,7 +61,7 @@ enum class ErrorKind {
   validation,
 };
 
-[[nodiscard]] constexpr auto toString(ErrorCode code) noexcept
+[[nodiscard]] constexpr auto to_string(ErrorCode code) noexcept
     -> std::string_view {
   switch (code) {
     case ErrorCode::unknown_option:
@@ -112,17 +110,17 @@ struct ParseError {
   std::string subject{};
   std::string detail{};
 
-  [[nodiscard]] constexpr auto hasPosition() const noexcept -> bool {
+  [[nodiscard]] constexpr auto has_position() const noexcept -> bool {
     return position >= 0;
   }
 
-  [[nodiscard]] constexpr auto exitCode() const noexcept -> int {
+  [[nodiscard]] constexpr auto exit_code() const noexcept -> int {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success
                ? 0
                : 1;
   }
 
-  [[nodiscard]] constexpr auto useStdout() const noexcept -> bool {
+  [[nodiscard]] constexpr auto use_stdout() const noexcept -> bool {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success;
   }
 
@@ -135,7 +133,7 @@ struct ParseError {
       return detail;
     }
 
-    std::string out{toString(code)};
+    std::string out{to_string(code)};
     if (!subject.empty()) {
       out += ": ";
       out += subject;
@@ -147,7 +145,7 @@ struct ParseError {
       out += ")";
     }
 
-    if (hasPosition()) {
+    if (has_position()) {
       out += " at argv[";
       out += std::to_string(position);
       out += "]";
@@ -156,7 +154,7 @@ struct ParseError {
     return out;
   }
 
-  [[nodiscard]] constexpr auto hasError() const noexcept -> bool {
+  [[nodiscard]] constexpr auto has_error() const noexcept -> bool {
     return code != ErrorCode::unknown_error;
   }
 };
@@ -220,17 +218,17 @@ struct ActionResult {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   template <class U>
@@ -257,17 +255,17 @@ struct ActionResult<void> {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   static constexpr auto ok() -> ActionResult<void> {
@@ -310,9 +308,6 @@ struct ActionCtx<void> {
 namespace detail {
 
 template <class T>
-constexpr auto remove_cvref_t = std::remove_cvref_t<T>{};
-
-template <class T>
 [[nodiscard]]
 auto to_error_subject(const T& value) -> std::string {
   using U = std::remove_cvref_t<T>;
@@ -327,11 +322,10 @@ auto to_error_subject(const T& value) -> std::string {
     return value ? "true" : "false";
   } else if constexpr (std::integral<U>) {
     return std::to_string(value);
-  } else if constexpr (std::floating_point<U>) {
-    return std::format("{}", value);
   } else if constexpr (std::same_as<U, std::filesystem::path>) {
     return value.string();
-  } else if constexpr (requires { std::format("{}", value); }) {
+  } else if constexpr (requires { std::format("{}", value); } or
+                       std::floating_point<U>) {
     return std::format("{}", value);
   } else {
     return "<value>";
@@ -390,7 +384,7 @@ inline auto invalid_choice_error(std::size_t index, std::string subject,
 [[nodiscard]]
 inline auto is_blank(std::string_view text) -> bool {
   return std::ranges::all_of(
-      text, [](unsigned char ch) { return std::isspace(ch) != 0; });
+      text, [](unsigned char ch) -> bool { return std::isspace(ch) != 0; });
 }
 
 template <class T>
@@ -402,20 +396,20 @@ struct HelpRequested {
 };
 
 template <class T>
-struct is_help_requested : std::false_type {};
+struct IsHelpRequested : std::false_type {};
 
 template <class T>
-struct is_help_requested<HelpRequested<T>> : std::true_type {};
+struct IsHelpRequested<HelpRequested<T>> : std::true_type {};
 
 template <class T>
-concept pair_like = requires {
+concept PairLike = requires {
   typename std::tuple_size<decay_t<T>>::type;
   requires std::tuple_size_v<decay_t<T>> == 2;
 };
 
 template <class T>
-concept string_like = std::same_as<decay_t<T>, std::string> ||
-                      std::same_as<decay_t<T>, std::string_view>;
+concept StringLike = std::same_as<decay_t<T>, std::string> ||
+                     std::same_as<decay_t<T>, std::string_view>;
 
 }  // namespace detail
 
@@ -521,10 +515,8 @@ struct Integer {
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
     T result{};
-    auto r = std::from_chars(
-        input.value.data(),
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        input.value.data() + input.value.size(), result);
+    auto r = std::from_chars(input.value.data(),
+                             input.value.data() + input.value.size(), result);
 
     if (r.ec == std::errc::invalid_argument) {
       return ActionResult<T>::fail(detail::invalid_value_error(
@@ -565,10 +557,8 @@ struct Floating {
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
     T result{};
-    auto r = std::from_chars(
-        input.value.data(),
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        input.value.data() + input.value.size(), result);
+    auto r = std::from_chars(input.value.data(),
+                             input.value.data() + input.value.size(), result);
 
     if (r.ec == std::errc::invalid_argument) {
       return ActionResult<T>::fail(detail::invalid_value_error(
@@ -895,7 +885,7 @@ struct NonEmpty {
 struct NotBlank {
   template <class Prev>
   static constexpr bool accepts_input =
-      detail::string_like<Prev> ||
+      detail::StringLike<Prev> ||
       std::same_as<detail::decay_t<Prev>, const char*>;
 
   template <class Prev>
@@ -945,7 +935,7 @@ struct OneOf {
 template <StringLiteral Pattern>
 struct Matches {
   template <class Prev>
-  static constexpr bool accepts_input = detail::string_like<Prev>;
+  static constexpr bool accepts_input = detail::StringLike<Prev>;
 
   template <class Prev>
   using after_type = Prev;
@@ -1288,7 +1278,7 @@ struct Insert {
 
 struct InsertOrAssign {
   template <class Prev>
-  static constexpr bool accepts_input = detail::pair_like<Prev>;
+  static constexpr bool accepts_input = detail::PairLike<Prev>;
 
   template <class Prev>
   using after_type = void;
@@ -1311,7 +1301,7 @@ struct Extend {
   template <class Prev>
   static constexpr bool accepts_input =
       std::ranges::input_range<detail::decay_t<Prev>> &&
-      !detail::string_like<Prev>;
+      !detail::StringLike<Prev>;
 
   template <class Prev>
   using after_type = void;
@@ -1424,7 +1414,7 @@ struct ExitSuccess {
   template <class Arg, class T>
   auto operator()(ActionCtx<Arg> ctx, ActionResult<T>) const -> ActionResult<T> {
     using U = std::remove_cvref_t<T>;
-    if constexpr (detail::is_help_requested<U>::value) {
+    if constexpr (detail::IsHelpRequested<U>::value) {
       return ActionResult<T>::fail(ParseError{
           .code = ErrorCode::help_requested,
           .kind = ErrorKind::parse,
@@ -1454,7 +1444,7 @@ namespace cli {
 
 namespace detail {
 
-struct any {
+struct Any {
   template <class U>
   operator U();
 };
@@ -1462,7 +1452,7 @@ struct any {
 template <class T, std::size_t N>
 consteval auto aggregate_initializable_at_least() {
   return []<size_t... I>(std::index_sequence<I...>) -> auto {
-    return (requires { T{((void)I, any{})...}; });
+    return (requires { T{((void)I, Any{})...}; });
   }(std::make_index_sequence<N>{});
 }
 
@@ -2219,10 +2209,10 @@ consteval auto is_valid_command_name() noexcept {
   return is_valid_long_option_name<Name>();
 }
 
-template <Nargs nargs>
+template <Nargs NargsValue>
 [[nodiscard]]
 consteval auto is_valid_nargs() noexcept -> bool {
-  if (nargs.max == -1 && nargs.min == -1) {
+  if (NargsValue.max == -1 && NargsValue.min == -1) {
     return false;
   }
   return true;
@@ -2401,9 +2391,11 @@ struct Command : public T, public CommandTag {
   Command() = default;
   Command(CommandParameter param) : help(param.help) {}
   static constexpr auto name = Name;
-  static constexpr auto commandName() -> std::string_view { return Name.view(); }
+  static constexpr auto command_name() -> std::string_view {
+    return Name.view();
+  }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto helpText() const -> std::string_view { return help; }
+  [[nodiscard]] auto help_text() const -> std::string_view { return help; }
   auto mark_provided() -> void { provided_ = true; }
 
  private:
@@ -2547,7 +2539,7 @@ struct AnsiStyle {
 };
 
 // Returns true when file descriptor 1 (stdout) is connected to a terminal.
-inline auto isTty() noexcept -> bool {
+inline auto is_tty() noexcept -> bool {
 #ifdef _WIN32
   return _isatty(1) != 0;
 #else
@@ -2556,9 +2548,9 @@ inline auto isTty() noexcept -> bool {
 }
 
 // Resolves a ColorMode to a concrete AnsiStyle.
-inline auto resolveColor(ColorMode mode) noexcept -> AnsiStyle {
+inline auto resolve_color(ColorMode mode) noexcept -> AnsiStyle {
   const bool on =
-      (mode == ColorMode::always) || (mode == ColorMode::auto_ && isTty());
+      (mode == ColorMode::always) || (mode == ColorMode::auto_ && is_tty());
   return AnsiStyle{on};
 }
 
@@ -2654,9 +2646,9 @@ auto command_usage_suffix(T& value) -> std::string {
   bool has_commands = false;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
                 has_options = true;
@@ -2700,7 +2692,7 @@ auto field_usage_label() -> std::string {
   } else if constexpr (std::derived_from<F, PositionalTag>) {
     return metavar_for<typename F::value_type>();
   } else if constexpr (std::derived_from<F, CommandTag>) {
-    return std::string(F::commandName());
+    return std::string(F::command_name());
   } else {
     return std::string{};
   }
@@ -2750,9 +2742,9 @@ auto append_section(std::string& out, std::string_view title,
   std::size_t width = 0;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (pred.template operator()<F>()) {
                 const auto label = field_usage_label<F>();
@@ -2796,9 +2788,9 @@ template <class T>
 auto find_description(T& value) -> std::string_view {
   std::string_view description;
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, DescriptionTag>) {
                 if (description.empty()) {
@@ -2816,7 +2808,7 @@ template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
                       ColorMode color_mode, bool recurse,
                       std::string_view command_path) -> std::string {
-  const auto style = resolveColor(color_mode);
+  const auto style = resolve_color(color_mode);
   const std::string heading =
       std::string(style.bold()) + std::string(style.underline());
   const std::string option_color = std::string(style.bold());
@@ -2845,9 +2837,9 @@ auto format_help_impl(T& value, std::string_view program_name,
   std::size_t command_width = 0;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
                 auto label = field_usage_label<F>();
@@ -2860,7 +2852,7 @@ auto format_help_impl(T& value, std::string_view program_name,
               } else if constexpr (std::derived_from<F, CommandTag>) {
                 auto label = field_usage_label<F>();
                 command_width = std::max(command_width, label.size());
-                command_rows.emplace_back(std::move(label), fields.helpText());
+                command_rows.emplace_back(std::move(label), fields.help_text());
               }
             }(),
             ...);
@@ -2870,28 +2862,28 @@ auto format_help_impl(T& value, std::string_view program_name,
   auto append_rows =
       [&](std::string_view title,
           const std::vector<std::pair<std::string, std::string_view>>& rows,
-          std::size_t width) {
-        if (rows.empty()) {
-          return;
-        }
+          std::size_t width) -> auto {
+    if (rows.empty()) {
+      return;
+    }
+    out += '\n';
+    out += heading;
+    out += title;
+    out += reset;
+    out += '\n';
+    for (const auto& [label, description] : rows) {
+      out += "  ";
+      out += option_color;
+      out += label;
+      out += reset;
+      if (!description.empty()) {
+        out.append(width - label.size() + 2, ' ');
+        append_wrapped_description(out, description, width + 4);
+      } else {
         out += '\n';
-        out += heading;
-        out += title;
-        out += reset;
-        out += '\n';
-        for (const auto& [label, description] : rows) {
-          out += "  ";
-          out += option_color;
-          out += label;
-          out += reset;
-          if (!description.empty()) {
-            out.append(width - label.size() + 2, ' ');
-            append_wrapped_description(out, description, width + 4);
-          } else {
-            out += '\n';
-          }
-        }
-      };
+      }
+    }
+  };
 
   append_rows("Options:", option_rows, option_width);
   append_rows("Positional arguments:", positional_rows, positional_width);
@@ -2899,15 +2891,15 @@ auto format_help_impl(T& value, std::string_view program_name,
 
   if (recurse && !command_rows.empty()) {
     std::apply(
-        [&](auto&... fields) {
+        [&](auto&... fields) -> auto {
           (
-              [&] {
+              [&]() -> auto {
                 using F = std::remove_cvref_t<decltype(fields)>;
                 if constexpr (std::derived_from<F, CommandTag>) {
                   out += '\n';
                   out += format_help_impl<typename F::argument_type>(
                       static_cast<typename F::argument_type&>(fields),
-                      program_name, color_mode, true, F::commandName());
+                      program_name, color_mode, true, F::command_name());
                 }
               }(),
               ...);
@@ -2921,8 +2913,8 @@ auto format_help_impl(T& value, std::string_view program_name,
 }  // namespace detail
 
 template <ArgumentSpec T>
-auto formatHelp(T& value, std::string_view program_name = "program",
-                ColorMode color_mode = ColorMode::auto_, bool recurse = false)
+auto format_help(T& value, std::string_view program_name = "program",
+                 ColorMode color_mode = ColorMode::auto_, bool recurse = false)
     -> std::string {
   return detail::format_help_impl<T>(value, program_name, color_mode, recurse,
                                      {});
@@ -2958,17 +2950,17 @@ struct TokenizeResult {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   // Set the error and return *this so callers can write: return result.fail(...)
@@ -3146,17 +3138,17 @@ struct ParseResult {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   template <class U>
@@ -3200,11 +3192,11 @@ struct Parser {
       -> ParseResult<T> {
     ParseResult<T> result;
 
-    auto [spec_map, command_names] = getOptionSpecMap(result.value);
+    auto [spec_map, command_names] = get_option_spec_map(result.value);
     auto tokenized = tokenize(args.subspan(std::min(first_index, args.size())),
                               spec_map, command_names, cfg_);
     if (tokenized.has_error()) {
-      if (tokenized.error.hasPosition()) {
+      if (tokenized.error.has_position()) {
         tokenized.error.position += static_cast<int>(first_index);
       }
       result.error = std::move(tokenized.error);
@@ -3220,30 +3212,30 @@ struct Parser {
       if (tok.type == TokenType::option) {
         std::size_t j = i + 1;
         while (j < tokens.size() && tokens[j].type == TokenType::value) ++j;
-        auto err = dispatchOption(result.value, tok.matched_prefix,
-                                  tok.text.substr(tok.matched_prefix.size()),
-                                  std::span(tokens).subspan(i + 1, j - i - 1),
-                                  first_index, tok.position);
+        auto err = dispatch_option(result.value, tok.matched_prefix,
+                                   tok.text.substr(tok.matched_prefix.size()),
+                                   std::span(tokens).subspan(i + 1, j - i - 1),
+                                   first_index, tok.position);
         if (err.has_error()) {
-          result.error = finalizeSpecialError(std::move(err.error));
+          result.error = finalize_special_error(std::move(err.error));
           return result;
         }
         i = j;
 
       } else if (tok.type == TokenType::positional) {
-        auto err = dispatchPositional(result.value, pos_idx, pos_cnt, tok.text,
-                                      tok.position + first_index);
+        auto err = dispatch_positional(result.value, pos_idx, pos_cnt, tok.text,
+                                       tok.position + first_index);
         if (err.has_error()) {
-          result.error = finalizeSpecialError(std::move(err.error));
+          result.error = finalize_special_error(std::move(err.error));
           return result;
         }
         ++i;
 
       } else if (tok.type == TokenType::command) {
-        auto err = dispatchCommand(result.value, tok.text, args,
-                                   tok.position + first_index + 1);
+        auto err = dispatch_command(result.value, tok.text, args,
+                                    tok.position + first_index + 1);
         if (err.has_error()) {
-          result.error = finalizeSpecialError(std::move(err.error));
+          result.error = finalize_special_error(std::move(err.error));
           return result;
         }
         break;
@@ -3253,7 +3245,7 @@ struct Parser {
       }
     }
 
-    if (auto err = validateRequired(result.value); err.has_error()) {
+    if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
       return result;
     }
@@ -3266,16 +3258,16 @@ struct Parser {
   std::string program_name_ = "program";
 
  public:
-  auto formatHelp(ColorMode color_mode = ColorMode::auto_) -> std::string {
-    return cli::formatHelp<T>(scratch_, program_name_, color_mode, false);
+  auto format_help(ColorMode color_mode = ColorMode::auto_) -> std::string {
+    return cli::format_help<T>(scratch_, program_name_, color_mode, false);
   }
 
-  auto formatHelp(RecurseHelpTag) -> std::string {
-    return formatHelp(ColorMode::auto_, recurseHelp);
+  auto format_help(RecurseHelpTag) -> std::string {
+    return format_help(ColorMode::auto_, recurseHelp);
   }
 
-  auto formatHelp(ColorMode color_mode, RecurseHelpTag) -> std::string {
-    return cli::formatHelp<T>(scratch_, program_name_, color_mode, true);
+  auto format_help(ColorMode color_mode, RecurseHelpTag) -> std::string {
+    return cli::format_help<T>(scratch_, program_name_, color_mode, true);
   }
 
  private:
@@ -3283,21 +3275,21 @@ struct Parser {
 
   // Iterate every field of val, calling fn(field) for each.
   template <class Fn>
-  static auto forEachField(T& val, Fn fn) -> void {
-    std::apply([&fn](auto&... f) { (..., fn(f)); }, as_tuple(val));
+  static auto for_each_field(T& val, Fn fn) -> void {
+    std::apply([&fn](auto&... f) -> auto { (..., fn(f)); }, as_tuple(val));
   }
   template <class Fn>
-  static auto forEachField(const T& val, Fn fn) -> void {
-    std::apply([&fn](const auto&... f) { (..., fn(f)); }, as_tuple(val));
+  static auto for_each_field(const T& val, Fn fn) -> void {
+    std::apply([&fn](const auto&... f) -> auto { (..., fn(f)); }, as_tuple(val));
   }
 
   // Build the option spec-map and command-name set from the field types of val.
-  auto getOptionSpecMap(const T& val)
+  auto get_option_spec_map(const T& val)
       -> std::pair<std::unordered_map<std::string, Nargs>,
                    std::unordered_set<std::string>> {
     std::unordered_map<std::string, Nargs> spec_map;
     std::unordered_set<std::string> command_names;
-    forEachField(val, [&](const auto& f) {
+    for_each_field(val, [&](const auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag>) {
         for (const auto& p : cfg_.option_prefixes)
@@ -3308,7 +3300,7 @@ struct Parser {
               F::nargs);
       }
       if constexpr (std::derived_from<F, CommandTag>)
-        command_names.emplace(std::string(F::commandName()));
+        command_names.emplace(std::string(F::command_name()));
     });
     return {spec_map, command_names};
   }
@@ -3316,12 +3308,12 @@ struct Parser {
   // Find the ArgImpl field matching (prefix, bare), notify it, and invoke its
   // action on each value token.  notify_option_seen() is called once;
   // invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.
-  auto dispatchOption(T& val, std::string_view prefix, std::string_view bare,
-                      std::span<const Token> vals, std::size_t first_index,
-                      std::size_t option_position) -> ActionResult<void> {
+  auto dispatch_option(T& val, std::string_view prefix, std::string_view bare,
+                       std::span<const Token> vals, std::size_t first_index,
+                       std::size_t option_position) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
     bool found = false;
-    forEachField(val, [&](auto& f) {
+    for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag>) {
         if (found) return;
@@ -3353,13 +3345,13 @@ struct Parser {
 
   // Fill the pos_idx-th positional field with text.  Advances pos_idx/pos_cnt
   // when the current field reaches its nargs.max.
-  static auto dispatchPositional(T& val, std::size_t& pos_idx,
-                                 std::size_t& pos_cnt, std::string_view text,
-                                 std::size_t position) -> ActionResult<void> {
+  static auto dispatch_positional(T& val, std::size_t& pos_idx,
+                                  std::size_t& pos_cnt, std::string_view text,
+                                  std::size_t position) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
     bool invoked = false;
     std::size_t cur = 0;
-    forEachField(val, [&](auto& f) {
+    for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, PositionalTag>) {
         if (cur++ != pos_idx || invoked) return;
@@ -3384,15 +3376,15 @@ struct Parser {
     return res;
   }
 
-  auto dispatchCommand(T& val, std::string_view name,
-                       std::span<const std::string_view> args,
-                       std::size_t first_index) -> ActionResult<void> {
+  auto dispatch_command(T& val, std::string_view name,
+                        std::span<const std::string_view> args,
+                        std::size_t first_index) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
     bool found = false;
-    forEachField(val, [&](auto& f) {
+    for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, CommandTag>) {
-        if (found || F::commandName() != name) {
+        if (found || F::command_name() != name) {
           return;
         }
         found = true;
@@ -3419,9 +3411,9 @@ struct Parser {
     return res;
   }
 
-  static auto validateRequired(T& val) -> ActionResult<void> {
+  static auto validate_required(T& val) -> ActionResult<void> {
     ActionResult<void> res = ActionResult<void>::ok();
-    forEachField(val, [&](auto& f) {
+    for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag> ||
                     std::derived_from<F, PositionalTag>) {
@@ -3446,29 +3438,31 @@ struct Parser {
     return res;
   }
 
-  auto finalizeSpecialError(ParseError error) -> ParseError {
+  auto finalize_special_error(ParseError error) -> ParseError {
     if (error.code == ErrorCode::help_requested && error.detail.empty()) {
-      error.detail = formatHelp(ColorMode::never);
+      error.detail = format_help(ColorMode::never);
     }
     return error;
   }
 };
 
 template <ArgumentSpec T>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse(int argc, char* argv[]) -> ParseResult<T> {
   return Parser<T>{}.parse(argc, argv);
 }
 
 template <ArgumentSpec T>
-auto parseOrExit(int argc, char* argv[], std::ostream& out = std::cout,
-                 std::ostream& err = std::cerr) -> T {
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
+                   std::ostream& err = std::cerr) -> T {
   auto result = parse<T>(argc, argv);
   if (!result) {
     if (const auto message = result.error.message(); !message.empty()) {
-      auto& stream = result.error.useStdout() ? out : err;
+      auto& stream = result.error.use_stdout() ? out : err;
       stream << message << '\n';
     }
-    std::exit(result.error.exitCode());
+    std::exit(result.error.exit_code());
   }
   return std::move(result.value);
 }

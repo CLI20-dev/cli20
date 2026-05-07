@@ -35,17 +35,17 @@ struct ActionResult {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   template <class U>
@@ -72,17 +72,17 @@ struct ActionResult<void> {
 
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
-    return !error.hasError();
+    return !error.has_error();
   }
 
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
-    return error.hasError();
+    return error.has_error();
   }
 
   static constexpr auto ok() -> ActionResult<void> {
@@ -125,9 +125,6 @@ struct ActionCtx<void> {
 namespace detail {
 
 template <class T>
-constexpr auto remove_cvref_t = std::remove_cvref_t<T>{};
-
-template <class T>
 [[nodiscard]]
 auto to_error_subject(const T& value) -> std::string {
   using U = std::remove_cvref_t<T>;
@@ -142,11 +139,10 @@ auto to_error_subject(const T& value) -> std::string {
     return value ? "true" : "false";
   } else if constexpr (std::integral<U>) {
     return std::to_string(value);
-  } else if constexpr (std::floating_point<U>) {
-    return std::format("{}", value);
   } else if constexpr (std::same_as<U, std::filesystem::path>) {
     return value.string();
-  } else if constexpr (requires { std::format("{}", value); }) {
+  } else if constexpr (requires { std::format("{}", value); } or
+                       std::floating_point<U>) {
     return std::format("{}", value);
   } else {
     return "<value>";
@@ -205,7 +201,7 @@ inline auto invalid_choice_error(std::size_t index, std::string subject,
 [[nodiscard]]
 inline auto is_blank(std::string_view text) -> bool {
   return std::ranges::all_of(
-      text, [](unsigned char ch) { return std::isspace(ch) != 0; });
+      text, [](unsigned char ch) -> bool { return std::isspace(ch) != 0; });
 }
 
 template <class T>
@@ -217,20 +213,20 @@ struct HelpRequested {
 };
 
 template <class T>
-struct is_help_requested : std::false_type {};
+struct IsHelpRequested : std::false_type {};
 
 template <class T>
-struct is_help_requested<HelpRequested<T>> : std::true_type {};
+struct IsHelpRequested<HelpRequested<T>> : std::true_type {};
 
 template <class T>
-concept pair_like = requires {
+concept PairLike = requires {
   typename std::tuple_size<decay_t<T>>::type;
   requires std::tuple_size_v<decay_t<T>> == 2;
 };
 
 template <class T>
-concept string_like = std::same_as<decay_t<T>, std::string> ||
-                      std::same_as<decay_t<T>, std::string_view>;
+concept StringLike = std::same_as<decay_t<T>, std::string> ||
+                     std::same_as<decay_t<T>, std::string_view>;
 
 }  // namespace detail
 
@@ -336,10 +332,8 @@ struct Integer {
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
     T result{};
-    auto r = std::from_chars(
-        input.value.data(),
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        input.value.data() + input.value.size(), result);
+    auto r = std::from_chars(input.value.data(),
+                             input.value.data() + input.value.size(), result);
 
     if (r.ec == std::errc::invalid_argument) {
       return ActionResult<T>::fail(detail::invalid_value_error(
@@ -380,10 +374,8 @@ struct Floating {
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
     T result{};
-    auto r = std::from_chars(
-        input.value.data(),
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        input.value.data() + input.value.size(), result);
+    auto r = std::from_chars(input.value.data(),
+                             input.value.data() + input.value.size(), result);
 
     if (r.ec == std::errc::invalid_argument) {
       return ActionResult<T>::fail(detail::invalid_value_error(
@@ -710,7 +702,7 @@ struct NonEmpty {
 struct NotBlank {
   template <class Prev>
   static constexpr bool accepts_input =
-      detail::string_like<Prev> ||
+      detail::StringLike<Prev> ||
       std::same_as<detail::decay_t<Prev>, const char*>;
 
   template <class Prev>
@@ -760,7 +752,7 @@ struct OneOf {
 template <StringLiteral Pattern>
 struct Matches {
   template <class Prev>
-  static constexpr bool accepts_input = detail::string_like<Prev>;
+  static constexpr bool accepts_input = detail::StringLike<Prev>;
 
   template <class Prev>
   using after_type = Prev;
@@ -1103,7 +1095,7 @@ struct Insert {
 
 struct InsertOrAssign {
   template <class Prev>
-  static constexpr bool accepts_input = detail::pair_like<Prev>;
+  static constexpr bool accepts_input = detail::PairLike<Prev>;
 
   template <class Prev>
   using after_type = void;
@@ -1126,7 +1118,7 @@ struct Extend {
   template <class Prev>
   static constexpr bool accepts_input =
       std::ranges::input_range<detail::decay_t<Prev>> &&
-      !detail::string_like<Prev>;
+      !detail::StringLike<Prev>;
 
   template <class Prev>
   using after_type = void;
@@ -1239,7 +1231,7 @@ struct ExitSuccess {
   template <class Arg, class T>
   auto operator()(ActionCtx<Arg> ctx, ActionResult<T>) const -> ActionResult<T> {
     using U = std::remove_cvref_t<T>;
-    if constexpr (detail::is_help_requested<U>::value) {
+    if constexpr (detail::IsHelpRequested<U>::value) {
       return ActionResult<T>::fail(ParseError{
           .code = ErrorCode::help_requested,
           .kind = ErrorKind::parse,
