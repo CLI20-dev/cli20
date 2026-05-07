@@ -449,6 +449,34 @@ struct Action {
         }.template operator()<Fns...>(ctx, std::move(input));
   }
 
+  template <class Arg, class Result>
+  [[nodiscard]]
+  static constexpr auto invoke(const ActionCtx<Arg>& ctx,
+                               ActionResult<Result> input) {
+    return []<auto FnHead, auto... FnTail>(
+               const ActionCtx<Arg>& ctx,
+               ActionResult<Result> input) -> decltype(auto) {
+      using Head = std::remove_cvref_t<decltype(FnHead)>;
+      using Next = typename Head::template after_type<Result>;
+
+      if (!input) {
+        if constexpr (sizeof...(FnTail) == 0) {
+          return ActionResult<Next>::fail(input.error);
+        } else {
+          return Action<FnTail...>::invoke(
+              ctx, ActionResult<Next>::fail(input.error));
+        }
+      }
+
+      auto next = FnHead(ctx, std::move(input));
+      if constexpr (sizeof...(FnTail) == 0) {
+        return next;
+      } else {
+        return Action<FnTail...>::invoke(ctx, std::move(next));
+      }
+    }.template operator()<Fns...>(ctx, std::move(input));
+  }
+
   template <class Prev, auto FnHead, auto... FnTail>
   static constexpr auto validate_impl() {
     static_assert(
@@ -723,18 +751,18 @@ template <class T, auto Mapper>
 using Enumeration = Choice<T, Mapper>;
 
 template <std::integral T>
-inline constexpr auto integer = Integer<T>{};
+inline constexpr auto integer = Action<Integer<T>{}>{};
 template <std::floating_point T>
-inline constexpr auto floating = Floating<T>{};
+inline constexpr auto floating = Action<Floating<T>{}>{};
 template <class T, auto Mapper>
-inline constexpr auto choice = Choice<T, Mapper>{};
+inline constexpr auto choice = Action<Choice<T, Mapper>{}>{};
 template <class T, auto Mapper>
-inline constexpr auto enumeration = Enumeration<T, Mapper>{};
-inline constexpr auto string = String{};
-inline constexpr auto boolean = Bool{};
-inline constexpr auto path = Path{};
-inline constexpr auto existing_file = ExistingFile{};
-inline constexpr auto existing_directory = ExistingDirectory{};
+inline constexpr auto enumeration = Action<Enumeration<T, Mapper>{}>{};
+inline constexpr auto string = Action<String{}>{};
+inline constexpr auto boolean = Action<Bool{}>{};
+inline constexpr auto path = Action<Path{}>{};
+inline constexpr auto existing_file = Action<ExistingFile{}>{};
+inline constexpr auto existing_directory = Action<ExistingDirectory{}>{};
 
 }  // namespace conversion
 
@@ -1072,25 +1100,25 @@ struct Predicate {
 };
 
 template <auto MinValue>
-inline constexpr auto min = Min<MinValue>{};
+inline constexpr auto min = Action<Min<MinValue>{}>{};
 template <auto MaxValue>
-inline constexpr auto max = Max<MaxValue>{};
+inline constexpr auto max = Action<Max<MaxValue>{}>{};
 template <auto MinValue, auto MaxValue>
-inline constexpr auto range = Range<MinValue, MaxValue>{};
+inline constexpr auto range = Action<Range<MinValue, MaxValue>{}>{};
 template <auto... Allowed>
-inline constexpr auto one_of = OneOf<Allowed...>{};
+inline constexpr auto one_of = Action<OneOf<Allowed...>{}>{};
 template <StringLiteral Pattern>
-inline constexpr auto matches = Matches<Pattern>{};
+inline constexpr auto matches = Action<Matches<Pattern>{}>{};
 template <auto Pred>
-inline constexpr auto predicate = Predicate<Pred>{};
-inline constexpr auto positive = Positive{};
-inline constexpr auto non_negative = NonNegative{};
-inline constexpr auto non_empty = NonEmpty{};
-inline constexpr auto not_blank = NotBlank{};
-inline constexpr auto exists = Exists{};
-inline constexpr auto is_regular_file = IsRegularFile{};
-inline constexpr auto is_directory = IsDirectory{};
-inline constexpr auto parent_exists = ParentExists{};
+inline constexpr auto predicate = Action<Predicate<Pred>{}>{};
+inline constexpr auto positive = Action<Positive{}>{};
+inline constexpr auto non_negative = Action<NonNegative{}>{};
+inline constexpr auto non_empty = Action<NonEmpty{}>{};
+inline constexpr auto not_blank = Action<NotBlank{}>{};
+inline constexpr auto exists = Action<Exists{}>{};
+inline constexpr auto is_regular_file = Action<IsRegularFile{}>{};
+inline constexpr auto is_directory = Action<IsDirectory{}>{};
+inline constexpr auto parent_exists = Action<ParentExists{}>{};
 
 }  // namespace validation
 
@@ -1364,20 +1392,20 @@ struct Callback {
   }
 };
 
-inline constexpr auto set_true = SetTrue{};
-inline constexpr auto set_false = SetFalse{};
-inline constexpr auto toggle = Toggle{};
-inline constexpr auto increment = Increment{};
-inline constexpr auto set_once = SetOnce{};
-inline constexpr auto reject_duplicate = RejectDuplicate{};
-inline constexpr auto push_unique = PushUnique{};
-inline constexpr auto push = Push{};
-inline constexpr auto insert = Insert{};
-inline constexpr auto insert_or_assign = InsertOrAssign{};
-inline constexpr auto extend = Extend{};
-inline constexpr auto mark_present = MarkPresent{};
+inline constexpr auto set_true = Action<SetTrue{}>{};
+inline constexpr auto set_false = Action<SetFalse{}>{};
+inline constexpr auto toggle = Action<Toggle{}>{};
+inline constexpr auto increment = Action<Increment{}>{};
+inline constexpr auto set_once = Action<SetOnce{}>{};
+inline constexpr auto reject_duplicate = Action<RejectDuplicate{}>{};
+inline constexpr auto push_unique = Action<PushUnique{}>{};
+inline constexpr auto push = Action<Push{}>{};
+inline constexpr auto insert = Action<Insert{}>{};
+// inline constexpr auto insert_or_assign = Action<InsertOrAssign{}>{};
+// inline constexpr auto extend = Action<Extend{}>{};
+inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
-inline constexpr auto callback = Callback<Fn>{};
+inline constexpr auto callback = Action<Callback<Fn>{}>{};
 
 }  // namespace pack
 
@@ -1430,8 +1458,8 @@ struct ExitSuccess {
   }
 };
 
-inline constexpr auto print_help = PrintHelp{};
-inline constexpr auto exit_success = ExitSuccess{};
+inline constexpr auto print_help = Action<PrintHelp{}>{};
+inline constexpr auto exit_success = Action<ExitSuccess{}>{};
 
 }  // namespace action
 
@@ -2264,7 +2292,7 @@ struct ArgImpl : public OptionTag {
   static constexpr auto nargs = N;
 
   // Called once when the option token is seen (before processing its values).
-  auto notify_option_seen() -> void { ++option_occurrences_; }
+  auto notify_option_seen() -> void { ++occurrence_count_; }
 
   // Called once per value token associated with this option.
   auto invoke_action(std::string_view text, std::size_t arg_index)
@@ -2272,7 +2300,7 @@ struct ArgImpl : public OptionTag {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
-        .occurrences = option_occurrences_,
+        .occurrences = occurrence_count_,
         .invoke_count = invoke_count_,
         .arg = std::ref(value_),
     };
@@ -2290,7 +2318,7 @@ struct ArgImpl : public OptionTag {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
-        .occurrences = option_occurrences_,
+        .occurrences = occurrence_count_,
         .invoke_count = invoke_count_,
         .arg = std::ref(value_),
     };
@@ -2312,8 +2340,8 @@ struct ArgImpl : public OptionTag {
   friend struct Parser;
 
   value_type value_{};
-  std::size_t option_occurrences_{};  // times the option token appeared
-  std::size_t invoke_count_{};        // times invoke_action/invoke_flag called
+  std::size_t occurrence_count_{};  // times the option token appeared
+  std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
   bool provided_{};
 };
 
@@ -2410,39 +2438,34 @@ struct ActionFor;
 
 template <>
 struct ActionFor<std::string> {
-  inline static constexpr auto set_once =
-      Action<conversion::string, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::string, pack::push>{};
+  inline static constexpr auto set_once = conversion::string | pack::set_once;
+  inline static constexpr auto push = conversion::string | pack::push;
 };
 
 template <>
 struct ActionFor<bool> {
-  inline static constexpr auto set_once =
-      Action<conversion::boolean, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::boolean, pack::push>{};
+  inline static constexpr auto set_once = conversion::boolean | pack::set_once;
+  inline static constexpr auto push = conversion::boolean | pack::push;
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
-  inline static constexpr auto set_once =
-      Action<conversion::path, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::path, pack::push>{};
+  inline static constexpr auto set_once = conversion::path | pack::set_once;
+  inline static constexpr auto push = conversion::path | pack::push;
 };
 
 template <std::integral T>
 struct ActionFor<T> {
   inline static constexpr auto set_once =
-      Action<conversion::integer<T>, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::integer<T>, pack::push>{};
+      conversion::integer<T> | pack::set_once;
+  inline static constexpr auto push = conversion::integer<T> | pack::push;
 };
 
 template <std::floating_point T>
 struct ActionFor<T> {
   inline static constexpr auto set_once =
-      Action<conversion::floating<T>, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::floating<T>, pack::push>{};
+      conversion::floating<T> | pack::set_once;
+  inline static constexpr auto push = conversion::floating<T> | pack::push;
 };
 
 template <class T, Nargs N>
@@ -2461,11 +2484,11 @@ struct PositionalActionFor {
 // ── Core public API ───────────────────────────────────────────────────────────
 
 template <StringLiteral Name, char ShortName = '\0'>
-using Flag = ArgImpl<Name, ShortName, nargs::none, Action<pack::set_true>{}>;
+using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
 using Help = ArgImpl<Name, ShortName, nargs::none,
-                     Action<action::print_help, action::exit_success>{}>;
+                     action::print_help | action::exit_success>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
 using Option =
@@ -2505,18 +2528,18 @@ using PathOption = Option<std::filesystem::path, Name, ShortName>;
 
 namespace cli {
 
-// Controls whether ANSI escape codes are emitted by formatHelp().
+// Controls whether ANSI escape codes are emitted by format_help().
 //   auto_  : emit codes only when stdout is a TTY (default)
 //   never  : always plain text
 //   always : always emit codes regardless of terminal type
 enum class ColorMode { auto_, never, always };
 
-// Tag type passed to formatHelp() to request recursive sub-command output.
-//   parser.formatHelp(cli::recurseHelp)               // auto color + recurse
-//   parser.formatHelp(cli::ColorMode::never, cli::recurseHelp)  // no color
+// Tag type passed to format_help() to request recursive sub-command output.
+//   parser.format_help(cli::recurse_help)               // auto color + recurse
+//   parser.format_help(cli::ColorMode::never, cli::recurse_help)  // no color
 //   + recurse
 struct RecurseHelpTag {};
-inline constexpr RecurseHelpTag recurseHelp{};
+inline constexpr RecurseHelpTag recurse_help{};
 
 namespace detail {
 
@@ -3263,7 +3286,11 @@ struct Parser {
   }
 
   auto format_help(RecurseHelpTag) -> std::string {
+<<<<<<< more_easy_action_syntax_suger
+    return format_help(ColorMode::auto_, recurse_help);
+=======
     return format_help(ColorMode::auto_, recurseHelp);
+>>>>>>> main
   }
 
   auto format_help(ColorMode color_mode, RecurseHelpTag) -> std::string {

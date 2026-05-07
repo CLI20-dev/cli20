@@ -51,8 +51,7 @@ struct CustomHelpFlagArgs {
 };
 
 struct ExitSuccessArgs {
-  cli::ArgImpl<"version", 'V', cli::nargs::none,
-               cli::Action<cli::action::exit_success>{}>
+  cli::ArgImpl<"version", 'V', cli::nargs::none, cli::action::exit_success>
       version{{.help = "Print version and exit", .presence = cli::optional}};
 };
 

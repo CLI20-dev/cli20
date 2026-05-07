@@ -266,6 +266,34 @@ struct Action {
         }.template operator()<Fns...>(ctx, std::move(input));
   }
 
+  template <class Arg, class Result>
+  [[nodiscard]]
+  static constexpr auto invoke(const ActionCtx<Arg>& ctx,
+                               ActionResult<Result> input) {
+    return []<auto FnHead, auto... FnTail>(
+               const ActionCtx<Arg>& ctx,
+               ActionResult<Result> input) -> decltype(auto) {
+      using Head = std::remove_cvref_t<decltype(FnHead)>;
+      using Next = typename Head::template after_type<Result>;
+
+      if (!input) {
+        if constexpr (sizeof...(FnTail) == 0) {
+          return ActionResult<Next>::fail(input.error);
+        } else {
+          return Action<FnTail...>::invoke(
+              ctx, ActionResult<Next>::fail(input.error));
+        }
+      }
+
+      auto next = FnHead(ctx, std::move(input));
+      if constexpr (sizeof...(FnTail) == 0) {
+        return next;
+      } else {
+        return Action<FnTail...>::invoke(ctx, std::move(next));
+      }
+    }.template operator()<Fns...>(ctx, std::move(input));
+  }
+
   template <class Prev, auto FnHead, auto... FnTail>
   static constexpr auto validate_impl() {
     static_assert(
@@ -540,18 +568,18 @@ template <class T, auto Mapper>
 using Enumeration = Choice<T, Mapper>;
 
 template <std::integral T>
-inline constexpr auto integer = Integer<T>{};
+inline constexpr auto integer = Action<Integer<T>{}>{};
 template <std::floating_point T>
-inline constexpr auto floating = Floating<T>{};
+inline constexpr auto floating = Action<Floating<T>{}>{};
 template <class T, auto Mapper>
-inline constexpr auto choice = Choice<T, Mapper>{};
+inline constexpr auto choice = Action<Choice<T, Mapper>{}>{};
 template <class T, auto Mapper>
-inline constexpr auto enumeration = Enumeration<T, Mapper>{};
-inline constexpr auto string = String{};
-inline constexpr auto boolean = Bool{};
-inline constexpr auto path = Path{};
-inline constexpr auto existing_file = ExistingFile{};
-inline constexpr auto existing_directory = ExistingDirectory{};
+inline constexpr auto enumeration = Action<Enumeration<T, Mapper>{}>{};
+inline constexpr auto string = Action<String{}>{};
+inline constexpr auto boolean = Action<Bool{}>{};
+inline constexpr auto path = Action<Path{}>{};
+inline constexpr auto existing_file = Action<ExistingFile{}>{};
+inline constexpr auto existing_directory = Action<ExistingDirectory{}>{};
 
 }  // namespace conversion
 
@@ -889,25 +917,25 @@ struct Predicate {
 };
 
 template <auto MinValue>
-inline constexpr auto min = Min<MinValue>{};
+inline constexpr auto min = Action<Min<MinValue>{}>{};
 template <auto MaxValue>
-inline constexpr auto max = Max<MaxValue>{};
+inline constexpr auto max = Action<Max<MaxValue>{}>{};
 template <auto MinValue, auto MaxValue>
-inline constexpr auto range = Range<MinValue, MaxValue>{};
+inline constexpr auto range = Action<Range<MinValue, MaxValue>{}>{};
 template <auto... Allowed>
-inline constexpr auto one_of = OneOf<Allowed...>{};
+inline constexpr auto one_of = Action<OneOf<Allowed...>{}>{};
 template <StringLiteral Pattern>
-inline constexpr auto matches = Matches<Pattern>{};
+inline constexpr auto matches = Action<Matches<Pattern>{}>{};
 template <auto Pred>
-inline constexpr auto predicate = Predicate<Pred>{};
-inline constexpr auto positive = Positive{};
-inline constexpr auto non_negative = NonNegative{};
-inline constexpr auto non_empty = NonEmpty{};
-inline constexpr auto not_blank = NotBlank{};
-inline constexpr auto exists = Exists{};
-inline constexpr auto is_regular_file = IsRegularFile{};
-inline constexpr auto is_directory = IsDirectory{};
-inline constexpr auto parent_exists = ParentExists{};
+inline constexpr auto predicate = Action<Predicate<Pred>{}>{};
+inline constexpr auto positive = Action<Positive{}>{};
+inline constexpr auto non_negative = Action<NonNegative{}>{};
+inline constexpr auto non_empty = Action<NonEmpty{}>{};
+inline constexpr auto not_blank = Action<NotBlank{}>{};
+inline constexpr auto exists = Action<Exists{}>{};
+inline constexpr auto is_regular_file = Action<IsRegularFile{}>{};
+inline constexpr auto is_directory = Action<IsDirectory{}>{};
+inline constexpr auto parent_exists = Action<ParentExists{}>{};
 
 }  // namespace validation
 
@@ -1181,20 +1209,20 @@ struct Callback {
   }
 };
 
-inline constexpr auto set_true = SetTrue{};
-inline constexpr auto set_false = SetFalse{};
-inline constexpr auto toggle = Toggle{};
-inline constexpr auto increment = Increment{};
-inline constexpr auto set_once = SetOnce{};
-inline constexpr auto reject_duplicate = RejectDuplicate{};
-inline constexpr auto push_unique = PushUnique{};
-inline constexpr auto push = Push{};
-inline constexpr auto insert = Insert{};
-inline constexpr auto insert_or_assign = InsertOrAssign{};
-inline constexpr auto extend = Extend{};
-inline constexpr auto mark_present = MarkPresent{};
+inline constexpr auto set_true = Action<SetTrue{}>{};
+inline constexpr auto set_false = Action<SetFalse{}>{};
+inline constexpr auto toggle = Action<Toggle{}>{};
+inline constexpr auto increment = Action<Increment{}>{};
+inline constexpr auto set_once = Action<SetOnce{}>{};
+inline constexpr auto reject_duplicate = Action<RejectDuplicate{}>{};
+inline constexpr auto push_unique = Action<PushUnique{}>{};
+inline constexpr auto push = Action<Push{}>{};
+inline constexpr auto insert = Action<Insert{}>{};
+// inline constexpr auto insert_or_assign = Action<InsertOrAssign{}>{};
+// inline constexpr auto extend = Action<Extend{}>{};
+inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
-inline constexpr auto callback = Callback<Fn>{};
+inline constexpr auto callback = Action<Callback<Fn>{}>{};
 
 }  // namespace pack
 
@@ -1247,8 +1275,8 @@ struct ExitSuccess {
   }
 };
 
-inline constexpr auto print_help = PrintHelp{};
-inline constexpr auto exit_success = ExitSuccess{};
+inline constexpr auto print_help = Action<PrintHelp{}>{};
+inline constexpr auto exit_success = Action<ExitSuccess{}>{};
 
 }  // namespace action
 
