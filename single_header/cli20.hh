@@ -3286,11 +3286,7 @@ struct Parser {
   }
 
   auto format_help(RecurseHelpTag) -> std::string {
-<<<<<<< more_easy_action_syntax_suger
     return format_help(ColorMode::auto_, recurse_help);
-=======
-    return format_help(ColorMode::auto_, recurseHelp);
->>>>>>> main
   }
 
   auto format_help(ColorMode color_mode, RecurseHelpTag) -> std::string {
