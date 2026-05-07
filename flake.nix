@@ -45,6 +45,7 @@
               (pkgs.gtest.override {
                 stdenv = pkgs.libcxxStdenv;
               })
+              pkgs.nodejs_latest
               pkgs.clang-tools
               config.treefmt.build.wrapper
             ];

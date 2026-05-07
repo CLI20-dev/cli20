@@ -1,0 +1,130 @@
+---
+sidebar_position: 1
+title: Getting Started
+---
+
+# Getting Started
+
+**CLI20** is a header-only C++20 CLI parser that treats your command line as a typed schema, not a mutable runtime parser object. Define your interface once as a plain struct and let the library handle parsing, validation, and help generation.
+
+## Requirements
+
+- C++20-capable compiler (GCC 12+, Clang 14+, MSVC 19.34+)
+- CMake 3.21+ (optional, for CMake-based projects)
+
+## Installation
+
+### Option 1 — Copy the headers
+
+Copy the `include/` directory into your project and add it to your include path:
+
+```cmake
+add_library(cli20 INTERFACE)
+target_include_directories(cli20 INTERFACE path/to/cli20/include)
+target_compile_features(cli20 INTERFACE cxx_std_20)
+```
+
+### Option 3 — CMake `find_package` (installed)
+
+If you have installed CLI20 via CMake, link the exported target:
+
+```cmake
+find_package(cli20 CONFIG REQUIRED)
+
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE cli20::cli20)
+```
+
+### Option 2 — Single header
+
+If you prefer a single-file drop-in, use the generated `cli20.hh`:
+
+```cmake
+# Just copy single_header/cli20.hh anywhere on your include path
+add_library(cli20 INTERFACE)
+target_include_directories(cli20 INTERFACE path/to/single_header)
+target_compile_features(cli20 INTERFACE cxx_std_20)
+```
+
+```cpp
+#include "cli20.hh"  // instead of cli/argument.hh + cli/parser.hh
+```
+
+The single header is auto-generated from the source — do not edit it directly.
+
+### Option 3 — CMake `find_package`
+
+If you have installed CLI20 via CMake, link the exported target:
+
+```cmake
+find_package(cli20 CONFIG REQUIRED)
+
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE cli20::cli20)
+```
+
+### Option 4 — CMake `FetchContent`
+
+Fetch directly from the repository at configure time:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  cli20
+  GIT_REPOSITORY https://github.com/CLI20-dev/cli20.git
+  GIT_TAG        main
+)
+FetchContent_MakeAvailable(cli20)
+
+add_executable(my_app main.cc)
+target_link_libraries(my_app PRIVATE cli20::cli20)
+```
+
+## Your first program
+
+```cpp
+#include <iostream>
+
+#include "cli/argument.hh"
+#include "cli/parser.hh"
+
+struct Args {
+  cli::Flag<"verbose", 'v'>        verbose{{.help = "Enable verbose output"}};
+  cli::StringOption<"output", 'o'> output{{.help = "Output file path"}};
+  cli::Positional<std::string>     input{{.help = "Input file", .presence = cli::required}};
+  cli::Help<>                      help;
+};
+
+auto main(int argc, char* argv[]) -> int {
+  const auto args = cli::parse_or_exit<Args>(argc, argv);
+
+  if (args.verbose.value()) {
+    std::cout << "verbose mode on\n";
+  }
+
+  if (args.output.value()) {
+    std::cout << "output: " << *args.output.value() << '\n';
+  }
+
+  std::cout << "input: " << *args.input.value() << '\n';
+  return 0;
+}
+```
+
+Run it:
+
+```bash
+./my_app --verbose -o result.txt source.txt
+# verbose mode on
+# output: result.txt
+# input: source.txt
+```
+
+Get help for free:
+
+```bash
+./my_app --help
+```
+
+Continue to the [Tutorial](/docs/tutorial) to learn about options, positionals, subcommands, and the action pipeline.
