@@ -336,7 +336,27 @@ struct Parser {
   auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
       -> ParseResult<T> {
     ParseResult<T> result;
+    parse_body_(result, args, first_index);
+    return result;
+  }
 
+  // Parse with a pre-initialized T.  Useful with BoundOption / on_parse so
+  // that pointer targets and callbacks set before this call are preserved.
+  auto parse(T initial, std::span<const std::string_view> args,
+             std::size_t first_index = 0) -> ParseResult<T> {
+    ParseResult<T> result;
+    result.value = std::move(initial);
+    parse_body_(result, args, first_index);
+    return result;
+  }
+
+ private:
+  TokenizerConfig cfg_;
+  std::string program_name_ = "program";
+
+  auto parse_body_(ParseResult<T>& result,
+                   std::span<const std::string_view> args,
+                   std::size_t first_index) -> void {
     auto [spec_map, command_names] = get_option_spec_map(result.value);
     auto tokenized = tokenize(args.subspan(std::min(first_index, args.size())),
                               spec_map, command_names, cfg_);
@@ -345,7 +365,7 @@ struct Parser {
         tokenized.error.position += static_cast<int>(first_index);
       }
       result.error = std::move(tokenized.error);
-      return result;
+      return;
     }
 
     const auto& tokens = tokenized.tokens;
@@ -363,7 +383,7 @@ struct Parser {
                                    first_index, tok.position);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         i = j;
 
@@ -372,7 +392,7 @@ struct Parser {
                                        tok.position + first_index);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         ++i;
 
@@ -381,7 +401,7 @@ struct Parser {
                                     tok.position + first_index + 1);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         break;
 
@@ -392,15 +412,8 @@ struct Parser {
 
     if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
-      return result;
     }
-
-    return result;
   }
-
- private:
-  TokenizerConfig cfg_;
-  std::string program_name_ = "program";
 
  public:
   auto format_help(ColorMode color_mode = ColorMode::auto_) -> std::string {

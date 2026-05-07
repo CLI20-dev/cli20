@@ -1184,6 +1184,26 @@ struct MarkPresent {
   }
 };
 
+template <class T>
+struct StoreInto {
+  template <class Prev>
+  static constexpr bool accepts_input = std::same_as<detail::decay_t<Prev>, T>;
+
+  template <class Prev>
+  using after_type = void;
+
+  template <class Prev>
+  using storage_type = T*;
+
+  auto operator()(ActionCtx<T*> ctx, ActionResult<T> input) const
+      -> ActionResult<void> {
+    if (T* ptr = ctx.arg.get(); ptr != nullptr) {
+      *ptr = std::move(input.value);
+    }
+    return ActionResult<void>::ok();
+  }
+};
+
 template <auto Fn>
 struct Callback {
   template <class Prev>
@@ -1223,6 +1243,8 @@ inline constexpr auto insert = Action<Insert{}>{};
 inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
 inline constexpr auto callback = Action<Callback<Fn>{}>{};
+template <class T>
+inline constexpr auto store_into = Action<StoreInto<T>{}>{};
 
 }  // namespace pack
 
