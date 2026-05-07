@@ -36,3 +36,9 @@ ctest --test-dir build --output-on-failure
 ```
 
 > **Note:** clang-tidy requires a compiler that supports C++20 and a compatible version of clang-tidy in `PATH`.
+
+## Single header
+
+`single_header/cli20.hh` is generated automatically — do not edit it by hand and do not include changes to it in your PR.
+
+It is regenerated from `include/cli/*.hh` by `script/make_single_header.py` and committed back to `main` by the post-merge CI action after every merge.
