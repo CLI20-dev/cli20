@@ -29,9 +29,9 @@ jobs:
           fi
 
       - name: Verify single_header is not manually modified
+        if: github.event_name == 'pull_request'
         run: |
-          nix run nixpkgs#python3 -- script/make_single_header.py
-          if ! git diff --quiet single_header/; then
+          if ! git diff --quiet origin/${{ github.base_ref }}...HEAD -- single_header/; then
             echo ""
             echo "::error::single_header/ must not be modified manually."
             echo "It is regenerated automatically after each merge to main."
