@@ -95,3 +95,120 @@ TEST(Parse, MissingRequiredSubcommandOptionFailsInsideCommand) {
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
   EXPECT_EQ(result.error.subject, "threads");
 }
+
+#ifdef _WIN32
+namespace {
+
+// Build a wchar_t* argv[] from a list of wide string literals for testing wmain.
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto wide_argv(std::initializer_list<const wchar_t*> values)
+    -> std::vector<wchar_t*> {
+  std::vector<wchar_t*> result;
+  result.reserve(values.size());
+  for (const wchar_t* p : values) {
+    result.push_back(const_cast<wchar_t*>(p));
+  }
+  return result;
+}
+
+struct UnicodeArgs {
+  cli::StringOption<"name", 'n'> name{
+      {.help = "Name", .presence = cli::Presence::required}};
+  cli::Positional<std::string, cli::nargs::zero_or_more> files{
+      {.help = "Files", .presence = cli::Presence::optional}};
+};
+
+}  // namespace
+
+// ASCII via wide argv — basic sanity check.
+TEST(ParseWide, AsciiRoundtrip) {
+  auto args = wide_argv({L"prog", L"--name", L"hello"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.name.value().has_value());
+  EXPECT_EQ(*result.value.name.value(), "hello");
+}
+
+// Japanese: テスト (U+30C6 U+30B9 U+30C8) — 3-byte UTF-8 sequences.
+TEST(ParseWide, JapaneseOption) {
+  auto args = wide_argv({L"prog", L"--name", L"\u30C6\u30B9\u30C8"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.name.value().has_value());
+  EXPECT_EQ(*result.value.name.value(), "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
+}
+
+// Chinese: 你好 (U+4F60 U+597D).
+TEST(ParseWide, ChineseOption) {
+  auto args = wide_argv({L"prog", L"--name", L"\u4F60\u597D"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.name.value().has_value());
+  EXPECT_EQ(*result.value.name.value(), "\xe4\xbd\xa0\xe5\xa5\xbd");
+}
+
+// Emoji: 😀 (U+1F600) — 4-byte UTF-8 / surrogate pair in UTF-16.
+TEST(ParseWide, EmojiOption) {
+  auto args = wide_argv({L"prog", L"--name", L"\U0001F600"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.name.value().has_value());
+  EXPECT_EQ(*result.value.name.value(), "\xf0\x9f\x98\x80");
+}
+
+// Unicode in positional arguments.
+TEST(ParseWide, UnicodePositionals) {
+  auto args = wide_argv(
+      {L"prog", L"--name", L"x", L"\u30A2\u30A4\u30A6", L"\u6587\u4EF6"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value.files.value(),
+            (std::vector<std::string>{
+                "\xe3\x82\xa2\xe3\x82\xa4\xe3\x82\xa6",  // アイウ
+                "\xe6\x96\x87\xe4\xbb\xb6",              // 文件
+            }));
+}
+
+// Unicode program name is stored correctly.
+TEST(ParseWide, UnicodeProgramName) {
+  auto args = wide_argv({L"\u30A2\u30D7\u30EA", L"--name", L"x"});
+  cli::Parser<UnicodeArgs> parser;
+  auto result = parser.parse(static_cast<int>(args.size()), args.data());
+
+  ASSERT_TRUE(result.has_value());
+  // program_name_ is not directly exposed, but parse succeeds without
+  // corruption.
+}
+
+// Error path: missing required option still works through wide argv.
+TEST(ParseWide, MissingRequiredOptionFails) {
+  auto args = wide_argv({L"prog"});
+  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
+                                                 args.data());
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
+  EXPECT_EQ(result.error.subject, "name");
+}
+
+// Free-function parse() overload for wchar_t*.
+TEST(ParseWide, FreeFunctionParse) {
+  auto args = wide_argv({L"prog", L"--name", L"\u30C6\u30B9\u30C8"});
+  auto result =
+      cli::parse<UnicodeArgs>(static_cast<int>(args.size()), args.data());
+
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.name.value().has_value());
+  EXPECT_EQ(*result.value.name.value(), "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
+}
+#endif
