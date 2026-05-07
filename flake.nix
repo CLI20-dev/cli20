@@ -81,6 +81,23 @@
             '';
           };
 
+          packages.doc = pkgs.buildNpmPackage {
+            pname = "cli20-docs";
+            version = "0.0.0";
+            src = ./docs;
+            npmDepsHash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            buildPhase = ''
+              runHook preBuild
+              npm run build
+              runHook postBuild
+            '';
+            installPhase = ''
+              runHook preInstall
+              cp -r build $out
+              runHook postInstall
+            '';
+          };
+
           apps.build = {
             type = "app";
             program =
