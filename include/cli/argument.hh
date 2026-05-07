@@ -288,7 +288,6 @@ struct ArgImpl : public OptionTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
-    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
   }
 
@@ -307,8 +306,12 @@ struct ArgImpl : public OptionTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
-    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
+  }
+
+  // Called once after all value tokens for one option occurrence are processed.
+  auto fire_on_parse() -> void {
+    if (on_parse_) on_parse_(value_);
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
@@ -368,8 +371,12 @@ struct PositionalImpl : public PositionalTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
-    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
+  }
+
+  // Called once after all tokens for this positional are consumed.
+  auto fire_on_parse() -> void {
+    if (on_parse_) on_parse_(value_);
   }
 
   [[nodiscard]] auto value() const -> const value_type& { return value_; }

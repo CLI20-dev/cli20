@@ -410,6 +410,15 @@ struct Parser {
       }
     }
 
+    // Fire on_parse callbacks for positionals once, after all tokens are
+    // consumed.
+    for_each_field(result.value, [](auto& f) -> auto {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, PositionalTag>) {
+        if (f.provided()) f.fire_on_parse();
+      }
+    });
+
     if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
     }
@@ -496,6 +505,7 @@ struct Parser {
             res = f.invoke_action(vt.text, vt.position + first_index);
           }
         }
+        if (!res.has_error()) f.fire_on_parse();
       }
     });
     return res;

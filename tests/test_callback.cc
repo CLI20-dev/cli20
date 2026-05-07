@@ -80,42 +80,52 @@ TEST(Callback, NotCalledWhenFlagAbsent) {
   EXPECT_FALSE(fired);
 }
 
-TEST(Callback, CalledPerElementForList) {
-  std::vector<std::string> snapshots;
+// on_parse fires once per option *occurrence*, not once per value token.
+// --file a.txt b.txt c.txt  (one occurrence, 3 values) → fires once.
+TEST(Callback, CalledOncePerOccurrenceForList) {
+  int call_count = 0;
+  std::vector<std::string> last_seen;
   CallbackListArgs args;
   args.files = cli::ListOption<std::string, "file", 'f'>{{
       .on_parse =
-          [&snapshots](const std::vector<std::string>& v) {
-            snapshots.push_back(
-                v.back());  // capture each new element as it arrives
+          [&](const std::vector<std::string>& v) {
+            ++call_count;
+            last_seen = v;
           },
   }};
 
-  auto args_vec =
-      argv({"prog", "--file", "a.txt", "--file", "b.txt", "--file", "c.txt"});
+  // One occurrence of --file with three values.
+  auto args_vec = argv({"prog", "--file", "a.txt", "b.txt", "c.txt"});
   auto result = cli::Parser<CallbackListArgs>{}.parse(
       std::move(args), std::span<const std::string_view>(args_vec), 1);
 
   ASSERT_TRUE(result.has_value()) << result.error.message();
-  EXPECT_EQ(snapshots, (std::vector<std::string>{"a.txt", "b.txt", "c.txt"}));
+  EXPECT_EQ(call_count, 1);
+  EXPECT_EQ(last_seen, (std::vector<std::string>{"a.txt", "b.txt", "c.txt"}));
 }
 
-TEST(Callback, CalledForPositional) {
-  std::vector<std::string> seen;
+// on_parse for positionals fires once after all tokens are consumed, not per
+// token.
+TEST(Callback, CalledOnceForPositional) {
+  int call_count = 0;
+  std::vector<std::string> final_value;
   CallbackPositionalArgs args;
   args.inputs = cli::Positional<std::string, cli::nargs::one_or_more>{{
       .on_parse =
-          [&seen](const std::vector<std::string>& v) {
-            seen.push_back(v.back());
+          [&](const std::vector<std::string>& v) {
+            ++call_count;
+            final_value = v;
           },
   }};
 
-  auto args_vec = argv({"prog", "foo.cc", "bar.cc"});
+  auto args_vec = argv({"prog", "foo.cc", "bar.cc", "baz.cc"});
   auto result = cli::Parser<CallbackPositionalArgs>{}.parse(
       std::move(args), std::span<const std::string_view>(args_vec), 1);
 
   ASSERT_TRUE(result.has_value()) << result.error.message();
-  EXPECT_EQ(seen, (std::vector<std::string>{"foo.cc", "bar.cc"}));
+  EXPECT_EQ(call_count, 1);
+  EXPECT_EQ(final_value,
+            (std::vector<std::string>{"foo.cc", "bar.cc", "baz.cc"}));
 }
 
 TEST(Callback, NotCalledOnParseError) {
@@ -133,7 +143,8 @@ TEST(Callback, NotCalledOnParseError) {
   EXPECT_EQ(call_count, 0);
 }
 
-TEST(Callback, CallbackCountMatchesParseCount) {
+// Three separate occurrences of --file (each with one value) → fires 3 times.
+TEST(Callback, CallbackCountMatchesOccurrenceCount) {
   int call_count = 0;
   CallbackListArgs args;
   args.files = cli::ListOption<std::string, "file", 'f'>{{

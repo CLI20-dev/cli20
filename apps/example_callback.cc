@@ -1,11 +1,14 @@
 // example_callback.cc — demonstrates on_parse callbacks in ArgParameter.
 //
-// Each option can carry a std::function<void(const value_type&)> that is
-// called once per successful parse.  This is useful for side effects:
-// logging, validation, or writing to an external variable via capture.
+// Each option/positional can carry a std::function<void(const value_type&)>
+// that is called once per option *occurrence* (not once per value token).
+// For positionals it is called once after all tokens are consumed.
+// This is useful for side effects: logging, validation, or writing to an
+// external variable via capture.
 //
 // Run:
-//   ./example_callback --verbose --jobs 4 --include src --include lib main.cc
+//   ./example_callback --verbose --jobs 4 --include src lib --include inc
+//   main.cc other.cc
 
 #include <iostream>
 
@@ -48,23 +51,24 @@ auto main(int argc, char* argv[]) -> int {
           },
   }};
 
-  // List option callback: fires after each --include value is added.
-  // The callback receives the entire accumulated vector.
+  // List option callback: fires once per --include occurrence (after all its
+  // values are consumed).  The callback receives the full accumulated vector.
   args.includes = cli::ListOption<std::string, "include", 'I'>{{
       .help = "include directories",
       .on_parse =
           [](const std::vector<std::string>& v) {
-            std::cerr << "[callback] includes now has " << v.size()
-                      << " element(s), last: " << v.back() << '\n';
+            std::cerr << "[callback] --include done, total " << v.size()
+                      << " dir(s), last added: " << v.back() << '\n';
           },
   }};
 
-  // Positional callback: fires once per positional token.
+  // Positional callback: fires once after all positional tokens are consumed.
   args.inputs = cli::Positional<std::string, cli::nargs::one_or_more>{{
       .help = "input files",
       .on_parse =
           [](const std::vector<std::string>& v) {
-            std::cerr << "[callback] input added: " << v.back() << '\n';
+            std::cerr << "[callback] all inputs consumed (" << v.size()
+                      << " file(s))\n";
           },
   }};
 
