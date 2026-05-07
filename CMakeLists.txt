@@ -5,6 +5,7 @@ project(cli20 VERSION 0.1.1 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(CXX_CLI20_ENABLE_TEST "Enable building tests" OFF)
+option(CXX_CLI20_ENABLE_MODULE "Enable the CLI20 module" OFF)
 
 option(CXX_CLI20_ENABLE_CLANG_TIDY "Enable clang-tidy checks" OFF)
 if(CXX_CLI20_ENABLE_CLANG_TIDY)
@@ -73,4 +74,8 @@ add_subdirectory(apps)
 if(CXX_CLI20_ENABLE_TEST)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if(CXX_CLI20_ENABLE_MODULE)
+  add_subdirectory(modules)
 endif()

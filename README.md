@@ -165,6 +165,7 @@ Subcommands are just nested typed schemas.
 
 - C++20-native API design
 - Header-only
+- Support for C++20 modules
 - Typed command schemas
 - Compile-time option names
 - Strongly typed positional arguments
@@ -174,6 +175,33 @@ Subcommands are just nested typed schemas.
 - Custom validation and conversion pipelines
 - Automatic help generation
 - No macros
+
+## Using C++20 Modules
+
+cli20 provides full support for C++20 modules via the `cli20.cppm` module file.
+
+### Building with Modules
+
+To enable module support, configure your CMake build with the module option:
+
+```bash
+cmake -B build -DCXX_CLI20_ENABLE_MODULE=ON
+cmake --build build
+```
+
+### Using the cli20 Module
+
+Instead of including header files, you can import the module using `import cli20;`.
+
+See [apps/example_module.cc](apps/example_module.cc) for a complete example.
+
+### Module Availability
+
+The module target is named `cli20-module` and can be linked in your CMake project:
+
+```cmake
+target_link_libraries(your_target PRIVATE cli20-module)
+```
 
 ## Core Design Principles
 
