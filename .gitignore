@@ -13,3 +13,8 @@ build/
 
 # Nix build result
 result
+
+# npm
+node_modules/
+npm-debug.log
+.docusaurus/
