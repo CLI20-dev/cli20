@@ -2952,6 +2952,43 @@ auto format_help(T& value, std::string_view program_name = "program",
 
 namespace cli {
 
+#ifdef _WIN32
+namespace detail {
+// Convert a null-terminated UTF-16LE wchar_t string to UTF-8.
+// Uses only the Unicode specification — no windows.h required.
+inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
+  std::string out;
+  for (const wchar_t* p = wide; *p != L'\0';) {
+    char32_t cp{};
+    const auto u = static_cast<char16_t>(*p++);
+    if (u >= 0xD800 && u <= 0xDBFF) {
+      // High surrogate — must be followed by a low surrogate
+      const auto lo = static_cast<char16_t>(*p++);
+      cp = 0x10000 + ((static_cast<char32_t>(u - 0xD800) << 10) | (lo - 0xDC00));
+    } else {
+      cp = u;
+    }
+    if (cp <= 0x7F) {
+      out += static_cast<char>(cp);
+    } else if (cp <= 0x7FF) {
+      out += static_cast<char>(0xC0 | (cp >> 6));
+      out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else if (cp <= 0xFFFF) {
+      out += static_cast<char>(0xE0 | (cp >> 12));
+      out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+      out += static_cast<char>(0x80 | (cp & 0x3F));
+    } else {
+      out += static_cast<char>(0xF0 | (cp >> 18));
+      out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+      out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+      out += static_cast<char>(0x80 | (cp & 0x3F));
+    }
+  }
+  return out;
+}
+}  // namespace detail
+#endif
+
 enum class TokenType {
   option,
   value,
@@ -3210,6 +3247,27 @@ struct Parser {
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
+
+#ifdef _WIN32
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+  auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
+    std::vector<std::string> owned;
+    owned.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      owned.emplace_back(detail::wide_to_utf8(argv[i]));
+    }
+    std::vector<std::string_view> args;
+    args.reserve(owned.size());
+    for (const auto& s : owned) {
+      args.emplace_back(s);
+    }
+    if (argc > 0) {
+      program_name_ = owned[0];
+    }
+    return this->parse(std::span<const std::string_view>(args), 1);
+  }
+#endif
 
   auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
       -> ParseResult<T> {
@@ -3489,6 +3547,29 @@ auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
   }
   return std::move(result.value);
 }
+
+#ifdef _WIN32
+template <ArgumentSpec T>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
+  return Parser<T>{}.parse(argc, argv);
+}
+
+template <ArgumentSpec T>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse_or_exit(int argc, wchar_t* argv[], std::ostream& out = std::cout,
+                   std::ostream& err = std::cerr) -> T {
+  auto result = parse<T>(argc, argv);
+  if (!result) {
+    if (const auto message = result.error.message(); !message.empty()) {
+      auto& stream = result.error.use_stdout() ? out : err;
+      stream << message << '\n';
+    }
+    std::exit(result.error.exit_code());
+  }
+  return std::move(result.value);
+}
+#endif
 
 };  // namespace cli
 // ---- end: include/cli/parser.hh ----
