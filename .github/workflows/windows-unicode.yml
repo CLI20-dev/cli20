@@ -1,0 +1,73 @@
+name: Windows Unicode
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unicode:
+    name: Windows Unicode argv integration test
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: lukka/get-cmake@latest
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build unicode_echo
+        run: cmake --build build --target unicode_echo
+
+      - name: Run Unicode argument tests
+        shell: pwsh
+        run: |
+          # Tell PowerShell to decode subprocess stdout as UTF-8 so string
+          # comparisons with Unicode literals work correctly.
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding          = [System.Text.Encoding]::UTF8
+
+          $exe = ".\build\apps\unicode_echo.exe"
+          $failed = $false
+
+          function Assert-Output([string]$label, [string[]]$argList, [string[]]$expected) {
+            $out = & $exe @argList
+            # Normalize to array even for single-line output
+            $lines = @($out)
+            for ($i = 0; $i -lt $expected.Length; $i++) {
+              if ($lines[$i] -ne $expected[$i]) {
+                Write-Error "$label [$i]: expected '$($expected[$i])' but got '$($lines[$i])'"
+                $script:failed = $true
+              }
+            }
+          }
+
+          # ── ASCII (baseline) ──────────────────────────────────────────────
+          Assert-Output "ASCII" @("--name", "hello") @("name=hello")
+
+          # ── Japanese: テスト (U+30C6 U+30B9 U+30C8) ─────────────────────
+          Assert-Output "Japanese" @("--name", "テスト") @("name=テスト")
+
+          # ── Chinese: 你好 (U+4F60 U+597D) ────────────────────────────────
+          Assert-Output "Chinese" @("--name", "你好") @("name=你好")
+
+          # ── Emoji: 😀 (U+1F600, surrogate pair in UTF-16) ────────────────
+          Assert-Output "Emoji" @("--name", "😀") @("name=😀")
+
+          # ── Mixed ASCII + Unicode ─────────────────────────────────────────
+          Assert-Output "Mixed" @("--name", "cli-テスト-42") @("name=cli-テスト-42")
+
+          # ── Unicode in positional arguments ──────────────────────────────
+          Assert-Output "Positionals" @("--name", "x", "アイウ", "文件") `
+            @("name=x", "file=アイウ", "file=文件")
+
+          if ($failed) { exit 1 }
+          Write-Host "All Unicode argument tests passed."
