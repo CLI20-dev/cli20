@@ -59,13 +59,14 @@ struct ExitSuccessArgs {
 }  // namespace
 
 TEST(Help, UsageContainsProgramAndMajorGroups) {
-  char program[] = "myprog";
-  char* argv[] = {program};
+  char program[] = "myprog";  // NOLINT
+  char* argv[] = {program};   // NOLINT
 
   cli::Parser<HelpArgs> parser;
-  std::ignore = parser.parse(1, argv);
 
-  const auto help = parser.formatHelp(cli::ColorMode::never);
+  std::ignore = parser.parse(1, argv);  // NOLINT
+
+  const auto help = parser.format_help(cli::ColorMode::never);
   EXPECT_TRUE(help.starts_with("Usage: myprog"));
   EXPECT_NE(help.find("[options]"), std::string::npos);
   EXPECT_NE(help.find("[args]"), std::string::npos);
@@ -75,7 +76,7 @@ TEST(Help, UsageContainsProgramAndMajorGroups) {
 TEST(Help, DescriptionAndSectionsAppear) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::never);
+  const auto help = parser.format_help(cli::ColorMode::never);
   EXPECT_NE(help.find("A small tool used to exercise the help generator."),
             std::string::npos);
   EXPECT_NE(help.find("Options:"), std::string::npos);
@@ -86,7 +87,7 @@ TEST(Help, DescriptionAndSectionsAppear) {
 TEST(Help, OptionAndPositionalMetavarsAreRendered) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::never);
+  const auto help = parser.format_help(cli::ColorMode::never);
   EXPECT_NE(help.find("-c, --count <int>"), std::string::npos);
   EXPECT_NE(help.find("-I, --include <string...>"), std::string::npos);
   EXPECT_NE(help.find("<string>"), std::string::npos);
@@ -95,7 +96,7 @@ TEST(Help, OptionAndPositionalMetavarsAreRendered) {
 TEST(Help, FlagDoesNotShowMetavar) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::never);
+  const auto help = parser.format_help(cli::ColorMode::never);
   const auto line_start = help.find("-v, --verbose");
   ASSERT_NE(line_start, std::string::npos);
   const auto line_end = help.find('\n', line_start);
@@ -105,13 +106,13 @@ TEST(Help, FlagDoesNotShowMetavar) {
 
 TEST(Help, EmptySectionsAreOmitted) {
   cli::Parser<OptionsOnlyArgs> options_only;
-  const auto options_help = options_only.formatHelp(cli::ColorMode::never);
+  const auto options_help = options_only.format_help(cli::ColorMode::never);
   EXPECT_NE(options_help.find("Options:"), std::string::npos);
   EXPECT_EQ(options_help.find("Positional arguments:"), std::string::npos);
   EXPECT_EQ(options_help.find("Commands:"), std::string::npos);
 
   cli::Parser<CommandsOnlyArgs> commands_only;
-  const auto commands_help = commands_only.formatHelp(cli::ColorMode::never);
+  const auto commands_help = commands_only.format_help(cli::ColorMode::never);
   EXPECT_EQ(commands_help.find("Options:"), std::string::npos);
   EXPECT_EQ(commands_help.find("Positional arguments:"), std::string::npos);
   EXPECT_NE(commands_help.find("Commands:"), std::string::npos);
@@ -120,7 +121,7 @@ TEST(Help, EmptySectionsAreOmitted) {
 TEST(Help, RecursiveHelpIncludesSubcommandBody) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::never, cli::recurseHelp);
+  const auto help = parser.format_help(cli::ColorMode::never, cli::recurse_help);
   EXPECT_NE(help.find("Usage: program build [options]"), std::string::npos);
   EXPECT_NE(help.find("Compile sources into an executable."), std::string::npos);
   EXPECT_NE(help.find("-j, --jobs <int>"), std::string::npos);
@@ -129,14 +130,14 @@ TEST(Help, RecursiveHelpIncludesSubcommandBody) {
 TEST(Help, ColorNeverDoesNotEmitAnsi) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::never);
+  const auto help = parser.format_help(cli::ColorMode::never);
   EXPECT_EQ(help.find("\033["), std::string::npos);
 }
 
 TEST(Help, ColorAlwaysEmitsAnsiHeadingsAndLabels) {
   cli::Parser<HelpArgs> parser;
 
-  const auto help = parser.formatHelp(cli::ColorMode::always);
+  const auto help = parser.format_help(cli::ColorMode::always);
   EXPECT_NE(help.find("\033[1m"), std::string::npos);
   EXPECT_NE(help.find("\033[4m"), std::string::npos);
   EXPECT_NE(help.find("\033[0m"), std::string::npos);
@@ -144,8 +145,8 @@ TEST(Help, ColorAlwaysEmitsAnsiHeadingsAndLabels) {
 }
 
 TEST(Help, ResolveColorRespectsMode) {
-  const auto never = cli::detail::resolveColor(cli::ColorMode::never);
-  const auto always = cli::detail::resolveColor(cli::ColorMode::always);
+  const auto never = cli::detail::resolve_color(cli::ColorMode::never);
+  const auto always = cli::detail::resolve_color(cli::ColorMode::always);
 
   EXPECT_EQ(never.bold(), "");
   EXPECT_EQ(never.underline(), "");
@@ -166,8 +167,8 @@ TEST(Help, HelpFlagTriggersHelpRequested) {
   EXPECT_NE(result.error.detail.find("Usage: program [options]"),
             std::string::npos);
   EXPECT_EQ(result.error.message(), result.error.detail);
-  EXPECT_TRUE(result.error.useStdout());
-  EXPECT_EQ(result.error.exitCode(), 0);
+  EXPECT_TRUE(result.error.use_stdout());
+  EXPECT_EQ(result.error.exit_code(), 0);
 }
 
 TEST(Help, CustomHelpFlagNameAndShortOptionWork) {
@@ -187,6 +188,6 @@ TEST(Help, ExitSuccessActionTriggersDedicatedCode) {
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::exit_success);
   EXPECT_EQ(result.error.message(), "");
-  EXPECT_TRUE(result.error.useStdout());
-  EXPECT_EQ(result.error.exitCode(), 0);
+  EXPECT_TRUE(result.error.use_stdout());
+  EXPECT_EQ(result.error.exit_code(), 0);
 }

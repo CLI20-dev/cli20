@@ -8,7 +8,7 @@ namespace cli {
 
 namespace detail {
 
-struct any {
+struct Any {
   template <class U>
   operator U();
 };
@@ -16,7 +16,7 @@ struct any {
 template <class T, std::size_t N>
 consteval auto aggregate_initializable_at_least() {
   return []<size_t... I>(std::index_sequence<I...>) -> auto {
-    return (requires { T{((void)I, any{})...}; });
+    return (requires { T{((void)I, Any{})...}; });
   }(std::make_index_sequence<N>{});
 }
 

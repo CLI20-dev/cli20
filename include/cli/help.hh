@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <format>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -100,9 +99,9 @@ auto command_usage_suffix(T& value) -> std::string {
   bool has_commands = false;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
                 has_options = true;
@@ -146,7 +145,7 @@ auto field_usage_label() -> std::string {
   } else if constexpr (std::derived_from<F, PositionalTag>) {
     return metavar_for<typename F::value_type>();
   } else if constexpr (std::derived_from<F, CommandTag>) {
-    return std::string(F::commandName());
+    return std::string(F::command_name());
   } else {
     return std::string{};
   }
@@ -196,9 +195,9 @@ auto append_section(std::string& out, std::string_view title,
   std::size_t width = 0;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (pred.template operator()<F>()) {
                 const auto label = field_usage_label<F>();
@@ -242,9 +241,9 @@ template <class T>
 auto find_description(T& value) -> std::string_view {
   std::string_view description;
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, DescriptionTag>) {
                 if (description.empty()) {
@@ -262,7 +261,7 @@ template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
                       ColorMode color_mode, bool recurse,
                       std::string_view command_path) -> std::string {
-  const auto style = resolveColor(color_mode);
+  const auto style = resolve_color(color_mode);
   const std::string heading =
       std::string(style.bold()) + std::string(style.underline());
   const std::string option_color = std::string(style.bold());
@@ -291,9 +290,9 @@ auto format_help_impl(T& value, std::string_view program_name,
   std::size_t command_width = 0;
 
   std::apply(
-      [&](auto&... fields) {
+      [&](auto&... fields) -> auto {
         (
-            [&] {
+            [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
                 auto label = field_usage_label<F>();
@@ -306,7 +305,7 @@ auto format_help_impl(T& value, std::string_view program_name,
               } else if constexpr (std::derived_from<F, CommandTag>) {
                 auto label = field_usage_label<F>();
                 command_width = std::max(command_width, label.size());
-                command_rows.emplace_back(std::move(label), fields.helpText());
+                command_rows.emplace_back(std::move(label), fields.help_text());
               }
             }(),
             ...);
@@ -316,28 +315,28 @@ auto format_help_impl(T& value, std::string_view program_name,
   auto append_rows =
       [&](std::string_view title,
           const std::vector<std::pair<std::string, std::string_view>>& rows,
-          std::size_t width) {
-        if (rows.empty()) {
-          return;
-        }
+          std::size_t width) -> auto {
+    if (rows.empty()) {
+      return;
+    }
+    out += '\n';
+    out += heading;
+    out += title;
+    out += reset;
+    out += '\n';
+    for (const auto& [label, description] : rows) {
+      out += "  ";
+      out += option_color;
+      out += label;
+      out += reset;
+      if (!description.empty()) {
+        out.append(width - label.size() + 2, ' ');
+        append_wrapped_description(out, description, width + 4);
+      } else {
         out += '\n';
-        out += heading;
-        out += title;
-        out += reset;
-        out += '\n';
-        for (const auto& [label, description] : rows) {
-          out += "  ";
-          out += option_color;
-          out += label;
-          out += reset;
-          if (!description.empty()) {
-            out.append(width - label.size() + 2, ' ');
-            append_wrapped_description(out, description, width + 4);
-          } else {
-            out += '\n';
-          }
-        }
-      };
+      }
+    }
+  };
 
   append_rows("Options:", option_rows, option_width);
   append_rows("Positional arguments:", positional_rows, positional_width);
@@ -345,15 +344,15 @@ auto format_help_impl(T& value, std::string_view program_name,
 
   if (recurse && !command_rows.empty()) {
     std::apply(
-        [&](auto&... fields) {
+        [&](auto&... fields) -> auto {
           (
-              [&] {
+              [&]() -> auto {
                 using F = std::remove_cvref_t<decltype(fields)>;
                 if constexpr (std::derived_from<F, CommandTag>) {
                   out += '\n';
                   out += format_help_impl<typename F::argument_type>(
                       static_cast<typename F::argument_type&>(fields),
-                      program_name, color_mode, true, F::commandName());
+                      program_name, color_mode, true, F::command_name());
                 }
               }(),
               ...);
@@ -367,8 +366,8 @@ auto format_help_impl(T& value, std::string_view program_name,
 }  // namespace detail
 
 template <ArgumentSpec T>
-auto formatHelp(T& value, std::string_view program_name = "program",
-                ColorMode color_mode = ColorMode::auto_, bool recurse = false)
+auto format_help(T& value, std::string_view program_name = "program",
+                 ColorMode color_mode = ColorMode::auto_, bool recurse = false)
     -> std::string {
   return detail::format_help_impl<T>(value, program_name, color_mode, recurse,
                                      {});

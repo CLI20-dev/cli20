@@ -17,7 +17,7 @@ struct Args {
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = cli::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parse_or_exit<Args>(argc, argv);
   if (args.port.value().has_value()) {
     std::cout << "port: " << *args.port.value() << '\n';
   }

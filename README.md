@@ -18,7 +18,7 @@ struct Args {
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = cli::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parse_or_exit<Args>(argc, argv);
 }
 ```
 
@@ -74,7 +74,7 @@ struct Args {
   cli::StringOption<"output", 'o'> output;
 };
 
-const auto args = cli::parseOrExit<Args>(argc, argv);
+const auto args = cli::parse_or_exit<Args>(argc, argv);
 ```
 
 `cli20` treats your CLI as a typed schema, not as a mutable runtime parser object.
@@ -109,7 +109,7 @@ struct Args {
 };
 
 auto main(int argc, char* argv[]) -> int {
-  const auto args = cli::parseOrExit<Args>(argc, argv);
+  const auto args = cli::parse_or_exit<Args>(argc, argv);
 
   if (args.verbose.value()) {
     std::cout << "verbose enabled\n";
@@ -135,7 +135,7 @@ Built-in help is one field:
 cli::Help<> help;
 ```
 
-That expands to `--help` and `-h`, prints generated help, and exits successfully. Combined with `cli::parseOrExit()`, help handling does not need parser-specific boilerplate.
+That expands to `--help` and `-h`, prints generated help, and exits successfully. Combined with `cli::parse_or_exit()`, help handling does not need parser-specific boilerplate.
 
 If you want to wire help explicitly, the action pipeline is also available:
 
