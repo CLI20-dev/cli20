@@ -9,10 +9,9 @@ namespace fs = std::filesystem;
 struct BuildArgs {
   // `ArgImpl` remains available when you need validation beyond the sugar
   // aliases.
-  cli::ArgImpl<
-      "config", 'c', cli::nargs::one,
-      cli::Action<cli::conversion::path, cli::validation::exists,
-                  cli::validation::is_regular_file, cli::pack::set_once>{}>
+  cli::ArgImpl<"config", 'c', cli::nargs::one,
+               cli::conversion::path | cli::validation::exists |
+                   cli::validation::is_regular_file | cli::pack::set_once>
       config{{.help = "Build configuration file",
               .presence = cli::Presence::required}};
 
@@ -26,7 +25,7 @@ struct Args {
       "a subcommand."};
 
   cli::ArgImpl<"help", 'h', cli::nargs::none,
-               cli::Action<cli::action::print_help, cli::action::exit_success>{}>
+               cli::action::print_help | cli::action::exit_success>
       help{{.help = "Show this help message and exit",
             .presence = cli::Presence::optional}};
 

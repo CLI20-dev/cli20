@@ -32,6 +32,11 @@ constexpr auto parse_mode = [](std::string_view value) -> std::optional<int> {
 
 class TempPathGuard {
  public:
+  TempPathGuard(const TempPathGuard&) = default;
+  TempPathGuard(TempPathGuard&&) = delete;
+  auto operator=(const TempPathGuard&) -> TempPathGuard& = default;
+  auto operator=(TempPathGuard&&) -> TempPathGuard& = delete;
+
   explicit TempPathGuard(fs::path path) : path_(std::move(path)) {}
 
   ~TempPathGuard() {
@@ -83,7 +88,7 @@ TEST(Conversion, FloatingRejectsTrailingCharacters) {
 }
 
 TEST(Conversion, ChoiceUsesMapper) {
-  auto result = cli::conversion::choice<int, parse_mode>(
+  auto result = cli::conversion::choice<int, parse_mode>.invoke(
       ctx(2), ActionResult<std::string_view>::ok("fast"));
 
   ASSERT_TRUE(result.has_value());
@@ -91,7 +96,7 @@ TEST(Conversion, ChoiceUsesMapper) {
 }
 
 TEST(Conversion, ChoiceReportsInvalidChoice) {
-  auto result = cli::conversion::choice<int, parse_mode>(
+  auto result = cli::conversion::choice<int, parse_mode>.invoke(
       ctx(2), ActionResult<std::string_view>::ok("medium"));
 
   ASSERT_TRUE(result.has_error());

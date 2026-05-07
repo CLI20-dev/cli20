@@ -390,39 +390,34 @@ struct ActionFor;
 
 template <>
 struct ActionFor<std::string> {
-  inline static constexpr auto set_once =
-      Action<conversion::string, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::string, pack::push>{};
+  inline static constexpr auto set_once = conversion::string | pack::set_once;
+  inline static constexpr auto push = conversion::string | pack::push;
 };
 
 template <>
 struct ActionFor<bool> {
-  inline static constexpr auto set_once =
-      Action<conversion::boolean, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::boolean, pack::push>{};
+  inline static constexpr auto set_once = conversion::boolean | pack::set_once;
+  inline static constexpr auto push = conversion::boolean | pack::push;
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
-  inline static constexpr auto set_once =
-      Action<conversion::path, pack::set_once>{};
-  inline static constexpr auto push = Action<conversion::path, pack::push>{};
+  inline static constexpr auto set_once = conversion::path | pack::set_once;
+  inline static constexpr auto push = conversion::path | pack::push;
 };
 
 template <std::integral T>
 struct ActionFor<T> {
   inline static constexpr auto set_once =
-      Action<conversion::integer<T>, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::integer<T>, pack::push>{};
+      conversion::integer<T> | pack::set_once;
+  inline static constexpr auto push = conversion::integer<T> | pack::push;
 };
 
 template <std::floating_point T>
 struct ActionFor<T> {
   inline static constexpr auto set_once =
-      Action<conversion::floating<T>, pack::set_once>{};
-  inline static constexpr auto push =
-      Action<conversion::floating<T>, pack::push>{};
+      conversion::floating<T> | pack::set_once;
+  inline static constexpr auto push = conversion::floating<T> | pack::push;
 };
 
 template <class T, Nargs N>
@@ -441,11 +436,11 @@ struct PositionalActionFor {
 // ── Core public API ───────────────────────────────────────────────────────────
 
 template <StringLiteral Name, char ShortName = '\0'>
-using Flag = ArgImpl<Name, ShortName, nargs::none, Action<pack::set_true>{}>;
+using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
 using Help = ArgImpl<Name, ShortName, nargs::none,
-                     Action<action::print_help, action::exit_success>{}>;
+                     action::print_help | action::exit_success>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
 using Option =

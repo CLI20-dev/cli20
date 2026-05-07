@@ -142,7 +142,7 @@ If you want to wire help explicitly, the action pipeline is also available:
 ```cpp
 cli::ArgImpl<
     "help", 'h', cli::nargs::none,
-    cli::Action<cli::action::print_help, cli::action::exit_success>{}>
+    cli::action::print_help | cli::action::exit_success>
     help;
 ```
 
@@ -272,7 +272,21 @@ This enables:
 
 ## Going Beyond Sugar
 
-When you need stronger behavior, use `ArgImpl` and `Action<...>` directly.
+When you need stronger behavior, use `ArgImpl` directly with a custom action pipeline.
+
+Actions can be composed with `|`:
+
+```cpp
+cli::ArgImpl<
+    "config", 'c', cli::nargs::one,
+    cli::conversion::path
+        | cli::validation::exists
+        | cli::validation::is_regular_file
+        | cli::pack::set_once>
+    config{{.help = "Configuration file"}};
+```
+
+Each `|` appends a step to the pipeline. `Action<...>` with explicit template arguments is equivalent and can be used when you prefer the explicit form:
 
 ```cpp
 cli::ArgImpl<
@@ -287,9 +301,9 @@ cli::ArgImpl<
 
 The action pipeline is split into three layers:
 
-- `conversion::*`
-- `validation::*`
-- `pack::*`
+- `conversion::*` — parse the raw string into a typed value
+- `validation::*` — reject out-of-range or otherwise invalid values
+- `pack::*` — store the final value into the field
 
 ## Comparison with CLI11
 
