@@ -4,6 +4,7 @@
 #include <cli/meta.hh>
 #include <cli/string_literal.hh>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -214,6 +215,7 @@ struct ArgParameter {
   std::string_view help{};
   Presence presence{Presence::optional};
   T default_value{};
+  std::function<void(const T&)> on_parse{};
 };
 
 template <StringLiteral Name, char ShortName, Nargs N, Action A>
@@ -231,7 +233,31 @@ struct ArgImpl : public OptionTag {
   ArgImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
-        value_(param.default_value) {}
+        value_(param.default_value),
+        on_parse_(std::move(param.on_parse)) {}
+
+  // Convenience constructor for StoreInto variants (value_type == T*).
+  explicit ArgImpl(std::remove_pointer_t<value_type>& ref)
+    requires std::is_pointer_v<value_type>
+      : value_(&ref) {}
+  ArgImpl(std::remove_pointer_t<value_type>& ref, std::string_view help_text)
+    requires std::is_pointer_v<value_type>
+      : help(help_text), value_(&ref) {}
+
+  // Bind to an external variable after construction.
+  // Allows: opt.bind(var)  or  opt = &var
+  auto bind(std::remove_pointer_t<value_type>& ref) -> ArgImpl&
+    requires std::is_pointer_v<value_type>
+  {
+    value_ = &ref;
+    return *this;
+  }
+  auto operator=(std::remove_pointer_t<value_type>* ptr) -> ArgImpl&
+    requires std::is_pointer_v<value_type>
+  {
+    value_ = ptr;
+    return *this;
+  }
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -262,6 +288,7 @@ struct ArgImpl : public OptionTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
+    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
   }
 
@@ -280,6 +307,7 @@ struct ArgImpl : public OptionTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
+    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
   }
 
@@ -292,6 +320,7 @@ struct ArgImpl : public OptionTag {
   friend struct Parser;
 
   value_type value_{};
+  std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times the option token appeared
   std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
   bool provided_{};
@@ -311,7 +340,8 @@ struct PositionalImpl : public PositionalTag {
   PositionalImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
-        value_(param.default_value) {}
+        value_(param.default_value),
+        on_parse_(std::move(param.on_parse)) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -338,6 +368,7 @@ struct PositionalImpl : public PositionalTag {
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
+    if (on_parse_) on_parse_(value_);
     return ActionResult<void>::ok();
   }
 
@@ -350,6 +381,7 @@ struct PositionalImpl : public PositionalTag {
   friend struct Parser;
 
   value_type value_{};
+  std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times a value was provided
   std::size_t
       invoke_count_{};  // times invoke_action was called (same for positionals)
@@ -392,18 +424,24 @@ template <>
 struct ActionFor<std::string> {
   inline static constexpr auto set_once = conversion::string | pack::set_once;
   inline static constexpr auto push = conversion::string | pack::push;
+  inline static constexpr auto store_into =
+      conversion::string | pack::store_into<std::string>;
 };
 
 template <>
 struct ActionFor<bool> {
   inline static constexpr auto set_once = conversion::boolean | pack::set_once;
   inline static constexpr auto push = conversion::boolean | pack::push;
+  inline static constexpr auto store_into =
+      conversion::boolean | pack::store_into<bool>;
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
   inline static constexpr auto set_once = conversion::path | pack::set_once;
   inline static constexpr auto push = conversion::path | pack::push;
+  inline static constexpr auto store_into =
+      conversion::path | pack::store_into<std::filesystem::path>;
 };
 
 template <std::integral T>
@@ -411,6 +449,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::integer<T> | pack::set_once;
   inline static constexpr auto push = conversion::integer<T> | pack::push;
+  inline static constexpr auto store_into =
+      conversion::integer<T> | pack::store_into<T>;
 };
 
 template <std::floating_point T>
@@ -418,6 +458,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::floating<T> | pack::set_once;
   inline static constexpr auto push = conversion::floating<T> | pack::push;
+  inline static constexpr auto store_into =
+      conversion::floating<T> | pack::store_into<T>;
 };
 
 template <class T, Nargs N>
@@ -437,6 +479,22 @@ struct PositionalActionFor {
 
 template <StringLiteral Name, char ShortName = '\0'>
 using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
+
+template <class T, StringLiteral Name, char ShortName = '\0'>
+using BoundOption =
+    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::store_into>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundStringOption = BoundOption<std::string, Name, ShortName>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundIntOption = BoundOption<int, Name, ShortName>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundDoubleOption = BoundOption<double, Name, ShortName>;
+
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundPathOption = BoundOption<std::filesystem::path, Name, ShortName>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
 using Help = ArgImpl<Name, ShortName, nargs::none,
