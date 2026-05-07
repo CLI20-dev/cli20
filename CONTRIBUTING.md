@@ -42,3 +42,9 @@ ctest --test-dir build --output-on-failure
 `single_header/cli20.hh` is generated automatically — do not edit it by hand and do not include changes to it in your PR.
 
 It is regenerated from `include/cli/*.hh` by `script/make_single_header.py` and committed back to `main` by the post-merge CI action after every merge.
+
+To avoid merge conflicts on this file when running `git merge main` locally, enable the `ours` merge driver once per machine:
+
+```sh
+git config --global merge.ours.driver true
+```
