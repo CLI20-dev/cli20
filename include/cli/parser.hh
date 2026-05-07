@@ -10,11 +10,30 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "cli/argument.hh"
 #include "cli/error.hh"
 #include "cli/help.hh"
 
 namespace cli {
+
+#ifdef _WIN32
+namespace detail {
+inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
+  if (!wide) return {};
+  int len =
+      WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr);
+  if (len <= 1) return {};
+  std::string result(static_cast<std::size_t>(len) - 1, '\0');
+  WideCharToMultiByte(CP_UTF8, 0, wide, -1, result.data(), len, nullptr,
+                      nullptr);
+  return result;
+}
+}  // namespace detail
+#endif
 
 enum class TokenType {
   option,
@@ -274,6 +293,27 @@ struct Parser {
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
+
+#ifdef _WIN32
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+  auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
+    std::vector<std::string> owned;
+    owned.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      owned.emplace_back(detail::wide_to_utf8(argv[i]));
+    }
+    std::vector<std::string_view> args;
+    args.reserve(owned.size());
+    for (const auto& s : owned) {
+      args.emplace_back(s);
+    }
+    if (argc > 0) {
+      program_name_ = owned[0];
+    }
+    return this->parse(std::span<const std::string_view>(args), 1);
+  }
+#endif
 
   auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
       -> ParseResult<T> {
@@ -553,5 +593,28 @@ auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
   }
   return std::move(result.value);
 }
+
+#ifdef _WIN32
+template <ArgumentSpec T>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
+  return Parser<T>{}.parse(argc, argv);
+}
+
+template <ArgumentSpec T>
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+auto parse_or_exit(int argc, wchar_t* argv[], std::ostream& out = std::cout,
+                   std::ostream& err = std::cerr) -> T {
+  auto result = parse<T>(argc, argv);
+  if (!result) {
+    if (const auto message = result.error.message(); !message.empty()) {
+      auto& stream = result.error.use_stdout() ? out : err;
+      stream << message << '\n';
+    }
+    std::exit(result.error.exit_code());
+  }
+  return std::move(result.value);
+}
+#endif
 
 };  // namespace cli
