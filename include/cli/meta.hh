@@ -9,7 +9,8 @@ namespace cli {
 namespace detail {
 
 /**
- * @brief A universal implicit-conversion type used for aggregate-member counting.
+ * @brief A universal implicit-conversion type used for aggregate-member
+ * counting.
  *
  * `Any` can be implicitly converted to any type `U`, which allows it to be
  * passed as any aggregate member during brace-initialization probing.
@@ -20,10 +21,11 @@ struct Any {
 };
 
 /**
- * @brief Tests whether aggregate type `T` can be brace-initialized with at least `N` elements.
+ * @brief Tests whether aggregate type `T` can be brace-initialized with at least
+ * `N` elements.
  *
- * Uses SFINAE via a `requires` expression to detect whether `T{Any{}, ..., Any{}}` (N copies)
- * is a valid expression.
+ * Uses SFINAE via a `requires` expression to detect whether `T{Any{}, ...,
+ * Any{}}` (N copies) is a valid expression.
  *
  * @tparam T The aggregate type to probe.
  * @tparam N The number of initializer elements to test.
@@ -37,7 +39,8 @@ consteval auto aggregate_initializable_at_least() {
 }
 
 /**
- * @brief Determines the exact number of members of an aggregate type at compile time.
+ * @brief Determines the exact number of members of an aggregate type at compile
+ * time.
  *
  * Performs a binary search between `Min` and `Max` using
  * `aggregate_initializable_at_least` to find the largest `N` for which
@@ -70,7 +73,8 @@ consteval auto aggregate_initializable() -> std::size_t {
     __cplusplus >= 202400L
 
 /**
- * @brief Converts an aggregate value to a `std::tuple` of references to its members.
+ * @brief Converts an aggregate value to a `std::tuple` of references to its
+ * members.
  *
  * On C++26 compilers that support pack-expansion in structured bindings
  * (`__cpp_structured_bindings >= 202411L`), this uses the `auto& [... args]`
