@@ -37,6 +37,24 @@ ctest --test-dir build --output-on-failure
 
 > **Note:** clang-tidy requires a compiler that supports C++20 and a compatible version of clang-tidy in `PATH`.
 
+## Documentation
+
+To preview the documentation site locally:
+
+```sh
+cd docs
+npm ci
+npm run start
+```
+
+To verify the production build:
+
+```sh
+cd docs
+npm ci
+npm run build
+```
+
 ## Single header
 
 `single_header/cli20.hh` is generated automatically — do not edit it by hand and do not include changes to it in your PR.
