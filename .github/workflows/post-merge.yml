@@ -11,6 +11,7 @@ jobs:
   update:
     name: Regenerate single header and format
     runs-on: ubuntu-24.04
+    environment: single_header_autogen
     # Guard against the GitHub App bot's own pushes to prevent infinite loops.
     if: github.actor != 'cli20-single-header-autogen[bot]'
 
