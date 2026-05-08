@@ -5,7 +5,8 @@
 namespace cli {
 
 /**
- * @brief Identifies the specific failure that occurred during parsing or validation.
+ * @brief Identifies the specific failure that occurred during parsing or
+ * validation.
  *
  * Codes are grouped by category:
  * - **Parse errors** (`unknown_option` … `duplicate_argument`): problems
@@ -13,26 +14,33 @@ namespace cli {
  * - **Conversion/validation errors** (`conversion_error` … `validation_failed`):
  *   problems converting a raw string to the target type or failing a constraint.
  * - **Informational codes** (`help_requested`, `exit_success`): not true errors;
- *   the parser uses these to signal that the program should print help and exit 0.
+ *   the parser uses these to signal that the program should print help and exit
+ * 0.
  */
 enum class ErrorCode {
   unknown_option,       ///< An unrecognised option name was encountered.
   unknown_command,      ///< An unrecognised subcommand name was encountered.
-  unexpected_argument,  ///< A positional argument was supplied when none was expected.
+  unexpected_argument,  ///< A positional argument was supplied when none was
+                        ///< expected.
   missing_value,        ///< An option that requires a value was given none.
-  invalid_value,        ///< A value could not be interpreted as the required type.
-  duplicate_argument,   ///< An option or positional that forbids repetition was seen more than once.
+  invalid_value,  ///< A value could not be interpreted as the required type.
+  duplicate_argument,  ///< An option or positional that forbids repetition was
+                       ///< seen more than once.
 
-  conversion_error,     ///< Generic failure during string-to-type conversion.
-  out_of_range,         ///< A numeric value fell outside the representable range of the target type.
-  missing_required,     ///< A required option or positional was not provided.
-  mutually_exclusive,   ///< Two mutually-exclusive options were both supplied.
-  dependency_missing,   ///< An option that depends on another option was given without it.
-  invalid_choice,       ///< A value was not among the allowed choices.
-  validation_failed,    ///< A user-defined or built-in validation predicate rejected the value.
-  help_requested,       ///< The `--help` flag (or equivalent) was seen; print help and exit 0.
-  exit_success,         ///< The action pipeline requested a clean exit with code 0.
-  unknown_error,        ///< Sentinel/default; indicates no error has been set.
+  conversion_error,  ///< Generic failure during string-to-type conversion.
+  out_of_range,  ///< A numeric value fell outside the representable range of the
+                 ///< target type.
+  missing_required,    ///< A required option or positional was not provided.
+  mutually_exclusive,  ///< Two mutually-exclusive options were both supplied.
+  dependency_missing,  ///< An option that depends on another option was given
+                       ///< without it.
+  invalid_choice,      ///< A value was not among the allowed choices.
+  validation_failed,   ///< A user-defined or built-in validation predicate
+                       ///< rejected the value.
+  help_requested,  ///< The `--help` flag (or equivalent) was seen; print help
+                   ///< and exit 0.
+  exit_success,    ///< The action pipeline requested a clean exit with code 0.
+  unknown_error,   ///< Sentinel/default; indicates no error has been set.
 };
 
 /**
@@ -119,13 +127,15 @@ struct ParseError {
   /** @brief Broad category of the error. */
   ErrorKind kind = ErrorKind::parse;
 
-  /** @brief Zero-based index into `argv` where the error was detected, or -1 if unknown. */
+  /** @brief Zero-based index into `argv` where the error was detected, or -1 if
+   * unknown. */
   int position = -1;
 
   /** @brief The token or option name that caused the error (may be empty). */
   std::string subject{};
 
-  /** @brief Additional human-readable context about the failure (may be empty). */
+  /** @brief Additional human-readable context about the failure (may be empty).
+   */
   std::string detail{};
 
   /**

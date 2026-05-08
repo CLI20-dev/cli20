@@ -73,7 +73,8 @@ struct MetavarName<T> {
 };
 
 /**
- * @brief Helper that unwraps storage wrapper types to their underlying value type.
+ * @brief Helper that unwraps storage wrapper types to their underlying value
+ * type.
  *
  * - `UnwrapStorage<T>` → `type = T`, `variadic = false`
  * - `UnwrapStorage<std::optional<T>>` → `type = T`, `variadic = false`
@@ -106,7 +107,8 @@ template <class T>
 using unwrap_storage_t = typename UnwrapStorage<std::remove_cvref_t<T>>::type;
 
 /**
- * @brief Returns the metavar string for a storage type, e.g. `<int>` or `<path...>`.
+ * @brief Returns the metavar string for a storage type, e.g. `<int>` or
+ * `<path...>`.
  *
  * For variadic storage (i.e. `std::vector<T>`), `...` is inserted before the
  * closing `>`, producing e.g. `<string...>`.
@@ -176,7 +178,8 @@ auto command_usage_suffix(T& value) -> std::string {
 /**
  * @brief Returns the label used in the help table for a single field type.
  *
- * - For `OptionTag` fields: `"-s, --long <metavar>"` (short name omitted if `'\0'`).
+ * - For `OptionTag` fields: `"-s, --long <metavar>"` (short name omitted if
+ * `'\0'`).
  * - For `PositionalTag` fields: `"<metavar>"`.
  * - For `CommandTag` fields: the command name string.
  * - Otherwise: an empty string.
@@ -265,7 +268,8 @@ inline auto append_wrapped_description(std::string& out,
 }
 
 /**
- * @brief Appends a labelled section (Options, Positional arguments, Commands) to `out`.
+ * @brief Appends a labelled section (Options, Positional arguments, Commands) to
+ * `out`.
  *
  * Iterates over all fields of `value`, selects those for which `pred`
  * returns `true`, renders each via `render`, and emits a right-aligned
@@ -349,7 +353,8 @@ auto render_help_row(Field& field, std::string_view label, std::size_t width)
 }
 
 /**
- * @brief Extracts the `Description` field's text from an argument specification instance.
+ * @brief Extracts the `Description` field's text from an argument specification
+ * instance.
  *
  * Iterates over all fields; if a field derives from `DescriptionTag` its
  * string value is returned. Returns an empty view if no description is found.
@@ -396,7 +401,8 @@ auto find_description(T& value) -> std::string_view {
  * @param program_name The program name shown in the usage line.
  * @param color_mode   Controls ANSI color output.
  * @param recurse      If `true`, recursively append help for subcommands.
- * @param command_path The subcommand path prefix appended after `program_name` (empty for root).
+ * @param command_path The subcommand path prefix appended after `program_name`
+ * (empty for root).
  * @return The formatted help string.
  */
 template <class T>
@@ -515,9 +521,11 @@ auto format_help_impl(T& value, std::string_view program_name,
  *
  * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
  * @param value        An instance of the argument specification.
- * @param program_name The program name to display in the usage line. Default: `"program"`.
+ * @param program_name The program name to display in the usage line. Default:
+ * `"program"`.
  * @param color_mode   Controls ANSI color output. Default: `ColorMode::auto_`.
- * @param recurse      If `true`, also append help for each subcommand. Default: `false`.
+ * @param recurse      If `true`, also append help for each subcommand. Default:
+ * `false`.
  * @return The formatted help string.
  */
 template <ArgumentSpec T>

@@ -52,7 +52,8 @@ inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
  * - `option`     : An option name token (e.g. `"--verbose"`, `"-v"`).
  * - `value`      : A value token associated with the preceding option.
  * - `positional` : A bare positional argument.
- * - `command`    : A subcommand name; subsequent tokens belong to the subcommand.
+ * - `command`    : A subcommand name; subsequent tokens belong to the
+ * subcommand.
  */
 enum class TokenType {
   option,
@@ -65,10 +66,12 @@ enum class TokenType {
  * @brief A single token produced by `tokenize()`.
  */
 struct Token {
-  TokenType type;              ///< Classification of this token.
-  std::string_view text;       ///< The token text (a view into the original `args` span).
-  std::string_view matched_prefix; ///< The option prefix that was matched (e.g. `"--"`); empty for non-option tokens.
-  std::size_t position;        ///< Zero-based index into the original `args` span.
+  TokenType type;  ///< Classification of this token.
+  std::string_view
+      text;  ///< The token text (a view into the original `args` span).
+  std::string_view matched_prefix;  ///< The option prefix that was matched (e.g.
+                                    ///< `"--"`); empty for non-option tokens.
+  std::size_t position;  ///< Zero-based index into the original `args` span.
 };
 
 /**
@@ -129,10 +132,16 @@ struct TokenizeResult {
  * `=` as the inline value separator and `--` as the end-of-options marker.
  */
 struct TokenizerConfig {
-  std::vector<std::string> option_prefixes = {"--"}; ///< Prefixes that introduce long options.
-  std::string short_option_prefix = "-";             ///< Prefix for short (single-character) options.
-  std::string end_of_options_separator = "--";       ///< Token that ends option processing; subsequent tokens become positionals.
-  char inline_value_separator = '=';                 ///< Character separating option name from inline value (e.g. `=` for `--opt=val`).
+  std::vector<std::string> option_prefixes = {
+      "--"};  ///< Prefixes that introduce long options.
+  std::string short_option_prefix =
+      "-";  ///< Prefix for short (single-character) options.
+  std::string end_of_options_separator =
+      "--";  ///< Token that ends option processing; subsequent tokens become
+             ///< positionals.
+  char inline_value_separator =
+      '=';  ///< Character separating option name from inline value (e.g. `=` for
+            ///< `--opt=val`).
 };
 
 /**
@@ -153,11 +162,13 @@ struct TokenizerConfig {
  *   `{positional, "...", i}` regardless of prefix.
  *
  * @param args          The argument span to tokenize (typically `argv[1:]`).
- * @param spec_map      Map from full option keys (e.g. `"--verbose"`, `"-v"`) to their `Nargs`.
- *                      Must NOT contain command names.
+ * @param spec_map      Map from full option keys (e.g. `"--verbose"`, `"-v"`) to
+ * their `Nargs`. Must NOT contain command names.
  * @param command_names Set of bare subcommand name strings (no prefix).
- * @param cfg           Tokenizer configuration (prefixes, separator character, etc.).
- * @return A `TokenizeResult` containing the token list on success, or a `ParseError` on failure.
+ * @param cfg           Tokenizer configuration (prefixes, separator character,
+ * etc.).
+ * @return A `TokenizeResult` containing the token list on success, or a
+ * `ParseError` on failure.
  */
 inline auto tokenize(std::span<const std::string_view> args,
                      const std::unordered_map<std::string, Nargs>& spec_map,
@@ -293,7 +304,8 @@ inline auto tokenize(std::span<const std::string_view> args,
 }
 
 /**
- * @brief The result returned by `Parser::parse()` and the free `cli::parse()` function.
+ * @brief The result returned by `Parser::parse()` and the free `cli::parse()`
+ * function.
  *
  * On success, `value` holds the fully populated argument specification struct
  * and `error` is in the default (no-error) state.  On failure, `error` describes
@@ -313,8 +325,10 @@ inline auto tokenize(std::span<const std::string_view> args,
  */
 template <class T>
 struct ParseResult {
-  T value{};          ///< The parsed argument struct (valid only when `has_value()` is true).
-  ParseError error{}; ///< The error details (valid only when `has_error()` is true).
+  T value{};  ///< The parsed argument struct (valid only when `has_value()` is
+              ///< true).
+  ParseError
+      error{};  ///< The error details (valid only when `has_error()` is true).
 
   /** @brief Returns `true` when parsing succeeded. */
   [[nodiscard]]
@@ -373,12 +387,14 @@ struct ParseResult {
  * of `T`, validates required arguments, and fires `on_parse` callbacks.
  *
  * **Entry points:**
- * - `parse(argc, argv)` — standard C-style interface; sets program name from `argv[0]`.
+ * - `parse(argc, argv)` — standard C-style interface; sets program name from
+ * `argv[0]`.
  * - `parse(span, first_index)` — span-based interface with optional offset.
- * - `parse(initial, ...)` — pre-initialised variants; useful for `BoundOption` / `on_parse`.
+ * - `parse(initial, ...)` — pre-initialised variants; useful for `BoundOption` /
+ * `on_parse`.
  *
- * On Windows, `wchar_t*` overloads are also provided; they convert arguments to UTF-8
- * via `detail::wide_to_utf8` before processing.
+ * On Windows, `wchar_t*` overloads are also provided; they convert arguments to
+ * UTF-8 via `detail::wide_to_utf8` before processing.
  *
  * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
  */
@@ -388,7 +404,8 @@ struct Parser {
   friend struct Parser;
 
   /**
-   * @brief Parses standard C-style `argc`/`argv`, using `argv[0]` as the program name.
+   * @brief Parses standard C-style `argc`/`argv`, using `argv[0]` as the program
+   * name.
    *
    * @param argc Argument count (includes program name at index 0).
    * @param argv Argument vector.
@@ -472,7 +489,8 @@ struct Parser {
   /**
    * @brief Parses a span of string views, skipping `first_index` elements.
    *
-   * @param args        The full argument span (may include program name at index 0).
+   * @param args        The full argument span (may include program name at index
+   * 0).
    * @param first_index Index of the first argument to parse (default: 0).
    * @return A `ParseResult<T>` containing the parsed struct or an error.
    */
@@ -520,7 +538,8 @@ struct Parser {
   }
 
   /**
-   * @brief Parses a span with a pre-initialised struct and explicit program name.
+   * @brief Parses a span with a pre-initialised struct and explicit program
+   * name.
    *
    * @param initial      The pre-initialised argument struct.
    * @param args         The full argument span.
@@ -632,7 +651,8 @@ struct Parser {
   }
 
   /**
-   * @brief Generates a help string with explicit color mode and recursive subcommand help.
+   * @brief Generates a help string with explicit color mode and recursive
+   * subcommand help.
    *
    * @param color_mode Controls ANSI color output.
    * @return The formatted help string with all subcommand sections appended.
@@ -838,9 +858,9 @@ auto parse(int argc, char* argv[]) -> ParseResult<T> {
 /**
  * @brief Parses `argc`/`argv` and exits the process on failure.
  *
- * If parsing fails, writes the error message to `err` (or `out` for help/exit-success)
- * and calls `std::exit` with the appropriate exit code. On success, returns the
- * fully populated argument struct by value.
+ * If parsing fails, writes the error message to `err` (or `out` for
+ * help/exit-success) and calls `std::exit` with the appropriate exit code. On
+ * success, returns the fully populated argument struct by value.
  *
  * This is the typical one-liner entry point for command-line tools:
  * @code

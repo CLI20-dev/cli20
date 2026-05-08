@@ -13,7 +13,8 @@
 
 namespace cli {
 
-/** @brief Base tag for all members that may appear in an argument specification struct. */
+/** @brief Base tag for all members that may appear in an argument specification
+ * struct. */
 struct SpecMemberTag {};
 
 /** @brief Tag base class for command-line option/flag fields. */
@@ -25,11 +26,13 @@ struct PositionalTag : SpecMemberTag {};
 /** @brief Tag base class for subcommand fields. */
 struct CommandTag : SpecMemberTag {};
 
-/** @brief Tag base class for the `Description` field that provides the CLI's help text. */
+/** @brief Tag base class for the `Description` field that provides the CLI's
+ * help text. */
 struct DescriptionTag : SpecMemberTag {};
 
 /**
- * @brief Specifies the minimum and maximum number of values an option or positional accepts.
+ * @brief Specifies the minimum and maximum number of values an option or
+ * positional accepts.
  *
  * Use -1 for `max` to indicate an unlimited upper bound.
  * Both `min` and `max` must be >= 0 (or `max == -1`), and `min <= max`.
@@ -38,8 +41,8 @@ struct DescriptionTag : SpecMemberTag {};
  * constructing `Nargs` directly.
  */
 struct Nargs {
-  int min = -1; ///< Minimum number of values (must be >= 0).
-  int max = -1; ///< Maximum number of values (-1 = unlimited).
+  int min = -1;  ///< Minimum number of values (must be >= 0).
+  int max = -1;  ///< Maximum number of values (-1 = unlimited).
 };
 
 /**
@@ -96,7 +99,8 @@ inline constexpr Nargs between{.min = Min, .max = Max};
 namespace detail {
 
 /**
- * @brief Checks that every member of aggregate type `T` derives from `SpecMemberTag`.
+ * @brief Checks that every member of aggregate type `T` derives from
+ * `SpecMemberTag`.
  *
  * @tparam T The argument specification type to validate.
  * @return `true` if all members inherit from `SpecMemberTag`.
@@ -190,7 +194,8 @@ consteval auto commands_have_unique_long_name() -> bool {
 }
 
 /**
- * @brief Checks that any variadic positional appears after all fixed positionals.
+ * @brief Checks that any variadic positional appears after all fixed
+ * positionals.
  *
  * A variadic positional is one where `nargs.min != nargs.max`. The constraint
  * ensures that token dispatch is unambiguous.
@@ -318,7 +323,8 @@ consteval auto is_valid_nargs() noexcept -> bool {
 }  // namespace detail
 
 /**
- * @brief Concept that validates an aggregate type as a well-formed CLI argument specification.
+ * @brief Concept that validates an aggregate type as a well-formed CLI argument
+ * specification.
  *
  * A type satisfies `ArgumentSpec` when all of the following hold:
  * - All members derive from `SpecMemberTag`.
@@ -342,7 +348,8 @@ concept ArgumentSpec = requires {
 };
 
 /**
- * @brief Parameter bag used when constructing `ArgImpl` or `PositionalImpl` with named fields.
+ * @brief Parameter bag used when constructing `ArgImpl` or `PositionalImpl` with
+ * named fields.
  *
  * Allows brace-initialisation with named members, e.g.:
  * @code
@@ -357,10 +364,11 @@ concept ArgumentSpec = requires {
  */
 template <class T>
 struct ArgParameter {
-  std::string_view help{};                  ///< Help text shown in `--help` output.
-  Presence presence{Presence::optional};    ///< Whether the argument is required.
-  T default_value{};                        ///< Default value when the argument is absent.
-  std::function<void(const T&)> on_parse{}; ///< Callback invoked once after parsing completes.
+  std::string_view help{};  ///< Help text shown in `--help` output.
+  Presence presence{Presence::optional};  ///< Whether the argument is required.
+  T default_value{};  ///< Default value when the argument is absent.
+  std::function<void(const T&)>
+      on_parse{};  ///< Callback invoked once after parsing completes.
 };
 
 /**
@@ -371,10 +379,14 @@ struct ArgParameter {
  * instantiated directly; instead use the public aliases `Flag`, `Option`,
  * `ListOption`, `BoundOption`, `Help`, etc.
  *
- * @tparam Name      The long option name (e.g. `"verbose"`), without the `--` prefix.
- * @tparam ShortName The single-character short name (e.g. `'v'`), or `'\0'` for none.
- * @tparam N         The `Nargs` descriptor controlling how many values the option consumes.
- * @tparam A         The action pipeline that converts raw strings to the stored type.
+ * @tparam Name      The long option name (e.g. `"verbose"`), without the `--`
+ * prefix.
+ * @tparam ShortName The single-character short name (e.g. `'v'`), or `'\0'` for
+ * none.
+ * @tparam N         The `Nargs` descriptor controlling how many values the
+ * option consumes.
+ * @tparam A         The action pipeline that converts raw strings to the stored
+ * type.
  */
 template <StringLiteral Name, char ShortName, Nargs N, Action A>
   requires requires {
@@ -494,7 +506,8 @@ struct ArgImpl : public OptionTag {
  * along with occurrence counters and an optional `on_parse` callback.
  * It is not usually instantiated directly; use the `Positional` alias instead.
  *
- * @tparam N The `Nargs` descriptor controlling how many values the positional consumes.
+ * @tparam N The `Nargs` descriptor controlling how many values the positional
+ * consumes.
  * @tparam A The action pipeline that converts raw strings to the stored type.
  */
 template <Nargs N, Action A>
@@ -582,7 +595,8 @@ struct Description : public std::string, DescriptionTag {};
  * @brief Parameter bag used when constructing a `Command` field.
  */
 struct CommandParameter {
-  std::string_view help{}; ///< Brief description shown in the parent command's help.
+  std::string_view
+      help{};  ///< Brief description shown in the parent command's help.
 };
 
 /**
@@ -691,7 +705,8 @@ template <StringLiteral Name, char ShortName = '\0'>
 using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
 
 /**
- * @brief An option whose parsed value is written directly into an external variable.
+ * @brief An option whose parsed value is written directly into an external
+ * variable.
  *
  * The field stores a pointer `T*`; use the `bind(var)` method or the reference
  * constructor to point it at the target variable before parsing.
@@ -735,7 +750,8 @@ using Help = ArgImpl<Name, ShortName, nargs::none,
                      action::print_help | action::exit_success>;
 
 /**
- * @brief A single-value option that stores the parsed result in `std::optional<T>`.
+ * @brief A single-value option that stores the parsed result in
+ * `std::optional<T>`.
  *
  * Storage type: `std::optional<T>`. Present when the option was supplied on
  * the command line, absent (nullopt) otherwise.
@@ -749,7 +765,8 @@ using Option =
     ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
 
 /**
- * @brief A multi-value option that appends each occurrence to a `std::vector<T>`.
+ * @brief A multi-value option that appends each occurrence to a
+ * `std::vector<T>`.
  *
  * Storage type: `std::vector<T>`.
  *
@@ -765,7 +782,8 @@ using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
 /**
  * @brief A typed positional argument.
  *
- * Storage type: `std::optional<T>` for `N.max == 1`, `std::vector<T>` for multi-value.
+ * Storage type: `std::optional<T>` for `N.max == 1`, `std::vector<T>` for
+ * multi-value.
  *
  * @tparam T The value type to parse.
  * @tparam N `Nargs` descriptor. Default: `nargs::one`.

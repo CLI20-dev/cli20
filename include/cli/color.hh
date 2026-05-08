@@ -20,7 +20,8 @@ namespace cli {
 enum class ColorMode { auto_, never, always };
 
 /**
- * @brief Tag type passed to `format_help()` to request recursive sub-command output.
+ * @brief Tag type passed to `format_help()` to request recursive sub-command
+ * output.
  *
  * Pass the `cli::recurse_help` constant as an extra argument:
  * @code
@@ -56,7 +57,8 @@ struct AnsiStyle {
   }
 
   /**
-   * @brief Returns the ANSI underline sequence, or an empty string when disabled.
+   * @brief Returns the ANSI underline sequence, or an empty string when
+   * disabled.
    *
    * @return `"\033[4m"` if enabled, `""` otherwise.
    */
@@ -75,7 +77,8 @@ struct AnsiStyle {
 };
 
 /**
- * @brief Returns true when file descriptor 1 (stdout) is connected to a terminal.
+ * @brief Returns true when file descriptor 1 (stdout) is connected to a
+ * terminal.
  *
  * Uses `_isatty` on Windows and `::isatty` on POSIX systems.
  *
