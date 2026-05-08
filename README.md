@@ -197,10 +197,16 @@ See [apps/example_module.cc](apps/example_module.cc) for a complete example.
 
 ### Module Availability
 
-The module target is named `cli20-module` and can be linked in your CMake project:
+Within this repository, the module target is named `cli20-module`:
 
 ```cmake
 target_link_libraries(your_target PRIVATE cli20-module)
+```
+
+After installing `cli20` and using `find_package(cli20 CONFIG REQUIRED)`, use the exported target:
+
+```cmake
+target_link_libraries(your_target PRIVATE cli20::module)
 ```
 
 ## Core Design Principles
