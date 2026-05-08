@@ -35,32 +35,64 @@
 
 namespace cli {
 
+/**
+ * @brief Identifies the specific failure that occurred during parsing or
+ * validation.
+ *
+ * Codes are grouped by category:
+ * - **Parse errors** (`unknown_option` … `duplicate_argument`): problems
+ *   tokenising or dispatching command-line tokens.
+ * - **Conversion/validation errors** (`conversion_error` … `validation_failed`):
+ *   problems converting a raw string to the target type or failing a constraint.
+ * - **Informational codes** (`help_requested`, `exit_success`): not true errors;
+ *   the parser uses these to signal that the program should print help and exit
+ * 0.
+ */
 enum class ErrorCode {
-  unknown_option,
-  unknown_command,
-  unexpected_argument,
-  missing_value,
-  invalid_value,
-  duplicate_argument,
+  unknown_option,       ///< An unrecognised option name was encountered.
+  unknown_command,      ///< An unrecognised subcommand name was encountered.
+  unexpected_argument,  ///< A positional argument was supplied when none was
+                        ///< expected.
+  missing_value,        ///< An option that requires a value was given none.
+  invalid_value,  ///< A value could not be interpreted as the required type.
+  duplicate_argument,  ///< An option or positional that forbids repetition was
+                       ///< seen more than once.
 
-  conversion_error,
-  out_of_range,
-  missing_required,
-  mutually_exclusive,
-  dependency_missing,
-  invalid_choice,
-  validation_failed,
-  help_requested,
-  exit_success,
-  unknown_error,
+  conversion_error,  ///< Generic failure during string-to-type conversion.
+  out_of_range,  ///< A numeric value fell outside the representable range of the
+                 ///< target type.
+  missing_required,    ///< A required option or positional was not provided.
+  mutually_exclusive,  ///< Two mutually-exclusive options were both supplied.
+  dependency_missing,  ///< An option that depends on another option was given
+                       ///< without it.
+  invalid_choice,      ///< A value was not among the allowed choices.
+  validation_failed,   ///< A user-defined or built-in validation predicate
+                       ///< rejected the value.
+  help_requested,  ///< The `--help` flag (or equivalent) was seen; print help
+                   ///< and exit 0.
+  exit_success,    ///< The action pipeline requested a clean exit with code 0.
+  unknown_error,   ///< Sentinel/default; indicates no error has been set.
 };
 
+/**
+ * @brief Broad classification of an error for structured error handling.
+ *
+ * - `parse`      : The error arose during tokenisation or dispatch.
+ * - `conversion` : The error arose while converting a string to a typed value.
+ * - `validation` : The error arose while validating a converted value.
+ */
 enum class ErrorKind {
   parse,
   conversion,
   validation,
 };
 
+/**
+ * @brief Returns a human-readable description of an `ErrorCode`.
+ *
+ * @param code The error code to describe.
+ * @return A non-owning string view of a static description string.
+ */
 [[nodiscard]] constexpr auto to_string(ErrorCode code) noexcept
     -> std::string_view {
   switch (code) {
@@ -101,29 +133,83 @@ enum class ErrorKind {
   return "unknown error";
 }
 
+/**
+ * @brief Carries all context about a single parse/validation failure.
+ *
+ * A `ParseError` is embedded in both `ParseResult<T>` and `ActionResult<T>`.
+ * When `code == ErrorCode::unknown_error` the struct represents the *absence*
+ * of an error (i.e. success).
+ *
+ * Typical usage after parsing:
+ * @code
+ *   auto result = cli::parse<MyArgs>(argc, argv);
+ *   if (!result) {
+ *     auto& e = result.error;
+ *     auto& out = e.use_stdout() ? std::cout : std::cerr;
+ *     out << e.message() << '\n';
+ *     std::exit(e.exit_code());
+ *   }
+ * @endcode
+ */
 struct ParseError {
+  /** @brief The specific error code; `unknown_error` means no error. */
   ErrorCode code = ErrorCode::unknown_error;
+
+  /** @brief Broad category of the error. */
   ErrorKind kind = ErrorKind::parse;
 
+  /** @brief Zero-based index into `argv` where the error was detected, or -1 if
+   * unknown. */
   int position = -1;
 
+  /** @brief The token or option name that caused the error (may be empty). */
   std::string subject{};
+
+  /** @brief Additional human-readable context about the failure (may be empty).
+   */
   std::string detail{};
 
+  /**
+   * @brief Returns true when `position` contains a valid `argv` index.
+   *
+   * @return `true` if `position >= 0`.
+   */
   [[nodiscard]] constexpr auto has_position() const noexcept -> bool {
     return position >= 0;
   }
 
+  /**
+   * @brief Returns the process exit code appropriate for this error.
+   *
+   * @return 0 for `help_requested` or `exit_success`, 1 for all other codes.
+   */
   [[nodiscard]] constexpr auto exit_code() const noexcept -> int {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success
                ? 0
                : 1;
   }
 
+  /**
+   * @brief Returns true when the error message should be written to stdout.
+   *
+   * Help text and exit-success messages go to stdout; all other errors go to
+   * stderr.
+   *
+   * @return `true` for `help_requested` or `exit_success`.
+   */
   [[nodiscard]] constexpr auto use_stdout() const noexcept -> bool {
     return code == ErrorCode::help_requested || code == ErrorCode::exit_success;
   }
 
+  /**
+   * @brief Formats a human-readable error message.
+   *
+   * - For `help_requested` or `exit_success`: returns `detail` verbatim.
+   * - Otherwise: combines `to_string(code)`, `subject`, `detail`, and
+   *   (if available) the `argv` position into a single string.
+   *
+   * @return A formatted error string.
+   */
   [[nodiscard]] constexpr auto message() const -> std::string {
     if (code == ErrorCode::help_requested) {
       return detail;
@@ -154,6 +240,11 @@ struct ParseError {
     return out;
   }
 
+  /**
+   * @brief Returns true when an actual error is present.
+   *
+   * @return `true` if `code != unknown_error`.
+   */
   [[nodiscard]] constexpr auto has_error() const noexcept -> bool {
     return code != ErrorCode::unknown_error;
   }
@@ -165,39 +256,89 @@ struct ParseError {
 // ---- begin: include/cli/string_literal.hh ----
 
 namespace cli {
+
+/**
+ * @brief Compile-time string type usable as a non-type template parameter.
+ *
+ * C++20 allows class-type NTTPs provided the type satisfies structural
+ * requirements. `StringLiteral<N>` wraps a null-terminated character array so
+ * that string names such as `"verbose"` can appear directly in template
+ * argument lists:
+ *
+ * @code
+ *   cli::Flag<"verbose", 'v'> verbose;
+ * @endcode
+ *
+ * @tparam N Total storage size including the null terminator.
+ */
 template <std::size_t N>
 struct StringLiteral {
+  /** Raw character storage (null-terminated, length N). */
   std::array<char, N> value{};
 
+  /**
+   * @brief Constructs from a C string literal, copying all N characters.
+   *
+   * @param str Null-terminated string literal of length N.
+   */
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   consteval StringLiteral(const char (&str)[N]) noexcept {
     std::copy_n(str, N, value.begin());
   }
 
+  /**
+   * @brief Returns the string length excluding the null terminator.
+   *
+   * @return N - 1.
+   */
   [[nodiscard]]
   consteval auto size() const noexcept -> std::size_t {
     return N - 1;
   }
 
+  /**
+   * @brief Returns a raw pointer to the first character.
+   *
+   * @return Pointer to the underlying character array.
+   */
   [[nodiscard]]
   consteval auto data() const noexcept -> const char* {
     return value.data();
   }
 
+  /**
+   * @brief Returns a `std::string_view` over the stored characters.
+   *
+   * The returned view does not include the null terminator.
+   *
+   * @return A string_view of length `size()`.
+   */
   [[nodiscard]]
   consteval auto view() const noexcept -> std::string_view {
     return {value.data(), size()};
   }
 
+  /**
+   * @brief Returns the character at index `i`.
+   *
+   * @param i Zero-based character index.
+   * @return The character at position `i`.
+   */
   [[nodiscard]]
   constexpr auto operator[](std::size_t i) const noexcept -> char {
     return value[i];
   }
 
+  /**
+   * @brief Equality comparison (compares the underlying arrays).
+   */
   consteval auto operator==(const StringLiteral&) const noexcept
       -> bool = default;
 };
 
+/**
+ * @brief Deduction guide: `StringLiteral("hello")` deduces `StringLiteral<6>`.
+ */
 template <std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 StringLiteral(const char (&)[N]) -> StringLiteral<N>;
@@ -209,6 +350,20 @@ StringLiteral(const char (&)[N]) -> StringLiteral<N>;
 
 namespace cli {
 
+/**
+ * @brief The result type produced and consumed at each step of an action
+ * pipeline.
+ *
+ * An `ActionResult<T>` is either a *success* carrying a value of type `T`, or
+ * a *failure* carrying a `ParseError`. The `operator bool()`, `has_value()`,
+ * and `has_error()` methods make it easy to check the state inline.
+ *
+ * Factory methods:
+ * - `ActionResult<T>::ok(value)` — create a success result.
+ * - `ActionResult<T>::fail(error)` — create a failure result.
+ *
+ * @tparam T The value type held on success.
+ */
 template <class T>
 struct ActionResult {
   using value_type = T;
@@ -216,21 +371,31 @@ struct ActionResult {
   ParseError error{};
   T value{};
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents failure. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
+  /**
+   * @brief Creates a success result holding `value`.
+   *
+   * @tparam U Type of the value (deduced).
+   * @param value The value to store.
+   * @return A successful `ActionResult<T>`.
+   */
   template <class U>
   [[nodiscard]]
   static constexpr auto ok(U&& value) -> ActionResult<T> {
@@ -240,6 +405,12 @@ struct ActionResult {
     };
   }
 
+  /**
+   * @brief Creates a failure result carrying `error`.
+   *
+   * @param error The error to store.
+   * @return A failed `ActionResult<T>`.
+   */
   [[nodiscard]]
   static constexpr auto fail(ParseError error) -> ActionResult<T> {
     return {
@@ -249,31 +420,53 @@ struct ActionResult {
   }
 };
 
+/**
+ * @brief Specialisation of `ActionResult` for terminal (pack) actions that
+ * produce no value.
+ *
+ * Pack actions such as `SetTrue` or `Push` write their result directly into the
+ * argument storage referenced by `ActionCtx::arg`; they do not pass a value
+ * downstream, so `ActionResult<void>` carries only an error or success state.
+ */
 template <>
 struct ActionResult<void> {
   ParseError error{};
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents failure. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
+  /**
+   * @brief Creates a success result.
+   *
+   * @return A successful `ActionResult<void>`.
+   */
   static constexpr auto ok() -> ActionResult<void> {
     return {
         .error = {},
     };
   }
 
+  /**
+   * @brief Creates a failure result carrying `error`.
+   *
+   * @param error The error to store.
+   * @return A failed `ActionResult<void>`.
+   */
   [[nodiscard]]
   static constexpr auto fail(ParseError error) -> ActionResult<void> {
     return {
@@ -282,20 +475,50 @@ struct ActionResult<void> {
   }
 };
 
+/**
+ * @brief Context passed to each action function during pipeline execution.
+ *
+ * Provides access to the current `argv` position, how many times the parent
+ * option has been seen, how many times the action has been invoked so far, and
+ * a reference to the argument's storage value.
+ *
+ * @tparam T The storage type of the argument; `void` for intermediate
+ * (non-terminal) actions.
+ */
 template <class T = void>
 struct ActionCtx {
-  size_t index{};
-  size_t occurrences{};
-  size_t invoke_count{};
-  std::reference_wrapper<T> arg{};
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t invoke_count{};  ///< Number of times this action has been invoked for
+                          ///< the current option.
+  std::reference_wrapper<T>
+      arg{};  ///< Reference to the argument's storage value.
 };
 
+/**
+ * @brief Partial specialisation of `ActionCtx` used for intermediate pipeline
+ * steps.
+ *
+ * Conversion and validation actions do not have access to the final storage;
+ * they receive `ActionCtx<void>` which carries only the positional counters.
+ * This specialisation also provides a converting constructor from `ActionCtx<T>`
+ * so that the parser can downcast when invoking non-terminal actions.
+ */
 template <>
 struct ActionCtx<void> {
-  size_t index{};
-  size_t occurrences{};
-  size_t invoke_count{};
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t invoke_count{};  ///< Number of times this action has been invoked for
+                          ///< the current option.
 
+  /**
+   * @brief Constructs from a typed `ActionCtx<T>`, copying the counters.
+   *
+   * @tparam T The storage type of the source context.
+   * @param other The source context to copy counters from.
+   */
   template <class T>
   ActionCtx(const ActionCtx<T>& other)
       : index(other.index),
@@ -413,6 +636,30 @@ concept StringLike = std::same_as<decay_t<T>, std::string> ||
 
 }  // namespace detail
 
+/**
+ * @brief A compile-time pipeline of action functions applied sequentially to a
+ * parsed token.
+ *
+ * Each element of `Fns` must be a constexpr-constructible callable that:
+ * - Exposes `template<class I> static constexpr bool accepts_input` — whether it
+ *   can handle input of type `I`.
+ * - Exposes `template<class I> using after_type` — the output type when given
+ * input `I`.
+ * - Exposes `template<class I> using storage_type` — the argument storage type
+ *   (non-void only for the last/terminal action in the pipeline).
+ *
+ * Pipelines are composed with `operator|`:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int>
+ *                            | cli::validation::positive
+ *                            | cli::pack::set_once;
+ * @endcode
+ *
+ * At pipeline invocation, if any step returns a failure the error is
+ * short-circuited to the end without invoking subsequent steps.
+ *
+ * @tparam Fns Pack of constexpr action objects forming the pipeline.
+ */
 template <auto... Fns>
   requires(requires {
     {
@@ -524,8 +771,30 @@ constexpr auto operator|(Action<Fns...>, Action<Fn>) {
   return Action<Fns..., Fn>{};
 }
 
+/**
+ * @brief Actions that convert a raw `std::string_view` token to a typed value.
+ *
+ * Each action in this namespace transforms the pipeline value from a string
+ * representation into a specific C++ type. They are typically placed first in
+ * an action pipeline, before validation and pack actions.
+ *
+ * Example:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int> |
+ * cli::pack::set_once;
+ * @endcode
+ */
 namespace conversion {
 
+/**
+ * @brief Converts a string token to an integral type `T` using
+ * `std::from_chars`.
+ *
+ * Returns `ErrorCode::invalid_value` for non-numeric or partially-consumed
+ * input, and `ErrorCode::out_of_range` when the value overflows `T`.
+ *
+ * @tparam T The target integral type (e.g. `int`, `unsigned long`).
+ */
 template <std::integral T>
 struct Integer {
   template <class Input>
@@ -568,6 +837,15 @@ struct Integer {
   }
 };
 
+/**
+ * @brief Converts a string token to a floating-point type `T` using
+ * `std::from_chars`.
+ *
+ * Returns `ErrorCode::invalid_value` for non-numeric or partially-consumed
+ * input, and `ErrorCode::out_of_range` on overflow.
+ *
+ * @tparam T The target floating-point type (e.g. `float`, `double`).
+ */
 template <std::floating_point T>
 struct Floating {
   template <class Input>
@@ -610,6 +888,7 @@ struct Floating {
   }
 };
 
+/** @brief Converts a `string_view` token to a `std::string` by copying. */
 struct String {
   template <class Input>
   static constexpr bool accepts_input =
@@ -629,6 +908,12 @@ struct String {
   }
 };
 
+/**
+ * @brief Converts a string token to `bool`.
+ *
+ * Accepts `"true"` / `"1"` → `true` and `"false"` / `"0"` → `false`.
+ * Returns `ErrorCode::invalid_value` for any other input.
+ */
 struct Bool {
   template <class Input>
   static constexpr bool accepts_input =
@@ -657,6 +942,8 @@ struct Bool {
   }
 };
 
+/** @brief Converts a string token to `std::filesystem::path` without filesystem
+ * validation. */
 struct Path {
   template <class Input>
   static constexpr bool accepts_input =
@@ -676,6 +963,13 @@ struct Path {
   }
 };
 
+/**
+ * @brief Converts a string token to `std::filesystem::path`, requiring the path
+ * to exist and be a regular file.
+ *
+ * Returns `ErrorCode::invalid_value` if the path does not exist or is not a
+ * regular file.
+ */
 struct ExistingFile {
   template <class Input>
   static constexpr bool accepts_input = Path::template accepts_input<Input>;
@@ -701,6 +995,13 @@ struct ExistingFile {
   }
 };
 
+/**
+ * @brief Converts a string token to `std::filesystem::path`, requiring the path
+ * to exist and be a directory.
+ *
+ * Returns `ErrorCode::invalid_value` if the path does not exist or is not a
+ * directory.
+ */
 struct ExistingDirectory {
   template <class Input>
   static constexpr bool accepts_input = Path::template accepts_input<Input>;
@@ -725,6 +1026,17 @@ struct ExistingDirectory {
   }
 };
 
+/**
+ * @brief Converts a string token to type `T` via a user-supplied mapper
+ * function.
+ *
+ * `Mapper` must be a constexpr callable of the form
+ * `(std::string_view) -> std::optional<T>`. Returns `ErrorCode::invalid_choice`
+ * when the mapper returns `std::nullopt`.
+ *
+ * @tparam T      The target value type.
+ * @tparam Mapper A constexpr callable mapping strings to `std::optional<T>`.
+ */
 template <class T, auto Mapper>
 struct Choice {
   template <class Input>
@@ -766,8 +1078,26 @@ inline constexpr auto existing_directory = Action<ExistingDirectory{}>{};
 
 }  // namespace conversion
 
+/**
+ * @brief Actions that validate a typed value after conversion.
+ *
+ * Each action in this namespace passes its input through unchanged on success
+ * or returns `ErrorCode::validation_failed` / `ErrorCode::invalid_choice` on
+ * failure. They are placed after a conversion action and before a pack action:
+ *
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int>
+ *                            | cli::validation::range<1, 100>
+ *                            | cli::pack::set_once;
+ * @endcode
+ */
 namespace validation {
 
+/**
+ * @brief Validates that the input value is greater than or equal to `MinValue`.
+ *
+ * @tparam MinValue The inclusive lower bound (non-type template parameter).
+ */
 template <auto MinValue>
 struct Min {
   template <class Prev>
@@ -792,6 +1122,11 @@ struct Min {
   }
 };
 
+/**
+ * @brief Validates that the input value is less than or equal to `MaxValue`.
+ *
+ * @tparam MaxValue The inclusive upper bound (non-type template parameter).
+ */
 template <auto MaxValue>
 struct Max {
   template <class Prev>
@@ -816,6 +1151,13 @@ struct Max {
   }
 };
 
+/**
+ * @brief Validates that the input value is within the closed interval [MinValue,
+ * MaxValue].
+ *
+ * @tparam MinValue Inclusive lower bound.
+ * @tparam MaxValue Inclusive upper bound. Must be the same type as `MinValue`.
+ */
 template <auto MinValue, auto MaxValue>
   requires std::is_same_v<decltype(MinValue), decltype(MaxValue)>
 struct Range {
@@ -841,6 +1183,7 @@ struct Range {
   }
 };
 
+/** @brief Validates that the input value is strictly positive (> 0). */
 struct Positive {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -864,6 +1207,7 @@ struct Positive {
   }
 };
 
+/** @brief Validates that the input value is non-negative (>= 0). */
 struct NonNegative {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -887,6 +1231,8 @@ struct NonNegative {
   }
 };
 
+/** @brief Validates that the input value is not empty (requires `.empty()`
+ * member). */
 struct NonEmpty {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -910,6 +1256,7 @@ struct NonEmpty {
   }
 };
 
+/** @brief Validates that the input string is not blank (not all whitespace). */
 struct NotBlank {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -934,6 +1281,13 @@ struct NotBlank {
   }
 };
 
+/**
+ * @brief Validates that the input value equals one of the compile-time constants
+ * `Allowed`.
+ *
+ * @tparam Allowed Non-type template pack of allowed values. All must be the same
+ * type.
+ */
 template <auto... Allowed>
 struct OneOf {
   template <class Prev>
@@ -960,6 +1314,15 @@ struct OneOf {
   }
 };
 
+/**
+ * @brief Validates that the input string matches a compile-time regular
+ * expression.
+ *
+ * Uses `std::regex_match` (full-match semantics). Returns
+ * `ErrorCode::validation_failed` when the string does not match.
+ *
+ * @tparam Pattern The regex pattern string (e.g. `"[a-z]+"`).
+ */
 template <StringLiteral Pattern>
 struct Matches {
   template <class Prev>
@@ -984,6 +1347,7 @@ struct Matches {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` exists on the filesystem. */
 struct Exists {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1006,6 +1370,7 @@ struct Exists {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` refers to a regular file. */
 struct IsRegularFile {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1028,6 +1393,7 @@ struct IsRegularFile {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` refers to a directory. */
 struct IsDirectory {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1050,6 +1416,8 @@ struct IsDirectory {
   }
 };
 
+/** @brief Validates that the parent directory of a `std::filesystem::path`
+ * exists. */
 struct ParentExists {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1073,6 +1441,14 @@ struct ParentExists {
   }
 };
 
+/**
+ * @brief Validates a value using a user-supplied compile-time predicate.
+ *
+ * `Pred` must be a constexpr callable of the form `(const T&) -> bool`.
+ * Returns `ErrorCode::validation_failed` when `Pred` returns `false`.
+ *
+ * @tparam Pred A constexpr callable acting as the validation predicate.
+ */
 template <auto Pred>
 struct Predicate {
   template <class Prev>
@@ -1122,8 +1498,22 @@ inline constexpr auto parent_exists = Action<ParentExists{}>{};
 
 }  // namespace validation
 
+/**
+ * @brief Terminal actions that write the converted (and validated) value into
+ * argument storage.
+ *
+ * Pack actions are always the last step in an action pipeline. They define the
+ * `storage_type` alias that determines the type of the field's `.value()`
+ * member.
+ *
+ * Example:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int> | cli::pack::push;
+ * @endcode
+ */
 namespace pack {
 
+/** @brief Sets the `bool` storage to `true`. Used as the action for `Flag`. */
 struct SetTrue {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1142,6 +1532,7 @@ struct SetTrue {
   }
 };
 
+/** @brief Sets the `bool` storage to `false`. */
 struct SetFalse {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1160,6 +1551,7 @@ struct SetFalse {
   }
 };
 
+/** @brief Flips the `bool` storage each time the option is seen. */
 struct Toggle {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1178,6 +1570,7 @@ struct Toggle {
   }
 };
 
+/** @brief Increments a `std::size_t` counter each time the option is seen. */
 struct Increment {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1196,6 +1589,13 @@ struct Increment {
   }
 };
 
+/**
+ * @brief Passes the value through unchanged, but returns
+ * `ErrorCode::duplicate_argument` if the option has been seen more than once.
+ *
+ * This is a *filter* action (non-terminal); it must be followed by a terminal
+ * pack action.
+ */
 struct RejectDuplicate {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1218,6 +1618,14 @@ struct RejectDuplicate {
   }
 };
 
+/**
+ * @brief Stores the value in `std::optional<T>` and rejects subsequent
+ * occurrences.
+ *
+ * Storage type: `std::optional<T>`. Returns `ErrorCode::duplicate_argument` if
+ * the option appears more than once. This is the default terminal action for
+ * `Option<T, ...>`.
+ */
 struct SetOnce {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1241,6 +1649,12 @@ struct SetOnce {
   }
 };
 
+/**
+ * @brief Appends the value to a `std::vector<T>`, rejecting duplicate values.
+ *
+ * Storage type: `std::vector<T>`. Returns `ErrorCode::duplicate_argument` if
+ * the same value is pushed more than once.
+ */
 struct PushUnique {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1265,6 +1679,12 @@ struct PushUnique {
   }
 };
 
+/**
+ * @brief Appends the value to a `std::vector<T>`.
+ *
+ * Storage type: `std::vector<T>`. This is the default terminal action for
+ * `ListOption<T, ...>`.
+ */
 struct Push {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1284,6 +1704,12 @@ struct Push {
   }
 };
 
+/**
+ * @brief Inserts the value into a `std::set<T>` (duplicates are silently ignored
+ * by the set).
+ *
+ * Storage type: `std::set<T>`. Requires the value type to be totally ordered.
+ */
 struct Insert {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1349,6 +1775,13 @@ struct Extend {
   }
 };
 
+/**
+ * @brief Sets a `bool` flag to `true` when the option is seen, regardless of
+ * value.
+ *
+ * Storage type: `bool`. Useful for detecting option presence without caring
+ * about the value of the option.
+ */
 struct MarkPresent {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1367,6 +1800,52 @@ struct MarkPresent {
   }
 };
 
+/**
+ * @brief Writes the value directly into an external variable via a `T*` pointer.
+ *
+ * Storage type: `T*`. The pointer must be non-null at the time of parsing;
+ * returns `ErrorCode::validation_failed` with a descriptive message if the
+ * pointer is null. Used as the action for `BoundOption`.
+ *
+ * @tparam T The type of the external variable.
+ */
+template <class T>
+struct StoreInto {
+  template <class Prev>
+  static constexpr bool accepts_input = std::same_as<detail::decay_t<Prev>, T>;
+
+  template <class Prev>
+  using after_type = void;
+
+  template <class Prev>
+  using storage_type = T*;
+
+  auto operator()(ActionCtx<T*> ctx, ActionResult<T> input) const
+      -> ActionResult<void> {
+    if (T* ptr = ctx.arg.get(); ptr != nullptr) {
+      *ptr = std::move(input.value);
+      return ActionResult<void>::ok();
+    }
+    return ActionResult<void>::fail(detail::validation_failed_error(
+        ctx.index, "store_into",
+        "target pointer is null; did you forget to call bind()?"));
+  }
+};
+
+/**
+ * @brief Invokes a compile-time callable `Fn` with the parsed value as a
+ * terminal action.
+ *
+ * `Fn` may have any of the following signatures:
+ * - `(ActionCtx<void>, T value)` — receives context and value.
+ * - `(T value)` — receives value only.
+ * - `()` — receives nothing.
+ *
+ * Storage type: `std::monostate` (no value is stored; the callback is the only
+ * effect).
+ *
+ * @tparam Fn A constexpr callable to invoke.
+ */
 template <auto Fn>
 struct Callback {
   template <class Prev>
@@ -1406,11 +1885,23 @@ inline constexpr auto insert = Action<Insert{}>{};
 inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
 inline constexpr auto callback = Action<Callback<Fn>{}>{};
+template <class T>
+inline constexpr auto store_into = Action<StoreInto<T>{}>{};
 
 }  // namespace pack
 
+/**
+ * @brief Actions that control the parser's control flow (help, exit).
+ */
 namespace action {
 
+/**
+ * @brief Wraps the current value in a `HelpRequested<T>` sentinel type.
+ *
+ * When `ExitSuccess` follows this action, it detects the `HelpRequested` wrapper
+ * and emits `ErrorCode::help_requested` (which instructs the parser to print
+ * help and exit 0).
+ */
 struct PrintHelp {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1429,6 +1920,13 @@ struct PrintHelp {
   }
 };
 
+/**
+ * @brief Terminates the pipeline by returning a `ParseError` with code
+ * `exit_success` (or `help_requested` when preceded by `PrintHelp`).
+ *
+ * The parser catches these special codes and either prints help text or exits
+ * cleanly with code 0, without treating them as real errors.
+ */
 struct ExitSuccess {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1472,11 +1970,29 @@ namespace cli {
 
 namespace detail {
 
+/**
+ * @brief A universal implicit-conversion type used for aggregate-member
+ * counting.
+ *
+ * `Any` can be implicitly converted to any type `U`, which allows it to be
+ * passed as any aggregate member during brace-initialization probing.
+ */
 struct Any {
   template <class U>
   operator U();
 };
 
+/**
+ * @brief Tests whether aggregate type `T` can be brace-initialized with at least
+ * `N` elements.
+ *
+ * Uses SFINAE via a `requires` expression to detect whether `T{Any{}, ...,
+ * Any{}}` (N copies) is a valid expression.
+ *
+ * @tparam T The aggregate type to probe.
+ * @tparam N The number of initializer elements to test.
+ * @return `true` if `T` is brace-initializable with `N` elements.
+ */
 template <class T, std::size_t N>
 consteval auto aggregate_initializable_at_least() {
   return []<size_t... I>(std::index_sequence<I...>) -> auto {
@@ -1484,6 +2000,19 @@ consteval auto aggregate_initializable_at_least() {
   }(std::make_index_sequence<N>{});
 }
 
+/**
+ * @brief Determines the exact number of members of an aggregate type at compile
+ * time.
+ *
+ * Performs a binary search between `Min` and `Max` using
+ * `aggregate_initializable_at_least` to find the largest `N` for which
+ * `T` is brace-initializable with `N` elements.
+ *
+ * @tparam T   The aggregate type to inspect.
+ * @tparam Max Upper bound of the search (exclusive). Default: 65.
+ * @tparam Min Lower bound of the search (inclusive). Default: 0.
+ * @return The exact number of aggregate members of `T`.
+ */
 template <class T, std::size_t Max = 65, std::size_t Min = 0>
 consteval auto aggregate_initializable() -> std::size_t {
   if constexpr (Max == Min) {
@@ -1505,12 +2034,34 @@ consteval auto aggregate_initializable() -> std::size_t {
     __cpp_structured_bindings >= 202411L && defined(__cplusplus) && \
     __cplusplus >= 202400L
 
+/**
+ * @brief Converts an aggregate value to a `std::tuple` of references to its
+ * members.
+ *
+ * On C++26 compilers that support pack-expansion in structured bindings
+ * (`__cpp_structured_bindings >= 202411L`), this uses the `auto& [... args]`
+ * expansion directly. On earlier compilers the fallback below is used instead.
+ *
+ * The returned tuple contains lvalue references to each field of `t`, so
+ * modifying a tuple element modifies the original aggregate.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The aggregate instance to decompose.
+ * @return   A `std::tuple` of lvalue references to each field of `t`.
+ */
 template <class T>
 constexpr auto as_tuple(T& t) {
   auto& [... args] = t;
   return std::forward_as_tuple(args...);
 }
 
+/**
+ * @brief Const overload of `as_tuple`.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The const aggregate instance to decompose.
+ * @return   A `std::tuple` of const lvalue references to each field of `t`.
+ */
 template <class T>
 constexpr auto as_tuple(const T& t) {
   const auto& [... args] = t;
@@ -1519,6 +2070,18 @@ constexpr auto as_tuple(const T& t) {
 
 #else
 // clang-format off
+/**
+ * @brief Converts an aggregate value to a `std::tuple` of references to its members.
+ *
+ * Fallback implementation for compilers that do not support pack-expansion
+ * structured bindings. Uses `aggregate_initializable<T>()` to determine the
+ * field count at compile time and selects the corresponding explicit
+ * structured-binding branch (supports 0–64 members).
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The aggregate instance to decompose.
+ * @return   A `std::tuple` of lvalue references to each field of `t`.
+ */
 template <class T>
   requires (detail::aggregate_initializable<T>() <= 64 && ("as_tuple only supports up to 64 elements", true))
 constexpr auto as_tuple (T& t) {
@@ -1785,6 +2348,13 @@ constexpr auto as_tuple (T& t) {
   }
 }
 
+/**
+ * @brief Const overload of `as_tuple` for the fallback implementation.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The const aggregate instance to decompose.
+ * @return   A `std::tuple` of const lvalue references to each field of `t`.
+ */
 template <class T>
   requires (detail::aggregate_initializable<T>() <= 64 && ("as_tuple only supports up to 64 elements", true))
 constexpr auto as_tuple (const T& t) {
@@ -2060,34 +2630,88 @@ constexpr auto as_tuple (const T& t) {
 
 namespace cli {
 
+/** @brief Base tag for all members that may appear in an argument specification
+ * struct. */
 struct SpecMemberTag {};
 
+/** @brief Tag base class for command-line option/flag fields. */
 struct OptionTag : SpecMemberTag {};
+
+/** @brief Tag base class for positional argument fields. */
 struct PositionalTag : SpecMemberTag {};
+
+/** @brief Tag base class for subcommand fields. */
 struct CommandTag : SpecMemberTag {};
+
+/** @brief Tag base class for the `Description` field that provides the CLI's
+ * help text. */
 struct DescriptionTag : SpecMemberTag {};
 
+/**
+ * @brief Specifies the minimum and maximum number of values an option or
+ * positional accepts.
+ *
+ * The default `{0, -1}` is equivalent to `nargs::zero_or_more`.
+ *
+ * **Valid ranges:**
+ * - `min >= 0`
+ * - `max >= 1`, or `max == -1` which means *unlimited* (no upper bound)
+ * - `min <= max` (when `max != -1`)
+ *
+ * Prefer the predefined constants in the `cli::nargs` namespace over
+ * constructing `Nargs` directly.
+ */
 struct Nargs {
-  int min = -1;
-  int max = -1;
+  int min = 0;   ///< Minimum number of values (>= 0).
+  int max = -1;  ///< Maximum number of values; -1 means unlimited.
 };
 
+/**
+ * @brief Controls whether an option or positional argument is mandatory.
+ *
+ * When `required`, the parser returns `ErrorCode::missing_required` if the
+ * argument is absent. When `optional` (the default), absence is allowed.
+ */
 enum class Presence { required, optional };
 
+/** @brief Convenience constant for `Presence::required`. */
 inline constexpr auto required = Presence::required;
+
+/** @brief Convenience constant for `Presence::optional`. */
 inline constexpr auto optional = Presence::optional;
 
+/**
+ * @brief Predefined `Nargs` constants for common value-count patterns.
+ */
 namespace nargs {
 
+/** @brief Accepts no values; used for boolean flags. `{0, 0}` */
 inline constexpr Nargs none{.min = 0, .max = 0};
+
+/** @brief Accepts exactly one value. `{1, 1}` */
 inline constexpr Nargs one{.min = 1, .max = 1};
+
+/** @brief Accepts zero or one value. `{0, 1}` */
 inline constexpr Nargs zero_or_one{.min = 0, .max = 1};
+
+/** @brief Accepts zero or more values. `{0, -1}` */
 inline constexpr Nargs zero_or_more{.min = 0, .max = -1};
+
+/** @brief Accepts one or more values. `{1, -1}` */
 inline constexpr Nargs one_or_more{.min = 1, .max = -1};
 
+/**
+ * @brief Accepts exactly `N` values.
+ * @tparam N The required number of values.
+ */
 template <int N>
 inline constexpr Nargs exactly{.min = N, .max = N};
 
+/**
+ * @brief Accepts between `Min` and `Max` values (inclusive).
+ * @tparam Min Minimum number of values.
+ * @tparam Max Maximum number of values.
+ */
 template <int Min, int Max>
 inline constexpr Nargs between{.min = Min, .max = Max};
 
@@ -2095,6 +2719,13 @@ inline constexpr Nargs between{.min = Min, .max = Max};
 
 namespace detail {
 
+/**
+ * @brief Checks that every member of aggregate type `T` derives from
+ * `SpecMemberTag`.
+ *
+ * @tparam T The argument specification type to validate.
+ * @return `true` if all members inherit from `SpecMemberTag`.
+ */
 template <class T>
 consteval auto members_are_derived_from_valid_cli_class() -> bool {
   return []<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
@@ -2104,6 +2735,12 @@ consteval auto members_are_derived_from_valid_cli_class() -> bool {
                  std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
 }
 
+/**
+ * @brief Checks that all `OptionTag` members of `T` have distinct long names.
+ *
+ * @tparam T The argument specification type to validate.
+ * @return `true` if no two options share the same long name.
+ */
 template <class T>
 consteval auto options_have_unique_long_name() -> bool {
   std::vector<std::string_view> names;
@@ -2123,6 +2760,14 @@ consteval auto options_have_unique_long_name() -> bool {
   return std::ranges::adjacent_find(names) == names.end();
 }
 
+/**
+ * @brief Checks that all `OptionTag` members of `T` have distinct short names.
+ *
+ * Options with no short name (`'\0'`) are excluded from the uniqueness check.
+ *
+ * @tparam T The argument specification type to validate.
+ * @return `true` if no two options share the same non-null short name.
+ */
 template <class T>
 consteval auto options_have_unique_short_name() -> bool {
   std::vector<char> names;
@@ -2144,6 +2789,12 @@ consteval auto options_have_unique_short_name() -> bool {
   return std::ranges::adjacent_find(names) == names.end();
 }
 
+/**
+ * @brief Checks that all `CommandTag` members of `T` have distinct names.
+ *
+ * @tparam T The argument specification type to validate.
+ * @return `true` if no two subcommands share the same name.
+ */
 template <class T>
 consteval auto commands_have_unique_long_name() -> bool {
   std::vector<std::string_view> names;
@@ -2163,6 +2814,16 @@ consteval auto commands_have_unique_long_name() -> bool {
   return std::ranges::adjacent_find(names) == names.end();
 }
 
+/**
+ * @brief Checks that any variadic positional appears after all fixed
+ * positionals.
+ *
+ * A variadic positional is one where `nargs.min != nargs.max`. The constraint
+ * ensures that token dispatch is unambiguous.
+ *
+ * @tparam T The argument specification type to validate.
+ * @return `true` if no fixed positional follows a variadic positional.
+ */
 template <class T>
 consteval auto positionals_have_variadic_at_end() {
   bool found_variadic = false;
@@ -2188,6 +2849,18 @@ consteval auto positionals_have_variadic_at_end() {
   return !found_positional_after_variadic;
 }
 
+/**
+ * @brief Validates the syntax of a long option name at compile time.
+ *
+ * Rules:
+ * - Must be non-empty.
+ * - Must start with a lowercase ASCII letter.
+ * - May contain lowercase letters, digits, and single hyphens.
+ * - Must not contain consecutive hyphens or end with a hyphen.
+ *
+ * @tparam Name The option name to validate (without the `--` prefix).
+ * @return `true` if `Name` is a valid long option name.
+ */
 template <StringLiteral Name>
 [[nodiscard]]
 constexpr auto is_valid_long_option_name() noexcept -> bool {
@@ -2226,21 +2899,51 @@ constexpr auto is_valid_long_option_name() noexcept -> bool {
   return !previous_is_hyphen;
 }
 
+/**
+ * @brief Validates a short option name character at compile time.
+ *
+ * Accepts ASCII letters (upper or lower case) or `'\0'` (meaning no short name).
+ *
+ * @param Name The short option character to validate.
+ * @return `true` if `Name` is a valid short option name.
+ */
 constexpr auto is_valid_short_option_name(char Name) noexcept -> bool {
   return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') ||
          Name == '\0';
 }
 
+/**
+ * @brief Validates the syntax of a subcommand name at compile time.
+ *
+ * Applies the same rules as `is_valid_long_option_name`.
+ *
+ * @tparam Name The command name to validate.
+ * @return `true` if `Name` is a valid command name.
+ */
 template <StringLiteral Name>
 [[nodiscard]]
 consteval auto is_valid_command_name() noexcept {
   return is_valid_long_option_name<Name>();
 }
 
+/**
+ * @brief Validates that a `Nargs` value satisfies the basic range constraints.
+ *
+ * Checks that `min >= 0` and that `max` is either -1 (unlimited) or
+ * satisfies `max >= min`. The `ArgImpl` and `PositionalImpl` template
+ * `requires` clauses enforce these same constraints at the point of
+ * instantiation.
+ *
+ * @tparam NargsValue The `Nargs` value to validate.
+ * @return `true` if `NargsValue` is a well-formed nargs specification.
+ */
 template <Nargs NargsValue>
 [[nodiscard]]
 consteval auto is_valid_nargs() noexcept -> bool {
-  if (NargsValue.max == -1 && NargsValue.min == -1) {
+  if (NargsValue.min < 0) {
+    return false;
+  }
+  if (NargsValue.max != -1 && NargsValue.max < NargsValue.min) {
     return false;
   }
   return true;
@@ -2248,6 +2951,22 @@ consteval auto is_valid_nargs() noexcept -> bool {
 
 }  // namespace detail
 
+/**
+ * @brief Concept that validates an aggregate type as a well-formed CLI argument
+ * specification.
+ *
+ * A type satisfies `ArgumentSpec` when all of the following hold:
+ * - All members derive from `SpecMemberTag`.
+ * - All option long names are unique.
+ * - All option short names are unique (ignoring `'\0'`).
+ * - All command names are unique.
+ * - Variadic positionals appear only at the end of the positional list.
+ *
+ * Violations are reported as compile-time errors via `static_assert` inside
+ * the individual `consteval` checks.
+ *
+ * @tparam T The aggregate struct to validate.
+ */
 template <class T>
 concept ArgumentSpec = requires {
   requires detail::members_are_derived_from_valid_cli_class<T>();
@@ -2257,12 +2976,31 @@ concept ArgumentSpec = requires {
   requires detail::positionals_have_variadic_at_end<T>();
 };
 
+/**
+ * @brief Parameter bag used when constructing `ArgImpl` or `PositionalImpl` with
+ * named fields.
+ *
+ * Allows brace-initialisation with named members, e.g.:
+ * @code
+ *   cli::Option<int, "count"> count{cli::ArgParameter<int>{
+ *       .help = "Number of repetitions",
+ *       .presence = cli::required,
+ *       .default_value = 1,
+ *   }};
+ * @endcode
+ *
+ * @tparam T The storage value type of the argument.
+ */
 template <class T>
 struct ArgParameter {
-  std::string_view help{};
-  Presence presence{Presence::optional};
-  T default_value{};
+  std::string_view help{};  ///< Help text shown in `--help` output.
+  Presence presence{Presence::optional};  ///< Whether the argument is required.
+  T default_value{};  ///< Default value when the argument is absent.
+  std::function<void(const T&)>
+      on_parse{};  ///< Callback invoked once after parsing completes.
 };
+
+namespace detail {
 
 template <StringLiteral Name, char ShortName, Nargs N, Action A>
   requires requires {
@@ -2279,7 +3017,31 @@ struct ArgImpl : public OptionTag {
   ArgImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
-        value_(param.default_value) {}
+        value_(param.default_value),
+        on_parse_(std::move(param.on_parse)) {}
+
+  // Convenience constructor for StoreInto variants (value_type == T*).
+  explicit ArgImpl(std::remove_pointer_t<value_type>& ref)
+    requires std::is_pointer_v<value_type>
+      : value_(&ref) {}
+  ArgImpl(std::remove_pointer_t<value_type>& ref, std::string_view help_text)
+    requires std::is_pointer_v<value_type>
+      : help(help_text), value_(&ref) {}
+
+  // Bind to an external variable after construction.
+  // Allows: opt.bind(var)  or  opt = &var
+  auto bind(std::remove_pointer_t<value_type>& ref) -> ArgImpl&
+    requires std::is_pointer_v<value_type>
+  {
+    value_ = &ref;
+    return *this;
+  }
+  auto operator=(std::remove_pointer_t<value_type>* ptr) -> ArgImpl&
+    requires std::is_pointer_v<value_type>
+  {
+    value_ = ptr;
+    return *this;
+  }
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -2331,6 +3093,11 @@ struct ArgImpl : public OptionTag {
     return ActionResult<void>::ok();
   }
 
+  // Called once after all value tokens for one option occurrence are processed.
+  auto fire_on_parse() -> void {
+    if (on_parse_) on_parse_(value_);
+  }
+
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
   [[nodiscard]] auto value() -> value_type& { return value_; }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
@@ -2340,10 +3107,55 @@ struct ArgImpl : public OptionTag {
   friend struct Parser;
 
   value_type value_{};
+  std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times the option token appeared
   std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
   bool provided_{};
 };
+
+template <auto A>
+concept ActionValue = requires { std::remove_cvref_t<decltype(A)>::validate(); };
+
+template <auto... Args>
+struct ArgAlias {
+  static_assert(
+      sizeof...(Args) && !sizeof...(Args),
+      "Unsupported Arg<> parameter combination.\n"
+      "Supported forms (after the Name parameter):\n"
+      "  Arg<Name, Action>\n"
+      "  Arg<Name, Action, Nargs>\n"
+      "  Arg<Name, ShortName, Action>\n"
+      "  Arg<Name, ShortName, Action, Nargs>\n"
+      "Consider using Flag, Option, or ListOption for common argument kinds.");
+};
+
+template <StringLiteral Name, auto A>
+  requires ActionValue<A>
+struct ArgAlias<Name, A> {
+  using type = ArgImpl<Name, '\0', nargs::one, A>;
+};
+
+template <StringLiteral Name, auto A, auto N>
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
+struct ArgAlias<Name, A, N> {
+  using type = ArgImpl<Name, '\0', N, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A>
+  requires ActionValue<A>
+struct ArgAlias<Name, ShortName, A> {
+  using type = ArgImpl<Name, ShortName, nargs::one, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A, auto N>
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
+struct ArgAlias<Name, ShortName, A, N> {
+  using type = ArgImpl<Name, ShortName, N, A>;
+};
+
+}  // namespace detail
 
 template <Nargs N, Action A>
   requires requires {
@@ -2359,7 +3171,8 @@ struct PositionalImpl : public PositionalTag {
   PositionalImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
-        value_(param.default_value) {}
+        value_(param.default_value),
+        on_parse_(std::move(param.on_parse)) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -2389,6 +3202,11 @@ struct PositionalImpl : public PositionalTag {
     return ActionResult<void>::ok();
   }
 
+  // Called once after all tokens for this positional are consumed.
+  auto fire_on_parse() -> void {
+    if (on_parse_) on_parse_(value_);
+  }
+
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
   [[nodiscard]] auto value() -> value_type& { return value_; }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
@@ -2398,18 +3216,47 @@ struct PositionalImpl : public PositionalTag {
   friend struct Parser;
 
   value_type value_{};
+  std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times a value was provided
   std::size_t
       invoke_count_{};  // times invoke_action was called (same for positionals)
   bool provided_{};
 };
 
+/**
+ * @brief A `DescriptionTag` field that carries the top-level CLI description.
+ *
+ * Add an instance of `Description` as a member of your argument specification
+ * struct to provide a paragraph that appears in the help output between the
+ * usage line and the options/positionals sections:
+ * @code
+ *   struct MyArgs {
+ *     cli::Description description{"Does something useful."};
+ *     cli::Flag<"verbose"> verbose;
+ *   };
+ * @endcode
+ */
 struct Description : public std::string, DescriptionTag {};
 
+/**
+ * @brief Parameter bag used when constructing a `Command` field.
+ */
 struct CommandParameter {
-  std::string_view help{};
+  std::string_view
+      help{};  ///< Brief description shown in the parent command's help.
 };
 
+/**
+ * @brief A named subcommand that nests another argument specification.
+ *
+ * `Command` inherits from both the argument specification type `T` (to hold
+ * its parsed fields) and `CommandTag` (so the parser identifies it as a
+ * subcommand). Use `provided()` to check whether the subcommand was actually
+ * invoked at runtime.
+ *
+ * @tparam Name The subcommand name (e.g. `"build"`).
+ * @tparam T    The argument specification type for the subcommand's own options.
+ */
 template <StringLiteral Name, ArgumentSpec T>
   requires requires { detail::is_valid_command_name<Name>(); }
 struct Command : public T, public CommandTag {
@@ -2417,17 +3264,17 @@ struct Command : public T, public CommandTag {
   using argument_type = T;
 
   Command() = default;
-  Command(CommandParameter param) : help(param.help) {}
+  Command(CommandParameter param) : help_(param.help) {}
   static constexpr auto name = Name;
   static constexpr auto command_name() -> std::string_view {
     return Name.view();
   }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto help_text() const -> std::string_view { return help; }
+  [[nodiscard]] auto help_text() const -> std::string_view { return help_; }
   auto mark_provided() -> void { provided_ = true; }
 
  private:
-  std::string_view help{};
+  std::string_view help_{};
   bool provided_{};
 };
 
@@ -2440,18 +3287,24 @@ template <>
 struct ActionFor<std::string> {
   inline static constexpr auto set_once = conversion::string | pack::set_once;
   inline static constexpr auto push = conversion::string | pack::push;
+  inline static constexpr auto store_into =
+      conversion::string | pack::store_into<std::string>;
 };
 
 template <>
 struct ActionFor<bool> {
   inline static constexpr auto set_once = conversion::boolean | pack::set_once;
   inline static constexpr auto push = conversion::boolean | pack::push;
+  inline static constexpr auto store_into =
+      conversion::boolean | pack::store_into<bool>;
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
   inline static constexpr auto set_once = conversion::path | pack::set_once;
   inline static constexpr auto push = conversion::path | pack::push;
+  inline static constexpr auto store_into =
+      conversion::path | pack::store_into<std::filesystem::path>;
 };
 
 template <std::integral T>
@@ -2459,6 +3312,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::integer<T> | pack::set_once;
   inline static constexpr auto push = conversion::integer<T> | pack::push;
+  inline static constexpr auto store_into =
+      conversion::integer<T> | pack::store_into<T>;
 };
 
 template <std::floating_point T>
@@ -2466,6 +3321,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::floating<T> | pack::set_once;
   inline static constexpr auto push = conversion::floating<T> | pack::push;
+  inline static constexpr auto store_into =
+      conversion::floating<T> | pack::store_into<T>;
 };
 
 template <class T, Nargs N>
@@ -2483,35 +3340,142 @@ struct PositionalActionFor {
 
 // ── Core public API ───────────────────────────────────────────────────────────
 
+/**
+ * @brief Defines a typed command-line argument specification.
+ *
+ * `Arg` constructs a command-line option or flag from a compile-time
+ * specification. The supported parameter sequences after `Name` are:
+ *
+ * | Form                          | Effect                                   |
+ * |-------------------------------|------------------------------------------|
+ * | `<Name, Action>`              | No short name; `nargs::one`.             |
+ * | `<Name, Action, Nargs>`       | No short name; custom arity.             |
+ * | `<Name, ShortName, Action>`   | With short name; `nargs::one`.           |
+ * | `<Name, ShortName, Action, Nargs>` | With short name; custom arity.      |
+ *
+ * The short name character (if present) must appear before the action, and
+ * the `Nargs` value (if present) must appear after the action.
+ *
+ * Most users should prefer higher-level aliases such as `Flag`,
+ * `Option`, and `ListOption` for common argument kinds.
+ *
+ * @tparam Name Long option name without the leading `--`.
+ * @tparam Args Configuration parameters: `[ShortName,] Action [, Nargs]`.
+ */
+template <StringLiteral Name, auto... Args>
+using Arg = typename detail::ArgAlias<Name, Args...>::type;
+
+/**
+ * @brief A boolean flag option that stores `true` when present.
+ *
+ * Storage type: `bool`. Default: `false`.
+ *
+ * @tparam Name      Long option name (e.g. `"verbose"`).
+ * @tparam ShortName Short option character (e.g. `'v'`), or `'\0'` for none.
+ */
 template <StringLiteral Name, char ShortName = '\0'>
-using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
+using Flag = Arg<Name, ShortName, pack::set_true, nargs::none>;
 
-template <StringLiteral Name = "help", char ShortName = 'h'>
-using Help = ArgImpl<Name, ShortName, nargs::none,
-                     action::print_help | action::exit_success>;
-
+/**
+ * @brief An option whose parsed value is written directly into an external
+ * variable.
+ *
+ * The field stores a pointer `T*`; use the `bind(var)` method or the reference
+ * constructor to point it at the target variable before parsing.
+ *
+ * Storage type: `T*`.
+ *
+ * @tparam T         The value type of the external variable.
+ * @tparam Name      Long option name.
+ * @tparam ShortName Short option character, or `'\0'`.
+ */
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using Option =
-    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
+using BoundOption = Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
 
+/** @brief `BoundOption` specialisation for `std::string`. */
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundStringOption = BoundOption<std::string, Name, ShortName>;
+
+/** @brief `BoundOption` specialisation for `int`. */
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundIntOption = BoundOption<int, Name, ShortName>;
+
+/** @brief `BoundOption` specialisation for `double`. */
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundDoubleOption = BoundOption<double, Name, ShortName>;
+
+/** @brief `BoundOption` specialisation for `std::filesystem::path`. */
+template <StringLiteral Name, char ShortName = '\0'>
+using BoundPathOption = BoundOption<std::filesystem::path, Name, ShortName>;
+
+/**
+ * @brief A built-in help flag that prints help and exits with code 0.
+ *
+ * Default names: `--help` / `-h`. Override via template parameters.
+ *
+ * @tparam Name      Long option name. Default: `"help"`.
+ * @tparam ShortName Short option character. Default: `'h'`.
+ */
+template <StringLiteral Name = "help", char ShortName = 'h'>
+using Help =
+    Arg<Name, ShortName, action::print_help | action::exit_success, nargs::none>;
+
+/**
+ * @brief A single-value option that stores the parsed result in
+ * `std::optional<T>`.
+ *
+ * Storage type: `std::optional<T>`. Present when the option was supplied on
+ * the command line, absent (nullopt) otherwise.
+ *
+ * @tparam T         The value type to parse (e.g. `int`, `std::string`).
+ * @tparam Name      Long option name.
+ * @tparam ShortName Short option character, or `'\0'`.
+ */
+template <class T, StringLiteral Name, char ShortName = '\0'>
+using Option = Arg<Name, ShortName, detail::ActionFor<T>::set_once>;
+
+/**
+ * @brief A multi-value option that appends each occurrence to a
+ * `std::vector<T>`.
+ *
+ * Storage type: `std::vector<T>`.
+ *
+ * @tparam T         The element type.
+ * @tparam Name      Long option name.
+ * @tparam ShortName Short option character, or `'\0'`.
+ * @tparam N         `Nargs` descriptor. Default: `nargs::one_or_more`.
+ */
 template <class T, StringLiteral Name, char ShortName = '\0',
           Nargs N = nargs::one_or_more>
-using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
+using ListOption = Arg<Name, ShortName, detail::ActionFor<T>::push, N>;
 
+/**
+ * @brief A typed positional argument.
+ *
+ * Storage type: `std::optional<T>` for `N.max == 1`, `std::vector<T>` for
+ * multi-value.
+ *
+ * @tparam T The value type to parse.
+ * @tparam N `Nargs` descriptor. Default: `nargs::one`.
+ */
 template <class T, Nargs N = nargs::one>
 using Positional = PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;
 
 // ── Convenience aliases for common types ─────────────────────────────────────
 
+/** @brief `Option<std::string, Name, ShortName>`. */
 template <StringLiteral Name, char ShortName = '\0'>
 using StringOption = Option<std::string, Name, ShortName>;
 
+/** @brief `Option<int, Name, ShortName>`. */
 template <StringLiteral Name, char ShortName = '\0'>
 using IntOption = Option<int, Name, ShortName>;
 
+/** @brief `Option<double, Name, ShortName>`. */
 template <StringLiteral Name, char ShortName = '\0'>
 using DoubleOption = Option<double, Name, ShortName>;
 
+/** @brief `Option<std::filesystem::path, Name, ShortName>`. */
 template <StringLiteral Name, char ShortName = '\0'>
 using PathOption = Option<std::filesystem::path, Name, ShortName>;
 
@@ -2528,40 +3492,80 @@ using PathOption = Option<std::filesystem::path, Name, ShortName>;
 
 namespace cli {
 
-// Controls whether ANSI escape codes are emitted by format_help().
-//   auto_  : emit codes only when stdout is a TTY (default)
-//   never  : always plain text
-//   always : always emit codes regardless of terminal type
+/**
+ * @brief Controls whether ANSI escape codes are emitted by `format_help()`.
+ *
+ * - `auto_`  : emit codes only when stdout is connected to a TTY (default).
+ * - `never`  : always produce plain text.
+ * - `always` : always emit ANSI codes regardless of terminal type.
+ */
 enum class ColorMode { auto_, never, always };
 
-// Tag type passed to format_help() to request recursive sub-command output.
-//   parser.format_help(cli::recurse_help)               // auto color + recurse
-//   parser.format_help(cli::ColorMode::never, cli::recurse_help)  // no color
-//   + recurse
+/**
+ * @brief Tag type passed to `format_help()` to request recursive sub-command
+ * output.
+ *
+ * Pass the `cli::recurse_help` constant as an extra argument:
+ * @code
+ *   parser.format_help(cli::recurse_help);
+ *   parser.format_help(cli::ColorMode::never, cli::recurse_help);
+ * @endcode
+ */
 struct RecurseHelpTag {};
+
+/** @brief Convenience instance of `RecurseHelpTag`. */
 inline constexpr RecurseHelpTag recurse_help{};
 
 namespace detail {
 
-// Wraps standard ANSI SGR (Select Graphic Rendition) sequences.
-// Only the portable 8/16-color subset is used — no RGB/truecolor extensions.
-// All accessors return an empty string_view when disabled so callers can
-// concatenate unconditionally without branches.
+/**
+ * @brief Wraps standard ANSI SGR (Select Graphic Rendition) sequences.
+ *
+ * Only the portable 8/16-color subset is used — no RGB/truecolor extensions.
+ * All accessors return an empty `string_view` when `enabled` is false, so
+ * callers can concatenate unconditionally without branches.
+ */
 struct AnsiStyle {
+  /** @brief Whether ANSI codes should be emitted. */
   bool enabled;
 
+  /**
+   * @brief Returns the ANSI bold sequence, or an empty string when disabled.
+   *
+   * @return `"\033[1m"` if enabled, `""` otherwise.
+   */
   [[nodiscard]] constexpr auto bold() const noexcept -> std::string_view {
     return enabled ? "\033[1m" : "";
   }
+
+  /**
+   * @brief Returns the ANSI underline sequence, or an empty string when
+   * disabled.
+   *
+   * @return `"\033[4m"` if enabled, `""` otherwise.
+   */
   [[nodiscard]] constexpr auto underline() const noexcept -> std::string_view {
     return enabled ? "\033[4m" : "";
   }
+
+  /**
+   * @brief Returns the ANSI reset sequence, or an empty string when disabled.
+   *
+   * @return `"\033[0m"` if enabled, `""` otherwise.
+   */
   [[nodiscard]] constexpr auto reset() const noexcept -> std::string_view {
     return enabled ? "\033[0m" : "";
   }
 };
 
-// Returns true when file descriptor 1 (stdout) is connected to a terminal.
+/**
+ * @brief Returns true when file descriptor 1 (stdout) is connected to a
+ * terminal.
+ *
+ * Uses `_isatty` on Windows and `::isatty` on POSIX systems.
+ *
+ * @return `true` if stdout is a TTY, `false` otherwise.
+ */
 inline auto is_tty() noexcept -> bool {
 #ifdef _WIN32
   return _isatty(1) != 0;
@@ -2570,7 +3574,16 @@ inline auto is_tty() noexcept -> bool {
 #endif
 }
 
-// Resolves a ColorMode to a concrete AnsiStyle.
+/**
+ * @brief Resolves a `ColorMode` to a concrete `AnsiStyle`.
+ *
+ * - `ColorMode::always` → `AnsiStyle{true}`
+ * - `ColorMode::never`  → `AnsiStyle{false}`
+ * - `ColorMode::auto_`  → `AnsiStyle{is_tty()}`
+ *
+ * @param mode The requested color mode.
+ * @return An `AnsiStyle` with `enabled` set appropriately.
+ */
 inline auto resolve_color(ColorMode mode) noexcept -> AnsiStyle {
   const bool on =
       (mode == ColorMode::always) || (mode == ColorMode::auto_ && is_tty());
@@ -2587,67 +3600,105 @@ namespace cli {
 
 namespace detail {
 
+/**
+ * @brief Traits type that maps a C++ type to its help metavar name.
+ *
+ * The primary template uses `"value"` as a fallback. Specializations
+ * provide names such as `"string"`, `"int"`, `"path"`, etc.
+ *
+ * @tparam T The value type to look up.
+ */
 template <class T>
 struct MetavarName {
   static constexpr std::string_view value = "value";
 };
 
+/** @brief Metavar name for `std::string`: `"string"`. */
 template <>
 struct MetavarName<std::string> {
   static constexpr std::string_view value = "string";
 };
 
+/** @brief Metavar name for `bool`: `"bool"`. */
 template <>
 struct MetavarName<bool> {
   static constexpr std::string_view value = "bool";
 };
 
+/** @brief Metavar name for `float`: `"float"`. */
 template <>
 struct MetavarName<float> {
   static constexpr std::string_view value = "float";
 };
 
+/** @brief Metavar name for `double`: `"double"`. */
 template <>
 struct MetavarName<double> {
   static constexpr std::string_view value = "double";
 };
 
+/** @brief Metavar name for `std::filesystem::path`: `"path"`. */
 template <>
 struct MetavarName<std::filesystem::path> {
   static constexpr std::string_view value = "path";
 };
 
+/** @brief Metavar name for signed integer types: `"int"`. */
 template <std::signed_integral T>
 struct MetavarName<T> {
   static constexpr std::string_view value = "int";
 };
 
+/** @brief Metavar name for unsigned integer types: `"uint"`. */
 template <std::unsigned_integral T>
 struct MetavarName<T> {
   static constexpr std::string_view value = "uint";
 };
 
+/**
+ * @brief Helper that unwraps storage wrapper types to their underlying value
+ * type.
+ *
+ * - `UnwrapStorage<T>` → `type = T`, `variadic = false`
+ * - `UnwrapStorage<std::optional<T>>` → `type = T`, `variadic = false`
+ * - `UnwrapStorage<std::vector<T>>` → `type = T`, `variadic = true`
+ *
+ * @tparam T The potentially-wrapped storage type.
+ */
 template <class T>
 struct UnwrapStorage {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = false;
 };
 
+/** @brief Specialization for `std::optional<T>`. */
 template <class T>
 struct UnwrapStorage<std::optional<T>> {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = false;
 };
 
+/** @brief Specialization for `std::vector<T>` (variadic storage). */
 template <class T>
 struct UnwrapStorage<std::vector<T>> {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = true;
 };
 
+/** @brief Alias for the underlying value type of a storage wrapper. */
 template <class T>
 using unwrap_storage_t = typename UnwrapStorage<std::remove_cvref_t<T>>::type;
 
+/**
+ * @brief Returns the metavar string for a storage type, e.g. `<int>` or
+ * `<path...>`.
+ *
+ * For variadic storage (i.e. `std::vector<T>`), `...` is inserted before the
+ * closing `>`, producing e.g. `<string...>`.
+ *
+ * @tparam T The storage type of the argument field.
+ * @return A string such as `"<string>"` or `"<path...>"`.
+ */
 template <class T>
 [[nodiscard]]
 auto metavar_for() -> std::string {
@@ -2660,6 +3711,16 @@ auto metavar_for() -> std::string {
   return out;
 }
 
+/**
+ * @brief Builds the usage-line suffix that summarises what `value` accepts.
+ *
+ * Iterates over all fields of `value` and appends `" [options]"`,
+ * `" [args]"`, and/or `" [command]"` as appropriate.
+ *
+ * @tparam T The argument specification type.
+ * @param value An instance of the argument specification.
+ * @return A suffix string such as `" [options] [args]"`.
+ */
 template <class T>
 [[nodiscard]]
 auto command_usage_suffix(T& value) -> std::string {
@@ -2697,6 +3758,18 @@ auto command_usage_suffix(T& value) -> std::string {
   return out;
 }
 
+/**
+ * @brief Returns the label used in the help table for a single field type.
+ *
+ * - For `OptionTag` fields: `"-s, --long <metavar>"` (short name omitted if
+ * `'\0'`).
+ * - For `PositionalTag` fields: `"<metavar>"`.
+ * - For `CommandTag` fields: the command name string.
+ * - Otherwise: an empty string.
+ *
+ * @tparam T The field type (derived from one of the tag base classes).
+ * @return The formatted label string.
+ */
 template <class T>
 [[nodiscard]]
 auto field_usage_label() -> std::string {
@@ -2721,6 +3794,15 @@ auto field_usage_label() -> std::string {
   }
 }
 
+/**
+ * @brief Splits a string on newline characters.
+ *
+ * Always returns at least one element. If `text` is empty the result
+ * contains one empty string.
+ *
+ * @param text The string to split.
+ * @return A vector of lines (without the newline characters).
+ */
 inline auto split_lines(std::string_view text) -> std::vector<std::string> {
   std::vector<std::string> lines;
   std::size_t start = 0;
@@ -2739,6 +3821,17 @@ inline auto split_lines(std::string_view text) -> std::vector<std::string> {
   return lines;
 }
 
+/**
+ * @brief Appends a description string to `out`, indenting continuation lines.
+ *
+ * If `description` is empty a bare newline is appended. Otherwise the first
+ * line is written as-is, and each subsequent line is prefixed with `indent`
+ * spaces so that it aligns with the first line in the help table.
+ *
+ * @param out         The output string to append to.
+ * @param description The description text, potentially containing newlines.
+ * @param indent      Number of spaces to prepend to continuation lines.
+ */
 inline auto append_wrapped_description(std::string& out,
                                        std::string_view description,
                                        std::size_t indent) -> void {
@@ -2757,6 +3850,25 @@ inline auto append_wrapped_description(std::string& out,
   }
 }
 
+/**
+ * @brief Appends a labelled section (Options, Positional arguments, Commands) to
+ * `out`.
+ *
+ * Iterates over all fields of `value`, selects those for which `pred`
+ * returns `true`, renders each via `render`, and emits a right-aligned
+ * table under the section `title`.
+ *
+ * @tparam T      The argument specification type.
+ * @tparam Pred   A consteval callable `template<class F>() -> bool`.
+ * @tparam Render A callable `(field, label) -> std::string`.
+ * @param out           The output string to append to.
+ * @param title         Section heading text (e.g. `"Options:"`).
+ * @param heading_color ANSI sequence for the section heading (may be empty).
+ * @param reset_color   ANSI reset sequence (may be empty).
+ * @param value         The argument specification instance.
+ * @param pred          Field filter predicate.
+ * @param render        Row renderer called for each selected field.
+ */
 template <class T, class Pred, class Render>
 auto append_section(std::string& out, std::string_view title,
                     std::string_view heading_color, std::string_view reset_color,
@@ -2793,6 +3905,22 @@ auto append_section(std::string& out, std::string_view title,
   }
 }
 
+/**
+ * @brief Renders a single row in the help table for a field.
+ *
+ * Produces a string of the form:
+ * @code
+ *   "  <label>  <description>\n"
+ * @endcode
+ * The label is left-padded to `width` characters so all descriptions are
+ * aligned. Multi-line descriptions are indented to match.
+ *
+ * @tparam Field The field type (must have a `.help` member).
+ * @param field The field instance.
+ * @param label The pre-computed label string for this field.
+ * @param width The maximum label width in the current section (for alignment).
+ * @return The formatted row string.
+ */
 template <class Field>
 auto render_help_row(Field& field, std::string_view label, std::size_t width)
     -> std::string {
@@ -2807,6 +3935,17 @@ auto render_help_row(Field& field, std::string_view label, std::size_t width)
   return out;
 }
 
+/**
+ * @brief Extracts the `Description` field's text from an argument specification
+ * instance.
+ *
+ * Iterates over all fields; if a field derives from `DescriptionTag` its
+ * string value is returned. Returns an empty view if no description is found.
+ *
+ * @tparam T The argument specification type.
+ * @param value An instance of the argument specification.
+ * @return A `string_view` into the description string, or an empty view.
+ */
 template <class T>
 auto find_description(T& value) -> std::string_view {
   std::string_view description;
@@ -2827,6 +3966,28 @@ auto find_description(T& value) -> std::string_view {
   return description;
 }
 
+/**
+ * @brief Core implementation of help text generation.
+ *
+ * Builds the full help string including:
+ * - A `"Usage: <program> [options] [args] [command]"` line.
+ * - An optional description paragraph.
+ * - An `"Options:"` section for all `OptionTag` fields.
+ * - A `"Positional arguments:"` section for all `PositionalTag` fields.
+ * - A `"Commands:"` section for all `CommandTag` fields.
+ * - Optionally, recursively appended help for each subcommand.
+ *
+ * Labels within each section are right-aligned to the widest entry.
+ *
+ * @tparam T The argument specification type.
+ * @param value        An instance of the argument specification.
+ * @param program_name The program name shown in the usage line.
+ * @param color_mode   Controls ANSI color output.
+ * @param recurse      If `true`, recursively append help for subcommands.
+ * @param command_path The subcommand path prefix appended after `program_name`
+ * (empty for root).
+ * @return The formatted help string.
+ */
 template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
                       ColorMode color_mode, bool recurse,
@@ -2935,6 +4096,21 @@ auto format_help_impl(T& value, std::string_view program_name,
 
 }  // namespace detail
 
+/**
+ * @brief Generates a complete help string for an argument specification.
+ *
+ * This is the primary public API for help text generation. It delegates to
+ * `detail::format_help_impl` with an empty `command_path`.
+ *
+ * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
+ * @param value        An instance of the argument specification.
+ * @param program_name The program name to display in the usage line. Default:
+ * `"program"`.
+ * @param color_mode   Controls ANSI color output. Default: `ColorMode::auto_`.
+ * @param recurse      If `true`, also append help for each subcommand. Default:
+ * `false`.
+ * @return The formatted help string.
+ */
 template <ArgumentSpec T>
 auto format_help(T& value, std::string_view program_name = "program",
                  ColorMode color_mode = ColorMode::auto_, bool recurse = false)
@@ -2960,6 +4136,15 @@ namespace cli {
 
 #ifdef _WIN32
 namespace detail {
+/**
+ * @brief Converts a wide-character string to UTF-8.
+ *
+ * Uses `WideCharToMultiByte` with code page `CP_UTF8`. Returns an empty string
+ * for a null pointer or a zero-length conversion result.
+ *
+ * @param wide Null-terminated wide-character string, or `nullptr`.
+ * @return The UTF-8 encoded equivalent, or `""` on failure.
+ */
 inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
   if (!wide) return {};
   int len =
@@ -2973,6 +4158,15 @@ inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
 }  // namespace detail
 #endif
 
+/**
+ * @brief Classifies a single token produced by `tokenize()`.
+ *
+ * - `option`     : An option name token (e.g. `"--verbose"`, `"-v"`).
+ * - `value`      : A value token associated with the preceding option.
+ * - `positional` : A bare positional argument.
+ * - `command`    : A subcommand name; subsequent tokens belong to the
+ * subcommand.
+ */
 enum class TokenType {
   option,
   value,
@@ -2980,34 +4174,59 @@ enum class TokenType {
   command,
 };
 
+/**
+ * @brief A single token produced by `tokenize()`.
+ */
 struct Token {
-  TokenType type;
-  std::string_view text;
-  std::string_view matched_prefix;  // the option prefix that was matched; empty
-                                    // for non-option tokens
-  std::size_t position;             // index into original args
+  TokenType type;  ///< Classification of this token.
+  std::string_view
+      text;  ///< The token text (a view into the original `args` span).
+  std::string_view matched_prefix;  ///< The option prefix that was matched (e.g.
+                                    ///< `"--"`); empty for non-option tokens.
+  std::size_t position;  ///< Zero-based index into the original `args` span.
 };
 
+/**
+ * @brief The result returned by `tokenize()`.
+ *
+ * On success, `tokens` contains the ordered token sequence and `error` is in
+ * the default (no-error) state. On failure, `tokens` may be partial and
+ * `error` describes the first problem encountered.
+ */
 struct TokenizeResult {
   std::vector<Token> tokens;
   ParseError error{};
 
+  /** @brief Returns `true` when tokenization succeeded. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when tokenization succeeded. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when tokenization failed. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
-  // Set the error and return *this so callers can write: return result.fail(...)
+  /**
+   * @brief Sets the error and returns `*this` for method chaining.
+   *
+   * @param code    The error code.
+   * @param pos     The zero-based index into the input `args` span where the
+   *                error occurred. Higher-level parser code may apply an
+   *                offset when translating this to a caller-visible argument
+   *                index.
+   * @param subject The option or token name that caused the error.
+   * @param detail  Optional additional detail message.
+   * @return Reference to `*this`.
+   */
   auto fail(ErrorCode code, std::size_t pos, std::string subject,
             std::string detail = {}) -> TokenizeResult& {
     error = ParseError{
@@ -3021,27 +4240,51 @@ struct TokenizeResult {
   }
 };
 
+/**
+ * @brief Controls how `tokenize()` recognises option and separator syntax.
+ *
+ * The defaults implement GNU-style `--long` / `-s` argument conventions with
+ * `=` as the inline value separator and `--` as the end-of-options marker.
+ */
 struct TokenizerConfig {
-  std::vector<std::string> option_prefixes = {"--"};
-  std::string short_option_prefix = "-";
-  std::string end_of_options_separator = "--";
+  std::vector<std::string> option_prefixes = {
+      "--"};  ///< Prefixes that introduce long options.
+  std::string short_option_prefix =
+      "-";  ///< Prefix for short (single-character) options.
+  std::string end_of_options_separator =
+      "--";  ///< Token that ends option processing; subsequent tokens become
+             ///< positionals.
   char inline_value_separator =
-      '=';  // e.g. '=' for --opt=val, ':' for --opt:val
+      '=';  ///< Character separating option name from inline value (e.g. `=` for
+            ///< `--opt=val`).
 };
 
-// spec_map      : option/flag keys → nargs  (does NOT contain command names)
-// command_names : set of bare command name strings (no "--" prefix)
-// cfg           : controls which prefixes are recognised as options/separators
-//
-// Output token sequence:
-//   {option, "--opt", i}  followed by zero or more  {value, "...", j}
-//   {positional, "...", i}
-//   {command,  "cmd",  i}  — emitted for the command name only;
-//                            args[i+1:] are left for the sub-parser
-//                            (use token.position to obtain the subspan)
-//
-// --opt=val is split into {option,"--opt",i} + {value,"val",i} at the same
-// position so that downstream code can treat all value tokens uniformly.
+/**
+ * @brief Converts a raw argument span into an ordered sequence of typed tokens.
+ *
+ * This is a pure lexical operation; it does not access or modify any parsed
+ * result struct. It is used internally by `Parser::parse_body` but can also be
+ * called standalone for custom parsing scenarios.
+ *
+ * **Token sequence rules:**
+ * - An option token (`{option, "--opt", i}`) is followed by zero or more
+ *   `{value, "...", j}` tokens greedily consumed up to `nargs.max`.
+ * - `--opt=val` is split into `{option, "--opt", i}` + `{value, "val", i}`
+ *   at the same position.
+ * - Bare tokens that match a command name produce `{command, "cmd", i}` and
+ *   tokenization stops immediately; `args[i+1:]` are the subcommand's tokens.
+ * - After the end-of-options separator (`--`), all remaining tokens become
+ *   `{positional, "...", i}` regardless of prefix.
+ *
+ * @param args          The argument span to tokenize (typically `argv[1:]`).
+ * @param spec_map      Map from full option keys (e.g. `"--verbose"`, `"-v"`) to
+ * their `Nargs`. Must NOT contain command names.
+ * @param command_names Set of bare subcommand name strings (no prefix).
+ * @param cfg           Tokenizer configuration (prefixes, separator character,
+ * etc.).
+ * @return A `TokenizeResult` containing the token list on success, or a
+ * `ParseError` on failure.
+ */
 inline auto tokenize(std::span<const std::string_view> args,
                      const std::unordered_map<std::string, Nargs>& spec_map,
                      const std::unordered_set<std::string>& command_names = {},
@@ -3175,26 +4418,58 @@ inline auto tokenize(std::span<const std::string_view> args,
   return result;
 }
 
+/**
+ * @brief The result returned by `Parser::parse()` and the free `cli::parse()`
+ * function.
+ *
+ * On success, `value` holds the fully populated argument specification struct
+ * and `error` is in the default (no-error) state.  On failure, `error` describes
+ * what went wrong and `value` is in a partially-initialised (unusable) state.
+ *
+ * Typical usage:
+ * @code
+ *   auto result = cli::parse<MyArgs>(argc, argv);
+ *   if (!result) {
+ *       std::cerr << result.error.message() << '\n';
+ *       return 1;
+ *   }
+ *   // use result.value …
+ * @endcode
+ *
+ * @tparam T The argument specification type.
+ */
 template <class T>
 struct ParseResult {
-  T value{};
-  ParseError error{};
+  T value{};  ///< The parsed argument struct (valid only when `has_value()` is
+              ///< true).
+  ParseError
+      error{};  ///< The error details (valid only when `has_error()` is true).
 
+  /** @brief Returns `true` when parsing succeeded. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when parsing succeeded. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when parsing failed. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
+  /**
+   * @brief Creates a success result holding `value`.
+   *
+   * @tparam U Type of the value (deduced).
+   * @param value The parsed argument struct to store.
+   * @return A successful `ParseResult<T>`.
+   */
   template <class U>
   [[nodiscard]]
   static constexpr auto ok(U&& value) -> ParseResult<T> {
@@ -3204,6 +4479,12 @@ struct ParseResult {
     };
   }
 
+  /**
+   * @brief Creates a failure result carrying `error`.
+   *
+   * @param error The error to store.
+   * @return A failed `ParseResult<T>`.
+   */
   [[nodiscard]]
   static constexpr auto fail(ParseError error) -> ParseResult<T> {
     return {
@@ -3213,32 +4494,81 @@ struct ParseResult {
   }
 };
 
+/**
+ * @brief The main parsing engine for a typed argument specification.
+ *
+ * `Parser<T>` owns a `TokenizerConfig` and the program name used in help output.
+ * It tokenizes the argument list, dispatches each token to the appropriate field
+ * of `T`, validates required arguments, and fires `on_parse` callbacks.
+ *
+ * **Entry points:**
+ * - `parse(argc, argv)` — standard C-style interface; sets program name from
+ * `argv[0]`.
+ * - `parse(span, first_index)` — span-based interface with optional offset.
+ * - `parse(initial, ...)` — pre-initialised variants; useful for `BoundOption` /
+ * `on_parse`.
+ *
+ * On Windows, `wchar_t*` overloads are also provided; they convert arguments to
+ * UTF-8 via `detail::wide_to_utf8` before processing.
+ *
+ * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
+ */
 template <ArgumentSpec T>
 struct Parser {
   template <ArgumentSpec>
   friend struct Parser;
 
+  /**
+   * @brief Parses standard C-style `argc`/`argv`, using `argv[0]` as the program
+   * name.
+   *
+   * @param argc Argument count (includes program name at index 0).
+   * @param argv Argument vector.
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> ParseResult<T> {
     std::vector<std::string_view> args;
+    args.reserve(static_cast<std::size_t>(argc));
     for (int i = 0; i < argc; ++i) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       args.emplace_back(argv[i]);
     }
     if (argc > 0) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       program_name_ = argv[0];
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
 
-#ifdef _WIN32
+  /**
+   * @brief Parses `argc`/`argv` starting from a pre-initialised argument struct.
+   *
+   * Useful when fields of `T` need to be configured before parsing (e.g.
+   * `BoundOption` pointer targets or `on_parse` callbacks set on the struct).
+   *
+   * @param initial The pre-initialised argument struct.
+   * @param argc    Argument count (includes program name at index 0).
+   * @param argv    Argument vector.
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+  auto parse(T initial, int argc, char* argv[]) -> ParseResult<T> {
+    std::vector<std::string_view> args;
+    args.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      args.emplace_back(argv[i]);
+    }
+    if (argc > 0) {
+      program_name_ = argv[0];
+    }
+    return this->parse(std::move(initial),
+                       std::span<const std::string_view>(args), 1);
+  }
+
+#ifdef _WIN32
   auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
     std::vector<std::string> owned;
     owned.reserve(static_cast<std::size_t>(argc));
     for (int i = 0; i < argc; ++i) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       owned.emplace_back(detail::wide_to_utf8(argv[i]));
     }
     std::vector<std::string_view> args;
@@ -3251,12 +4581,103 @@ struct Parser {
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
+
+  auto parse(T initial, int argc, wchar_t* argv[]) -> ParseResult<T> {
+    std::vector<std::string> owned;
+    owned.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      owned.emplace_back(detail::wide_to_utf8(argv[i]));
+    }
+    std::vector<std::string_view> args;
+    args.reserve(owned.size());
+    for (const auto& s : owned) {
+      args.emplace_back(s);
+    }
+    if (argc > 0) {
+      program_name_ = owned[0];
+    }
+    return this->parse(std::move(initial),
+                       std::span<const std::string_view>(args), 1);
+  }
 #endif
 
+  /**
+   * @brief Parses a span of string views, skipping `first_index` elements.
+   *
+   * @param args        The full argument span (may include program name at index
+   * 0).
+   * @param first_index Index of the first argument to parse (default: 0).
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
   auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
       -> ParseResult<T> {
     ParseResult<T> result;
+    parse_body(result, args, first_index);
+    return result;
+  }
 
+  /**
+   * @brief Parses a span with an explicit program name for help output.
+   *
+   * @param args         The full argument span.
+   * @param program_name The name to display in usage/help text.
+   * @param first_index  Index of the first argument to parse (default: 0).
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
+  auto parse(std::span<const std::string_view> args,
+             std::string_view program_name, std::size_t first_index = 0)
+      -> ParseResult<T> {
+    program_name_ = std::string(program_name);
+    ParseResult<T> result;
+    parse_body(result, args, first_index);
+    return result;
+  }
+
+  /**
+   * @brief Parses a span starting from a pre-initialised argument struct.
+   *
+   * Useful with `BoundOption` / `on_parse` so that pointer targets and
+   * callbacks set before this call are preserved.
+   *
+   * @param initial     The pre-initialised argument struct.
+   * @param args        The full argument span.
+   * @param first_index Index of the first argument to parse (default: 0).
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
+  auto parse(T initial, std::span<const std::string_view> args,
+             std::size_t first_index = 0) -> ParseResult<T> {
+    ParseResult<T> result;
+    result.value = std::move(initial);
+    parse_body(result, args, first_index);
+    return result;
+  }
+
+  /**
+   * @brief Parses a span with a pre-initialised struct and explicit program
+   * name.
+   *
+   * @param initial      The pre-initialised argument struct.
+   * @param args         The full argument span.
+   * @param program_name The name to display in usage/help text.
+   * @param first_index  Index of the first argument to parse (default: 0).
+   * @return A `ParseResult<T>` containing the parsed struct or an error.
+   */
+  auto parse(T initial, std::span<const std::string_view> args,
+             std::string_view program_name, std::size_t first_index = 0)
+      -> ParseResult<T> {
+    program_name_ = std::string(program_name);
+    ParseResult<T> result;
+    result.value = std::move(initial);
+    parse_body(result, args, first_index);
+    return result;
+  }
+
+ private:
+  TokenizerConfig cfg_;
+  std::string program_name_ = "program";
+
+  auto parse_body(ParseResult<T>& result, std::span<const std::string_view> args,
+                  std::size_t first_index) -> void {
     auto [spec_map, command_names] = get_option_spec_map(result.value);
     auto tokenized = tokenize(args.subspan(std::min(first_index, args.size())),
                               spec_map, command_names, cfg_);
@@ -3265,7 +4686,7 @@ struct Parser {
         tokenized.error.position += static_cast<int>(first_index);
       }
       result.error = std::move(tokenized.error);
-      return result;
+      return;
     }
 
     const auto& tokens = tokenized.tokens;
@@ -3283,7 +4704,7 @@ struct Parser {
                                    first_index, tok.position);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         i = j;
 
@@ -3292,7 +4713,7 @@ struct Parser {
                                        tok.position + first_index);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         ++i;
 
@@ -3301,7 +4722,7 @@ struct Parser {
                                     tok.position + first_index + 1);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
-          return result;
+          return;
         }
         break;
 
@@ -3310,27 +4731,47 @@ struct Parser {
       }
     }
 
+    // Fire on_parse callbacks for positionals once, after all tokens are
+    // consumed.
+    for_each_field(result.value, [](auto& f) -> auto {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, PositionalTag>) {
+        if (f.provided()) f.fire_on_parse();
+      }
+    });
+
     if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
-      return result;
     }
-
-    return result;
   }
 
- private:
-  TokenizerConfig cfg_;
-  std::string program_name_ = "program";
-
  public:
+  /**
+   * @brief Generates a help string for the argument specification.
+   *
+   * @param color_mode Controls ANSI color output. Default: `ColorMode::auto_`.
+   * @return The formatted help string.
+   */
   auto format_help(ColorMode color_mode = ColorMode::auto_) -> std::string {
     return cli::format_help<T>(scratch_, program_name_, color_mode, false);
   }
 
+  /**
+   * @brief Generates a help string including recursive subcommand help.
+   *
+   * @return The formatted help string with all subcommand sections appended.
+   */
   auto format_help(RecurseHelpTag) -> std::string {
     return format_help(ColorMode::auto_, recurse_help);
   }
 
+  /**
+   * @brief Generates a help string with explicit color mode and recursive
+   * subcommand help.
+   *
+   * @param color_mode Controls ANSI color output.
+   * @return The formatted help string with all subcommand sections appended.
+   */
   auto format_help(ColorMode color_mode, RecurseHelpTag) -> std::string {
     return cli::format_help<T>(scratch_, program_name_, color_mode, true);
   }
@@ -3370,7 +4811,7 @@ struct Parser {
     return {spec_map, command_names};
   }
 
-  // Find the ArgImpl field matching (prefix, bare), notify it, and invoke its
+  // Find the option field matching (prefix, bare), notify it, and invoke its
   // action on each value token.  notify_option_seen() is called once;
   // invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.
   auto dispatch_option(T& val, std::string_view prefix, std::string_view bare,
@@ -3403,6 +4844,7 @@ struct Parser {
             res = f.invoke_action(vt.text, vt.position + first_index);
           }
         }
+        if (!res.has_error()) f.fire_on_parse();
       }
     });
     return res;
@@ -3455,7 +4897,8 @@ struct Parser {
         found = true;
         f.mark_provided();
         auto sub_parser = Parser<typename F::argument_type>{};
-        sub_parser.program_name_ = program_name_;
+        sub_parser.program_name_ =
+            std::format("{} {}", program_name_, F::command_name());
         auto sub = sub_parser.parse(args, first_index);
         if (sub.has_error()) {
           res = ActionResult<void>::fail(std::move(sub.error));
@@ -3511,12 +4954,41 @@ struct Parser {
   }
 };
 
+/**
+ * @brief Convenience free function that parses `argc`/`argv` into type `T`.
+ *
+ * Constructs a default `Parser<T>` and delegates to `Parser::parse`.
+ *
+ * @tparam T The argument specification type.
+ * @param argc Argument count (includes program name at index 0).
+ * @param argv Argument vector.
+ * @return A `ParseResult<T>` containing the parsed struct or an error.
+ */
 template <ArgumentSpec T>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse(int argc, char* argv[]) -> ParseResult<T> {
   return Parser<T>{}.parse(argc, argv);
 }
 
+/**
+ * @brief Parses `argc`/`argv` and exits the process on failure.
+ *
+ * If parsing fails, writes the error message to `err` (or `out` for
+ * help/exit-success) and calls `std::exit` with the appropriate exit code. On
+ * success, returns the fully populated argument struct by value.
+ *
+ * This is the typical one-liner entry point for command-line tools:
+ * @code
+ *   auto args = cli::parse_or_exit<MyArgs>(argc, argv);
+ * @endcode
+ *
+ * @tparam T   The argument specification type.
+ * @param argc Argument count (includes program name at index 0).
+ * @param argv Argument vector.
+ * @param out  Output stream for help/success messages. Default: `std::cout`.
+ * @param err  Output stream for error messages. Default: `std::cerr`.
+ * @return The parsed argument struct (never returns on failure).
+ */
 template <ArgumentSpec T>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
@@ -3534,13 +5006,11 @@ auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
 
 #ifdef _WIN32
 template <ArgumentSpec T>
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
   return Parser<T>{}.parse(argc, argv);
 }
 
 template <ArgumentSpec T>
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse_or_exit(int argc, wchar_t* argv[], std::ostream& out = std::cout,
                    std::ostream& err = std::cerr) -> T {
   auto result = parse<T>(argc, argv);
