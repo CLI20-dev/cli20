@@ -17,67 +17,105 @@ namespace cli {
 
 namespace detail {
 
+/**
+ * @brief Traits type that maps a C++ type to its help metavar name.
+ *
+ * The primary template uses `"value"` as a fallback. Specializations
+ * provide names such as `"string"`, `"int"`, `"path"`, etc.
+ *
+ * @tparam T The value type to look up.
+ */
 template <class T>
 struct MetavarName {
   static constexpr std::string_view value = "value";
 };
 
+/** @brief Metavar name for `std::string`: `"string"`. */
 template <>
 struct MetavarName<std::string> {
   static constexpr std::string_view value = "string";
 };
 
+/** @brief Metavar name for `bool`: `"bool"`. */
 template <>
 struct MetavarName<bool> {
   static constexpr std::string_view value = "bool";
 };
 
+/** @brief Metavar name for `float`: `"float"`. */
 template <>
 struct MetavarName<float> {
   static constexpr std::string_view value = "float";
 };
 
+/** @brief Metavar name for `double`: `"double"`. */
 template <>
 struct MetavarName<double> {
   static constexpr std::string_view value = "double";
 };
 
+/** @brief Metavar name for `std::filesystem::path`: `"path"`. */
 template <>
 struct MetavarName<std::filesystem::path> {
   static constexpr std::string_view value = "path";
 };
 
+/** @brief Metavar name for signed integer types: `"int"`. */
 template <std::signed_integral T>
 struct MetavarName<T> {
   static constexpr std::string_view value = "int";
 };
 
+/** @brief Metavar name for unsigned integer types: `"uint"`. */
 template <std::unsigned_integral T>
 struct MetavarName<T> {
   static constexpr std::string_view value = "uint";
 };
 
+/**
+ * @brief Helper that unwraps storage wrapper types to their underlying value
+ * type.
+ *
+ * - `UnwrapStorage<T>` → `type = T`, `variadic = false`
+ * - `UnwrapStorage<std::optional<T>>` → `type = T`, `variadic = false`
+ * - `UnwrapStorage<std::vector<T>>` → `type = T`, `variadic = true`
+ *
+ * @tparam T The potentially-wrapped storage type.
+ */
 template <class T>
 struct UnwrapStorage {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = false;
 };
 
+/** @brief Specialization for `std::optional<T>`. */
 template <class T>
 struct UnwrapStorage<std::optional<T>> {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = false;
 };
 
+/** @brief Specialization for `std::vector<T>` (variadic storage). */
 template <class T>
 struct UnwrapStorage<std::vector<T>> {
   using type = std::remove_cvref_t<T>;
   static constexpr bool variadic = true;
 };
 
+/** @brief Alias for the underlying value type of a storage wrapper. */
 template <class T>
 using unwrap_storage_t = typename UnwrapStorage<std::remove_cvref_t<T>>::type;
 
+/**
+ * @brief Returns the metavar string for a storage type, e.g. `<int>` or
+ * `<path...>`.
+ *
+ * For variadic storage (i.e. `std::vector<T>`), `...` is inserted before the
+ * closing `>`, producing e.g. `<string...>`.
+ *
+ * @tparam T The storage type of the argument field.
+ * @return A string such as `"<string>"` or `"<path...>"`.
+ */
 template <class T>
 [[nodiscard]]
 auto metavar_for() -> std::string {
@@ -90,6 +128,16 @@ auto metavar_for() -> std::string {
   return out;
 }
 
+/**
+ * @brief Builds the usage-line suffix that summarises what `value` accepts.
+ *
+ * Iterates over all fields of `value` and appends `" [options]"`,
+ * `" [args]"`, and/or `" [command]"` as appropriate.
+ *
+ * @tparam T The argument specification type.
+ * @param value An instance of the argument specification.
+ * @return A suffix string such as `" [options] [args]"`.
+ */
 template <class T>
 [[nodiscard]]
 auto command_usage_suffix(T& value) -> std::string {
@@ -127,6 +175,18 @@ auto command_usage_suffix(T& value) -> std::string {
   return out;
 }
 
+/**
+ * @brief Returns the label used in the help table for a single field type.
+ *
+ * - For `OptionTag` fields: `"-s, --long <metavar>"` (short name omitted if
+ * `'\0'`).
+ * - For `PositionalTag` fields: `"<metavar>"`.
+ * - For `CommandTag` fields: the command name string.
+ * - Otherwise: an empty string.
+ *
+ * @tparam T The field type (derived from one of the tag base classes).
+ * @return The formatted label string.
+ */
 template <class T>
 [[nodiscard]]
 auto field_usage_label() -> std::string {
@@ -151,6 +211,15 @@ auto field_usage_label() -> std::string {
   }
 }
 
+/**
+ * @brief Splits a string on newline characters.
+ *
+ * Always returns at least one element. If `text` is empty the result
+ * contains one empty string.
+ *
+ * @param text The string to split.
+ * @return A vector of lines (without the newline characters).
+ */
 inline auto split_lines(std::string_view text) -> std::vector<std::string> {
   std::vector<std::string> lines;
   std::size_t start = 0;
@@ -169,6 +238,17 @@ inline auto split_lines(std::string_view text) -> std::vector<std::string> {
   return lines;
 }
 
+/**
+ * @brief Appends a description string to `out`, indenting continuation lines.
+ *
+ * If `description` is empty a bare newline is appended. Otherwise the first
+ * line is written as-is, and each subsequent line is prefixed with `indent`
+ * spaces so that it aligns with the first line in the help table.
+ *
+ * @param out         The output string to append to.
+ * @param description The description text, potentially containing newlines.
+ * @param indent      Number of spaces to prepend to continuation lines.
+ */
 inline auto append_wrapped_description(std::string& out,
                                        std::string_view description,
                                        std::size_t indent) -> void {
@@ -187,6 +267,25 @@ inline auto append_wrapped_description(std::string& out,
   }
 }
 
+/**
+ * @brief Appends a labelled section (Options, Positional arguments, Commands) to
+ * `out`.
+ *
+ * Iterates over all fields of `value`, selects those for which `pred`
+ * returns `true`, renders each via `render`, and emits a right-aligned
+ * table under the section `title`.
+ *
+ * @tparam T      The argument specification type.
+ * @tparam Pred   A consteval callable `template<class F>() -> bool`.
+ * @tparam Render A callable `(field, label) -> std::string`.
+ * @param out           The output string to append to.
+ * @param title         Section heading text (e.g. `"Options:"`).
+ * @param heading_color ANSI sequence for the section heading (may be empty).
+ * @param reset_color   ANSI reset sequence (may be empty).
+ * @param value         The argument specification instance.
+ * @param pred          Field filter predicate.
+ * @param render        Row renderer called for each selected field.
+ */
 template <class T, class Pred, class Render>
 auto append_section(std::string& out, std::string_view title,
                     std::string_view heading_color, std::string_view reset_color,
@@ -223,6 +322,22 @@ auto append_section(std::string& out, std::string_view title,
   }
 }
 
+/**
+ * @brief Renders a single row in the help table for a field.
+ *
+ * Produces a string of the form:
+ * @code
+ *   "  <label>  <description>\n"
+ * @endcode
+ * The label is left-padded to `width` characters so all descriptions are
+ * aligned. Multi-line descriptions are indented to match.
+ *
+ * @tparam Field The field type (must have a `.help` member).
+ * @param field The field instance.
+ * @param label The pre-computed label string for this field.
+ * @param width The maximum label width in the current section (for alignment).
+ * @return The formatted row string.
+ */
 template <class Field>
 auto render_help_row(Field& field, std::string_view label, std::size_t width)
     -> std::string {
@@ -237,6 +352,17 @@ auto render_help_row(Field& field, std::string_view label, std::size_t width)
   return out;
 }
 
+/**
+ * @brief Extracts the `Description` field's text from an argument specification
+ * instance.
+ *
+ * Iterates over all fields; if a field derives from `DescriptionTag` its
+ * string value is returned. Returns an empty view if no description is found.
+ *
+ * @tparam T The argument specification type.
+ * @param value An instance of the argument specification.
+ * @return A `string_view` into the description string, or an empty view.
+ */
 template <class T>
 auto find_description(T& value) -> std::string_view {
   std::string_view description;
@@ -257,6 +383,28 @@ auto find_description(T& value) -> std::string_view {
   return description;
 }
 
+/**
+ * @brief Core implementation of help text generation.
+ *
+ * Builds the full help string including:
+ * - A `"Usage: <program> [options] [args] [command]"` line.
+ * - An optional description paragraph.
+ * - An `"Options:"` section for all `OptionTag` fields.
+ * - A `"Positional arguments:"` section for all `PositionalTag` fields.
+ * - A `"Commands:"` section for all `CommandTag` fields.
+ * - Optionally, recursively appended help for each subcommand.
+ *
+ * Labels within each section are right-aligned to the widest entry.
+ *
+ * @tparam T The argument specification type.
+ * @param value        An instance of the argument specification.
+ * @param program_name The program name shown in the usage line.
+ * @param color_mode   Controls ANSI color output.
+ * @param recurse      If `true`, recursively append help for subcommands.
+ * @param command_path The subcommand path prefix appended after `program_name`
+ * (empty for root).
+ * @return The formatted help string.
+ */
 template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
                       ColorMode color_mode, bool recurse,
@@ -365,6 +513,21 @@ auto format_help_impl(T& value, std::string_view program_name,
 
 }  // namespace detail
 
+/**
+ * @brief Generates a complete help string for an argument specification.
+ *
+ * This is the primary public API for help text generation. It delegates to
+ * `detail::format_help_impl` with an empty `command_path`.
+ *
+ * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
+ * @param value        An instance of the argument specification.
+ * @param program_name The program name to display in the usage line. Default:
+ * `"program"`.
+ * @param color_mode   Controls ANSI color output. Default: `ColorMode::auto_`.
+ * @param recurse      If `true`, also append help for each subcommand. Default:
+ * `false`.
+ * @return The formatted help string.
+ */
 template <ArgumentSpec T>
 auto format_help(T& value, std::string_view program_name = "program",
                  ColorMode color_mode = ColorMode::auto_, bool recurse = false)

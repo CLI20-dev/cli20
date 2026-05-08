@@ -26,6 +26,20 @@
 
 namespace cli {
 
+/**
+ * @brief The result type produced and consumed at each step of an action
+ * pipeline.
+ *
+ * An `ActionResult<T>` is either a *success* carrying a value of type `T`, or
+ * a *failure* carrying a `ParseError`. The `operator bool()`, `has_value()`,
+ * and `has_error()` methods make it easy to check the state inline.
+ *
+ * Factory methods:
+ * - `ActionResult<T>::ok(value)` — create a success result.
+ * - `ActionResult<T>::fail(error)` — create a failure result.
+ *
+ * @tparam T The value type held on success.
+ */
 template <class T>
 struct ActionResult {
   using value_type = T;
@@ -33,21 +47,31 @@ struct ActionResult {
   ParseError error{};
   T value{};
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents failure. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
+  /**
+   * @brief Creates a success result holding `value`.
+   *
+   * @tparam U Type of the value (deduced).
+   * @param value The value to store.
+   * @return A successful `ActionResult<T>`.
+   */
   template <class U>
   [[nodiscard]]
   static constexpr auto ok(U&& value) -> ActionResult<T> {
@@ -57,6 +81,12 @@ struct ActionResult {
     };
   }
 
+  /**
+   * @brief Creates a failure result carrying `error`.
+   *
+   * @param error The error to store.
+   * @return A failed `ActionResult<T>`.
+   */
   [[nodiscard]]
   static constexpr auto fail(ParseError error) -> ActionResult<T> {
     return {
@@ -66,31 +96,53 @@ struct ActionResult {
   }
 };
 
+/**
+ * @brief Specialisation of `ActionResult` for terminal (pack) actions that
+ * produce no value.
+ *
+ * Pack actions such as `SetTrue` or `Push` write their result directly into the
+ * argument storage referenced by `ActionCtx::arg`; they do not pass a value
+ * downstream, so `ActionResult<void>` carries only an error or success state.
+ */
 template <>
 struct ActionResult<void> {
   ParseError error{};
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr explicit operator bool() const noexcept {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents success. */
   [[nodiscard]]
   constexpr auto has_value() const noexcept -> bool {
     return !error.has_error();
   }
 
+  /** @brief Returns `true` when the result represents failure. */
   [[nodiscard]]
   constexpr auto has_error() const noexcept -> bool {
     return error.has_error();
   }
 
+  /**
+   * @brief Creates a success result.
+   *
+   * @return A successful `ActionResult<void>`.
+   */
   static constexpr auto ok() -> ActionResult<void> {
     return {
         .error = {},
     };
   }
 
+  /**
+   * @brief Creates a failure result carrying `error`.
+   *
+   * @param error The error to store.
+   * @return A failed `ActionResult<void>`.
+   */
   [[nodiscard]]
   static constexpr auto fail(ParseError error) -> ActionResult<void> {
     return {
@@ -99,20 +151,50 @@ struct ActionResult<void> {
   }
 };
 
+/**
+ * @brief Context passed to each action function during pipeline execution.
+ *
+ * Provides access to the current `argv` position, how many times the parent
+ * option has been seen, how many times the action has been invoked so far, and
+ * a reference to the argument's storage value.
+ *
+ * @tparam T The storage type of the argument; `void` for intermediate
+ * (non-terminal) actions.
+ */
 template <class T = void>
 struct ActionCtx {
-  size_t index{};
-  size_t occurrences{};
-  size_t invoke_count{};
-  std::reference_wrapper<T> arg{};
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t invoke_count{};  ///< Number of times this action has been invoked for
+                          ///< the current option.
+  std::reference_wrapper<T>
+      arg{};  ///< Reference to the argument's storage value.
 };
 
+/**
+ * @brief Partial specialisation of `ActionCtx` used for intermediate pipeline
+ * steps.
+ *
+ * Conversion and validation actions do not have access to the final storage;
+ * they receive `ActionCtx<void>` which carries only the positional counters.
+ * This specialisation also provides a converting constructor from `ActionCtx<T>`
+ * so that the parser can downcast when invoking non-terminal actions.
+ */
 template <>
 struct ActionCtx<void> {
-  size_t index{};
-  size_t occurrences{};
-  size_t invoke_count{};
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t invoke_count{};  ///< Number of times this action has been invoked for
+                          ///< the current option.
 
+  /**
+   * @brief Constructs from a typed `ActionCtx<T>`, copying the counters.
+   *
+   * @tparam T The storage type of the source context.
+   * @param other The source context to copy counters from.
+   */
   template <class T>
   ActionCtx(const ActionCtx<T>& other)
       : index(other.index),
@@ -230,6 +312,30 @@ concept StringLike = std::same_as<decay_t<T>, std::string> ||
 
 }  // namespace detail
 
+/**
+ * @brief A compile-time pipeline of action functions applied sequentially to a
+ * parsed token.
+ *
+ * Each element of `Fns` must be a constexpr-constructible callable that:
+ * - Exposes `template<class I> static constexpr bool accepts_input` — whether it
+ *   can handle input of type `I`.
+ * - Exposes `template<class I> using after_type` — the output type when given
+ * input `I`.
+ * - Exposes `template<class I> using storage_type` — the argument storage type
+ *   (non-void only for the last/terminal action in the pipeline).
+ *
+ * Pipelines are composed with `operator|`:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int>
+ *                            | cli::validation::positive
+ *                            | cli::pack::set_once;
+ * @endcode
+ *
+ * At pipeline invocation, if any step returns a failure the error is
+ * short-circuited to the end without invoking subsequent steps.
+ *
+ * @tparam Fns Pack of constexpr action objects forming the pipeline.
+ */
 template <auto... Fns>
   requires(requires {
     {
@@ -341,8 +447,30 @@ constexpr auto operator|(Action<Fns...>, Action<Fn>) {
   return Action<Fns..., Fn>{};
 }
 
+/**
+ * @brief Actions that convert a raw `std::string_view` token to a typed value.
+ *
+ * Each action in this namespace transforms the pipeline value from a string
+ * representation into a specific C++ type. They are typically placed first in
+ * an action pipeline, before validation and pack actions.
+ *
+ * Example:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int> |
+ * cli::pack::set_once;
+ * @endcode
+ */
 namespace conversion {
 
+/**
+ * @brief Converts a string token to an integral type `T` using
+ * `std::from_chars`.
+ *
+ * Returns `ErrorCode::invalid_value` for non-numeric or partially-consumed
+ * input, and `ErrorCode::out_of_range` when the value overflows `T`.
+ *
+ * @tparam T The target integral type (e.g. `int`, `unsigned long`).
+ */
 template <std::integral T>
 struct Integer {
   template <class Input>
@@ -385,6 +513,15 @@ struct Integer {
   }
 };
 
+/**
+ * @brief Converts a string token to a floating-point type `T` using
+ * `std::from_chars`.
+ *
+ * Returns `ErrorCode::invalid_value` for non-numeric or partially-consumed
+ * input, and `ErrorCode::out_of_range` on overflow.
+ *
+ * @tparam T The target floating-point type (e.g. `float`, `double`).
+ */
 template <std::floating_point T>
 struct Floating {
   template <class Input>
@@ -427,6 +564,7 @@ struct Floating {
   }
 };
 
+/** @brief Converts a `string_view` token to a `std::string` by copying. */
 struct String {
   template <class Input>
   static constexpr bool accepts_input =
@@ -446,6 +584,12 @@ struct String {
   }
 };
 
+/**
+ * @brief Converts a string token to `bool`.
+ *
+ * Accepts `"true"` / `"1"` → `true` and `"false"` / `"0"` → `false`.
+ * Returns `ErrorCode::invalid_value` for any other input.
+ */
 struct Bool {
   template <class Input>
   static constexpr bool accepts_input =
@@ -474,6 +618,8 @@ struct Bool {
   }
 };
 
+/** @brief Converts a string token to `std::filesystem::path` without filesystem
+ * validation. */
 struct Path {
   template <class Input>
   static constexpr bool accepts_input =
@@ -493,6 +639,13 @@ struct Path {
   }
 };
 
+/**
+ * @brief Converts a string token to `std::filesystem::path`, requiring the path
+ * to exist and be a regular file.
+ *
+ * Returns `ErrorCode::invalid_value` if the path does not exist or is not a
+ * regular file.
+ */
 struct ExistingFile {
   template <class Input>
   static constexpr bool accepts_input = Path::template accepts_input<Input>;
@@ -518,6 +671,13 @@ struct ExistingFile {
   }
 };
 
+/**
+ * @brief Converts a string token to `std::filesystem::path`, requiring the path
+ * to exist and be a directory.
+ *
+ * Returns `ErrorCode::invalid_value` if the path does not exist or is not a
+ * directory.
+ */
 struct ExistingDirectory {
   template <class Input>
   static constexpr bool accepts_input = Path::template accepts_input<Input>;
@@ -542,6 +702,17 @@ struct ExistingDirectory {
   }
 };
 
+/**
+ * @brief Converts a string token to type `T` via a user-supplied mapper
+ * function.
+ *
+ * `Mapper` must be a constexpr callable of the form
+ * `(std::string_view) -> std::optional<T>`. Returns `ErrorCode::invalid_choice`
+ * when the mapper returns `std::nullopt`.
+ *
+ * @tparam T      The target value type.
+ * @tparam Mapper A constexpr callable mapping strings to `std::optional<T>`.
+ */
 template <class T, auto Mapper>
 struct Choice {
   template <class Input>
@@ -583,8 +754,26 @@ inline constexpr auto existing_directory = Action<ExistingDirectory{}>{};
 
 }  // namespace conversion
 
+/**
+ * @brief Actions that validate a typed value after conversion.
+ *
+ * Each action in this namespace passes its input through unchanged on success
+ * or returns `ErrorCode::validation_failed` / `ErrorCode::invalid_choice` on
+ * failure. They are placed after a conversion action and before a pack action:
+ *
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int>
+ *                            | cli::validation::range<1, 100>
+ *                            | cli::pack::set_once;
+ * @endcode
+ */
 namespace validation {
 
+/**
+ * @brief Validates that the input value is greater than or equal to `MinValue`.
+ *
+ * @tparam MinValue The inclusive lower bound (non-type template parameter).
+ */
 template <auto MinValue>
 struct Min {
   template <class Prev>
@@ -609,6 +798,11 @@ struct Min {
   }
 };
 
+/**
+ * @brief Validates that the input value is less than or equal to `MaxValue`.
+ *
+ * @tparam MaxValue The inclusive upper bound (non-type template parameter).
+ */
 template <auto MaxValue>
 struct Max {
   template <class Prev>
@@ -633,6 +827,13 @@ struct Max {
   }
 };
 
+/**
+ * @brief Validates that the input value is within the closed interval [MinValue,
+ * MaxValue].
+ *
+ * @tparam MinValue Inclusive lower bound.
+ * @tparam MaxValue Inclusive upper bound. Must be the same type as `MinValue`.
+ */
 template <auto MinValue, auto MaxValue>
   requires std::is_same_v<decltype(MinValue), decltype(MaxValue)>
 struct Range {
@@ -658,6 +859,7 @@ struct Range {
   }
 };
 
+/** @brief Validates that the input value is strictly positive (> 0). */
 struct Positive {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -681,6 +883,7 @@ struct Positive {
   }
 };
 
+/** @brief Validates that the input value is non-negative (>= 0). */
 struct NonNegative {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -704,6 +907,8 @@ struct NonNegative {
   }
 };
 
+/** @brief Validates that the input value is not empty (requires `.empty()`
+ * member). */
 struct NonEmpty {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -727,6 +932,7 @@ struct NonEmpty {
   }
 };
 
+/** @brief Validates that the input string is not blank (not all whitespace). */
 struct NotBlank {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -751,6 +957,13 @@ struct NotBlank {
   }
 };
 
+/**
+ * @brief Validates that the input value equals one of the compile-time constants
+ * `Allowed`.
+ *
+ * @tparam Allowed Non-type template pack of allowed values. All must be the same
+ * type.
+ */
 template <auto... Allowed>
 struct OneOf {
   template <class Prev>
@@ -777,6 +990,15 @@ struct OneOf {
   }
 };
 
+/**
+ * @brief Validates that the input string matches a compile-time regular
+ * expression.
+ *
+ * Uses `std::regex_match` (full-match semantics). Returns
+ * `ErrorCode::validation_failed` when the string does not match.
+ *
+ * @tparam Pattern The regex pattern string (e.g. `"[a-z]+"`).
+ */
 template <StringLiteral Pattern>
 struct Matches {
   template <class Prev>
@@ -801,6 +1023,7 @@ struct Matches {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` exists on the filesystem. */
 struct Exists {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -823,6 +1046,7 @@ struct Exists {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` refers to a regular file. */
 struct IsRegularFile {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -845,6 +1069,7 @@ struct IsRegularFile {
   }
 };
 
+/** @brief Validates that a `std::filesystem::path` refers to a directory. */
 struct IsDirectory {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -867,6 +1092,8 @@ struct IsDirectory {
   }
 };
 
+/** @brief Validates that the parent directory of a `std::filesystem::path`
+ * exists. */
 struct ParentExists {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -890,6 +1117,14 @@ struct ParentExists {
   }
 };
 
+/**
+ * @brief Validates a value using a user-supplied compile-time predicate.
+ *
+ * `Pred` must be a constexpr callable of the form `(const T&) -> bool`.
+ * Returns `ErrorCode::validation_failed` when `Pred` returns `false`.
+ *
+ * @tparam Pred A constexpr callable acting as the validation predicate.
+ */
 template <auto Pred>
 struct Predicate {
   template <class Prev>
@@ -939,8 +1174,22 @@ inline constexpr auto parent_exists = Action<ParentExists{}>{};
 
 }  // namespace validation
 
+/**
+ * @brief Terminal actions that write the converted (and validated) value into
+ * argument storage.
+ *
+ * Pack actions are always the last step in an action pipeline. They define the
+ * `storage_type` alias that determines the type of the field's `.value()`
+ * member.
+ *
+ * Example:
+ * @code
+ *   constexpr auto my_action = cli::conversion::integer<int> | cli::pack::push;
+ * @endcode
+ */
 namespace pack {
 
+/** @brief Sets the `bool` storage to `true`. Used as the action for `Flag`. */
 struct SetTrue {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -959,6 +1208,7 @@ struct SetTrue {
   }
 };
 
+/** @brief Sets the `bool` storage to `false`. */
 struct SetFalse {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -977,6 +1227,7 @@ struct SetFalse {
   }
 };
 
+/** @brief Flips the `bool` storage each time the option is seen. */
 struct Toggle {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -995,6 +1246,7 @@ struct Toggle {
   }
 };
 
+/** @brief Increments a `std::size_t` counter each time the option is seen. */
 struct Increment {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1013,6 +1265,13 @@ struct Increment {
   }
 };
 
+/**
+ * @brief Passes the value through unchanged, but returns
+ * `ErrorCode::duplicate_argument` if the option has been seen more than once.
+ *
+ * This is a *filter* action (non-terminal); it must be followed by a terminal
+ * pack action.
+ */
 struct RejectDuplicate {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1035,6 +1294,14 @@ struct RejectDuplicate {
   }
 };
 
+/**
+ * @brief Stores the value in `std::optional<T>` and rejects subsequent
+ * occurrences.
+ *
+ * Storage type: `std::optional<T>`. Returns `ErrorCode::duplicate_argument` if
+ * the option appears more than once. This is the default terminal action for
+ * `Option<T, ...>`.
+ */
 struct SetOnce {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1058,6 +1325,12 @@ struct SetOnce {
   }
 };
 
+/**
+ * @brief Appends the value to a `std::vector<T>`, rejecting duplicate values.
+ *
+ * Storage type: `std::vector<T>`. Returns `ErrorCode::duplicate_argument` if
+ * the same value is pushed more than once.
+ */
 struct PushUnique {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1082,6 +1355,12 @@ struct PushUnique {
   }
 };
 
+/**
+ * @brief Appends the value to a `std::vector<T>`.
+ *
+ * Storage type: `std::vector<T>`. This is the default terminal action for
+ * `ListOption<T, ...>`.
+ */
 struct Push {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1101,6 +1380,12 @@ struct Push {
   }
 };
 
+/**
+ * @brief Inserts the value into a `std::set<T>` (duplicates are silently ignored
+ * by the set).
+ *
+ * Storage type: `std::set<T>`. Requires the value type to be totally ordered.
+ */
 struct Insert {
   template <class Prev>
   static constexpr bool accepts_input =
@@ -1166,6 +1451,13 @@ struct Extend {
   }
 };
 
+/**
+ * @brief Sets a `bool` flag to `true` when the option is seen, regardless of
+ * value.
+ *
+ * Storage type: `bool`. Useful for detecting option presence without caring
+ * about the value of the option.
+ */
 struct MarkPresent {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1184,6 +1476,15 @@ struct MarkPresent {
   }
 };
 
+/**
+ * @brief Writes the value directly into an external variable via a `T*` pointer.
+ *
+ * Storage type: `T*`. The pointer must be non-null at the time of parsing;
+ * returns `ErrorCode::validation_failed` with a descriptive message if the
+ * pointer is null. Used as the action for `BoundOption`.
+ *
+ * @tparam T The type of the external variable.
+ */
 template <class T>
 struct StoreInto {
   template <class Prev>
@@ -1207,6 +1508,20 @@ struct StoreInto {
   }
 };
 
+/**
+ * @brief Invokes a compile-time callable `Fn` with the parsed value as a
+ * terminal action.
+ *
+ * `Fn` may have any of the following signatures:
+ * - `(ActionCtx<void>, T value)` — receives context and value.
+ * - `(T value)` — receives value only.
+ * - `()` — receives nothing.
+ *
+ * Storage type: `std::monostate` (no value is stored; the callback is the only
+ * effect).
+ *
+ * @tparam Fn A constexpr callable to invoke.
+ */
 template <auto Fn>
 struct Callback {
   template <class Prev>
@@ -1251,8 +1566,18 @@ inline constexpr auto store_into = Action<StoreInto<T>{}>{};
 
 }  // namespace pack
 
+/**
+ * @brief Actions that control the parser's control flow (help, exit).
+ */
 namespace action {
 
+/**
+ * @brief Wraps the current value in a `HelpRequested<T>` sentinel type.
+ *
+ * When `ExitSuccess` follows this action, it detects the `HelpRequested` wrapper
+ * and emits `ErrorCode::help_requested` (which instructs the parser to print
+ * help and exit 0).
+ */
 struct PrintHelp {
   template <class Prev>
   static constexpr bool accepts_input = true;
@@ -1271,6 +1596,13 @@ struct PrintHelp {
   }
 };
 
+/**
+ * @brief Terminates the pipeline by returning a `ParseError` with code
+ * `exit_success` (or `help_requested` when preceded by `PrintHelp`).
+ *
+ * The parser catches these special codes and either prints help text or exits
+ * cleanly with code 0, without treating them as real errors.
+ */
 struct ExitSuccess {
   template <class Prev>
   static constexpr bool accepts_input = true;
