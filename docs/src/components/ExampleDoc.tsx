@@ -1,10 +1,9 @@
 import React from 'react';
 import CodeBlock from '@theme/CodeBlock';
-import {exampleCommandOutputs} from '@site/src/generated/exampleCommandOutputs';
 
 export type ExampleSourceData = {
   sourcePath: string;
-  sourceCode: string;
+  sourceCode?: string;  // injected by remark plugin at build time
   sourceHref?: string;
 };
 
@@ -13,10 +12,6 @@ export type ExampleCommandData = {
   command: string;
   output?: string;
 };
-
-function observedOutput(item: ExampleCommandData): string | undefined {
-  return item.output ?? exampleCommandOutputs[item.command];
-}
 
 export function ExampleSource({example}: {example: ExampleSourceData}) {
   const sourceHref =
@@ -55,7 +50,7 @@ export function ExampleCommands({
     <>
       <h2>{title}</h2>
       {normalizedItems.map((item, index) => {
-        const output = observedOutput(item);
+        const output = item.output;
         return (
           <div key={`${item.label ?? 'command'}-${index}`} style={{marginBottom: '1.5rem'}}>
             {item.label ? (

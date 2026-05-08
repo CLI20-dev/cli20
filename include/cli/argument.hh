@@ -500,7 +500,17 @@ template <auto A>
 concept ActionValue = requires { std::remove_cvref_t<decltype(A)>::validate(); };
 
 template <auto... Args>
-struct ArgAlias;
+struct ArgAlias {
+  static_assert(
+      sizeof...(Args) && !sizeof...(Args),
+      "Unsupported Arg<> parameter combination.\n"
+      "Supported forms (after the Name parameter):\n"
+      "  Arg<Name, Action>\n"
+      "  Arg<Name, Action, Nargs>\n"
+      "  Arg<Name, ShortName, Action>\n"
+      "  Arg<Name, ShortName, Action, Nargs>\n"
+      "Consider using Flag, Option, or ListOption for common argument kinds.");
+};
 
 template <StringLiteral Name, auto A>
   requires ActionValue<A>
@@ -717,21 +727,23 @@ struct PositionalActionFor {
  * @brief Defines a typed command-line argument specification.
  *
  * `Arg` constructs a command-line option or flag from a compile-time
- * specification consisting of:
+ * specification. The supported parameter sequences after `Name` are:
  *
- * - a long option name
- * - an optional short option name
- * - an argument arity specification
- * - an action
+ * | Form                          | Effect                                   |
+ * |-------------------------------|------------------------------------------|
+ * | `<Name, Action>`              | No short name; `nargs::one`.             |
+ * | `<Name, Action, Nargs>`       | No short name; custom arity.             |
+ * | `<Name, ShortName, Action>`   | With short name; `nargs::one`.           |
+ * | `<Name, ShortName, Action, Nargs>` | With short name; custom arity.      |
  *
- * The additional configuration parameters may be specified in any order.
+ * The short name character (if present) must appear before the action, and
+ * the `Nargs` value (if present) must appear after the action.
  *
  * Most users should prefer higher-level aliases such as `Flag`,
  * `Option`, and `ListOption` for common argument kinds.
  *
  * @tparam Name Long option name without the leading `--`.
- * @tparam Args Order-independent configuration parameters, such as a short
- *              option character, `Nargs` specification, or action.
+ * @tparam Args Configuration parameters: `[ShortName,] Action [, Nargs]`.
  */
 template <StringLiteral Name, auto... Args>
 using Arg = typename detail::ArgAlias<Name, Args...>::type;

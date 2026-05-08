@@ -1,6 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+// @ts-expect-error — local ESM plugin, no type declarations
+import remarkRunExampleCommands from './plugins/remark-run-example-commands.mjs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -40,6 +42,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          remarkPlugins: [remarkRunExampleCommands],
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -47,26 +50,7 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-  plugins: [
-    function rawExampleSourcesPlugin() {
-      return {
-        name: 'raw-example-sources',
-        configureWebpack() {
-          return {
-            module: {
-              rules: [
-                {
-                  test: /\.cc$/i,
-                  resourceQuery: /raw/,
-                  type: 'asset/source',
-                },
-              ],
-            },
-          };
-        },
-      };
-    },
-  ],
+  plugins: [],
 
   themeConfig: {
     image: 'img/logo.png',
