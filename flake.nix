@@ -89,7 +89,13 @@
             # the whole repository, not just the docs/ subdirectory.
             src = ./.;
             postUnpack = ''sourceRoot="$sourceRoot/docs"'';
-            npmDepsHash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            # npmDeps must reference docs/ explicitly so fetchNpmDeps finds
+            # package-lock.json there, not at the repo root.
+            npmDeps = pkgs.fetchNpmDeps {
+              name = "cli20-docs-0.0.0-npm-deps";
+              src = ./docs;
+              hash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            };
             nativeBuildInputs = [
               pkgs.llvmPackages.libcxxClang
               pkgs.cmake
