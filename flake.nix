@@ -93,7 +93,8 @@
             '';
             installPhase = ''
               runHook preInstall
-              cp -r build $out
+              mkdir -p $out
+              cp -r build/. $out/
               runHook postInstall
             '';
           };
