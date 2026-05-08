@@ -15,14 +15,14 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://gen740.github.io',
+  url: 'https://cli20-dev.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/CLI20/',
+  baseUrl: '/cli20/',
 
   // GitHub pages deployment config.
-  organizationName: 'gen740',
-  projectName: 'CLI20',
+  organizationName: 'CLI20-dev',
+  projectName: 'cli20',
 
   onBrokenLinks: 'throw',
 
