@@ -1,0 +1,37 @@
+---
+sidebar_position: 1
+title: Examples Overview
+---
+
+# Examples Overview
+
+The repository ships a set of focused programs under
+[`examples/`](https://github.com/CLI20-dev/cli20/tree/main/examples).
+Each one is small enough to copy into a project, but specific enough to answer
+"how do I do this with cli20?" without digging through tests.
+
+## Example Order
+
+1. [Simple API](./simple-api)  
+   The smallest useful typed-schema CLI: help, a flag, an option, and a required positional.
+2. [Subcommands](./subcommand)  
+   Nested commands with their own help output and behavior.
+3. [Validation](./validation)  
+   Parse-time checks for numbers, names, and filesystem arguments.
+4. [Bind](./bind)  
+   Write values directly into existing variables.
+5. [Callback Entry Point](./callback-entry-point)  
+   Fill application state during parsing, then call the real entry point.
+6. [Advanced](./advanced)  
+   Lower-level composition with explicit conversion, validation, and packing steps.
+7. [Distribution and Platform Examples](./distribution-and-platform)  
+   Single-header usage, C++20 modules, and the Windows Unicode sample used by CI.
+
+## Building
+
+```bash
+cmake -B build
+cmake --build build
+```
+
+Each source file becomes an executable with the same base name under `build/examples/`.

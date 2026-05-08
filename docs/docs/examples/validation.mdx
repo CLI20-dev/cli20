@@ -1,0 +1,59 @@
+---
+title: Validation
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import validationSource from '../../../examples/validation.cc?raw';
+
+# Validation
+
+Open this example when parse-time rejection matters more than keeping to the
+sugar aliases. It shows how to combine explicit conversion and validation
+actions in one pipeline.
+
+This is the page to read when you want bad input to fail early, with clear
+errors, before the rest of your program starts running.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/validation.cc',
+    sourceCode: validationSource,
+  }}
+/>
+
+## What This Example Shows
+
+This example converts raw argv text into typed values, rejects invalid ports and
+profile names during parsing, and checks filesystem-related arguments before the
+rest of the program runs. On success, the parsed state ends up as optional
+typed fields for `port`, `profile`, and `output`.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Successful parse',
+      command: './build/examples/validation --port 8080 --profile release_1 --output /tmp/cli20-example/out/result.bin',
+    },
+    {
+      label: 'Generated help',
+      command: './build/examples/validation --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Port outside the accepted range',
+      command: './build/examples/validation --port 70000 --profile BadName',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Advanced](/docs/examples/advanced)
+- [Simple API](/docs/examples/simple-api)

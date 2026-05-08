@@ -47,6 +47,26 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
+  plugins: [
+    function rawExampleSourcesPlugin() {
+      return {
+        name: 'raw-example-sources',
+        configureWebpack() {
+          return {
+            module: {
+              rules: [
+                {
+                  test: /\.cc$/i,
+                  resourceQuery: /raw/,
+                  type: 'asset/source',
+                },
+              ],
+            },
+          };
+        },
+      };
+    },
+  ],
 
   themeConfig: {
     image: 'img/logo.png',
@@ -65,6 +85,12 @@ const config: Config = {
           sidebarId: 'tutorialSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          type: 'doc',
+          docId: 'examples/index',
+          position: 'left',
+          label: 'Examples',
         },
         {
           href: 'https://github.com/CLI20-dev/cli20',
@@ -86,6 +112,10 @@ const config: Config = {
             {
               label: 'Tutorial',
               to: '/docs/tutorial',
+            },
+            {
+              label: 'Examples',
+              to: '/docs/examples',
             },
           ],
         },

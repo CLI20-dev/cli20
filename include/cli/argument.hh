@@ -218,6 +218,8 @@ struct ArgParameter {
   std::function<void(const T&)> on_parse{};
 };
 
+namespace detail {
+
 template <StringLiteral Name, char ShortName, Nargs N, Action A>
   requires requires {
     detail::is_valid_long_option_name<Name>();
@@ -328,6 +330,31 @@ struct ArgImpl : public OptionTag {
   std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
   bool provided_{};
 };
+
+template <auto... Args>
+struct ArgAlias;
+
+template <StringLiteral Name, auto A>
+struct ArgAlias<Name, A> {
+  using type = ArgImpl<Name, '\0', nargs::one, A>;
+};
+
+template <StringLiteral Name, auto A, Nargs N>
+struct ArgAlias<Name, A, N> {
+  using type = ArgImpl<Name, '\0', N, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A>
+struct ArgAlias<Name, ShortName, A> {
+  using type = ArgImpl<Name, ShortName, nargs::one, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A, Nargs N>
+struct ArgAlias<Name, ShortName, A, N> {
+  using type = ArgImpl<Name, ShortName, N, A>;
+};
+
+}  // namespace detail
 
 template <Nargs N, Action A>
   requires requires {
@@ -484,12 +511,15 @@ struct PositionalActionFor {
 
 // ── Core public API ───────────────────────────────────────────────────────────
 
+template <StringLiteral Name, auto... Args>
+using Arg = typename detail::ArgAlias<Name, Args...>::type;
+
 template <StringLiteral Name, char ShortName = '\0'>
-using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
+using Flag = Arg<Name, ShortName, pack::set_true, nargs::none>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
 using BoundOption =
-    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::store_into>;
+    Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using BoundStringOption = BoundOption<std::string, Name, ShortName>;
@@ -504,16 +534,17 @@ template <StringLiteral Name, char ShortName = '\0'>
 using BoundPathOption = BoundOption<std::filesystem::path, Name, ShortName>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
-using Help = ArgImpl<Name, ShortName, nargs::none,
-                     action::print_help | action::exit_success>;
+using Help =
+    Arg<Name, ShortName, action::print_help | action::exit_success,
+        nargs::none>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
 using Option =
-    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
+    Arg<Name, ShortName, detail::ActionFor<T>::set_once>;
 
 template <class T, StringLiteral Name, char ShortName = '\0',
           Nargs N = nargs::one_or_more>
-using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
+using ListOption = Arg<Name, ShortName, detail::ActionFor<T>::push, N>;
 
 template <class T, Nargs N = nargs::one>
 using Positional = PositionalImpl<N, detail::PositionalActionFor<T, N>::value>;

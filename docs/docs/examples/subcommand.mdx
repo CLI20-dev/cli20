@@ -1,0 +1,63 @@
+---
+title: Subcommands
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import subcommandSource from '../../../examples/subcommand.cc?raw';
+
+# Subcommands
+
+Open this when your CLI has verbs like `build`, `publish`, `run`, or `deploy`.
+cli20 models those commands as nested typed schemas rather than a mutable
+runtime graph.
+
+This page is the reference for command-oriented CLIs where each verb owns its
+own arguments and help output.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/subcommand.cc',
+    sourceCode: subcommandSource,
+  }}
+/>
+
+## What This Example Shows
+
+This example splits one CLI into multiple verbs, gives each subcommand its own
+arguments and help text, and makes it easy to check which command actually ran.
+Global options are handled first, then control passes to exactly one command,
+whose nested fields keep the usual `value()` and `provided()` behavior.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Run the build subcommand',
+      command: './build/examples/subcommand build --release --jobs 4 main.cc util.cc',
+    },
+    {
+      label: 'Subcommand help',
+      command: './build/examples/subcommand build --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Build selected without source files',
+      command: './build/examples/subcommand build',
+    },
+    {
+      label: 'Publish selected without a registry',
+      command: './build/examples/subcommand publish',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Simple API](/docs/examples/simple-api)
+- [Callback Entry Point](/docs/examples/callback-entry-point)

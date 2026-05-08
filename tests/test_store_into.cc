@@ -143,10 +143,10 @@ TEST(StoreInto, MultipleVariablesBoundToSameArgs) {
   EXPECT_EQ(output, "out.bin");
 }
 
-TEST(StoreInto, DirectArgImplWithStoreInto) {
+TEST(StoreInto, DirectArgWithStoreInto) {
   struct DirectArgs {
-    cli::ArgImpl<"port", 'p', cli::nargs::one,
-                 cli::conversion::integer<int> | cli::pack::store_into<int>>
+    cli::Arg<"port", 'p',
+             cli::conversion::integer<int> | cli::pack::store_into<int>>
         port_opt;
   };
 

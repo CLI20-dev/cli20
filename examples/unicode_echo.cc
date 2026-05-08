@@ -1,4 +1,4 @@
-// unicode_echo: integration-test helper for Windows wmain Unicode support.
+// unicode_echo.cc — integration-test helper for Windows wmain Unicode support.
 // Parses --name and positional file arguments, then echoes each value to
 // stdout in "key=value\n" format so CI scripts can compare output.
 //

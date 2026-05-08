@@ -82,12 +82,13 @@ cli::Help<> help;
 
 This expands to `--help` / `-h`. When the flag is present, cli20 prints a formatted help message and exits with success. Combined with `cli::parse_or_exit()`, no additional boilerplate is required.
 
-For explicit control you can use `ArgImpl` directly with an action pipeline:
+For explicit control you can use `Arg` directly with an action pipeline:
 
 ```cpp
-cli::ArgImpl<
-    "help", 'h', cli::nargs::none,
-    cli::action::print_help | cli::action::exit_success>
+cli::Arg<
+    "help", 'h',
+    cli::action::print_help | cli::action::exit_success,
+    cli::nargs::none>
     help;
 ```
 
@@ -166,13 +167,13 @@ auto main(int argc, char* argv[]) -> int {
 
 ## Going Beyond Sugar — action pipelines
 
-When the sugar API is not enough, use `ArgImpl` directly with a custom action pipeline.
+When the sugar API is not enough, use `Arg` directly with a custom action pipeline.
 
 Actions are composed with `|`:
 
 ```cpp
-cli::ArgImpl<
-    "config", 'c', cli::nargs::one,
+cli::Arg<
+    "config", 'c',
     cli::conversion::path
         | cli::validation::exists
         | cli::validation::is_regular_file
@@ -183,8 +184,8 @@ cli::ArgImpl<
 Each `|` appends a step to the pipeline. The explicit `cli::Action<...>` template form is equivalent:
 
 ```cpp
-cli::ArgImpl<
-    "config", 'c', cli::nargs::one,
+cli::Arg<
+    "config", 'c',
     cli::Action<
         cli::conversion::path,
         cli::validation::exists,
@@ -201,4 +202,4 @@ The pipeline is split into three conceptual layers:
 | Validation | `cli::validation::*` | Reject out-of-range or otherwise invalid values |
 | Packing | `cli::pack::*` | Store the final value into the field |
 
-Use the sugar API for the common case and drop down to `ArgImpl` only when you need stronger validation or custom conversion behavior.
+Use the sugar API for the common case and drop down to `Arg` only when you need stronger validation or custom conversion behavior.

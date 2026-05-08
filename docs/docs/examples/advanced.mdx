@@ -1,0 +1,61 @@
+---
+title: Advanced
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import advancedSource from '../../../examples/advanced.cc?raw';
+
+# Advanced
+
+This is the reference example for explicit action-pipeline composition. Use it
+when the sugar aliases are close but not quite enough.
+
+It is the page to open when you need to understand the lower-level building
+blocks behind cli20's higher-level aliases.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/advanced.cc',
+    sourceCode: advancedSource,
+  }}
+/>
+
+## What This Example Shows
+
+This example builds parsing behavior from explicit conversion, validation, and
+storage steps instead of the higher-level aliases. It is the pattern to copy
+when you need lists, uniqueness, or filesystem checks with precise control over
+how values are stored. On success, it produces optional `config` and `jobs`
+values plus collected `includes` and `defines`.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Prepare sample files and run the example',
+      command: `mkdir -p /tmp/cli20-example/include /tmp/cli20-example/out
+touch /tmp/cli20-example/config.toml
+./build/examples/advanced --config /tmp/cli20-example/config.toml --jobs 8 --include /tmp/cli20-example/include -D DEBUG -D TRACE`,
+    },
+    {
+      label: 'Generated help',
+      command: './build/examples/advanced --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Missing configuration file fails validation',
+      command: './build/examples/advanced --config /tmp/cli20-example/missing.toml',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Validation](/docs/examples/validation)
+- [Bind](/docs/examples/bind)

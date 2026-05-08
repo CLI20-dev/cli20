@@ -1,0 +1,74 @@
+import React from 'react';
+import CodeBlock from '@theme/CodeBlock';
+import {exampleCommandOutputs} from '@site/src/generated/exampleCommandOutputs';
+
+export type ExampleSourceData = {
+  sourcePath: string;
+  sourceCode: string;
+  sourceHref?: string;
+};
+
+export type ExampleCommandData = {
+  label?: string;
+  command: string;
+  output?: string;
+};
+
+function observedOutput(item: ExampleCommandData): string | undefined {
+  return item.output ?? exampleCommandOutputs[item.command];
+}
+
+export function ExampleSource({example}: {example: ExampleSourceData}) {
+  const sourceHref =
+    example.sourceHref ??
+    `https://github.com/CLI20-dev/cli20/blob/main/${example.sourcePath}`;
+  return (
+    <>
+      <p>
+        Source:{' '}
+        <a href={sourceHref}>
+          <code>{example.sourcePath}</code>
+        </a>
+      </p>
+      <CodeBlock language="cpp" title={example.sourcePath}>
+        {example.sourceCode}
+      </CodeBlock>
+    </>
+  );
+}
+
+export function ExampleCommands({
+  title = 'Commands',
+  items,
+  command,
+  label,
+}: {
+  title?: string;
+  items?: ExampleCommandData[];
+  command?: string;
+  label?: string;
+}) {
+  const normalizedItems =
+    items ?? (command ? [{label, command}] satisfies ExampleCommandData[] : []);
+
+  return (
+    <>
+      <h2>{title}</h2>
+      {normalizedItems.map((item, index) => (
+        <div key={`${item.label ?? 'command'}-${index}`} style={{marginBottom: '1.5rem'}}>
+          {item.label ? (
+            <p>
+              <strong>{item.label}</strong>
+            </p>
+          ) : null}
+          <CodeBlock language="bash">{item.command}</CodeBlock>
+          {observedOutput(item) ? (
+            <CodeBlock language="text" title="Observed output">
+              {observedOutput(item)}
+            </CodeBlock>
+          ) : null}
+        </div>
+      ))}
+    </>
+  );
+}
