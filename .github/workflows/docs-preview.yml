@@ -10,6 +10,9 @@ on:
       - '.github/workflows/docs-preview.yml'
       - '.github/workflows/deploy-docs.yml'
 
+permissions:
+  contents: read
+
 jobs:
   docs-preview:
     name: Build docs preview
