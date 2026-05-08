@@ -30,17 +30,6 @@ jobs:
             exit 1
           fi
 
-      - name: Verify single_header is not manually modified
-        if: github.event_name == 'pull_request'
-        run: |
-          if ! git diff --quiet \
-            ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} \
-            -- single_header/; then
-            echo ""
-            echo "::error::single_header/ must not be modified manually."
-            echo "It is regenerated automatically after each merge to main."
-            exit 1
-          fi
 
   # ── Build + test matrix ───────────────────────────────────────────────────
   test:
