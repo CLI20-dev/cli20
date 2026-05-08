@@ -1,0 +1,48 @@
+PROJECT_NAME           = "cli20"
+PROJECT_BRIEF          = "A C++20 typed-schema command-line parser"
+PROJECT_NUMBER         = v0.1.1-pre
+
+INPUT                  = include/
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hh *.h
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+# Hide internal implementation details
+EXCLUDE_SYMBOLS        = cli::detail
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = docs/static/api
+
+# doxygen-awesome-css: modern flat theme
+HTML_EXTRA_STYLESHEET  = doxygen/doxygen-awesome.css
+HTML_COLORSTYLE        = LIGHT
+HTML_COLORSTYLE_HUE    = 209
+HTML_COLORSTYLE_SAT    = 255
+HTML_COLORSTYLE_GAMMA  = 113
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+GENERATE_XML           = NO
+
+QUIET                  = YES
+WARNINGS               = YES
+
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+
+BUILTIN_STL_SUPPORT    = YES
+CPP_CLI_SUPPORT        = NO
+IDL_PROPERTY_SUPPORT   = NO
+
+ALPHABETICAL_INDEX     = YES
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+
+HAVE_DOT               = NO

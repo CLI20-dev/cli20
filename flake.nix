@@ -47,6 +47,7 @@
               })
               pkgs.nodejs_latest
               pkgs.clang-tools
+              pkgs.doxygen
               config.treefmt.build.wrapper
             ];
           };
@@ -100,6 +101,7 @@
               pkgs.llvmPackages.libcxxClang
               pkgs.cmake
               pkgs.ninja
+              pkgs.doxygen
             ];
             # cwd is source/docs/, so .. is the repo root.
             configurePhase = ''
@@ -110,6 +112,9 @@
                 -DCXX_CLI20_ENABLE_CLANG_TIDY=OFF \
                 -DCXX_CLI20_ENABLE_SANITIZERS=OFF
               cmake --build ../build
+              # Generate Doxygen API reference into static/api/ so Docusaurus
+              # picks it up as a static asset during the npm build below.
+              ( cd .. && doxygen Doxyfile )
               runHook postConfigure
             '';
             buildPhase = ''

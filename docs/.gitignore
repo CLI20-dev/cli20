@@ -2,3 +2,5 @@
 build/
 node_modules/
 static/.nojekyll
+static/api/*
+!static/api/.gitkeep

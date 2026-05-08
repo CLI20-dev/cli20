@@ -3,6 +3,7 @@
 [<img src="docs/static/img/logo.png" alt="CLI20 logo" width="320">](docs/static/img/logo.png)
 
 [![CI](https://github.com/gen740/CLI20/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/gen740/CLI20/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-cli20--dev.github.io-blue)](https://cli20-dev.github.io/cli20/)
 
 A C++20 typed-schema command-line parser.
 Define your CLI as a type, not as a builder.
