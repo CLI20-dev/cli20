@@ -331,25 +331,36 @@ struct ArgImpl : public OptionTag {
   bool provided_{};
 };
 
+template <auto A>
+concept ActionValue = requires {
+  std::remove_cvref_t<decltype(A)>::validate();
+};
+
 template <auto... Args>
 struct ArgAlias;
 
 template <StringLiteral Name, auto A>
+  requires ActionValue<A>
 struct ArgAlias<Name, A> {
   using type = ArgImpl<Name, '\0', nargs::one, A>;
 };
 
-template <StringLiteral Name, auto A, Nargs N>
+template <StringLiteral Name, auto A, auto N>
+  requires(ActionValue<A> && std::same_as<std::remove_cvref_t<decltype(N)>,
+                                          Nargs>)
 struct ArgAlias<Name, A, N> {
   using type = ArgImpl<Name, '\0', N, A>;
 };
 
 template <StringLiteral Name, char ShortName, auto A>
+  requires ActionValue<A>
 struct ArgAlias<Name, ShortName, A> {
   using type = ArgImpl<Name, ShortName, nargs::one, A>;
 };
 
-template <StringLiteral Name, char ShortName, auto A, Nargs N>
+template <StringLiteral Name, char ShortName, auto A, auto N>
+  requires(ActionValue<A> && std::same_as<std::remove_cvref_t<decltype(N)>,
+                                          Nargs>)
 struct ArgAlias<Name, ShortName, A, N> {
   using type = ArgImpl<Name, ShortName, N, A>;
 };
