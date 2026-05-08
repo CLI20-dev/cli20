@@ -14,10 +14,9 @@ struct Args {
                cli::pack::set_once>
       port{{.help = "TCP port number", .presence = cli::required}};
 
-  cli::Arg<"profile",
-           cli::conversion::string |
-               cli::validation::matches<"[a-z][a-z0-9_-]*"> |
-               cli::pack::set_once>
+  cli::Arg<"profile", cli::conversion::string |
+                          cli::validation::matches<"[a-z][a-z0-9_-]*"> |
+                          cli::pack::set_once>
       profile{{.help = "Lowercase profile name", .presence = cli::required}};
 
   cli::Arg<"output", 'o',

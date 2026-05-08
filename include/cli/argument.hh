@@ -332,9 +332,7 @@ struct ArgImpl : public OptionTag {
 };
 
 template <auto A>
-concept ActionValue = requires {
-  std::remove_cvref_t<decltype(A)>::validate();
-};
+concept ActionValue = requires { std::remove_cvref_t<decltype(A)>::validate(); };
 
 template <auto... Args>
 struct ArgAlias;
@@ -346,8 +344,8 @@ struct ArgAlias<Name, A> {
 };
 
 template <StringLiteral Name, auto A, auto N>
-  requires(ActionValue<A> && std::same_as<std::remove_cvref_t<decltype(N)>,
-                                          Nargs>)
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
 struct ArgAlias<Name, A, N> {
   using type = ArgImpl<Name, '\0', N, A>;
 };
@@ -359,8 +357,8 @@ struct ArgAlias<Name, ShortName, A> {
 };
 
 template <StringLiteral Name, char ShortName, auto A, auto N>
-  requires(ActionValue<A> && std::same_as<std::remove_cvref_t<decltype(N)>,
-                                          Nargs>)
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
 struct ArgAlias<Name, ShortName, A, N> {
   using type = ArgImpl<Name, ShortName, N, A>;
 };
@@ -529,8 +527,7 @@ template <StringLiteral Name, char ShortName = '\0'>
 using Flag = Arg<Name, ShortName, pack::set_true, nargs::none>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using BoundOption =
-    Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
+using BoundOption = Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
 
 template <StringLiteral Name, char ShortName = '\0'>
 using BoundStringOption = BoundOption<std::string, Name, ShortName>;
@@ -546,12 +543,10 @@ using BoundPathOption = BoundOption<std::filesystem::path, Name, ShortName>;
 
 template <StringLiteral Name = "help", char ShortName = 'h'>
 using Help =
-    Arg<Name, ShortName, action::print_help | action::exit_success,
-        nargs::none>;
+    Arg<Name, ShortName, action::print_help | action::exit_success, nargs::none>;
 
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using Option =
-    Arg<Name, ShortName, detail::ActionFor<T>::set_once>;
+using Option = Arg<Name, ShortName, detail::ActionFor<T>::set_once>;
 
 template <class T, StringLiteral Name, char ShortName = '\0',
           Nargs N = nargs::one_or_more>
