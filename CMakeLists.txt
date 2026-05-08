@@ -87,12 +87,14 @@ if(Python3_FOUND)
   file(GLOB CLI20_HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/cli/*.hh"
   )
-  set(CLI20_SINGLE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/single_header/cli20.hh")
+  set(CLI20_SINGLE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/single_header/cli20.hh")
   add_custom_command(
     OUTPUT "${CLI20_SINGLE_HEADER}"
-    COMMAND Python3::Interpreter script/make_single_header.py
+    COMMAND Python3::Interpreter
+      "${CMAKE_CURRENT_SOURCE_DIR}/script/make_single_header.py"
+      "${CMAKE_CURRENT_SOURCE_DIR}/include/cli"
+      "${CLI20_SINGLE_HEADER}"
     DEPENDS ${CLI20_HEADERS}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating single_header/cli20.hh"
   )
   add_custom_target(cli20_single_header DEPENDS "${CLI20_SINGLE_HEADER}")
