@@ -57,12 +57,12 @@ npm run build
 
 ## Single header
 
-`single_header/cli20.hh` is generated automatically — do not edit it by hand and do not include changes to it in your PR.
+`single_header/cli20.hh` is a build artifact — it is not tracked in git.
 
-It is regenerated from `include/cli/*.hh` by `script/make_single_header.py` and committed back to `main` by the post-merge CI action after every merge.
-
-To avoid merge conflicts on this file when running `git merge main` locally, enable the `ours` merge driver once per machine:
+It is generated automatically by CMake when Python 3 is available, or manually via:
 
 ```sh
-git config --global merge.ours.driver true
+python3 script/make_single_header.py
 ```
+
+The generated file is uploaded as a release asset on each tagged release.
