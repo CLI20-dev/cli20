@@ -45,6 +45,7 @@
               (pkgs.gtest.override {
                 stdenv = pkgs.libcxxStdenv;
               })
+              pkgs.nodejs_latest
               pkgs.clang-tools
               config.treefmt.build.wrapper
             ];
@@ -77,6 +78,24 @@
               runHook preCheck
               ctest --output-on-failure
               runHook postCheck
+            '';
+          };
+
+          packages.doc = pkgs.buildNpmPackage {
+            pname = "cli20-docs";
+            version = "0.0.0";
+            src = ./docs;
+            npmDepsHash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            buildPhase = ''
+              runHook preBuild
+              npm run build
+              runHook postBuild
+            '';
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out
+              cp -r build/. $out/
+              runHook postInstall
             '';
           };
 

@@ -2950,41 +2950,25 @@ auto format_help(T& value, std::string_view program_name = "program",
 
 // #include <expected>
 
+#ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 namespace cli {
 
 #ifdef _WIN32
 namespace detail {
-// Convert a null-terminated UTF-16LE wchar_t string to UTF-8.
-// Uses only the Unicode specification — no windows.h required.
 inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
-  std::string out;
-  for (const wchar_t* p = wide; *p != L'\0';) {
-    char32_t cp{};
-    const auto u = static_cast<char16_t>(*p++);
-    if (u >= 0xD800 && u <= 0xDBFF) {
-      // High surrogate — must be followed by a low surrogate
-      const auto lo = static_cast<char16_t>(*p++);
-      cp = 0x10000 + ((static_cast<char32_t>(u - 0xD800) << 10) | (lo - 0xDC00));
-    } else {
-      cp = u;
-    }
-    if (cp <= 0x7F) {
-      out += static_cast<char>(cp);
-    } else if (cp <= 0x7FF) {
-      out += static_cast<char>(0xC0 | (cp >> 6));
-      out += static_cast<char>(0x80 | (cp & 0x3F));
-    } else if (cp <= 0xFFFF) {
-      out += static_cast<char>(0xE0 | (cp >> 12));
-      out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
-      out += static_cast<char>(0x80 | (cp & 0x3F));
-    } else {
-      out += static_cast<char>(0xF0 | (cp >> 18));
-      out += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
-      out += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
-      out += static_cast<char>(0x80 | (cp & 0x3F));
-    }
-  }
-  return out;
+  if (!wide) return {};
+  int len =
+      WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr);
+  if (len <= 1) return {};
+  std::string result(static_cast<std::size_t>(len) - 1, '\0');
+  WideCharToMultiByte(CP_UTF8, 0, wide, -1, result.data(), len, nullptr,
+                      nullptr);
+  return result;
 }
 }  // namespace detail
 #endif
