@@ -107,7 +107,10 @@ struct TokenizeResult {
    * @brief Sets the error and returns `*this` for method chaining.
    *
    * @param code    The error code.
-   * @param pos     The `argv` index where the error occurred.
+   * @param pos     The zero-based index into the input `args` span where the
+   *                error occurred. Higher-level parser code may apply an
+   *                offset when translating this to a caller-visible argument
+   *                index.
    * @param subject The option or token name that caused the error.
    * @param detail  Optional additional detail message.
    * @return Reference to `*this`.
