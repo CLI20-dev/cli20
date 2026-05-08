@@ -84,8 +84,34 @@
           packages.doc = pkgs.buildNpmPackage {
             pname = "cli20-docs";
             version = "0.0.0";
-            src = ./docs;
-            npmDepsHash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            # Full repo source: the remark plugin reads examples/*.cc and
+            # executes build/examples/* at build time, so it needs access to
+            # the whole repository, not just the docs/ subdirectory.
+            src = ./.;
+            postUnpack = ''sourceRoot="$sourceRoot/docs"'';
+            # npmDeps must reference docs/ explicitly so fetchNpmDeps finds
+            # package-lock.json there, not at the repo root.
+            npmDeps = pkgs.fetchNpmDeps {
+              name = "cli20-docs-0.0.0-npm-deps";
+              src = ./docs;
+              hash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+            };
+            nativeBuildInputs = [
+              pkgs.llvmPackages.libcxxClang
+              pkgs.cmake
+              pkgs.ninja
+            ];
+            # cwd is source/docs/, so .. is the repo root.
+            configurePhase = ''
+              runHook preConfigure
+              cmake -S .. -B ../build -G Ninja \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCXX_CLI20_ENABLE_TEST=OFF \
+                -DCXX_CLI20_ENABLE_CLANG_TIDY=OFF \
+                -DCXX_CLI20_ENABLE_SANITIZERS=OFF
+              cmake --build ../build
+              runHook postConfigure
+            '';
             buildPhase = ''
               runHook preBuild
               npm run build

@@ -383,23 +383,8 @@ struct ArgParameter {
       on_parse{};  ///< Callback invoked once after parsing completes.
 };
 
-/**
- * @brief Internal implementation type for a typed command-line option or flag.
- *
- * `ArgImpl` derives from `OptionTag` and stores the parsed value, occurrence
- * counters, and the optional `on_parse` callback. It is not usually
- * instantiated directly; instead use the public aliases `Flag`, `Option`,
- * `ListOption`, `BoundOption`, `Help`, etc.
- *
- * @tparam Name      The long option name (e.g. `"verbose"`), without the `--`
- * prefix.
- * @tparam ShortName The single-character short name (e.g. `'v'`), or `'\0'` for
- * none.
- * @tparam N         The `Nargs` descriptor controlling how many values the
- * option consumes.
- * @tparam A         The action pipeline that converts raw strings to the stored
- * type.
- */
+namespace detail {
+
 template <StringLiteral Name, char ShortName, Nargs N, Action A>
   requires requires {
     detail::is_valid_long_option_name<Name>();
@@ -511,17 +496,50 @@ struct ArgImpl : public OptionTag {
   bool provided_{};
 };
 
-/**
- * @brief Internal implementation type for a typed positional argument.
- *
- * `PositionalImpl` derives from `PositionalTag` and stores the parsed value
- * along with occurrence counters and an optional `on_parse` callback.
- * It is not usually instantiated directly; use the `Positional` alias instead.
- *
- * @tparam N The `Nargs` descriptor controlling how many values the positional
- * consumes.
- * @tparam A The action pipeline that converts raw strings to the stored type.
- */
+template <auto A>
+concept ActionValue = requires { std::remove_cvref_t<decltype(A)>::validate(); };
+
+template <auto... Args>
+struct ArgAlias {
+  static_assert(
+      sizeof...(Args) && !sizeof...(Args),
+      "Unsupported Arg<> parameter combination.\n"
+      "Supported forms (after the Name parameter):\n"
+      "  Arg<Name, Action>\n"
+      "  Arg<Name, Action, Nargs>\n"
+      "  Arg<Name, ShortName, Action>\n"
+      "  Arg<Name, ShortName, Action, Nargs>\n"
+      "Consider using Flag, Option, or ListOption for common argument kinds.");
+};
+
+template <StringLiteral Name, auto A>
+  requires ActionValue<A>
+struct ArgAlias<Name, A> {
+  using type = ArgImpl<Name, '\0', nargs::one, A>;
+};
+
+template <StringLiteral Name, auto A, auto N>
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
+struct ArgAlias<Name, A, N> {
+  using type = ArgImpl<Name, '\0', N, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A>
+  requires ActionValue<A>
+struct ArgAlias<Name, ShortName, A> {
+  using type = ArgImpl<Name, ShortName, nargs::one, A>;
+};
+
+template <StringLiteral Name, char ShortName, auto A, auto N>
+  requires(ActionValue<A> &&
+           std::same_as<std::remove_cvref_t<decltype(N)>, Nargs>)
+struct ArgAlias<Name, ShortName, A, N> {
+  using type = ArgImpl<Name, ShortName, N, A>;
+};
+
+}  // namespace detail
+
 template <Nargs N, Action A>
   requires requires {
     0 <= N.min;
@@ -706,6 +724,31 @@ struct PositionalActionFor {
 // ── Core public API ───────────────────────────────────────────────────────────
 
 /**
+ * @brief Defines a typed command-line argument specification.
+ *
+ * `Arg` constructs a command-line option or flag from a compile-time
+ * specification. The supported parameter sequences after `Name` are:
+ *
+ * | Form                          | Effect                                   |
+ * |-------------------------------|------------------------------------------|
+ * | `<Name, Action>`              | No short name; `nargs::one`.             |
+ * | `<Name, Action, Nargs>`       | No short name; custom arity.             |
+ * | `<Name, ShortName, Action>`   | With short name; `nargs::one`.           |
+ * | `<Name, ShortName, Action, Nargs>` | With short name; custom arity.      |
+ *
+ * The short name character (if present) must appear before the action, and
+ * the `Nargs` value (if present) must appear after the action.
+ *
+ * Most users should prefer higher-level aliases such as `Flag`,
+ * `Option`, and `ListOption` for common argument kinds.
+ *
+ * @tparam Name Long option name without the leading `--`.
+ * @tparam Args Configuration parameters: `[ShortName,] Action [, Nargs]`.
+ */
+template <StringLiteral Name, auto... Args>
+using Arg = typename detail::ArgAlias<Name, Args...>::type;
+
+/**
  * @brief A boolean flag option that stores `true` when present.
  *
  * Storage type: `bool`. Default: `false`.
@@ -714,7 +757,7 @@ struct PositionalActionFor {
  * @tparam ShortName Short option character (e.g. `'v'`), or `'\0'` for none.
  */
 template <StringLiteral Name, char ShortName = '\0'>
-using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
+using Flag = Arg<Name, ShortName, pack::set_true, nargs::none>;
 
 /**
  * @brief An option whose parsed value is written directly into an external
@@ -730,8 +773,7 @@ using Flag = ArgImpl<Name, ShortName, nargs::none, pack::set_true>;
  * @tparam ShortName Short option character, or `'\0'`.
  */
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using BoundOption =
-    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::store_into>;
+using BoundOption = Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
 
 /** @brief `BoundOption` specialisation for `std::string`. */
 template <StringLiteral Name, char ShortName = '\0'>
@@ -758,8 +800,8 @@ using BoundPathOption = BoundOption<std::filesystem::path, Name, ShortName>;
  * @tparam ShortName Short option character. Default: `'h'`.
  */
 template <StringLiteral Name = "help", char ShortName = 'h'>
-using Help = ArgImpl<Name, ShortName, nargs::none,
-                     action::print_help | action::exit_success>;
+using Help =
+    Arg<Name, ShortName, action::print_help | action::exit_success, nargs::none>;
 
 /**
  * @brief A single-value option that stores the parsed result in
@@ -773,8 +815,7 @@ using Help = ArgImpl<Name, ShortName, nargs::none,
  * @tparam ShortName Short option character, or `'\0'`.
  */
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using Option =
-    ArgImpl<Name, ShortName, nargs::one, detail::ActionFor<T>::set_once>;
+using Option = Arg<Name, ShortName, detail::ActionFor<T>::set_once>;
 
 /**
  * @brief A multi-value option that appends each occurrence to a
@@ -789,7 +830,7 @@ using Option =
  */
 template <class T, StringLiteral Name, char ShortName = '\0',
           Nargs N = nargs::one_or_more>
-using ListOption = ArgImpl<Name, ShortName, N, detail::ActionFor<T>::push>;
+using ListOption = Arg<Name, ShortName, detail::ActionFor<T>::push, N>;
 
 /**
  * @brief A typed positional argument.

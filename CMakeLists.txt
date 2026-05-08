@@ -82,7 +82,7 @@ install(
 )
 
 
-add_subdirectory(apps)
+add_subdirectory(examples)
 
 if(CXX_CLI20_ENABLE_TEST)
   enable_testing()

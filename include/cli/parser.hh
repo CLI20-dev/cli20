@@ -699,7 +699,7 @@ struct Parser {
     return {spec_map, command_names};
   }
 
-  // Find the ArgImpl field matching (prefix, bare), notify it, and invoke its
+  // Find the option field matching (prefix, bare), notify it, and invoke its
   // action on each value token.  notify_option_seen() is called once;
   // invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.
   auto dispatch_option(T& val, std::string_view prefix, std::string_view bare,

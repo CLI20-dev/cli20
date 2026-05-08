@@ -1,6 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+// @ts-expect-error — local ESM plugin, no type declarations
+import remarkRunExampleCommands from './plugins/remark-run-example-commands.mjs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -40,6 +42,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          remarkPlugins: [remarkRunExampleCommands],
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -47,6 +50,7 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
+  plugins: [],
 
   themeConfig: {
     image: 'img/logo.png',
@@ -65,6 +69,12 @@ const config: Config = {
           sidebarId: 'tutorialSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          type: 'doc',
+          docId: 'examples/index',
+          position: 'left',
+          label: 'Examples',
         },
         {
           href: 'https://github.com/CLI20-dev/cli20',
@@ -86,6 +96,10 @@ const config: Config = {
             {
               label: 'Tutorial',
               to: '/docs/tutorial',
+            },
+            {
+              label: 'Examples',
+              to: '/docs/examples',
             },
           ],
         },

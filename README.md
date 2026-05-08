@@ -140,9 +140,10 @@ That expands to `--help` and `-h`, prints generated help, and exits successfully
 If you want to wire help explicitly, the action pipeline is also available:
 
 ```cpp
-cli::ArgImpl<
-    "help", 'h', cli::nargs::none,
-    cli::action::print_help | cli::action::exit_success>
+cli::Arg<
+    "help", 'h',
+    cli::action::print_help | cli::action::exit_success,
+    cli::nargs::none>
     help;
 ```
 
@@ -193,7 +194,7 @@ cmake --build build
 
 Instead of including header files, you can import the module using `import cli20;`.
 
-See [apps/example_module.cc](apps/example_module.cc) for a complete example.
+See [examples/module.cc](examples/module.cc) for a complete example.
 
 ### Module Availability
 
@@ -278,13 +279,13 @@ This enables:
 
 ## Going Beyond Sugar
 
-When you need stronger behavior, use `ArgImpl` directly with a custom action pipeline.
+When you need stronger behavior, use `Arg` directly with a custom action pipeline.
 
 Actions can be composed with `|`:
 
 ```cpp
-cli::ArgImpl<
-    "config", 'c', cli::nargs::one,
+cli::Arg<
+    "config", 'c',
     cli::conversion::path
         | cli::validation::exists
         | cli::validation::is_regular_file
@@ -295,8 +296,8 @@ cli::ArgImpl<
 Each `|` appends a step to the pipeline. `Action<...>` with explicit template arguments is equivalent and can be used when you prefer the explicit form:
 
 ```cpp
-cli::ArgImpl<
-    "config", 'c', cli::nargs::one,
+cli::Arg<
+    "config", 'c',
     cli::Action<
         cli::conversion::path,
         cli::validation::exists,

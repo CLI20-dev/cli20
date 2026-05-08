@@ -1,0 +1,76 @@
+---
+title: Distribution and Platform Examples
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+
+# Distribution and Platform Examples
+
+These examples are narrower than the core workflow pages above, but they are
+useful when you care about packaging or platform-specific entry points.
+
+## Single Header
+
+Use this when you want to vendor one file instead of integrating the full
+include tree. The example includes `single_header/cli20.hh` directly, so it is
+the quickest packaging smoke test.
+
+### Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/single_header.cc',
+  }}
+/>
+
+### What This Example Shows
+
+This example consumes cli20 as a single vendored header and mirrors the basic
+CLI flow through the single-header distribution path. It is mainly a packaging
+smoke test that proves the distributed header exposes the same everyday
+features.
+
+## C++20 Module
+
+Use this when you want to verify `import cli20;` works in your toolchain. This
+is mostly a distribution and CI example rather than the recommended starting
+point for end users.
+
+### Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/module.cc',
+  }}
+/>
+
+### What This Example Shows
+
+This example consumes cli20 through a C++20 module interface instead of
+traditional headers. It keeps the CLI itself small and acts as a packaging and
+toolchain regression test for the module surface.
+
+## Unicode Echo
+
+This sample exists for Windows Unicode entry-point coverage. It is useful when
+you need to see how cli20 behaves with wide-character arguments or non-ASCII
+values in CI.
+
+### Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/unicode_echo.cc',
+  }}
+/>
+
+### What This Example Shows
+
+This example converts wide-character process arguments to UTF-8 before parsing,
+which makes the Windows-oriented entry point behave like the normal string-based
+flow. It is the sample to look at when non-ASCII command lines matter.
+
+<ExampleCommands
+  command="./build/examples/unicode_echo --name test alpha beta"
+  label="Observed run"
+/>

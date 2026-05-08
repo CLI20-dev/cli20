@@ -1,0 +1,54 @@
+---
+title: Simple API
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+
+# Simple API
+
+This is the first example to open when you want the default cli20 flow. It
+shows the smallest useful cli20 program: one flag, one optional named argument,
+and one required positional input.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/simple_api.cc',
+  }}
+/>
+
+## What This Example Shows
+
+This example declares a CLI as ordinary typed fields, mixes a flag with an
+optional named value and a required positional, and lets cli20 handle standard
+help and error flow. On success, `verbose` becomes a `bool`, `output` holds an
+optional path-like string, and `input` holds the required file name.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Successful parse',
+      command: './build/examples/simple_api --verbose --output result.txt input.cc',
+    },
+    {
+      label: 'Generated help',
+      command: './build/examples/simple_api --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Missing the required positional argument',
+      command: './build/examples/simple_api --output result.txt',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Subcommands](/docs/examples/subcommand)
+- [Bind](/docs/examples/bind)

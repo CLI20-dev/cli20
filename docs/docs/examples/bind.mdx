@@ -1,0 +1,57 @@
+---
+title: Bind
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+
+# Bind
+
+Use this when your program already has destination variables and you do not want
+to read values back out of `Args`.
+
+This page is for the case where cli20 is only one part of a larger program and
+the final state already lives in ordinary local variables or objects.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/bind.cc',
+  }}
+/>
+
+## What This Example Shows
+
+This example binds parsed values directly into existing variables, so the real
+state lives outside `Args` from the start. It is useful when the surrounding
+program already owns `port`, `output`, and `ratio`, and on success those values
+are written straight into their target `int`, `std::string`, and `double`
+variables.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Successful parse',
+      command: './build/examples/bind --port 9000 --output release.bin --ratio 1.5',
+    },
+    {
+      label: 'Generated help',
+      command: './build/examples/bind --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Conversion still fails before anything is written',
+      command: './build/examples/bind --port nope',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Callback Entry Point](/docs/examples/callback-entry-point)
+- [Simple API](/docs/examples/simple-api)

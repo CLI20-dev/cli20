@@ -1,0 +1,58 @@
+---
+title: Callback Entry Point
+---
+
+import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+
+# Callback Entry Point
+
+Open this when parsing should populate application state for some other entry
+point, service object, or orchestration function.
+
+This page is the bridge between cli20 and a larger application architecture.
+The parser gathers state first, and then your real program entry point runs with
+that prepared state.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/callback_entry_point.cc',
+  }}
+/>
+
+## What This Example Shows
+
+This example updates application state incrementally as each argument is parsed
+and then hands the finished state to the real entry point. It keeps CLI wiring
+at the edge, supports repeated `--include` options without swallowing
+positionals, and leaves the final state in `verbose`, `jobs`, `includes`, and
+`inputs`.
+
+<ExampleCommands
+  items={[
+    {
+      label: 'Populate state and then call run(state)',
+      command: './build/examples/callback_entry_point --verbose --jobs 8 --include src --include include main.cc lib.cc',
+    },
+    {
+      label: 'Generated help',
+      command: './build/examples/callback_entry_point --help',
+    },
+  ]}
+/>
+
+<ExampleCommands
+  title="Failure Cases"
+  items={[
+    {
+      label: 'Invalid integer conversion for jobs',
+      command: './build/examples/callback_entry_point --jobs nope main.cc',
+    },
+  ]}
+/>
+
+## Related Examples
+
+- [Bind](/docs/examples/bind)
+- [Subcommands](/docs/examples/subcommand)

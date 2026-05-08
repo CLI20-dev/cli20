@@ -35,7 +35,7 @@ jobs:
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding          = [System.Text.Encoding]::UTF8
 
-          $exe = ".\build\apps\unicode_echo.exe"
+          $exe = ".\build\examples\unicode_echo.exe"
           $failed = $false
 
           function Assert-Output([string]$label, [string[]]$argList, [string[]]$expected) {
