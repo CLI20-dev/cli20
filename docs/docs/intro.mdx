@@ -37,10 +37,9 @@ target_link_libraries(my_app PRIVATE cli20::cli20)
 
 ### Option 2 — Single header
 
-If you prefer a single-file drop-in, use the generated `cli20.hh`:
+If you prefer a single-file drop-in, download `cli20.hh` from the [latest release](https://github.com/CLI20-dev/cli20/releases/latest) and copy it anywhere on your include path:
 
 ```cmake
-# Just copy single_header/cli20.hh anywhere on your include path
 add_library(cli20 INTERFACE)
 target_include_directories(cli20 INTERFACE path/to/single_header)
 target_compile_features(cli20 INTERFACE cxx_std_20)

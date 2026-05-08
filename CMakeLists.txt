@@ -82,6 +82,28 @@ install(
 )
 
 
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_FOUND)
+  file(GLOB CLI20_HEADERS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/cli/*.hh"
+  )
+  set(CLI20_SINGLE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/single_header/cli20.hh")
+  add_custom_command(
+    OUTPUT "${CLI20_SINGLE_HEADER}"
+    COMMAND Python3::Interpreter script/make_single_header.py
+    DEPENDS ${CLI20_HEADERS}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating single_header/cli20.hh"
+  )
+  add_custom_target(cli20_single_header DEPENDS "${CLI20_SINGLE_HEADER}")
+  install(
+    FILES "${CLI20_SINGLE_HEADER}"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+else()
+  message(STATUS "Python3 not found – single_header target and example are disabled")
+endif()
+
 add_subdirectory(examples)
 
 if(CXX_CLI20_ENABLE_TEST)
