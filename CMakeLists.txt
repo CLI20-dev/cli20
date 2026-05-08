@@ -96,10 +96,6 @@ if(Python3_FOUND)
     COMMENT "Generating single_header/cli20.hh"
   )
   add_custom_target(cli20_single_header DEPENDS "${CLI20_SINGLE_HEADER}")
-  install(
-    FILES "${CLI20_SINGLE_HEADER}"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  )
 else()
   message(STATUS "Python3 not found – single_header target and example are disabled")
 endif()
