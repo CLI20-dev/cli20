@@ -1199,8 +1199,11 @@ struct StoreInto {
       -> ActionResult<void> {
     if (T* ptr = ctx.arg.get(); ptr != nullptr) {
       *ptr = std::move(input.value);
+      return ActionResult<void>::ok();
     }
-    return ActionResult<void>::ok();
+    return ActionResult<void>::fail(detail::validation_failed_error(
+        ctx.index, "store_into",
+        "target pointer is null; did you forget to call bind()?"));
   }
 };
 
