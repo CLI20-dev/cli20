@@ -408,17 +408,17 @@ struct Command : public T, public CommandTag {
   using argument_type = T;
 
   Command() = default;
-  Command(CommandParameter param) : help(param.help) {}
+  Command(CommandParameter param) : help_(param.help) {}
   static constexpr auto name = Name;
   static constexpr auto command_name() -> std::string_view {
     return Name.view();
   }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto help_text() const -> std::string_view { return help; }
+  [[nodiscard]] auto help_text() const -> std::string_view { return help_; }
   auto mark_provided() -> void { provided_ = true; }
 
  private:
-  std::string_view help{};
+  std::string_view help_{};
   bool provided_{};
 };
 

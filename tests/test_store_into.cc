@@ -111,6 +111,22 @@ TEST(StoreInto, InvalidValueFails) {
   EXPECT_EQ(port, 0);  // unchanged on error
 }
 
+TEST(StoreInto, UnboundOptionFailsValidation) {
+  BoundIntArgs args;
+
+  auto args_vec = argv({"prog", "--port", "8080"});
+  auto result = cli::Parser<BoundIntArgs>{}.parse(
+      std::move(args), std::span<const std::string_view>(args_vec), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::validation_failed);
+  EXPECT_EQ(result.error.kind, cli::ErrorKind::validation);
+  EXPECT_EQ(result.error.subject, "store_into");
+  EXPECT_EQ(result.error.detail,
+            "target pointer is null; did you forget to call bind()?");
+  EXPECT_EQ(result.error.position, 2);
+}
+
 TEST(StoreInto, MultipleVariablesBoundToSameArgs) {
   int port = 0;
   std::string output;

@@ -12,6 +12,7 @@ namespace {
 struct BuildArgs {
   cli::Description description{"Compile sources into an executable."};
 
+  cli::Help<> help;
   cli::Flag<"release", 'r'> release{
       {.help = "Build with optimizations", .presence = cli::optional}};
   cli::IntOption<"jobs", 'j'> jobs{
@@ -58,12 +59,12 @@ struct ExitSuccessArgs {
 }  // namespace
 
 TEST(Help, UsageContainsProgramAndMajorGroups) {
-  char program[] = "myprog";  // NOLINT
-  char* argv[] = {program};   // NOLINT
+  char program[] = "myprog";
+  char* argv[] = {program};
 
   cli::Parser<HelpArgs> parser;
 
-  std::ignore = parser.parse(1, argv);  // NOLINT
+  std::ignore = parser.parse(1, argv);
 
   const auto help = parser.format_help(cli::ColorMode::never);
   EXPECT_TRUE(help.starts_with("Usage: myprog"));
@@ -170,6 +171,30 @@ TEST(Help, HelpFlagTriggersHelpRequested) {
   EXPECT_EQ(result.error.exit_code(), 0);
 }
 
+TEST(Help, HelpFlagUsesExplicitProgramNameForSpanParse) {
+  auto args = std::vector<std::string_view>{"prog", "--help"};
+  auto result = cli::Parser<HelpFlagArgs>{}.parse(
+      std::span<const std::string_view>(args), "prog", 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::help_requested);
+  EXPECT_NE(result.error.detail.find("Usage: prog [options]"),
+            std::string::npos);
+}
+
+TEST(Help, HelpFlagUsesProgramNameForPreinitializedArgvParse) {
+  char program[] = "prog";
+  char help[] = "--help";
+  char* argv[] = {program, help};
+
+  auto result = cli::Parser<HelpFlagArgs>{}.parse(HelpFlagArgs{}, 2, argv);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::help_requested);
+  EXPECT_NE(result.error.detail.find("Usage: prog [options]"),
+            std::string::npos);
+}
+
 TEST(Help, CustomHelpFlagNameAndShortOptionWork) {
   auto args = std::vector<std::string_view>{"prog", "-u"};
   auto result = cli::Parser<CustomHelpFlagArgs>{}.parse(
@@ -177,6 +202,17 @@ TEST(Help, CustomHelpFlagNameAndShortOptionWork) {
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::help_requested);
+}
+
+TEST(Help, SubcommandHelpUsesConcatenatedProgramName) {
+  auto args = std::vector<std::string_view>{"build", "--help"};
+  auto result = cli::Parser<HelpArgs>{}.parse(
+      std::span<const std::string_view>(args), "prog", 0);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::help_requested);
+  EXPECT_NE(result.error.detail.find("Usage: prog build [options]"),
+            std::string::npos);
 }
 
 TEST(Help, ExitSuccessActionTriggersDedicatedCode) {

@@ -285,24 +285,35 @@ struct Parser {
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
   auto parse(int argc, char* argv[]) -> ParseResult<T> {
     std::vector<std::string_view> args;
+    args.reserve(static_cast<std::size_t>(argc));
     for (int i = 0; i < argc; ++i) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       args.emplace_back(argv[i]);
     }
     if (argc > 0) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       program_name_ = argv[0];
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
 
-#ifdef _WIN32
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+  auto parse(T initial, int argc, char* argv[]) -> ParseResult<T> {
+    std::vector<std::string_view> args;
+    args.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      args.emplace_back(argv[i]);
+    }
+    if (argc > 0) {
+      program_name_ = argv[0];
+    }
+    return this->parse(std::move(initial),
+                       std::span<const std::string_view>(args), 1);
+  }
+
+#ifdef _WIN32
   auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
     std::vector<std::string> owned;
     owned.reserve(static_cast<std::size_t>(argc));
     for (int i = 0; i < argc; ++i) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
       owned.emplace_back(detail::wide_to_utf8(argv[i]));
     }
     std::vector<std::string_view> args;
@@ -315,12 +326,39 @@ struct Parser {
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
+
+  auto parse(T initial, int argc, wchar_t* argv[]) -> ParseResult<T> {
+    std::vector<std::string> owned;
+    owned.reserve(static_cast<std::size_t>(argc));
+    for (int i = 0; i < argc; ++i) {
+      owned.emplace_back(detail::wide_to_utf8(argv[i]));
+    }
+    std::vector<std::string_view> args;
+    args.reserve(owned.size());
+    for (const auto& s : owned) {
+      args.emplace_back(s);
+    }
+    if (argc > 0) {
+      program_name_ = owned[0];
+    }
+    return this->parse(std::move(initial),
+                       std::span<const std::string_view>(args), 1);
+  }
 #endif
 
   auto parse(std::span<const std::string_view> args, std::size_t first_index = 0)
       -> ParseResult<T> {
     ParseResult<T> result;
-    parse_body_(result, args, first_index);
+    parse_body(result, args, first_index);
+    return result;
+  }
+
+  auto parse(std::span<const std::string_view> args,
+             std::string_view program_name, std::size_t first_index = 0)
+      -> ParseResult<T> {
+    program_name_ = std::string(program_name);
+    ParseResult<T> result;
+    parse_body(result, args, first_index);
     return result;
   }
 
@@ -330,7 +368,17 @@ struct Parser {
              std::size_t first_index = 0) -> ParseResult<T> {
     ParseResult<T> result;
     result.value = std::move(initial);
-    parse_body_(result, args, first_index);
+    parse_body(result, args, first_index);
+    return result;
+  }
+
+  auto parse(T initial, std::span<const std::string_view> args,
+             std::string_view program_name, std::size_t first_index = 0)
+      -> ParseResult<T> {
+    program_name_ = std::string(program_name);
+    ParseResult<T> result;
+    result.value = std::move(initial);
+    parse_body(result, args, first_index);
     return result;
   }
 
@@ -338,9 +386,8 @@ struct Parser {
   TokenizerConfig cfg_;
   std::string program_name_ = "program";
 
-  auto parse_body_(ParseResult<T>& result,
-                   std::span<const std::string_view> args,
-                   std::size_t first_index) -> void {
+  auto parse_body(ParseResult<T>& result, std::span<const std::string_view> args,
+                  std::size_t first_index) -> void {
     auto [spec_map, command_names] = get_option_spec_map(result.value);
     auto tokenized = tokenize(args.subspan(std::min(first_index, args.size())),
                               spec_map, command_names, cfg_);
@@ -542,7 +589,8 @@ struct Parser {
         found = true;
         f.mark_provided();
         auto sub_parser = Parser<typename F::argument_type>{};
-        sub_parser.program_name_ = program_name_;
+        sub_parser.program_name_ =
+            std::format("{} {}", program_name_, F::command_name());
         auto sub = sub_parser.parse(args, first_index);
         if (sub.has_error()) {
           res = ActionResult<void>::fail(std::move(sub.error));
@@ -621,13 +669,11 @@ auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
 
 #ifdef _WIN32
 template <ArgumentSpec T>
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
   return Parser<T>{}.parse(argc, argv);
 }
 
 template <ArgumentSpec T>
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 auto parse_or_exit(int argc, wchar_t* argv[], std::ostream& out = std::cout,
                    std::ostream& err = std::cerr) -> T {
   auto result = parse<T>(argc, argv);

@@ -36,11 +36,7 @@ auto main(int argc, char* argv[]) -> int {
   args.ratio_opt = &ratio;  // operator=(T*) also works
 
   // Parse — pass the pre-initialized args to preserve the pointer bindings.
-  std::vector<std::string_view> argv_sv;
-  for (int i = 0; i < argc; ++i) argv_sv.emplace_back(argv[i]);  // NOLINT
-
-  auto result = cli::Parser<Args>{}.parse(
-      std::move(args), std::span<const std::string_view>(argv_sv), 1);
+  auto result = cli::Parser<Args>{}.parse(std::move(args), argc, argv);
 
   if (!result) {
     std::cerr << result.error.message() << '\n';
