@@ -34,13 +34,9 @@ struct DescriptionTag : SpecMemberTag {};
  * @brief Specifies the minimum and maximum number of values an option or
  * positional accepts.
  *
- * **Sentinel value:** The default `{-1, -1}` means *unset*. An unset `Nargs`
- * is rejected by `is_valid_nargs()` and therefore also by the `ArgImpl` /
- * `PositionalImpl` template constraints — it is only a valid intermediate
- * state before a named preset (e.g. `nargs::one`) or a custom value is
- * assigned.
+ * The default `{0, -1}` is equivalent to `nargs::zero_or_more`.
  *
- * **Valid ranges for a fully-initialised `Nargs`:**
+ * **Valid ranges:**
  * - `min >= 0`
  * - `max >= 1`, or `max == -1` which means *unlimited* (no upper bound)
  * - `min <= max` (when `max != -1`)
@@ -49,11 +45,8 @@ struct DescriptionTag : SpecMemberTag {};
  * constructing `Nargs` directly.
  */
 struct Nargs {
-  int min = -1;  ///< Minimum number of values. -1 = unset sentinel (invalid for
-                 ///< use in ArgImpl/PositionalImpl); must be >= 0 when set.
-  int max = -1;  ///< Maximum number of values. -1 has two meanings: *unset*
-                 ///< sentinel when `min` is also -1, or *unlimited* upper bound
-                 ///< when `min >= 0`.
+  int min = 0;   ///< Minimum number of values (>= 0).
+  int max = -1;  ///< Maximum number of values; -1 means unlimited.
 };
 
 /**
@@ -317,15 +310,23 @@ consteval auto is_valid_command_name() noexcept {
 }
 
 /**
- * @brief Validates that a `Nargs` value is not the unset sentinel `{-1, -1}`.
+ * @brief Validates that a `Nargs` value satisfies the basic range constraints.
+ *
+ * Checks that `min >= 0` and that `max` is either -1 (unlimited) or
+ * satisfies `max >= min`. The `ArgImpl` and `PositionalImpl` template
+ * `requires` clauses enforce these same constraints at the point of
+ * instantiation.
  *
  * @tparam NargsValue The `Nargs` value to validate.
- * @return `true` if at least one of `min` or `max` has been explicitly set.
+ * @return `true` if `NargsValue` is a well-formed nargs specification.
  */
 template <Nargs NargsValue>
 [[nodiscard]]
 consteval auto is_valid_nargs() noexcept -> bool {
-  if (NargsValue.max == -1 && NargsValue.min == -1) {
+  if (NargsValue.min < 0) {
+    return false;
+  }
+  if (NargsValue.max != -1 && NargsValue.max < NargsValue.min) {
     return false;
   }
   return true;
