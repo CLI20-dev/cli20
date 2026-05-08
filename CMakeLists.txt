@@ -19,32 +19,44 @@ if(CXX_CLI20_ENABLE_SANITIZERS)
   add_link_options(-fsanitize=address,undefined)
 endif()
 
-# add_subdirectory(src)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+file(GLOB_RECURSE CLI20_PUBLIC_HEADERS CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hh"
+)
 
 add_library(cli20 INTERFACE)
 add_library(cli20::cli20 ALIAS cli20)
 
+target_sources(cli20
+    INTERFACE
+        FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+        FILES ${CLI20_PUBLIC_HEADERS}
+)
+
 target_include_directories(cli20
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_compile_features(cli20
-    INTERFACE
-        cxx_std_20
-)
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
+target_compile_features(cli20 INTERFACE cxx_std_20)
 
 set(CLI20_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/cli20")
-
-install(TARGETS cli20 EXPORT cli20-targets)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+set(CLI20_TARGETS_EXPORT_NAME cli20Targets)
 
 install(
-  EXPORT cli20-targets
+  TARGETS cli20
+  EXPORT ${CLI20_TARGETS_EXPORT_NAME}
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+  EXPORT ${CLI20_TARGETS_EXPORT_NAME}
+  FILE ${CLI20_TARGETS_EXPORT_NAME}.cmake
   NAMESPACE cli20::
   DESTINATION ${CLI20_INSTALL_CMAKEDIR}
 )
@@ -53,6 +65,7 @@ configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cli20Config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/cli20Config.cmake
   INSTALL_DESTINATION ${CLI20_INSTALL_CMAKEDIR}
+  NO_SET_AND_CHECK_MACRO
 )
 
 write_basic_package_version_file(
