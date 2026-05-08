@@ -5,22 +5,28 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update:
     name: Regenerate single header and format
     runs-on: ubuntu-24.04
-    # GITHUB_TOKEN pushes do not re-trigger workflows, but guard explicitly
-    # against any bot-initiated push to avoid accidental loops.
-    if: github.actor != 'github-actions[bot]'
+    # Guard against the GitHub App bot's own pushes to prevent infinite loops.
+    if: github.actor != 'cli20-single-header-autogen[bot]'
 
     steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          installation_id: ${{ secrets.INSTALLATION_ID }}
+
       - uses: actions/checkout@v4
         with:
-          # Use the default GITHUB_TOKEN — pushes made with this token do not
-          # retrigger workflow runs, which prevents infinite loops.
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use the GitHub App token so that the resulting push re-triggers CI.
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: cachix/install-nix-action@v27
         with:
@@ -35,8 +41,8 @@ jobs:
 
       - name: Commit and push if changed
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "cli20-single-header-autogen[bot]"
+          git config user.email "cli20-single-header-autogen[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "Nothing to commit"
