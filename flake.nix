@@ -112,9 +112,6 @@
                 -DCXX_CLI20_ENABLE_CLANG_TIDY=OFF \
                 -DCXX_CLI20_ENABLE_SANITIZERS=OFF
               cmake --build ../build
-              # Generate Doxygen API reference into static/api/ so Docusaurus
-              # picks it up as a static asset during the npm build below.
-              ( cd .. && doxygen Doxyfile )
               runHook postConfigure
             '';
             buildPhase = ''

@@ -6,6 +6,8 @@ import remarkRunExampleCommands from './plugins/remark-run-example-commands.mjs'
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const baseUrl = '/cli20/';
+
 const config: Config = {
   title: 'CLI20',
   tagline: 'Define your CLI as a type, not as a builder.',
@@ -20,7 +22,7 @@ const config: Config = {
   url: 'https://cli20-dev.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/cli20/',
+  baseUrl,
 
   // GitHub pages deployment config.
   organizationName: 'CLI20-dev',
@@ -77,7 +79,7 @@ const config: Config = {
           label: 'Examples',
         },
         {
-          href: '/cli20/api/index.html',
+          href: `${baseUrl}api/index.html`,
           label: 'API Reference',
           position: 'left',
           target: '_blank',
@@ -109,7 +111,7 @@ const config: Config = {
             },
             {
               label: 'API Reference',
-              href: '/cli20/api/index.html',
+              href: `${baseUrl}api/index.html`,
               target: '_blank',
             },
           ],
