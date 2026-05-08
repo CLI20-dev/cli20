@@ -77,6 +77,12 @@ const config: Config = {
           label: 'Examples',
         },
         {
+          href: '/cli20/api/index.html',
+          label: 'API Reference',
+          position: 'left',
+          target: '_blank',
+        },
+        {
           href: 'https://github.com/CLI20-dev/cli20',
           label: 'GitHub',
           position: 'right',
@@ -100,6 +106,11 @@ const config: Config = {
             {
               label: 'Examples',
               to: '/docs/examples',
+            },
+            {
+              label: 'API Reference',
+              href: '/cli20/api/index.html',
+              target: '_blank',
             },
           ],
         },

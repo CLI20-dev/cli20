@@ -5,6 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
+    "prebuild": "cd .. && doxygen Doxyfile",
+    "predeploy": "cd .. && doxygen Doxyfile",
+    "prestart": "cd .. && doxygen Doxyfile",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
