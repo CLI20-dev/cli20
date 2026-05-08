@@ -6,6 +6,7 @@
 
 # build artifacts
 build/
+single_header/cli20.hh
 *.o
 *.a
 *.so
