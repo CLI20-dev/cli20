@@ -8,11 +8,27 @@ namespace cli {
 
 namespace detail {
 
+/**
+ * @brief A universal implicit-conversion type used for aggregate-member counting.
+ *
+ * `Any` can be implicitly converted to any type `U`, which allows it to be
+ * passed as any aggregate member during brace-initialization probing.
+ */
 struct Any {
   template <class U>
   operator U();
 };
 
+/**
+ * @brief Tests whether aggregate type `T` can be brace-initialized with at least `N` elements.
+ *
+ * Uses SFINAE via a `requires` expression to detect whether `T{Any{}, ..., Any{}}` (N copies)
+ * is a valid expression.
+ *
+ * @tparam T The aggregate type to probe.
+ * @tparam N The number of initializer elements to test.
+ * @return `true` if `T` is brace-initializable with `N` elements.
+ */
 template <class T, std::size_t N>
 consteval auto aggregate_initializable_at_least() {
   return []<size_t... I>(std::index_sequence<I...>) -> auto {
@@ -20,6 +36,18 @@ consteval auto aggregate_initializable_at_least() {
   }(std::make_index_sequence<N>{});
 }
 
+/**
+ * @brief Determines the exact number of members of an aggregate type at compile time.
+ *
+ * Performs a binary search between `Min` and `Max` using
+ * `aggregate_initializable_at_least` to find the largest `N` for which
+ * `T` is brace-initializable with `N` elements.
+ *
+ * @tparam T   The aggregate type to inspect.
+ * @tparam Max Upper bound of the search (exclusive). Default: 65.
+ * @tparam Min Lower bound of the search (inclusive). Default: 0.
+ * @return The exact number of aggregate members of `T`.
+ */
 template <class T, std::size_t Max = 65, std::size_t Min = 0>
 consteval auto aggregate_initializable() -> std::size_t {
   if constexpr (Max == Min) {
@@ -41,12 +69,33 @@ consteval auto aggregate_initializable() -> std::size_t {
     __cpp_structured_bindings >= 202411L && defined(__cplusplus) && \
     __cplusplus >= 202400L
 
+/**
+ * @brief Converts an aggregate value to a `std::tuple` of references to its members.
+ *
+ * On C++26 compilers that support pack-expansion in structured bindings
+ * (`__cpp_structured_bindings >= 202411L`), this uses the `auto& [... args]`
+ * expansion directly. On earlier compilers the fallback below is used instead.
+ *
+ * The returned tuple contains lvalue references to each field of `t`, so
+ * modifying a tuple element modifies the original aggregate.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The aggregate instance to decompose.
+ * @return   A `std::tuple` of lvalue references to each field of `t`.
+ */
 template <class T>
 constexpr auto as_tuple(T& t) {
   auto& [... args] = t;
   return std::forward_as_tuple(args...);
 }
 
+/**
+ * @brief Const overload of `as_tuple`.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The const aggregate instance to decompose.
+ * @return   A `std::tuple` of const lvalue references to each field of `t`.
+ */
 template <class T>
 constexpr auto as_tuple(const T& t) {
   const auto& [... args] = t;
@@ -55,6 +104,18 @@ constexpr auto as_tuple(const T& t) {
 
 #else
 // clang-format off
+/**
+ * @brief Converts an aggregate value to a `std::tuple` of references to its members.
+ *
+ * Fallback implementation for compilers that do not support pack-expansion
+ * structured bindings. Uses `aggregate_initializable<T>()` to determine the
+ * field count at compile time and selects the corresponding explicit
+ * structured-binding branch (supports 0–64 members).
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The aggregate instance to decompose.
+ * @return   A `std::tuple` of lvalue references to each field of `t`.
+ */
 template <class T>
   requires (detail::aggregate_initializable<T>() <= 64 && ("as_tuple only supports up to 64 elements", true))
 constexpr auto as_tuple (T& t) {
@@ -321,6 +382,13 @@ constexpr auto as_tuple (T& t) {
   }
 }
 
+/**
+ * @brief Const overload of `as_tuple` for the fallback implementation.
+ *
+ * @tparam T An aggregate type with up to 64 members.
+ * @param t  The const aggregate instance to decompose.
+ * @return   A `std::tuple` of const lvalue references to each field of `t`.
+ */
 template <class T>
   requires (detail::aggregate_initializable<T>() <= 64 && ("as_tuple only supports up to 64 elements", true))
 constexpr auto as_tuple (const T& t) {
