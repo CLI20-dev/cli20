@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Regenerate single header
-        run: python3 script/make_single_header.py
+        run: python3 script/make_single_header.py include/cli single_header/cli20.hh
 
       - name: Package include/
         run: tar -czf "cli20-${GITHUB_REF_NAME}-include.tar.gz" include

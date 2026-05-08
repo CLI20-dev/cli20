@@ -7,8 +7,8 @@ function(add_cli20_example source_file suffix cxx_std)
 
   if(example_name STREQUAL "single_header")
     add_dependencies("${target_name}" cli20_single_header)
-    target_include_directories("${target_name}" PRIVATE
-      "${CMAKE_SOURCE_DIR}/single_header")
+    cmake_path(GET CLI20_SINGLE_HEADER PARENT_PATH _single_header_dir)
+    target_include_directories("${target_name}" PRIVATE "${_single_header_dir}")
   elseif(example_name STREQUAL "module")
     if(CXX_CLI20_ENABLE_MODULE)
       target_link_libraries("${target_name}" PRIVATE cli20-module)

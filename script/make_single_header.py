@@ -17,10 +17,7 @@ def ordered_unique(items: list[str]) -> list[str]:
     return list(OrderedDict.fromkeys(items))
 
 
-def main() -> int:
-    repo_root = Path(__file__).resolve().parent.parent
-    include_dir = repo_root / "include" / "cli"
-    output_path = repo_root / "single_header" / "cli20.hh"
+def main(include_dir: Path, output_path: Path) -> int:
 
     headers = sorted(include_dir.glob("*.hh"))
     if not headers:
@@ -110,9 +107,12 @@ def main() -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
 
-    print(output_path.relative_to(repo_root))
+    print(output_path)
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import sys
+    if len(sys.argv) != 3:
+        raise SystemExit(f"usage: {sys.argv[0]} <include_dir> <output_path>")
+    raise SystemExit(main(Path(sys.argv[1]), Path(sys.argv[2])))
