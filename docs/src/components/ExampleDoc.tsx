@@ -54,21 +54,24 @@ export function ExampleCommands({
   return (
     <>
       <h2>{title}</h2>
-      {normalizedItems.map((item, index) => (
-        <div key={`${item.label ?? 'command'}-${index}`} style={{marginBottom: '1.5rem'}}>
-          {item.label ? (
-            <p>
-              <strong>{item.label}</strong>
-            </p>
-          ) : null}
-          <CodeBlock language="bash">{item.command}</CodeBlock>
-          {observedOutput(item) ? (
-            <CodeBlock language="text" title="Observed output">
-              {observedOutput(item)}
-            </CodeBlock>
-          ) : null}
-        </div>
-      ))}
+      {normalizedItems.map((item, index) => {
+        const output = observedOutput(item);
+        return (
+          <div key={`${item.label ?? 'command'}-${index}`} style={{marginBottom: '1.5rem'}}>
+            {item.label ? (
+              <p>
+                <strong>{item.label}</strong>
+              </p>
+            ) : null}
+            <CodeBlock language="bash">{item.command}</CodeBlock>
+            {output ? (
+              <CodeBlock language="text" title="Observed output">
+                {output}
+              </CodeBlock>
+            ) : null}
+          </div>
+        );
+      })}
     </>
   );
 }
