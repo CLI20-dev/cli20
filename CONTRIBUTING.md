@@ -43,7 +43,7 @@ To preview the documentation site locally:
 
 ```sh
 cd docs
-npm install
+npm ci
 npm run start
 ```
 
@@ -51,6 +51,7 @@ To verify the production build:
 
 ```sh
 cd docs
+npm ci
 npm run build
 ```
 
