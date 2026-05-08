@@ -34,15 +34,26 @@ struct DescriptionTag : SpecMemberTag {};
  * @brief Specifies the minimum and maximum number of values an option or
  * positional accepts.
  *
- * Use -1 for `max` to indicate an unlimited upper bound.
- * Both `min` and `max` must be >= 0 (or `max == -1`), and `min <= max`.
+ * **Sentinel value:** The default `{-1, -1}` means *unset*. An unset `Nargs`
+ * is rejected by `is_valid_nargs()` and therefore also by the `ArgImpl` /
+ * `PositionalImpl` template constraints — it is only a valid intermediate
+ * state before a named preset (e.g. `nargs::one`) or a custom value is
+ * assigned.
+ *
+ * **Valid ranges for a fully-initialised `Nargs`:**
+ * - `min >= 0`
+ * - `max >= 1`, or `max == -1` which means *unlimited* (no upper bound)
+ * - `min <= max` (when `max != -1`)
  *
  * Prefer the predefined constants in the `cli::nargs` namespace over
  * constructing `Nargs` directly.
  */
 struct Nargs {
-  int min = -1;  ///< Minimum number of values (must be >= 0).
-  int max = -1;  ///< Maximum number of values (-1 = unlimited).
+  int min = -1;  ///< Minimum number of values. -1 = unset sentinel (invalid for
+                 ///< use in ArgImpl/PositionalImpl); must be >= 0 when set.
+  int max = -1;  ///< Maximum number of values. -1 has two meanings: *unset*
+                 ///< sentinel when `min` is also -1, or *unlimited* upper bound
+                 ///< when `min >= 0`.
 };
 
 /**
