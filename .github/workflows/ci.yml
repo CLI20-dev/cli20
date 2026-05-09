@@ -35,10 +35,9 @@ jobs:
   # ── Build + test matrix ───────────────────────────────────────────────────
   test:
     name: ${{ matrix.os }} / ${{ matrix.compiler }}
-    needs: check
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           # x86-64 Linux
