@@ -7,9 +7,8 @@ on:
       - 'docs/**'
       - 'flake.nix'
       - 'flake.lock'
-      - '.github/workflows/docs-preview.yml'
-  workflow_dispatch:
       - '.github/workflows/deploy-docs.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
