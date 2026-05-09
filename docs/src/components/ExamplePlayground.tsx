@@ -5,6 +5,7 @@ function splitArgs(input: string): string[] {
   const args: string[] = [];
   let cur = '';
   let quote: '"' | "'" | null = null;
+  let inToken = false;
   for (const ch of input) {
     if (quote) {
       if (ch === quote) {
@@ -14,16 +15,19 @@ function splitArgs(input: string): string[] {
       }
     } else if (ch === '"' || ch === "'") {
       quote = ch;
+      inToken = true;
     } else if (ch === ' ' || ch === '\t') {
-      if (cur) {
+      if (inToken) {
         args.push(cur);
         cur = '';
+        inToken = false;
       }
     } else {
       cur += ch;
+      inToken = true;
     }
   }
-  if (cur) args.push(cur);
+  if (inToken) args.push(cur);
   return args;
 }
 

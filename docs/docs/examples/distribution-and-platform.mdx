@@ -70,3 +70,9 @@ values in CI.
 This example converts wide-character process arguments to UTF-8 before parsing,
 which makes the Windows-oriented entry point behave like the normal string-based
 flow. It is the sample to look at when non-ASCII command lines matter.
+
+:::note
+No interactive playground is available for this example — it relies on
+Windows-specific wide-character entry points (`wmain`) that cannot run in a
+browser WebAssembly environment.
+:::

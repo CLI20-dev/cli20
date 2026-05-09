@@ -103,6 +103,7 @@
               pkgs.cmake
               pkgs.ninja
               pkgs.doxygen
+              pkgs.emscripten
             ];
             # cwd is source/docs/, so .. is the repo root.
             configurePhase = ''
