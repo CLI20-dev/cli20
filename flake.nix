@@ -91,9 +91,9 @@
             pkgs.buildNpmPackage {
               pname = "cli20-docs";
               inherit version;
-              # Full repo source: the remark plugin reads examples/*.cc and
-              # executes build/examples/* at build time, so it needs access to
-              # the whole repository, not just the docs/ subdirectory.
+              # Full repo source: prebuild compiles examples/*.cc to WebAssembly
+              # (emcc) and runs doxygen over include/, so the whole repository
+              # is needed, not just the docs/ subdirectory.
               src = ./.;
               postUnpack = ''sourceRoot="$sourceRoot/docs"'';
               DOCUSAURUS_BASE_URL = baseUrl;
@@ -154,11 +154,9 @@
               base_url="$1"
               out_link="''${2:-result}"
 
-              nix build --impure -L --out-link "$out_link" --expr "
-                (builtins.getFlake (toString ./.)).legacyPackages.${pkgs.system}.buildDoc {
-                  baseUrl = \"$base_url\";
-                }
-              "
+              nix build --impure -L --out-link "$out_link" \
+                --argstr baseUrl "$base_url" \
+                --expr '{ baseUrl }: (builtins.getFlake (toString ./.)).legacyPackages.${pkgs.system}.buildDoc { inherit baseUrl; }'
             ''}/bin/build-cli20-doc";
           };
         };

@@ -13,6 +13,7 @@ build/
 
 # Nix build result
 result
+result-*
 
 # npm
 node_modules/
