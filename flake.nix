@@ -28,6 +28,9 @@
 
       perSystem =
         { pkgs, config, ... }:
+        let
+          version = builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile ./VERSION);
+        in
         {
           treefmt = {
             projectRootFile = "flake.nix";
@@ -55,7 +58,7 @@
 
           packages.default = pkgs.stdenvNoCC.mkDerivation {
             pname = "cli20";
-            version = "v0.1.1-pre";
+            inherit version;
             src = ./.;
             nativeBuildInputs = [
               pkgs.llvmPackages.libcxxClang
@@ -85,7 +88,7 @@
 
           packages.doc = pkgs.buildNpmPackage {
             pname = "cli20-docs";
-            version = "0.0.0";
+            inherit version;
             # Full repo source: the remark plugin reads examples/*.cc and
             # executes build/examples/* at build time, so it needs access to
             # the whole repository, not just the docs/ subdirectory.
