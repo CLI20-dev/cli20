@@ -16,13 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Install clang
+        run: sudo apt-get install -y clang
 
       - name: Regenerate single header
-        run: python3 script/make_single_header.py include/cli single_header/cli20.hh
+        run: sh script/make_single_header.sh include single_header/cli20.hh
 
       - name: Package include/
         run: tar -czf "cli20-${GITHUB_REF_NAME}-include.tar.gz" include
