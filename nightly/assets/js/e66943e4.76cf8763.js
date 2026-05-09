@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkcli20_docs=self.webpackChunkcli20_docs||[]).push([["366"],{5326(e){e.exports=JSON.parse('{"metadata":{"permalink":"/cli20/nightly/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":0,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

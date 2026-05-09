@@ -1,0 +1,76 @@
+var annotated_dup =
+[
+    [ "cli", "namespacecli.html", [
+      [ "conversion", "namespacecli_1_1conversion.html", [
+        [ "Integer", "structcli_1_1conversion_1_1Integer.html", "structcli_1_1conversion_1_1Integer" ],
+        [ "Floating", "structcli_1_1conversion_1_1Floating.html", "structcli_1_1conversion_1_1Floating" ],
+        [ "String", "structcli_1_1conversion_1_1String.html", "structcli_1_1conversion_1_1String" ],
+        [ "Bool", "structcli_1_1conversion_1_1Bool.html", "structcli_1_1conversion_1_1Bool" ],
+        [ "Path", "structcli_1_1conversion_1_1Path.html", "structcli_1_1conversion_1_1Path" ],
+        [ "ExistingFile", "structcli_1_1conversion_1_1ExistingFile.html", "structcli_1_1conversion_1_1ExistingFile" ],
+        [ "ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", "structcli_1_1conversion_1_1ExistingDirectory" ],
+        [ "Choice", "structcli_1_1conversion_1_1Choice.html", "structcli_1_1conversion_1_1Choice" ]
+      ] ],
+      [ "validation", "namespacecli_1_1validation.html", [
+        [ "Min", "structcli_1_1validation_1_1Min.html", "structcli_1_1validation_1_1Min" ],
+        [ "Max", "structcli_1_1validation_1_1Max.html", "structcli_1_1validation_1_1Max" ],
+        [ "Range", "structcli_1_1validation_1_1Range.html", "structcli_1_1validation_1_1Range" ],
+        [ "Positive", "structcli_1_1validation_1_1Positive.html", "structcli_1_1validation_1_1Positive" ],
+        [ "NonNegative", "structcli_1_1validation_1_1NonNegative.html", "structcli_1_1validation_1_1NonNegative" ],
+        [ "NonEmpty", "structcli_1_1validation_1_1NonEmpty.html", "structcli_1_1validation_1_1NonEmpty" ],
+        [ "NotBlank", "structcli_1_1validation_1_1NotBlank.html", "structcli_1_1validation_1_1NotBlank" ],
+        [ "OneOf", "structcli_1_1validation_1_1OneOf.html", "structcli_1_1validation_1_1OneOf" ],
+        [ "Matches", "structcli_1_1validation_1_1Matches.html", "structcli_1_1validation_1_1Matches" ],
+        [ "Exists", "structcli_1_1validation_1_1Exists.html", "structcli_1_1validation_1_1Exists" ],
+        [ "IsRegularFile", "structcli_1_1validation_1_1IsRegularFile.html", "structcli_1_1validation_1_1IsRegularFile" ],
+        [ "IsDirectory", "structcli_1_1validation_1_1IsDirectory.html", "structcli_1_1validation_1_1IsDirectory" ],
+        [ "ParentExists", "structcli_1_1validation_1_1ParentExists.html", "structcli_1_1validation_1_1ParentExists" ],
+        [ "Predicate", "structcli_1_1validation_1_1Predicate.html", "structcli_1_1validation_1_1Predicate" ]
+      ] ],
+      [ "pack", "namespacecli_1_1pack.html", [
+        [ "SetTrue", "structcli_1_1pack_1_1SetTrue.html", "structcli_1_1pack_1_1SetTrue" ],
+        [ "SetFalse", "structcli_1_1pack_1_1SetFalse.html", "structcli_1_1pack_1_1SetFalse" ],
+        [ "Toggle", "structcli_1_1pack_1_1Toggle.html", "structcli_1_1pack_1_1Toggle" ],
+        [ "Increment", "structcli_1_1pack_1_1Increment.html", "structcli_1_1pack_1_1Increment" ],
+        [ "RejectDuplicate", "structcli_1_1pack_1_1RejectDuplicate.html", "structcli_1_1pack_1_1RejectDuplicate" ],
+        [ "SetOnce", "structcli_1_1pack_1_1SetOnce.html", "structcli_1_1pack_1_1SetOnce" ],
+        [ "PushUnique", "structcli_1_1pack_1_1PushUnique.html", "structcli_1_1pack_1_1PushUnique" ],
+        [ "Push", "structcli_1_1pack_1_1Push.html", "structcli_1_1pack_1_1Push" ],
+        [ "Insert", "structcli_1_1pack_1_1Insert.html", "structcli_1_1pack_1_1Insert" ],
+        [ "InsertOrAssign", "structcli_1_1pack_1_1InsertOrAssign.html", "structcli_1_1pack_1_1InsertOrAssign" ],
+        [ "Extend", "structcli_1_1pack_1_1Extend.html", "structcli_1_1pack_1_1Extend" ],
+        [ "MarkPresent", "structcli_1_1pack_1_1MarkPresent.html", "structcli_1_1pack_1_1MarkPresent" ],
+        [ "StoreInto", "structcli_1_1pack_1_1StoreInto.html", "structcli_1_1pack_1_1StoreInto" ],
+        [ "Callback", "structcli_1_1pack_1_1Callback.html", "structcli_1_1pack_1_1Callback" ]
+      ] ],
+      [ "action", "namespacecli_1_1action.html", [
+        [ "PrintHelp", "structcli_1_1action_1_1PrintHelp.html", "structcli_1_1action_1_1PrintHelp" ],
+        [ "ExitSuccess", "structcli_1_1action_1_1ExitSuccess.html", "structcli_1_1action_1_1ExitSuccess" ]
+      ] ],
+      [ "ActionResult", "structcli_1_1ActionResult.html", "structcli_1_1ActionResult" ],
+      [ "ActionResult&lt; void &gt;", "structcli_1_1ActionResult_3_01void_01_4.html", "structcli_1_1ActionResult_3_01void_01_4" ],
+      [ "ActionCtx", "structcli_1_1ActionCtx.html", "structcli_1_1ActionCtx" ],
+      [ "ActionCtx&lt; void &gt;", "structcli_1_1ActionCtx_3_01void_01_4.html", "structcli_1_1ActionCtx_3_01void_01_4" ],
+      [ "Action", "structcli_1_1Action.html", "structcli_1_1Action" ],
+      [ "Action&lt;&gt;", "structcli_1_1Action_3_4.html", "structcli_1_1Action_3_4" ],
+      [ "SpecMemberTag", "structcli_1_1SpecMemberTag.html", null ],
+      [ "OptionTag", "structcli_1_1OptionTag.html", null ],
+      [ "PositionalTag", "structcli_1_1PositionalTag.html", null ],
+      [ "CommandTag", "structcli_1_1CommandTag.html", null ],
+      [ "DescriptionTag", "structcli_1_1DescriptionTag.html", null ],
+      [ "Nargs", "structcli_1_1Nargs.html", "structcli_1_1Nargs" ],
+      [ "ArgParameter", "structcli_1_1ArgParameter.html", "structcli_1_1ArgParameter" ],
+      [ "PositionalImpl", "structcli_1_1PositionalImpl.html", "structcli_1_1PositionalImpl" ],
+      [ "Description", "structcli_1_1Description.html", null ],
+      [ "CommandParameter", "structcli_1_1CommandParameter.html", "structcli_1_1CommandParameter" ],
+      [ "Command", "structcli_1_1Command.html", "structcli_1_1Command" ],
+      [ "RecurseHelpTag", "structcli_1_1RecurseHelpTag.html", null ],
+      [ "ParseError", "structcli_1_1ParseError.html", "structcli_1_1ParseError" ],
+      [ "Token", "structcli_1_1Token.html", "structcli_1_1Token" ],
+      [ "TokenizeResult", "structcli_1_1TokenizeResult.html", "structcli_1_1TokenizeResult" ],
+      [ "TokenizerConfig", "structcli_1_1TokenizerConfig.html", "structcli_1_1TokenizerConfig" ],
+      [ "ParseResult", "structcli_1_1ParseResult.html", "structcli_1_1ParseResult" ],
+      [ "Parser", "structcli_1_1Parser.html", "structcli_1_1Parser" ],
+      [ "StringLiteral", "structcli_1_1StringLiteral.html", "structcli_1_1StringLiteral" ]
+    ] ]
+];
