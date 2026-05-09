@@ -50,18 +50,7 @@ jobs:
 
           touch .nojekyll
 
-          python3 -c "
-import json, os, re, functools
-dirs = [d for d in os.listdir('.') if os.path.isdir(d) and re.match(r'^(nightly|latest|v)', d)]
-def cmp(a, b):
-    if a == 'nightly': return -1
-    if b == 'nightly': return 1
-    if a == 'latest': return -1
-    if b == 'latest': return 1
-    return (b > a) - (b < a)
-vers = sorted(dirs, key=functools.cmp_to_key(cmp))
-json.dump({'versions': vers}, open('versions.json', 'w'), indent=2)
-"
+          python3 "$GITHUB_WORKSPACE/script/gen_versions_json.py"
 
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
