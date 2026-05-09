@@ -59,10 +59,6 @@ npm run build
 
 `single_header/cli20.hh` is a build artifact — it is not tracked in git.
 
-It is generated automatically by CMake when Python 3 is available, or manually via:
-
-```sh
-python3 script/make_single_header.py
-```
+It is generated automatically by CMake as part of the build.
 
 The generated file is uploaded as a release asset on each tagged release.
