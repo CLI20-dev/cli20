@@ -7,6 +7,7 @@ on:
       - 'docs/**'
       - 'flake.nix'
       - 'flake.lock'
+  workflow_dispatch:
 
 # Allow one concurrent deployment; cancel in-progress runs on new pushes.
 concurrency:
