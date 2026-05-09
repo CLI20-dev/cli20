@@ -1,8 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cli/meta.hh>
-#include <cli/string_literal.hh>
 #include <filesystem>
 #include <functional>
 #include <string>
@@ -10,6 +8,8 @@
 #include <vector>
 
 #include "cli/action.hh"
+#include "cli/meta.hh"
+#include "cli/string_literal.hh"
 
 namespace cli {
 

@@ -82,24 +82,24 @@ install(
 )
 
 
-find_package(Python3 COMPONENTS Interpreter)
-if(Python3_FOUND)
+if(MSVC)
+  message(STATUS "single_header target is not supported with MSVC – skipping")
+else()
   file(GLOB CLI20_HEADERS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/cli/*.hh"
   )
   set(CLI20_SINGLE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/single_header/cli20.hh")
   add_custom_command(
     OUTPUT "${CLI20_SINGLE_HEADER}"
-    COMMAND Python3::Interpreter
-      "${CMAKE_CURRENT_SOURCE_DIR}/script/make_single_header.py"
-      "${CMAKE_CURRENT_SOURCE_DIR}/include/cli"
+    COMMAND sh
+      "${CMAKE_CURRENT_SOURCE_DIR}/script/make_single_header.sh"
+      "${CMAKE_CURRENT_SOURCE_DIR}/include"
       "${CLI20_SINGLE_HEADER}"
+      "${CMAKE_CXX_COMPILER}"
     DEPENDS ${CLI20_HEADERS}
     COMMENT "Generating single_header/cli20.hh"
   )
   add_custom_target(cli20_single_header DEPENDS "${CLI20_SINGLE_HEADER}")
-else()
-  message(STATUS "Python3 not found – single_header target and example are disabled")
 endif()
 
 add_subdirectory(examples)
