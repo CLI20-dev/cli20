@@ -1,0 +1,67 @@
+name: Deploy Nightly Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'flake.nix'
+      - 'flake.lock'
+
+# Allow one concurrent deployment; cancel in-progress runs on new pushes.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy nightly docs to gh-pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build docs
+        run: nix run .#doc -- /cli20/nightly/
+
+      - name: Fetch gh-pages
+        run: |
+          git fetch origin gh-pages:gh-pages || true
+
+      - name: Deploy to gh-pages/nightly
+        run: |
+          set -eu
+
+          git worktree add gh-pages-out gh-pages
+          cd gh-pages-out
+
+          rm -rf nightly
+          mkdir -p nightly
+          cp -r ../result/. nightly/
+
+          touch .nojekyll
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+            exit 0
+          fi
+
+          git commit -m "docs: nightly build"
+
+      - name: Push gh-pages
+        run: |
+          cd gh-pages-out
+          git push --force origin gh-pages

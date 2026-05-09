@@ -5,7 +5,7 @@ import remarkExampleSource from './plugins/remark-example-source.mjs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
-const baseUrl = '/cli20/';
+const baseUrl = process.env.DOCUSAURUS_BASE_URL ?? '/cli20/';
 
 const config: Config = {
   title: 'CLI20',
@@ -78,7 +78,7 @@ const config: Config = {
           label: 'Examples',
         },
         {
-          href: `${baseUrl}api/index.html`,
+          to: '/api/',
           label: 'API Reference',
           position: 'left',
           target: '_blank',
@@ -110,7 +110,7 @@ const config: Config = {
             },
             {
               label: 'API Reference',
-              href: `${baseUrl}api/index.html`,
+              to: `/api/`,
               target: '_blank',
             },
           ],

@@ -31,7 +31,7 @@
         let
           version = builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile ./VERSION);
         in
-        {
+        rec {
           treefmt = {
             projectRootFile = "flake.nix";
             programs.clang-format = {
@@ -86,50 +86,44 @@
             '';
           };
 
-          packages.doc = pkgs.buildNpmPackage {
-            pname = "cli20-docs";
-            inherit version;
-            # Full repo source: the remark plugin reads examples/*.cc and
-            # executes build/examples/* at build time, so it needs access to
-            # the whole repository, not just the docs/ subdirectory.
-            src = ./.;
-            postUnpack = ''sourceRoot="$sourceRoot/docs"'';
-            # npmDeps must reference docs/ explicitly so fetchNpmDeps finds
-            # package-lock.json there, not at the repo root.
-            npmDeps = pkgs.fetchNpmDeps {
-              name = "cli20-docs-0.0.0-npm-deps";
-              src = ./docs;
-              hash = "sha256-RLSaV0EkTN+8+7MpJPxiwJ3QGouTptR0UMU0jcsu3BM=";
+          legacyPackages.buildDoc =
+            { baseUrl }:
+            pkgs.buildNpmPackage {
+              pname = "cli20-docs";
+              inherit version;
+              # Full repo source: the remark plugin reads examples/*.cc and
+              # executes build/examples/* at build time, so it needs access to
+              # the whole repository, not just the docs/ subdirectory.
+              src = ./.;
+              postUnpack = ''sourceRoot="$sourceRoot/docs"'';
+              DOCUSAURUS_BASE_URL = baseUrl;
+              # npmDeps must reference docs/ explicitly so fetchNpmDeps finds
+              # package-lock.json there, not at the repo root.
+              npmDeps = pkgs.fetchNpmDeps {
+                name = "cli20-docs-0.0.0-npm-deps";
+                src = ./docs;
+                hash = "sha256-DOI2KP2qq8zbUjX3Kktgfe16n567pNkkGz5ABGSgSdo=";
+              };
+              nativeBuildInputs = [
+                pkgs.emscripten
+                pkgs.doxygen
+              ];
+              buildPhase = ''
+                runHook preBuild
+                mkdir -p .emcc-cache
+                export EM_CACHE=$(pwd)/.emcc-cache
+                npm run build
+                runHook postBuild
+              '';
+              installPhase = ''
+                runHook preInstall
+                cp -r build/. $out/
+                runHook postInstall
+              '';
             };
-            nativeBuildInputs = [
-              pkgs.llvmPackages.libcxxClang
-              pkgs.cmake
-              pkgs.ninja
-              pkgs.doxygen
-              pkgs.emscripten
-            ];
-            # cwd is source/docs/, so .. is the repo root.
-            configurePhase = ''
-              runHook preConfigure
-              cmake -S .. -B ../build -G Ninja \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCXX_CLI20_ENABLE_TEST=OFF \
-                -DCXX_CLI20_ENABLE_CLANG_TIDY=OFF \
-                -DCXX_CLI20_ENABLE_SANITIZERS=OFF
-              cmake --build ../build
-              runHook postConfigure
-            '';
-            buildPhase = ''
-              runHook preBuild
-              npm run build
-              runHook postBuild
-            '';
-            installPhase = ''
-              runHook preInstall
-              mkdir -p $out
-              cp -r build/. $out/
-              runHook postInstall
-            '';
+
+          packages.doc = legacyPackages.buildDoc {
+            baseUrl = "/cli20/";
           };
 
           apps.build = {
@@ -145,6 +139,27 @@
                 fi
                 nix develop --command cmake --build build
               '').outPath;
+          };
+
+          apps.doc = {
+            type = "app";
+            program = "${pkgs.writeShellScriptBin "build-cli20-doc" ''
+              set -eu
+
+              if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+                echo "usage: nix run .#doc -- BASE_URL [OUT_LINK]" >&2
+                exit 2
+              fi
+
+              base_url="$1"
+              out_link="''${2:-result}"
+
+              nix build --impure -L --out-link "$out_link" --expr "
+                (builtins.getFlake (toString ./.)).legacyPackages.${pkgs.system}.buildDoc {
+                  baseUrl = \"$base_url\";
+                }
+              "
+            ''}/bin/build-cli20-doc";
           };
         };
     };
