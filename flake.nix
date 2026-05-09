@@ -61,7 +61,6 @@
               pkgs.cmake
               pkgs.ninja
               pkgs.clang-tools
-              pkgs.python3
             ];
             buildInputs = [
               (pkgs.gtest.override {
