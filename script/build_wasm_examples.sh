@@ -16,6 +16,7 @@ SKIP="module single_header unicode_echo"
 mkdir -p "$OUT_DIR"
 
 for src in "$EXAMPLES_DIR"/*.cc; do
+  [ -f "$src" ] || continue
   name=$(basename "$src" .cc)
 
   skip=0
