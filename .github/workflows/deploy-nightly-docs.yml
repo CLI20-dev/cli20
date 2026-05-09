@@ -33,15 +33,16 @@ jobs:
       - name: Build docs
         run: nix run .#doc -- /cli20/nightly/
 
-      - name: Fetch gh-pages
-        run: |
-          git fetch origin gh-pages:gh-pages || true
-
       - name: Deploy to gh-pages/nightly
         run: |
           set -eu
 
-          git worktree add gh-pages-out gh-pages
+          git fetch origin gh-pages:gh-pages || true
+          if git rev-parse --verify gh-pages > /dev/null 2>&1; then
+            git worktree add gh-pages-out gh-pages
+          else
+            git worktree add --orphan -b gh-pages gh-pages-out
+          fi
           cd gh-pages-out
 
           rm -rf nightly
