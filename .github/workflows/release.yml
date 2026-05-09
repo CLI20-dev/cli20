@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get install -y clang
 
       - name: Regenerate single header
-        run: sh script/make_single_header.sh include single_header/cli20.hh
+        run: CXX=clang++ sh script/make_single_header.sh include single_header/cli20.hh
 
       - name: Package include/
         run: tar -czf "cli20-${GITHUB_REF_NAME}-include.tar.gz" include
