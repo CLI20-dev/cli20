@@ -3,6 +3,7 @@ name: Release Docs
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 concurrency:
   group: pages
