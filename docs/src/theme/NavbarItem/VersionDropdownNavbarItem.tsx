@@ -4,7 +4,11 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 type VersionsJson = {versions: string[]};
 
-export default function VersionDropdownNavbarItem(): ReactNode {
+type Props = {
+  mobile?: boolean;
+};
+
+export default function VersionDropdownNavbarItem({mobile = false}: Props): ReactNode {
   const {
     siteConfig: {baseUrl},
   } = useDocusaurusContext();
@@ -25,9 +29,25 @@ export default function VersionDropdownNavbarItem(): ReactNode {
 
   if (versions.length === 0) return null;
 
-  const repoPrefix =
-    baseUrl.split('/').filter(Boolean)[0] ?? '';
+  const repoPrefix = baseUrl.split('/').filter(Boolean)[0] ?? '';
   const prefix = repoPrefix ? `/${repoPrefix}` : '';
+
+  if (mobile) {
+    return (
+      <>
+        <span className="menu__link menu__link--sublist">Versions</span>
+        <ul className="menu__list">
+          {versions.map((v) => (
+            <li key={v} className="menu__list-item">
+              <a href={`${prefix}/${v}/`} className="menu__link">
+                {v}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
 
   return (
     <div className="navbar__item dropdown dropdown--hoverable">
