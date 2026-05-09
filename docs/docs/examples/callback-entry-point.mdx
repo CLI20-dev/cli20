@@ -2,7 +2,8 @@
 title: Callback Entry Point
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
 
 # Callback Entry Point
 
@@ -29,28 +30,16 @@ at the edge, supports repeated `--include` options without swallowing
 positionals, and leaves the final state in `verbose`, `jobs`, `includes`, and
 `inputs`.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Populate state and then call run(state)',
-      command: './build/examples/callback_entry_point --verbose --jobs 8 --include src --include include main.cc lib.cc',
-    },
-    {
-      label: 'Generated help',
-      command: './build/examples/callback_entry_point --help',
-    },
-  ]}
-/>
+## Try It
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Invalid integer conversion for jobs',
-      command: './build/examples/callback_entry_point --jobs nope main.cc',
-    },
-  ]}
-/>
+<ExamplePlayground name="callback_entry_point" defaultArgs="--verbose --jobs 8 --include src --include include main.cc lib.cc" />
+
+Things to try:
+
+- **Happy path** — `--verbose --jobs 8 --include src --include include main.cc lib.cc`
+- **Help** — `--help`
+- **Multiple includes** — add more `--include path` flags to see the list grow
+- **No inputs** — `--verbose` to see what happens with no positional arguments
 
 ## Related Examples
 

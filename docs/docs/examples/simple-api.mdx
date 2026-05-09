@@ -2,7 +2,8 @@
 title: Simple API
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
 
 # Simple API
 
@@ -25,28 +26,16 @@ optional named value and a required positional, and lets cli20 handle standard
 help and error flow. On success, `verbose` becomes a `bool`, `output` holds an
 optional path-like string, and `input` holds the required file name.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Successful parse',
-      command: './build/examples/simple_api --verbose --output result.txt input.cc',
-    },
-    {
-      label: 'Generated help',
-      command: './build/examples/simple_api --help',
-    },
-  ]}
-/>
+## Try It
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Missing the required positional argument',
-      command: './build/examples/simple_api --output result.txt',
-    },
-  ]}
-/>
+<ExamplePlayground name="simple_api" defaultArgs="--verbose --output result.txt input.cc" />
+
+Things to try:
+
+- **Happy path** — `--verbose --output result.txt input.cc`
+- **No flag** — `input.cc` (just the required positional)
+- **Help** — `--help`
+- **Missing positional** — `--verbose` to see the required-argument error
 
 ## Related Examples
 

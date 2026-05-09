@@ -48,6 +48,7 @@
               pkgs.nodejs_latest
               pkgs.clang-tools
               pkgs.doxygen
+              pkgs.emscripten
               config.treefmt.build.wrapper
             ];
           };

@@ -2,7 +2,10 @@
 title: Validation
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+import {setupValidationFs} from '@site/src/components/exampleSetups';
+
 
 # Validation
 
@@ -28,28 +31,24 @@ profile names during parsing, and checks filesystem-related arguments before the
 rest of the program runs. On success, the parsed state ends up as optional
 typed fields for `port`, `profile`, and `output`.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Successful parse',
-      command: './build/examples/validation --port 8080 --profile release_1 --output /tmp/cli20-example/out/result.bin',
-    },
-    {
-      label: 'Generated help',
-      command: './build/examples/validation --help',
-    },
-  ]}
-/>
+## Try It
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Port outside the accepted range',
-      command: './build/examples/validation --port 70000 --profile BadName',
-    },
-  ]}
-/>
+The virtual filesystem is configured like this in this environment:
+
+```
+/
+└── tmp/          (directory)
+```
+
+<ExamplePlayground name="validation" defaultArgs="--port 8080 --profile release_1" setupFs={setupValidationFs} />
+
+Things to try:
+
+- **Happy path** — `--port 8080 --profile release_1 --output /tmp/result.txt`
+- **Port out of range** — `--port 99999 --profile dev` to see range fail
+- **Invalid profile** — `--port 80 --profile My-Profile` to see regex reject uppercase
+- **Missing required args** — just `--output /tmp/x` to see both required args reported
+- **Help** — `--help`
 
 ## Related Examples
 

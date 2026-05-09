@@ -18,3 +18,6 @@ result
 node_modules/
 npm-debug.log
 .docusaurus/
+
+# wasm build artifacts
+docs/static/wasm/

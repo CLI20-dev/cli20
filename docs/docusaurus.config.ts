@@ -1,7 +1,8 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-// @ts-expect-error — local ESM plugin, no type declarations
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore — local ESM plugin, no type declarations
 import remarkRunExampleCommands from './plugins/remark-run-example-commands.mjs';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
