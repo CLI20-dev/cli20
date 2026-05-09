@@ -1,6 +1,6 @@
 PROJECT_NAME           = "cli20"
 PROJECT_BRIEF          = "A C++20 typed-schema command-line parser"
-PROJECT_NUMBER         = v0.1.1-pre
+PROJECT_NUMBER         = $(CLI20_VERSION)
 
 INPUT                  = include/
 RECURSIVE              = YES

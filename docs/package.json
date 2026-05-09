@@ -5,9 +5,9 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "prebuild": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
-    "predeploy": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
-    "prestart": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
+    "prebuild": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && CLI20_VERSION=$(tr -d '[:space:]' < VERSION) doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
+    "predeploy": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && CLI20_VERSION=$(tr -d '[:space:]' < VERSION) doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
+    "prestart": "cd .. && (command -v doxygen > /dev/null 2>&1 && (rm -rf docs/static/api && CLI20_VERSION=$(tr -d '[:space:]' < VERSION) doxygen Doxyfile) || echo '[docs] doxygen not found – skipping API reference generation')",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
