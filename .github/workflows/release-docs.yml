@@ -1,0 +1,77 @@
+name: Release Docs
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  release-docs:
+    name: Build and deploy release docs to gh-pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Check version
+        run: |
+          set -eu
+          VERSION="v$(tr -d '[:space:]' < VERSION)"
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "VERSION file ($VERSION) does not match tag ($GITHUB_REF_NAME)" >&2
+            exit 1
+          fi
+
+      - name: Build docs
+        run: nix run .#doc -- /cli20/release/ result-release
+
+      - name: Build docs
+        run: nix run .#doc -- /cli20/$GITHUB_REF_NAME/ result-tag
+
+      - name: Fetch gh-pages
+        run: |
+          git fetch origin gh-pages:gh-pages || true
+
+      - name: Deploy to gh-pages release directories
+        run: |
+          set -eu
+          VERSION="$GITHUB_REF_NAME"
+
+          git worktree add gh-pages-out gh-pages
+          cd gh-pages-out
+
+          rm -rf "$VERSION" latest
+          mkdir -p "$VERSION" latest
+
+          cp -r ../result-tag/. "$VERSION/"
+          cp -r ../result-release/. latest/
+
+          touch .nojekyll
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to deploy."
+            exit 0
+          fi
+
+          git commit -m "docs: release $VERSION"
+
+      - name: Push gh-pages
+        run: |
+          cd gh-pages-out
+          git push --force origin gh-pages

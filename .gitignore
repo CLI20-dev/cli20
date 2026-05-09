@@ -17,7 +17,9 @@ result
 # npm
 node_modules/
 npm-debug.log
-.docusaurus/
 
-# wasm build artifacts
+# docs
+docs/build/
+docs/.docusaurus/
+docs/static/api/
 docs/static/wasm/

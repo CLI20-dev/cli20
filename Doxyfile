@@ -13,8 +13,9 @@ EXTRACT_STATIC         = YES
 # Hide internal implementation details
 EXCLUDE_SYMBOLS        = cli::detail
 
+OUTPUT_DIRECTORY       = docs/static/api
 GENERATE_HTML          = YES
-HTML_OUTPUT            = docs/static/api
+HTML_OUTPUT            = .
 
 # doxygen-awesome-css: modern flat theme
 HTML_EXTRA_STYLESHEET  = doxygen/doxygen-awesome.css
