@@ -18,6 +18,7 @@ GENERATE_HTML          = YES
 HTML_OUTPUT            = .
 
 # doxygen-awesome-css: modern flat theme
+HTML_HEADER            = doxygen/header.html
 HTML_EXTRA_STYLESHEET  = doxygen/doxygen-awesome.css
 HTML_COLORSTYLE        = LIGHT
 HTML_COLORSTYLE_HUE    = 209
