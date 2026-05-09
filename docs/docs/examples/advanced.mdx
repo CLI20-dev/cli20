@@ -2,7 +2,10 @@
 title: Advanced
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+import {setupAdvancedFs} from '@site/src/components/exampleSetups';
+
 
 # Advanced
 
@@ -28,30 +31,30 @@ when you need lists, uniqueness, or filesystem checks with precise control over
 how values are stored. On success, it produces optional `config` and `jobs`
 values plus collected `includes` and `defines`.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Prepare sample files and run the example',
-      command: `mkdir -p /tmp/cli20-example/include /tmp/cli20-example/out
-touch /tmp/cli20-example/config.toml
-./build/examples/advanced --config /tmp/cli20-example/config.toml --jobs 8 --include /tmp/cli20-example/include -D DEBUG -D TRACE`,
-    },
-    {
-      label: 'Generated help',
-      command: './build/examples/advanced --help',
-    },
-  ]}
+## Try It
+
+The virtual filesystem is configured like this in this environment:
+
+```
+/
+├── config.toml   (regular file)
+└── configs/      (directory)
+```
+
+<ExamplePlayground
+  name="advanced"
+  defaultArgs="--config config.toml --jobs 4 -I /include -D DEBUG"
+  setupFs={setupAdvancedFs}
 />
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Missing configuration file fails validation',
-      command: './build/examples/advanced --config /tmp/cli20-example/missing.toml',
-    },
-  ]}
-/>
+Things to try:
+
+- **Happy path** — `--config config.toml --jobs 4 -I /include -D DEBUG`
+- **Multiple defines** — `--config config.toml -D FOO -D BAR -D FOO` to see `push_unique` deduplicate
+- **Directory as config** — `--config /configs` to see `is_regular_file` reject it
+- **Out-of-range jobs** — `--config config.toml --jobs 99` to see range validation fail
+- **Missing parent** — `-I /usr/include` to see `parent_exists` fail (`/usr` doesn't exist in the virtual FS)
+- **Help** — `-h` or `--help`
 
 ## Related Examples
 

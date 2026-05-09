@@ -2,7 +2,8 @@
 title: Subcommands
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
 
 # Subcommands
 
@@ -28,32 +29,17 @@ arguments and help text, and makes it easy to check which command actually ran.
 Global options are handled first, then control passes to exactly one command,
 whose nested fields keep the usual `value()` and `provided()` behavior.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Run the build subcommand',
-      command: './build/examples/subcommand build --release --jobs 4 main.cc util.cc',
-    },
-    {
-      label: 'Subcommand help',
-      command: './build/examples/subcommand build --help',
-    },
-  ]}
-/>
+## Try It
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Build selected without source files',
-      command: './build/examples/subcommand build',
-    },
-    {
-      label: 'Publish selected without a registry',
-      command: './build/examples/subcommand publish',
-    },
-  ]}
-/>
+<ExamplePlayground name="subcommand" defaultArgs="build --release --jobs 4 main.cc util.cc" />
+
+Things to try:
+
+- **build** — `build --release --jobs 4 main.cc util.cc`
+- **publish** — `publish --registry https://registry.example.com --dry-run`
+- **Verbose flag** — `--verbose build main.cc`
+- **Subcommand help** — `build --help` or `publish --help`
+- **Top-level help** — `--help`
 
 ## Related Examples
 

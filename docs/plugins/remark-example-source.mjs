@@ -1,14 +1,8 @@
 import {readFileSync} from 'node:fs';
-import {spawnSync} from 'node:child_process';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-
-function runCommand(command) {
-  const result = spawnSync(command, {shell: true, cwd: repoRoot, encoding: 'utf8'});
-  return `${result.stdout ?? ''}${result.stderr ?? ''}`.trimEnd();
-}
 
 // Minimal AST visitor — avoids adding unist-util-visit as an explicit dependency.
 function visit(node, type, fn) {
@@ -49,57 +43,17 @@ function hasProperty(objectExpr, name) {
 }
 
 /**
- * Remark plugin that handles <ExampleCommands> and <ExampleSource> at MDX
- * compile time, so no pre-generated files or runtime lookups are needed.
- *
- * <ExampleCommands> — executes each command and injects its output as a prop.
- * <ExampleSource>   — reads the C++ source file and injects it as sourceCode.
+ * Remark plugin that handles <ExampleSource> at MDX compile time.
+ * Reads the C++ source file from disk and injects it as the sourceCode prop.
  */
 export default function remarkExampleDocs() {
   return (tree) => {
     visit(tree, 'mdxJsxFlowElement', (node) => {
-      if (node.name === 'ExampleCommands') {
-        handleExampleCommands(node);
-      } else if (node.name === 'ExampleSource') {
+      if (node.name === 'ExampleSource') {
         handleExampleSource(node);
       }
     });
   };
-}
-
-function handleExampleCommands(node) {
-  for (const attr of node.attributes ?? []) {
-    if (attr.type !== 'mdxJsxAttribute') continue;
-
-    // command="./build/examples/foo" — simple string attribute
-    if (attr.name === 'command' && typeof attr.value === 'string') {
-      node.attributes.push({
-        type: 'mdxJsxAttribute',
-        name: 'output',
-        value: runCommand(attr.value),
-      });
-      return;
-    }
-
-    // items={[{command: '...', label: '...'}]}
-    if (attr.name === 'items') {
-      const arrayExpr = attr.value?.data?.estree?.body?.[0]?.expression;
-      if (arrayExpr?.type !== 'ArrayExpression') continue;
-
-      for (const element of arrayExpr.elements ?? []) {
-        if (element?.type !== 'ObjectExpression') continue;
-
-        const commandProp = element.properties.find(
-          (p) => (p.key?.name ?? p.key?.value) === 'command',
-        );
-        const command = literalString(commandProp?.value);
-        if (!command || hasProperty(element, 'output')) continue;
-
-        element.properties.push(stringProperty('output', runCommand(command)));
-      }
-      return;
-    }
-  }
 }
 
 function handleExampleSource(node) {

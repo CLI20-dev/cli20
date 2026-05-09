@@ -2,7 +2,8 @@
 title: Bind
 ---
 
-import {ExampleCommands, ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
 
 # Bind
 
@@ -28,28 +29,16 @@ program already owns `port`, `output`, and `ratio`, and on success those values
 are written straight into their target `int`, `std::string`, and `double`
 variables.
 
-<ExampleCommands
-  items={[
-    {
-      label: 'Successful parse',
-      command: './build/examples/bind --port 9000 --output release.bin --ratio 1.5',
-    },
-    {
-      label: 'Generated help',
-      command: './build/examples/bind --help',
-    },
-  ]}
-/>
+## Try It
 
-<ExampleCommands
-  title="Failure Cases"
-  items={[
-    {
-      label: 'Conversion still fails before anything is written',
-      command: './build/examples/bind --port nope',
-    },
-  ]}
-/>
+<ExamplePlayground name="bind" defaultArgs="--port 9000 --output release.bin --ratio 1.5" />
+
+Things to try:
+
+- **Happy path** — `--port 9000 --output release.bin --ratio 1.5`
+- **Defaults** — run with no arguments to see the pre-bound default values
+- **Help** — `--help`
+- **Bad ratio** — `--port 80 --ratio abc` to see conversion fail
 
 ## Related Examples
 
