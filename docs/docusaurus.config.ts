@@ -84,6 +84,10 @@ const config: Config = {
           target: '_blank',
         },
         {
+          type: 'custom-VersionDropdown',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/CLI20-dev/cli20',
           label: 'GitHub',
           position: 'right',

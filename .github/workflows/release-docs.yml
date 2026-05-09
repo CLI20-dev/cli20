@@ -34,10 +34,10 @@ jobs:
             exit 1
           fi
 
-      - name: Build docs
-        run: nix run .#doc -- /cli20/release/ result-release
+      - name: Build docs (latest base URL)
+        run: nix run .#doc -- /cli20/latest/ result-release
 
-      - name: Build docs
+      - name: Build docs (versioned base URL)
         run: nix run .#doc -- /cli20/$GITHUB_REF_NAME/ result-tag
 
       - name: Fetch gh-pages
@@ -60,6 +60,19 @@ jobs:
 
           touch .nojekyll
 
+          python3 -c "
+import json, os, re, functools
+dirs = [d for d in os.listdir('.') if os.path.isdir(d) and re.match(r'^(nightly|latest|v)', d)]
+def cmp(a, b):
+    if a == 'nightly': return -1
+    if b == 'nightly': return 1
+    if a == 'latest': return -1
+    if b == 'latest': return 1
+    return (b > a) - (b < a)
+vers = sorted(dirs, key=functools.cmp_to_key(cmp))
+json.dump({'versions': vers}, open('versions.json', 'w'), indent=2)
+"
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add -A
@@ -69,9 +82,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "docs: release $VERSION"
-
-      - name: Push gh-pages
-        run: |
-          cd gh-pages-out
-          git push --force origin gh-pages
+          # Create an orphan commit (no parent) to keep gh-pages history lean
+          tree=$(git write-tree)
+          commit=$(git commit-tree "$tree" -m "docs: release $VERSION")
+          git push --force origin "${commit}:refs/heads/gh-pages"
