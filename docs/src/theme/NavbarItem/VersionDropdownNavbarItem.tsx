@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import type {ReactNode} from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
@@ -7,6 +7,32 @@ type VersionsJson = {versions: string[]};
 type Props = {
   mobile?: boolean;
 };
+
+function MobileVersionDropdown({versions, prefix}: {versions: string[]; prefix: string}): ReactNode {
+  const [collapsed, setCollapsed] = useState(true);
+  const toggle = useCallback(() => setCollapsed((c) => !c), []);
+
+  return (
+    <li className="menu__list-item">
+      <button
+        className={`clean-btn menu__link menu__link--sublist menu__link--sublist-caret${collapsed ? '' : ' menu__link--active'}`}
+        style={{fontSize: 'inherit'}}
+        onClick={toggle}
+        aria-expanded={!collapsed}>
+        Versions
+      </button>
+      <ul className="menu__list" style={{display: collapsed ? 'none' : undefined}}>
+        {versions.map((v) => (
+          <li key={v} className="menu__list-item">
+            <a href={`${prefix}/${v}/`} className="menu__link">
+              {v}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
+}
 
 export default function VersionDropdownNavbarItem({mobile = false}: Props): ReactNode {
   const {
@@ -33,20 +59,7 @@ export default function VersionDropdownNavbarItem({mobile = false}: Props): Reac
   const prefix = repoPrefix ? `/${repoPrefix}` : '';
 
   if (mobile) {
-    return (
-      <>
-        <span className="menu__link menu__link--sublist">Versions</span>
-        <ul className="menu__list">
-          {versions.map((v) => (
-            <li key={v} className="menu__list-item">
-              <a href={`${prefix}/${v}/`} className="menu__link">
-                {v}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </>
-    );
+    return <MobileVersionDropdown versions={versions} prefix={prefix} />;
   }
 
   return (
