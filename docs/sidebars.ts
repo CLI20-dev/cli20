@@ -44,8 +44,13 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: 'doc',
+          id: 'examples/compiler',
+          label: '7. Compiler Wrapper',
+        },
+        {
+          type: 'doc',
           id: 'examples/distribution-and-platform',
-          label: '7. Distribution and Platform',
+          label: '8. Distribution and Platform',
         },
       ],
     },
