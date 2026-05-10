@@ -113,7 +113,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ac172d5d254d341b960662125857c24dc" id="r_ac172d5d254d341b960662125857c24dc"><td class="memItemLeft"><a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8">TokenType</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac172d5d254d341b960662125857c24dc">type</a></td></tr>
 <tr class="memdesc:ac172d5d254d341b960662125857c24dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classification of this token.  <br /></td></tr>
 <tr class="memitem:a0b97bc1df1782aaf7e0d71f097056ad1" id="r_a0b97bc1df1782aaf7e0d71f097056ad1"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a0b97bc1df1782aaf7e0d71f097056ad1">text</a></td></tr>
-<tr class="memdesc:a0b97bc1df1782aaf7e0d71f097056ad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The token text (a view into the original <span class="tt">args</span> span).  <br /></td></tr>
+<tr class="memdesc:a0b97bc1df1782aaf7e0d71f097056ad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For option tokens: the bare name without prefix (e.g.  <br /></td></tr>
 <tr class="memitem:a30153553875b142ecb2c53be7204df6c" id="r_a30153553875b142ecb2c53be7204df6c"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a30153553875b142ecb2c53be7204df6c">matched_prefix</a></td></tr>
 <tr class="memdesc:a30153553875b142ecb2c53be7204df6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The option prefix that was matched (e.g.  <br /></td></tr>
 <tr class="memitem:ae904130a91d102fcdafb93abc2d0d480" id="r_ae904130a91d102fcdafb93abc2d0d480"><td class="memItemLeft">std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#ae904130a91d102fcdafb93abc2d0d480">position</a></td></tr>
@@ -137,9 +137,9 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>The option prefix that was matched (e.g. </p>
-<p><span class="tt">"--"</span>); empty for non-option tokens. </p>
+<p><span class="tt">"--"</span> or <span class="tt">"-"</span>); empty for non-option tokens. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00072">72</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00074">74</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -157,7 +157,7 @@ Public Attributes</h2></td></tr>
 
 <p>Zero-based index into the original <span class="tt">args</span> span. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00074">74</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00077">77</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -173,9 +173,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>The token text (a view into the original <span class="tt">args</span> span). </p>
+<p>For option tokens: the bare name without prefix (e.g. </p>
+<p><span class="tt">"verbose"</span> for <span class="tt">--verbose</span>, <span class="tt">"v"</span> for <span class="tt">-v</span>). For value/positional/command tokens: the raw text from the args span. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00071">71</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00070">70</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

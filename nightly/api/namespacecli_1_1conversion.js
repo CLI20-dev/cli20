@@ -8,7 +8,11 @@ var namespacecli_1_1conversion =
     [ "ExistingFile", "structcli_1_1conversion_1_1ExistingFile.html", "structcli_1_1conversion_1_1ExistingFile" ],
     [ "ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", "structcli_1_1conversion_1_1ExistingDirectory" ],
     [ "Choice", "structcli_1_1conversion_1_1Choice.html", "structcli_1_1conversion_1_1Choice" ],
+    [ "NegatableResult", "structcli_1_1conversion_1_1NegatableResult.html", "structcli_1_1conversion_1_1NegatableResult" ],
+    [ "Negatable", "structcli_1_1conversion_1_1Negatable.html", "structcli_1_1conversion_1_1Negatable" ],
     [ "Enumeration", "namespacecli_1_1conversion.html#ab80de38ce5e4cbd1062711038a43a8d1", null ],
+    [ "get", "namespacecli_1_1conversion.html#a1d769bb58034fb91680dca0ab07270c7", null ],
+    [ "get", "namespacecli_1_1conversion.html#ab07650a836199d7ae02f64a8fa59cc41", null ],
     [ "boolean", "namespacecli_1_1conversion.html#abb92b6f4c4005a2ac80acd7911290a19", null ],
     [ "choice", "namespacecli_1_1conversion.html#a09abfb96cc1911350f7bd764ae66aab0", null ],
     [ "enumeration", "namespacecli_1_1conversion.html#a2f8bc6ee5c42c905ab93961e022258cc", null ],
@@ -16,6 +20,7 @@ var namespacecli_1_1conversion =
     [ "existing_file", "namespacecli_1_1conversion.html#af32f182973cd20c2d59bcadaee9184f6", null ],
     [ "floating", "namespacecli_1_1conversion.html#aa29493904d59c8cc58fa5fda073ea1c8", null ],
     [ "integer", "namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b", null ],
+    [ "negatable", "namespacecli_1_1conversion.html#a177665b2e9fabfe6777e9cb2474d1621", null ],
     [ "path", "namespacecli_1_1conversion.html#af9b6ac4a41b2cf578796334c17d06ed4", null ],
     [ "string", "namespacecli_1_1conversion.html#a078ad9ec1fc45b256d05e2b50e55050f", null ]
 ];

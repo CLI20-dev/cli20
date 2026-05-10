@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['listoption_0',['ListOption',['../namespacecli.html#a32d4dd1a69eb7d5d77f5029c07bec31c',1,'cli']]]
+  ['kind_0',['kind',['../structcli_1_1ParseError.html#a95a74cdc3c386025ead4bff16df76b89',1,'cli::ParseError']]]
 ];

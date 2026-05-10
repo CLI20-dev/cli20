@@ -1103,7 +1103,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00857">857</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00946">946</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -1141,7 +1141,7 @@ template&lt;ArgumentSpec T&gt; </div>
 <p>Parses <span class="tt">argc</span>/<span class="tt">argv</span> and exits the process on failure. </p>
 <p>If parsing fails, writes the error message to <span class="tt">err</span> (or <span class="tt">out</span> for help/exit-success) and calls <span class="tt">std::exit</span> with the appropriate exit code. On success, returns the fully populated argument struct by value.</p>
 <p>This is the typical one-liner entry point for command-line tools: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> args = <a class="code hl_function" href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit&lt;MyArgs&gt;</a>(argc, argv);</div>
-<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l00882">parser.hh:882</a></div></div>
+<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l00971">parser.hh:971</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The argument specification type. </td></tr>
@@ -1159,7 +1159,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The parsed argument struct (never returns on failure). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00882">882</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00971">971</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -1276,7 +1276,7 @@ template&lt;std::size_t N&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1TokenizeResult.html" title="The result returned by tokenize().">TokenizeResult</a></span> containing the token list on success, or a <span class="tt"><a class="el" href="structcli_1_1ParseError.html" title="Carries all context about a single parse/validation failure.">ParseError</a></span> on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00176">176</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00179">179</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

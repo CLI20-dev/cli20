@@ -1,22 +1,11 @@
 var searchData=
 [
-  ['increment_0',['Increment',['../structcli_1_1pack_1_1Increment.html',1,'cli::pack']]],
-  ['increment_1',['increment',['../namespacecli_1_1pack.html#ac3c614ed516fe045fb91fcaec2b9fc40',1,'cli::pack']]],
-  ['index_2',['index',['../structcli_1_1ActionCtx.html#a1779949d1719724cf615e460af0b8273',1,'cli::ActionCtx::index'],['../structcli_1_1ActionCtx_3_01void_01_4.html#ae980f8e4315ea71e7e8d853e84a0203b',1,'cli::ActionCtx&lt; void &gt;::index']]],
-  ['inline_5fvalue_5fseparator_3',['inline_value_separator',['../structcli_1_1TokenizerConfig.html#a3ce5137a2dd20d9134466ee7d39ab3e2',1,'cli::TokenizerConfig']]],
-  ['insert_4',['Insert',['../structcli_1_1pack_1_1Insert.html',1,'cli::pack']]],
-  ['insert_5',['insert',['../namespacecli_1_1pack.html#a727e12c2519525ff1732452df0925d48',1,'cli::pack']]],
-  ['insertorassign_6',['InsertOrAssign',['../structcli_1_1pack_1_1InsertOrAssign.html',1,'cli::pack']]],
-  ['integer_7',['Integer',['../structcli_1_1conversion_1_1Integer.html',1,'cli::conversion']]],
-  ['integer_8',['integer',['../namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b',1,'cli::conversion']]],
-  ['intoption_9',['IntOption',['../namespacecli.html#a63e188dda009359b627c2327bb1ef512',1,'cli']]],
-  ['invalid_5fchoice_10',['invalid_choice',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97ab6e6e2649a76870bbdb667a9e593f4c2',1,'cli']]],
-  ['invalid_5fvalue_11',['invalid_value',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a24fe18195f0e29f8d3ef5ad3110cfc24',1,'cli']]],
-  ['invoke_12',['invoke',['../structcli_1_1Action.html#a378aa33a763e8b8a680872e094dc12bb',1,'cli::Action::invoke(ActionCtx&lt; Arg &gt; &amp;ctx, ActionResult&lt; Result &gt; input)'],['../structcli_1_1Action.html#ad6cc87684e39470cc5c113d63b445d04',1,'cli::Action::invoke(const ActionCtx&lt; Arg &gt; &amp;ctx, ActionResult&lt; Result &gt; input)'],['../structcli_1_1Action_3_4.html#a71e9baefacd28fb237437a32e24dde47',1,'cli::Action&lt;&gt;::invoke()']]],
-  ['invoke_5faction_13',['invoke_action',['../structcli_1_1PositionalImpl.html#a9f404bf50663cb8de12156f046b5b041',1,'cli::PositionalImpl']]],
-  ['invoke_5fcount_14',['invoke_count',['../structcli_1_1ActionCtx.html#a12469af231ff62a7cd9e0adc3fd1935e',1,'cli::ActionCtx::invoke_count'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a125fd503226b0e3446a2fa4270265eaa',1,'cli::ActionCtx&lt; void &gt;::invoke_count']]],
-  ['is_5fdirectory_15',['is_directory',['../namespacecli_1_1validation.html#ac481457a5a7bd76427a3186bc9850cff',1,'cli::validation']]],
-  ['is_5fregular_5ffile_16',['is_regular_file',['../namespacecli_1_1validation.html#ab9975e4c6a83ab290a985a0c67db130d',1,'cli::validation']]],
-  ['isdirectory_17',['IsDirectory',['../structcli_1_1validation_1_1IsDirectory.html',1,'cli::validation']]],
-  ['isregularfile_18',['IsRegularFile',['../structcli_1_1validation_1_1IsRegularFile.html',1,'cli::validation']]]
+  ['has_5ferror_0',['has_error',['../structcli_1_1ActionResult.html#a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5',1,'cli::ActionResult::has_error()'],['../structcli_1_1ActionResult_3_01void_01_4.html#a5cffc09cea016e195a5710bdad8b6b8c',1,'cli::ActionResult&lt; void &gt;::has_error()'],['../structcli_1_1ParseError.html#ad60f34a59c134b147b1934f7fbf0ba54',1,'cli::ParseError::has_error()'],['../structcli_1_1TokenizeResult.html#a92be3f039ecc1b5c517d18bb5e0b2676',1,'cli::TokenizeResult::has_error()'],['../structcli_1_1ParseResult.html#a6ebd982434f59e61b99e96f5ff686d3f',1,'cli::ParseResult::has_error()']]],
+  ['has_5fposition_1',['has_position',['../structcli_1_1ParseError.html#a96ce36b3fe6b36ef92c7238154d76b5e',1,'cli::ParseError']]],
+  ['has_5fvalue_2',['has_value',['../structcli_1_1ActionResult.html#aab81d09f88f901940df92e4bcc242331',1,'cli::ActionResult::has_value()'],['../structcli_1_1ActionResult_3_01void_01_4.html#abb954c0b4cdd22b62c449860068d2333',1,'cli::ActionResult&lt; void &gt;::has_value()'],['../structcli_1_1TokenizeResult.html#aa880f67ec05dd57491b1714af79c522d',1,'cli::TokenizeResult::has_value()'],['../structcli_1_1ParseResult.html#a7afc85040ac01b5cf1423cbe0cd4bc5f',1,'cli::ParseResult::has_value()']]],
+  ['help_3',['Help',['../namespacecli.html#a027641d00d18b18aec164ec8a1b10854',1,'cli']]],
+  ['help_4',['help',['../structcli_1_1ArgParameter.html#a30e1c198851be72459f903cbb7996f1d',1,'cli::ArgParameter::help'],['../structcli_1_1PositionalImpl.html#a0856b8e40aaf1e26ce51bdf7e49f276a',1,'cli::PositionalImpl::help'],['../structcli_1_1CommandParameter.html#a10d288a60222cb7254827b801c72dd55',1,'cli::CommandParameter::help']]],
+  ['help_2ehh_5',['help.hh',['../help_8hh.html',1,'']]],
+  ['help_5frequested_6',['help_requested',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97ae42676cdb92fefd591b0b1286d8f96a7',1,'cli']]],
+  ['help_5ftext_7',['help_text',['../structcli_1_1Command.html#a3412007a8d8297617cb8ad5d731c4ac1',1,'cli::Command']]]
 ];

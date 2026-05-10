@@ -9,7 +9,9 @@ var annotated_dup =
         [ "Path", "structcli_1_1conversion_1_1Path.html", "structcli_1_1conversion_1_1Path" ],
         [ "ExistingFile", "structcli_1_1conversion_1_1ExistingFile.html", "structcli_1_1conversion_1_1ExistingFile" ],
         [ "ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", "structcli_1_1conversion_1_1ExistingDirectory" ],
-        [ "Choice", "structcli_1_1conversion_1_1Choice.html", "structcli_1_1conversion_1_1Choice" ]
+        [ "Choice", "structcli_1_1conversion_1_1Choice.html", "structcli_1_1conversion_1_1Choice" ],
+        [ "NegatableResult", "structcli_1_1conversion_1_1NegatableResult.html", "structcli_1_1conversion_1_1NegatableResult" ],
+        [ "Negatable", "structcli_1_1conversion_1_1Negatable.html", "structcli_1_1conversion_1_1Negatable" ]
       ] ],
       [ "validation", "namespacecli_1_1validation.html", [
         [ "Min", "structcli_1_1validation_1_1Min.html", "structcli_1_1validation_1_1Min" ],
@@ -72,5 +74,10 @@ var annotated_dup =
       [ "ParseResult", "structcli_1_1ParseResult.html", "structcli_1_1ParseResult" ],
       [ "Parser", "structcli_1_1Parser.html", "structcli_1_1Parser" ],
       [ "StringLiteral", "structcli_1_1StringLiteral.html", "structcli_1_1StringLiteral" ]
+    ] ],
+    [ "std", null, [
+      [ "tuple_size&lt; cli::conversion::NegatableResult &gt;", "structstd_1_1tuple__size_3_01cli_1_1conversion_1_1NegatableResult_01_4.html", null ],
+      [ "tuple_element&lt; 0, cli::conversion::NegatableResult &gt;", "structstd_1_1tuple__element_3_010_00_01cli_1_1conversion_1_1NegatableResult_01_4.html", "structstd_1_1tuple__element_3_010_00_01cli_1_1conversion_1_1NegatableResult_01_4" ],
+      [ "tuple_element&lt; 1, cli::conversion::NegatableResult &gt;", "structstd_1_1tuple__element_3_011_00_01cli_1_1conversion_1_1NegatableResult_01_4.html", "structstd_1_1tuple__element_3_011_00_01cli_1_1conversion_1_1NegatableResult_01_4" ]
     ] ]
 ];

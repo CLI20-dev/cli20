@@ -1,5 +1,10 @@
 var searchData=
 [
-  ['zero_5for_5fmore_0',['zero_or_more',['../namespacecli_1_1nargs.html#ab3e4bbfca857da2375706745088256fc',1,'cli::nargs']]],
-  ['zero_5for_5fone_1',['zero_or_one',['../namespacecli_1_1nargs.html#a6c1a45e18786951a3a1e2d02a9c27319',1,'cli::nargs']]]
+  ['validate_0',['validate',['../structcli_1_1Action.html#ad76ee01503938738888a9b7d5dd850ad',1,'cli::Action::validate()'],['../structcli_1_1Action_3_4.html#aa1535d671fd8f1b63cea589f7a1dcc47',1,'cli::Action&lt;&gt;::validate()']]],
+  ['validate_5fimpl_1',['validate_impl',['../structcli_1_1Action.html#a6b3ac25f3ce26498280aca47b01a6cb4',1,'cli::Action::validate_impl()'],['../structcli_1_1Action.html#a6b3ac25f3ce26498280aca47b01a6cb4',1,'cli::Action&lt;&gt;::validate_impl()']]],
+  ['validation_2',['validation',['../namespacecli.html#a4220318a1dd8b318645b20307b4f8e01aa617908b172c473cb8e8cda059e55bf0',1,'cli']]],
+  ['validation_5ffailed_3',['validation_failed',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97aa3e737a90e4c67df71574f314e530060',1,'cli']]],
+  ['value_4',['value',['../structcli_1_1ActionResult.html#a547b5c3d493347410fe4358fc63e4e66',1,'cli::ActionResult::value'],['../structcli_1_1ParseResult.html#a3d8604a116e6becafdae2ca965250b74',1,'cli::ParseResult::value'],['../structcli_1_1StringLiteral.html#a76716e1a7e71404159445ceb3ea63a3f',1,'cli::StringLiteral::value'],['../structcli_1_1PositionalImpl.html#abc743de4aa02b85653b857833207f2ad',1,'cli::PositionalImpl::value() const -&gt; const value_type &amp;'],['../structcli_1_1PositionalImpl.html#ae2943097d1dbfda71833257031cf48be',1,'cli::PositionalImpl::value() -&gt; value_type &amp;'],['../structcli_1_1ActionResult.html#a547b5c3d493347410fe4358fc63e4e66',1,'cli::ActionResult&lt; void &gt;::value'],['../namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804',1,'cli::value']]],
+  ['value_5ftype_5',['value_type',['../structcli_1_1ActionResult.html#a03ee470592a532bd706485c402ca0655',1,'cli::ActionResult::value_type'],['../structcli_1_1PositionalImpl.html#a9d6e3ca32da4077cf63b5bcbb35983c8',1,'cli::PositionalImpl::value_type'],['../structcli_1_1ActionResult.html#a03ee470592a532bd706485c402ca0655',1,'cli::ActionResult&lt; void &gt;::value_type']]],
+  ['view_6',['view',['../structcli_1_1StringLiteral.html#a3014d1e5526e0699051cfcac9de27fd3',1,'cli::StringLiteral']]]
 ];

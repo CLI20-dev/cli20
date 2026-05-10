@@ -26,6 +26,9 @@ var hierarchy =
     [ "cli::pack::Insert", "structcli_1_1pack_1_1Insert.html", null ],
     [ "cli::pack::InsertOrAssign", "structcli_1_1pack_1_1InsertOrAssign.html", null ],
     [ "cli::conversion::Integer&lt; T &gt;", "structcli_1_1conversion_1_1Integer.html", null ],
+    [ "std::integral_constant", null, [
+      [ "std::tuple_size< cli::conversion::NegatableResult >", "structstd_1_1tuple__size_3_01cli_1_1conversion_1_1NegatableResult_01_4.html", null ]
+    ] ],
     [ "cli::validation::IsDirectory", "structcli_1_1validation_1_1IsDirectory.html", null ],
     [ "cli::validation::IsRegularFile", "structcli_1_1validation_1_1IsRegularFile.html", null ],
     [ "cli::pack::MarkPresent", "structcli_1_1pack_1_1MarkPresent.html", null ],
@@ -33,6 +36,8 @@ var hierarchy =
     [ "cli::validation::Max&lt; MaxValue &gt;", "structcli_1_1validation_1_1Max.html", null ],
     [ "cli::validation::Min&lt; MinValue &gt;", "structcli_1_1validation_1_1Min.html", null ],
     [ "cli::Nargs", "structcli_1_1Nargs.html", null ],
+    [ "cli::conversion::Negatable&lt; Prefix &gt;", "structcli_1_1conversion_1_1Negatable.html", null ],
+    [ "cli::conversion::NegatableResult", "structcli_1_1conversion_1_1NegatableResult.html", null ],
     [ "cli::validation::NonEmpty", "structcli_1_1validation_1_1NonEmpty.html", null ],
     [ "cli::validation::NonNegative", "structcli_1_1validation_1_1NonNegative.html", null ],
     [ "cli::validation::NotBlank", "structcli_1_1validation_1_1NotBlank.html", null ],
@@ -66,6 +71,8 @@ var hierarchy =
         [ "cli::PositionalImpl< N, A >", "structcli_1_1PositionalImpl.html", null ]
       ] ]
     ] ],
+    [ "cli::pack::InsertOrAssign::storage_type_impl&lt; Prev, bool &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1storage__type__impl.html", null ],
+    [ "cli::pack::InsertOrAssign::storage_type_impl&lt; Prev, true &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1storage__type__impl_3_01Prev_00_01true_01_4.html", null ],
     [ "cli::pack::StoreInto&lt; T &gt;", "structcli_1_1pack_1_1StoreInto.html", null ],
     [ "cli::conversion::String", "structcli_1_1conversion_1_1String.html", null ],
     [ "cli::StringLiteral&lt; N &gt;", "structcli_1_1StringLiteral.html", null ],
@@ -73,6 +80,8 @@ var hierarchy =
     [ "cli::Token", "structcli_1_1Token.html", null ],
     [ "cli::TokenizerConfig", "structcli_1_1TokenizerConfig.html", null ],
     [ "cli::TokenizeResult", "structcli_1_1TokenizeResult.html", null ],
+    [ "std::tuple_element&lt; 0, cli::conversion::NegatableResult &gt;", "structstd_1_1tuple__element_3_010_00_01cli_1_1conversion_1_1NegatableResult_01_4.html", null ],
+    [ "std::tuple_element&lt; 1, cli::conversion::NegatableResult &gt;", "structstd_1_1tuple__element_3_011_00_01cli_1_1conversion_1_1NegatableResult_01_4.html", null ],
     [ "cli::T", null, [
       [ "cli::Command< Name, T >", "structcli_1_1Command.html", null ]
     ] ]

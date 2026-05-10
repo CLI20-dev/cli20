@@ -17,6 +17,7 @@ var namespacecli_1_1pack =
     [ "callback", "namespacecli_1_1pack.html#adeecd921f590b75c6ec9bbe147c351e7", null ],
     [ "increment", "namespacecli_1_1pack.html#ac3c614ed516fe045fb91fcaec2b9fc40", null ],
     [ "insert", "namespacecli_1_1pack.html#a727e12c2519525ff1732452df0925d48", null ],
+    [ "insert_or_assign", "namespacecli_1_1pack.html#abdbe05c4c6224e85a6a3d3b22242bde2", null ],
     [ "mark_present", "namespacecli_1_1pack.html#aae9bda57f0efac3e615043c32dee4d29", null ],
     [ "push", "namespacecli_1_1pack.html#a96845f625a5575985c9d694699a41483", null ],
     [ "push_unique", "namespacecli_1_1pack.html#a9afa999a79e80003f325482452f2f134", null ],
