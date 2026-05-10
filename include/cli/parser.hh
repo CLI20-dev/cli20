@@ -67,7 +67,7 @@ enum class TokenType {
  * @brief A single token produced by `tokenize()`.
  */
 struct Token {
-  TokenType type;  ///< Classification of this token.
+  TokenType type;         ///< Classification of this token.
   std::string_view text;  ///< For option tokens: the bare name without prefix
                           ///< (e.g. `"verbose"` for `--verbose`, `"v"` for
                           ///< `-v`). For value/positional/command tokens: the
@@ -304,7 +304,8 @@ inline auto tokenize(std::span<const std::string_view> args,
       const Nargs& nargs = spec_it->second;
       const bool is_flag = (nargs.min == 0 && nargs.max == 0);
 
-      // Store bare name (without prefix) in text; matched_prefix holds the prefix.
+      // Store bare name (without prefix) in text; matched_prefix holds the
+      // prefix.
       push(TokenType::option, opt_sv.substr(prefix.size()), i,
            opt_sv.substr(0, prefix.size()));
 

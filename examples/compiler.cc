@@ -11,18 +11,19 @@ struct Args {
       "Compiler-wrapper example: short-cluster flags, -W<warning>, "
       "--feature=<name> with negatable enable/disable."};
 
-  // cli::Help<> is sugar for Arg<"help",'h', print_help|exit_success, nargs::none>
+  // cli::Help<> is sugar for Arg<"help",'h', print_help|exit_success,
+  // nargs::none>
   cli::Help<> help{{.help = "Show help and exit"}};
 
   // -O0 .. -O3
-  cli::Arg<"optimize", 'O', cli::conversion::integer<int> |
-                                 cli::validation::range<0, 3> |
-                                 cli::pack::set_once>
+  cli::Arg<"optimize", 'O',
+           cli::conversion::integer<int> | cli::validation::range<0, 3> |
+               cli::pack::set_once>
       optimize{{.help = "Optimisation level (0-3)"}};
 
   // -v / -vv: counted verbosity
-  cli::Arg<"verbose", 'v', cli::pack::increment, cli::nargs::none>
-      verbose{{.help = "Increase verbosity (repeatable)"}};
+  cli::Arg<"verbose", 'v', cli::pack::increment, cli::nargs::none> verbose{
+      {.help = "Increase verbosity (repeatable)"}};
 
   // -Werror      → warnings["error"]  = true
   // -Wno-unused  → warnings["unused"] = false
