@@ -325,8 +325,8 @@ struct EnvArgs {
 TEST(ParseEnv, FallsBackToEnvWhenOptionAbsent) {
   setenv("TEST_OUTPUT", "from_env", 1);
   auto args = argv({"prog"});
-  auto result = cli::Parser<EnvArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_OUTPUT");
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.output.value().has_value());
@@ -336,8 +336,8 @@ TEST(ParseEnv, FallsBackToEnvWhenOptionAbsent) {
 TEST(ParseEnv, CliTakesPrecedenceOverEnv) {
   setenv("TEST_OUTPUT", "from_env", 1);
   auto args = argv({"prog", "--output", "from_cli"});
-  auto result = cli::Parser<EnvArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_OUTPUT");
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.output.value().has_value());
@@ -374,8 +374,8 @@ TEST(ParseEnv, MissingEnvStillFailsForRequired) {
 TEST(ParseEnv, IntOptionFromEnv) {
   setenv("TEST_COUNT", "42", 1);
   auto args = argv({"prog"});
-  auto result = cli::Parser<EnvArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_COUNT");
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.count.value().has_value());
@@ -385,8 +385,8 @@ TEST(ParseEnv, IntOptionFromEnv) {
 TEST(ParseEnv, FlagFromEnv) {
   setenv("TEST_VERBOSE", "1", 1);
   auto args = argv({"prog"});
-  auto result = cli::Parser<EnvArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_VERBOSE");
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result.value.verbose.value());
@@ -395,8 +395,8 @@ TEST(ParseEnv, FlagFromEnv) {
 TEST(ParseEnv, InvalidEnvValueReportsError) {
   setenv("TEST_COUNT", "not_a_number", 1);
   auto args = argv({"prog"});
-  auto result = cli::Parser<EnvArgs>{}.parse(
-      std::span<const std::string_view>(args), 1);
+  auto result =
+      cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_COUNT");
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::invalid_value);
