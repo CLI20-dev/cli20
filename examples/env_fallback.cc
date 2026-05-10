@@ -24,10 +24,9 @@ struct Args {
               .presence = cli::optional,
               .env = "CONFIG_FILE"}};
 
-  cli::Flag<"verbose", 'v'> verbose{
-      {.help = "Verbose output (env: VERBOSE)",
-       .presence = cli::optional,
-       .env = "VERBOSE"}};
+  cli::Flag<"verbose", 'v'> verbose{{.help = "Verbose output (env: VERBOSE)",
+                                     .presence = cli::optional,
+                                     .env = "VERBOSE"}};
 
   cli::Positional<std::string> job{
       {.help = "Job name to run", .presence = cli::required}};
