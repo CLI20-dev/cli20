@@ -212,3 +212,61 @@ TEST(ParseWide, FreeFunctionParse) {
   EXPECT_EQ(*result.value.name.value(), "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
 }
 #endif
+
+// ---- short cluster / attached value (end-to-end) --------------------------
+
+namespace {
+
+struct ClusterArgs {
+  cli::Flag<"verbose", 'v'> verbose;
+  cli::Flag<"xray", 'x'> xray;
+  cli::Flag<"force", 'f'> force;
+  cli::StringOption<"output", 'o'> output;
+  cli::IntOption<"count", 'c'> count;
+};
+
+}  // namespace
+
+TEST(ParseCluster, AllFlagsCluster) {
+  auto args = argv({"prog", "-vxf"});
+  auto result =
+      cli::Parser<ClusterArgs>{}.parse(std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result.value.verbose.value());
+  EXPECT_TRUE(result.value.xray.value());
+  EXPECT_TRUE(result.value.force.value());
+}
+
+TEST(ParseCluster, AttachedValue) {
+  // -ofile  →  output = "file"
+  auto args = argv({"prog", "-ofile"});
+  auto result =
+      cli::Parser<ClusterArgs>{}.parse(std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.output.value().has_value());
+  EXPECT_EQ(*result.value.output.value(), "file");
+}
+
+TEST(ParseCluster, FlagsThenAttachedValue) {
+  // -vxofile  →  verbose, xray, output="file"
+  auto args = argv({"prog", "-vxofile"});
+  auto result =
+      cli::Parser<ClusterArgs>{}.parse(std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result.value.verbose.value());
+  EXPECT_TRUE(result.value.xray.value());
+  ASSERT_TRUE(result.value.output.value().has_value());
+  EXPECT_EQ(*result.value.output.value(), "file");
+}
+
+TEST(ParseCluster, FlagsThenValueNextToken) {
+  // -vxo out.txt  →  verbose, xray, output="out.txt"
+  auto args = argv({"prog", "-vxo", "out.txt"});
+  auto result =
+      cli::Parser<ClusterArgs>{}.parse(std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result.value.verbose.value());
+  EXPECT_TRUE(result.value.xray.value());
+  ASSERT_TRUE(result.value.output.value().has_value());
+  EXPECT_EQ(*result.value.output.value(), "out.txt");
+}

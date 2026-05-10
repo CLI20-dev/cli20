@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <format>
 #include <iostream>
+#include <list>
 #include <span>
 #include <tuple>
 #include <unordered_map>
@@ -67,10 +68,13 @@ enum class TokenType {
  */
 struct Token {
   TokenType type;  ///< Classification of this token.
-  std::string_view
-      text;  ///< The token text (a view into the original `args` span).
+  std::string_view text;  ///< For option tokens: the bare name without prefix
+                          ///< (e.g. `"verbose"` for `--verbose`, `"v"` for
+                          ///< `-v`). For value/positional/command tokens: the
+                          ///< raw text from the args span.
   std::string_view matched_prefix;  ///< The option prefix that was matched (e.g.
-                                    ///< `"--"`); empty for non-option tokens.
+                                    ///< `"--"` or `"-"`); empty for non-option
+                                    ///< tokens.
   std::size_t position;  ///< Zero-based index into the original `args` span.
 };
 
@@ -234,15 +238,75 @@ inline auto tokenize(std::span<const std::string_view> args,
 
       const auto spec_it = spec_map.find(opt_name);
       if (spec_it == spec_map.end()) {
+        // Short cluster (-xvf) or attached value (-ofile): only when the token
+        // uses the short prefix and carries more than one character after it.
+        const std::string_view body = opt_sv.substr(prefix.size());
+        if (prefix == cfg.short_option_prefix && !has_inline_val &&
+            body.size() > 1) {
+          bool advanced_i = false;
+          for (std::size_t k = 0; k < body.size(); ++k) {
+            // Each char's bare name and prefix are views into the original tok.
+            const std::string_view char_bare = tok.substr(prefix.size() + k, 1);
+            const std::string_view char_prefix = tok.substr(0, prefix.size());
+            const std::string char_full =
+                std::string(char_prefix) + std::string(char_bare);
+            const auto it = spec_map.find(char_full);
+            if (it == spec_map.end()) {
+              return result.fail(ErrorCode::unknown_option, i, char_full);
+            }
+            const Nargs& nargs = it->second;
+            const bool is_flag = (nargs.min == 0 && nargs.max == 0);
+            push(TokenType::option, char_bare, i, char_prefix);
+            if (!is_flag) {
+              if (k + 1 < body.size()) {
+                // Attached value: rest of body
+                push(TokenType::value, tok.substr(prefix.size() + k + 1), i);
+                ++i;
+              } else {
+                // Consume next token(s) greedily as values
+                ++i;
+                int count = 0;
+                while (i < args.size()) {
+                  const std::string_view next = args[i];
+                  if (next == cfg.end_of_options_separator) break;
+                  if (command_names.contains(std::string(next))) break;
+                  if (nargs.max != -1 && count >= nargs.max) break;
+                  if (!find_prefix(next).empty()) {
+                    const auto next_sep = next.find(sep);
+                    const std::string next_opt{next_sep != std::string_view::npos
+                                                   ? next.substr(0, next_sep)
+                                                   : next};
+                    if (spec_map.contains(next_opt)) break;
+                    if (count >= 1 || nargs.min == 0) break;
+                  }
+                  push(TokenType::value, args[i], i);
+                  ++i;
+                  ++count;
+                }
+                if (count < nargs.min) {
+                  return result.fail(
+                      ErrorCode::missing_value, i, char_full,
+                      std::format("option requires at least {} value(s), but {} "
+                                  "provided",
+                                  nargs.min, count));
+                }
+              }
+              advanced_i = true;
+              break;
+            }
+          }
+          if (!advanced_i) ++i;
+          continue;
+        }
         return result.fail(ErrorCode::unknown_option, i, opt_name);
       }
 
       const Nargs& nargs = spec_it->second;
       const bool is_flag = (nargs.min == 0 && nargs.max == 0);
 
-      // Use opt_sv (view into args) for matched_prefix so it stays valid
-      // after cfg is destroyed — do not point into cfg.option_prefixes.
-      push(TokenType::option, opt_sv, i, opt_sv.substr(0, prefix.size()));
+      // Store bare name (without prefix) in text; matched_prefix holds the prefix.
+      push(TokenType::option, opt_sv.substr(prefix.size()), i,
+           opt_sv.substr(0, prefix.size()));
 
       if (has_inline_val) {
         if (is_flag) {
@@ -586,8 +650,7 @@ struct Parser {
       if (tok.type == TokenType::option) {
         std::size_t j = i + 1;
         while (j < tokens.size() && tokens[j].type == TokenType::value) ++j;
-        auto err = dispatch_option(result.value, tok.matched_prefix,
-                                   tok.text.substr(tok.matched_prefix.size()),
+        auto err = dispatch_option(result.value, tok.matched_prefix, tok.text,
                                    std::span(tokens).subspan(i + 1, j - i - 1),
                                    first_index, tok.position);
         if (err.has_error()) {
