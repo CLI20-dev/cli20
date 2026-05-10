@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <format>
 #include <iostream>
-#include <list>
 #include <span>
 #include <tuple>
 #include <unordered_map>
@@ -244,12 +243,12 @@ inline auto tokenize(std::span<const std::string_view> args,
         if (prefix == cfg.short_option_prefix && !has_inline_val &&
             body.size() > 1) {
           bool advanced_i = false;
+          const std::string_view char_prefix = tok.substr(0, prefix.size());
+          std::string char_full{char_prefix};
+          char_full.push_back('\0');
           for (std::size_t k = 0; k < body.size(); ++k) {
-            // Each char's bare name and prefix are views into the original tok.
             const std::string_view char_bare = tok.substr(prefix.size() + k, 1);
-            const std::string_view char_prefix = tok.substr(0, prefix.size());
-            const std::string char_full =
-                std::string(char_prefix) + std::string(char_bare);
+            char_full.back() = body[k];
             const auto it = spec_map.find(char_full);
             if (it == spec_map.end()) {
               return result.fail(ErrorCode::unknown_option, i, char_full);
@@ -271,10 +270,9 @@ inline auto tokenize(std::span<const std::string_view> args,
                   if (nargs.max != -1 && count >= nargs.max) break;
                   if (!find_prefix(next).empty()) {
                     const auto next_sep = next.find(sep);
-                    const std::string next_opt{
-                        next_sep != std::string_view::npos
-                            ? next.substr(0, next_sep)
-                            : next};
+                    const std::string next_opt{next_sep != std::string_view::npos
+                                                   ? next.substr(0, next_sep)
+                                                   : next};
                     if (spec_map.contains(next_opt)) break;
                     if (count >= 1 || nargs.min == 0) break;
                   }
