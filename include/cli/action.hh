@@ -746,6 +746,45 @@ template <class T, auto Mapper>
 inline constexpr auto choice = Action<Choice<T, Mapper>{}>{};
 template <class T, auto Mapper>
 inline constexpr auto enumeration = Action<Enumeration<T, Mapper>{}>{};
+/**
+ * @brief Converts a string token to `std::pair<std::string, bool>` by detecting
+ * a compile-time negation prefix.
+ *
+ * Given prefix `"no-"`:
+ * - `"lto"` → `{"lto", true}`
+ * - `"no-lto"` → `{"lto", false}`
+ *
+ * @tparam Prefix The negation prefix string (e.g. `"no-"`, `"!"`).
+ */
+template <StringLiteral Prefix>
+struct Negatable {
+  template <class Input>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Input>, std::string_view> ||
+      std::same_as<std::remove_cvref_t<Input>, std::string>;
+
+  template <class Input>
+  using after_type = std::pair<std::string, bool>;
+
+  template <class Prev>
+  using storage_type = void;
+
+  constexpr auto operator()(ActionCtx<void>,
+                            ActionResult<std::string_view> input) const
+      -> ActionResult<std::pair<std::string, bool>> {
+    constexpr std::string_view prefix = Prefix.view();
+    const std::string_view val = input.value;
+    if (val.starts_with(prefix)) {
+      return ActionResult<std::pair<std::string, bool>>::ok(
+          std::make_pair(std::string(val.substr(prefix.size())), false));
+    }
+    return ActionResult<std::pair<std::string, bool>>::ok(
+        std::make_pair(std::string(val), true));
+  }
+};
+
+template <StringLiteral Prefix>
+inline constexpr auto negatable = Action<Negatable<Prefix>{}>{};
 inline constexpr auto string = Action<String{}>{};
 inline constexpr auto boolean = Action<Bool{}>{};
 inline constexpr auto path = Action<Path{}>{};
@@ -1413,10 +1452,17 @@ struct InsertOrAssign {
   template <class Prev>
   using after_type = void;
 
+  template <class Prev, bool = detail::PairLike<Prev>>
+  struct storage_type_impl { using type = void; };
   template <class Prev>
-  using storage_type = std::map<
-      std::remove_cvref_t<std::tuple_element_t<0, detail::decay_t<Prev>>>,
-      std::remove_cvref_t<std::tuple_element_t<1, detail::decay_t<Prev>>>>;
+  struct storage_type_impl<Prev, true> {
+    using type = std::map<
+        std::remove_cvref_t<std::tuple_element_t<0, detail::decay_t<Prev>>>,
+        std::remove_cvref_t<std::tuple_element_t<1, detail::decay_t<Prev>>>>;
+  };
+
+  template <class Prev>
+  using storage_type = typename storage_type_impl<Prev>::type;
 
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const
@@ -1556,7 +1602,7 @@ inline constexpr auto reject_duplicate = Action<RejectDuplicate{}>{};
 inline constexpr auto push_unique = Action<PushUnique{}>{};
 inline constexpr auto push = Action<Push{}>{};
 inline constexpr auto insert = Action<Insert{}>{};
-// inline constexpr auto insert_or_assign = Action<InsertOrAssign{}>{};
+inline constexpr auto insert_or_assign = Action<InsertOrAssign{}>{};
 // inline constexpr auto extend = Action<Extend{}>{};
 inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
