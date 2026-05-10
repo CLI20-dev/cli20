@@ -19,6 +19,7 @@ using cli::conversion::ExistingDirectory;
 using cli::conversion::ExistingFile;
 using cli::conversion::Floating;
 using cli::conversion::Integer;
+using cli::conversion::Negatable;
 
 constexpr auto parse_mode = [](std::string_view value) -> std::optional<int> {
   if (value == "fast") {
@@ -133,4 +134,34 @@ TEST(Conversion, ExistingDirectoryRequiresDirectory) {
       ctx(7), ActionResult<std::string_view>::ok(temp_root.string()));
   ASSERT_TRUE(ok.has_value());
   EXPECT_EQ(ok.value, temp_root);
+}
+
+TEST(Conversion, NegatableNoPrefixReturnsNameAndTrue) {
+  auto r = Negatable<"no-">{}(ctx(0), ActionResult<std::string_view>::ok("lto"));
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.value.name, "lto");
+  EXPECT_TRUE(r.value.enabled);
+}
+
+TEST(Conversion, NegatablePrefixedReturnsStrippedNameAndFalse) {
+  auto r =
+      Negatable<"no-">{}(ctx(0), ActionResult<std::string_view>::ok("no-lto"));
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.value.name, "lto");
+  EXPECT_FALSE(r.value.enabled);
+}
+
+TEST(Conversion, NegatablePrefixOnlyYieldsEmptyName) {
+  auto r = Negatable<"no-">{}(ctx(0), ActionResult<std::string_view>::ok("no-"));
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.value.name, "");
+  EXPECT_FALSE(r.value.enabled);
+}
+
+TEST(Conversion, NegatablePrefixInMiddleIsNotStripped) {
+  auto r =
+      Negatable<"no-">{}(ctx(0), ActionResult<std::string_view>::ok("lno-to"));
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.value.name, "lno-to");
+  EXPECT_TRUE(r.value.enabled);
 }

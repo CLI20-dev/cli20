@@ -747,8 +747,19 @@ inline constexpr auto choice = Action<Choice<T, Mapper>{}>{};
 template <class T, auto Mapper>
 inline constexpr auto enumeration = Action<Enumeration<T, Mapper>{}>{};
 /**
- * @brief Converts a string token to `std::pair<std::string, bool>` by detecting
- * a compile-time negation prefix.
+ * @brief Result of the `negatable<>` conversion.
+ *
+ * Supports structured bindings and satisfies `PairLike` so it can be used
+ * directly with `pack::insert_or_assign`.
+ */
+struct NegatableResult {
+  std::string name;
+  bool enabled;
+};
+
+/**
+ * @brief Converts a string token to `NegatableResult` by detecting a
+ * compile-time negation prefix.
  *
  * Given prefix `"no-"`:
  * - `"lto"` → `{"lto", true}`
@@ -764,22 +775,22 @@ struct Negatable {
       std::same_as<std::remove_cvref_t<Input>, std::string>;
 
   template <class Input>
-  using after_type = std::pair<std::string, bool>;
+  using after_type = NegatableResult;
 
   template <class Prev>
   using storage_type = void;
 
   constexpr auto operator()(ActionCtx<void>,
                             ActionResult<std::string_view> input) const
-      -> ActionResult<std::pair<std::string, bool>> {
+      -> ActionResult<NegatableResult> {
     constexpr std::string_view prefix = Prefix.view();
     const std::string_view val = input.value;
     if (val.starts_with(prefix)) {
-      return ActionResult<std::pair<std::string, bool>>::ok(
-          std::make_pair(std::string(val.substr(prefix.size())), false));
+      return ActionResult<NegatableResult>::ok(
+          NegatableResult{std::string(val.substr(prefix.size())), false});
     }
-    return ActionResult<std::pair<std::string, bool>>::ok(
-        std::make_pair(std::string(val), true));
+    return ActionResult<NegatableResult>::ok(
+        NegatableResult{std::string(val), true});
   }
 };
 
@@ -1686,3 +1697,36 @@ inline constexpr auto exit_success = Action<ExitSuccess{}>{};
 }  // namespace action
 
 }  // namespace cli
+
+// Tuple protocol for NegatableResult — required for PairLike and structured
+// bindings with pack::insert_or_assign.
+template <>
+struct std::tuple_size<cli::conversion::NegatableResult>
+    : std::integral_constant<std::size_t, 2> {};
+template <>
+struct std::tuple_element<0, cli::conversion::NegatableResult> {
+  using type = std::string;
+};
+template <>
+struct std::tuple_element<1, cli::conversion::NegatableResult> {
+  using type = bool;
+};
+
+namespace cli::conversion {
+
+template <std::size_t I>
+auto get(NegatableResult& r) -> decltype(auto) {
+  if constexpr (I == 0)
+    return (r.name);
+  else
+    return (r.enabled);
+}
+template <std::size_t I>
+auto get(const NegatableResult& r) -> decltype(auto) {
+  if constexpr (I == 0)
+    return (r.name);
+  else
+    return (r.enabled);
+}
+
+}  // namespace cli::conversion
