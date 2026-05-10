@@ -381,6 +381,8 @@ struct ArgParameter {
   T default_value{};  ///< Default value when the argument is absent.
   std::function<void(const T&)>
       on_parse{};  ///< Callback invoked once after parsing completes.
+  std::string_view env{};  ///< Environment variable name to fall back to when
+                           ///< the option is absent from the command line.
 };
 
 namespace detail {
@@ -400,6 +402,7 @@ struct ArgImpl : public OptionTag {
   ArgImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
+        env(param.env),
         value_(param.default_value),
         on_parse_(std::move(param.on_parse)) {}
 
@@ -429,6 +432,8 @@ struct ArgImpl : public OptionTag {
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   cli::Presence presence{Presence::optional};
+  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+  std::string_view env{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   value_type default_value{};
 

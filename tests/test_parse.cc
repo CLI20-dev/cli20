@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <cstdlib>
 #include <string_view>
 #include <vector>
 
@@ -307,4 +308,96 @@ TEST(ParseClusterNargs2, FlagsThenValueNextTokens) {
   EXPECT_EQ(result.value.output.value(),
             (std::vector<std::string>{"file1", "file2"}));
   EXPECT_EQ(result.value.files.value(), (std::vector<std::string>{"file3"}));
+}
+
+// ---- env fallback ----------------------------------------------------------
+
+namespace {
+
+struct EnvArgs {
+  cli::StringOption<"output", 'o'> output{{.env = "TEST_OUTPUT"}};
+  cli::IntOption<"count", 'c'> count{{.env = "TEST_COUNT"}};
+  cli::Flag<"verbose", 'v'> verbose{{.env = "TEST_VERBOSE"}};
+};
+
+}  // namespace
+
+TEST(ParseEnv, FallsBackToEnvWhenOptionAbsent) {
+  setenv("TEST_OUTPUT", "from_env", 1);
+  auto args = argv({"prog"});
+  auto result = cli::Parser<EnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_OUTPUT");
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.output.value().has_value());
+  EXPECT_EQ(*result.value.output.value(), "from_env");
+}
+
+TEST(ParseEnv, CliTakesPrecedenceOverEnv) {
+  setenv("TEST_OUTPUT", "from_env", 1);
+  auto args = argv({"prog", "--output", "from_cli"});
+  auto result = cli::Parser<EnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_OUTPUT");
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.output.value().has_value());
+  EXPECT_EQ(*result.value.output.value(), "from_cli");
+}
+
+TEST(ParseEnv, EnvSatisfiesRequiredOption) {
+  struct RequiredEnvArgs {
+    cli::StringOption<"output"> output{
+        {.presence = cli::required, .env = "TEST_OUTPUT"}};
+  };
+  setenv("TEST_OUTPUT", "env_val", 1);
+  auto args = argv({"prog"});
+  auto result = cli::Parser<RequiredEnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_OUTPUT");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(*result.value.output.value(), "env_val");
+}
+
+TEST(ParseEnv, MissingEnvStillFailsForRequired) {
+  struct RequiredEnvArgs {
+    cli::StringOption<"output"> output{
+        {.presence = cli::required, .env = "TEST_OUTPUT_ABSENT"}};
+  };
+  unsetenv("TEST_OUTPUT_ABSENT");
+  auto args = argv({"prog"});
+  auto result = cli::Parser<RequiredEnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
+}
+
+TEST(ParseEnv, IntOptionFromEnv) {
+  setenv("TEST_COUNT", "42", 1);
+  auto args = argv({"prog"});
+  auto result = cli::Parser<EnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_COUNT");
+  ASSERT_TRUE(result.has_value());
+  ASSERT_TRUE(result.value.count.value().has_value());
+  EXPECT_EQ(*result.value.count.value(), 42);
+}
+
+TEST(ParseEnv, FlagFromEnv) {
+  setenv("TEST_VERBOSE", "1", 1);
+  auto args = argv({"prog"});
+  auto result = cli::Parser<EnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_VERBOSE");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result.value.verbose.value());
+}
+
+TEST(ParseEnv, InvalidEnvValueReportsError) {
+  setenv("TEST_COUNT", "not_a_number", 1);
+  auto args = argv({"prog"});
+  auto result = cli::Parser<EnvArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  unsetenv("TEST_COUNT");
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::invalid_value);
 }
