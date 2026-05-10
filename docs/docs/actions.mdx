@@ -358,7 +358,7 @@ constexpr auto chunk_action =
 Pack steps are terminal: they write a value into storage and return
 `ActionResult<void>`. `storage_type` must always be declared explicitly —
 it is the only trait that cannot be derived from `operator()` (see
-[Why `storage_type` cannot be inferred](#why-storage_type-cannot-be-inferred)).
+[Why storage\_type cannot be inferred](#why-storage_type-cannot-be-inferred)).
 
 ```cpp
 // Store only the maximum value seen across multiple occurrences.
@@ -392,7 +392,7 @@ constexpr auto latency_action =
     | store_max;
 ```
 
-### Why `storage_type` cannot be inferred {#why-storage_type-cannot-be-inferred}
+### Why storage\_type cannot be inferred
 
 `deduce_accepts_input` and `deduce_after_type` work because non-terminal steps
 always take `ActionCtx<void>` — a concrete type that can be used as a probe for
