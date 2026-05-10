@@ -38,17 +38,27 @@ regardless of whether the value came from the CLI or the environment.
 
 Edit the environment variables in the panel below, then run the program.
 
+The virtual filesystem for this playground contains the following config files
+you can reference as `CONFIG_FILE`:
+
+| Path | Notes |
+|---|---|
+| `dev.toml` | local development |
+| `test.toml` | test environment |
+| `staging.toml` | staging environment |
+| `prod.toml` | production |
+
 <ExamplePlayground
   name="env_fallback"
   defaultArgs="build-job"
   setupFs={setupEnvFallbackFs}
-  initialEnv={{NUM_THREADS: '4', CONFIG_FILE: 'job.toml'}}
+  initialEnv={{NUM_THREADS: '4', CONFIG_FILE: 'dev.toml'}}
 />
 
 Things to try:
 
-- **Env only** — `build-job` with `NUM_THREADS=4` and `CONFIG_FILE=job.toml` set
-- **CLI overrides env** — `--threads 8 build-job` while `NUM_THREADS=4` is set
+- **Switch environment** — change `CONFIG_FILE` to `staging.toml` or `prod.toml`
+- **CLI overrides env** — `--config test.toml build-job` while `CONFIG_FILE` is set
 - **Validation via env** — set `NUM_THREADS=99` to see a range error
 - **Bad config name** — set `CONFIG_FILE=settings.json` to see the regex fail
 - **Verbose from env** — add `VERBOSE=1` and run `build-job`
