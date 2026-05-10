@@ -1,5 +1,7 @@
 var NAVTREEINDEX3 =
 {
+"structcli_1_1validation_1_1Max.html#a1321e5eaff63cd97d4fe09d528867993":[2,0,0,1,1,3],
+"structcli_1_1validation_1_1Max.html#a2b446355a07593f079b85408fb57090a":[0,0,0,1,1,0],
 "structcli_1_1validation_1_1Max.html#a2b446355a07593f079b85408fb57090a":[2,0,0,1,1,0],
 "structcli_1_1validation_1_1Max.html#aec2fca30281ff14b8078fa565ee2c1b8":[0,0,0,1,1,2],
 "structcli_1_1validation_1_1Max.html#aec2fca30281ff14b8078fa565ee2c1b8":[2,0,0,1,1,2],

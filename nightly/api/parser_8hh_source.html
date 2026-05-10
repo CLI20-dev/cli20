@@ -672,267 +672,300 @@ $(function(){initNavTree('parser_8hh_source.html','',''); });
 <div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>      }</div>
 <div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>    });</div>
 <div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span> </div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>    <span class="keywordflow">if</span> (<span class="keyword">auto</span> err = validate_required(result.value); err.has_error()) {</div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span>    <span class="keywordflow">if</span> (<span class="keyword">auto</span> err = apply_env_fallback(result.value); err.has_error()) {</div>
 <div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span>      result.error = std::move(err.error);</div>
-<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>    }</div>
-<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>  }</div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>    }</div>
 <div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span> </div>
-<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span> <span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00732" data-start="{" data-end="}">
-<div class="line"><a id="l00732" name="l00732"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">  732</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">format_help</a>(<a class="code hl_enumeration" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode = <a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>) -&gt; std::string {</div>
-<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">cli::format_help&lt;T&gt;</a>(scratch_, program_name_, color_mode, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>  }</div>
+<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>    <span class="keywordflow">if</span> (<span class="keyword">auto</span> err = validate_required(result.value); err.has_error()) {</div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>      result.error = std::move(err.error);</div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>    }</div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>  }</div>
+<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span> </div>
+<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span> <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00737" data-start="{" data-end="}">
+<div class="line"><a id="l00737" name="l00737"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">  737</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">format_help</a>(<a class="code hl_enumeration" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode = <a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>) -&gt; std::string {</div>
+<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">cli::format_help&lt;T&gt;</a>(scratch_, program_name_, color_mode, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>  }</div>
 </div>
-<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span></div>
-<div class="foldopen" id="foldopen00741" data-start="{" data-end="}">
-<div class="line"><a id="l00741" name="l00741"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">  741</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">format_help</a>(<a class="code hl_struct" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string {</div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">format_help</a>(<a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>, <a class="code hl_variable" href="namespacecli.html#a6daa0c1a38f127f7ba2d372eb77b7328">recurse_help</a>);</div>
-<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>  }</div>
+<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span></div>
+<div class="foldopen" id="foldopen00746" data-start="{" data-end="}">
+<div class="line"><a id="l00746" name="l00746"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">  746</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">format_help</a>(<a class="code hl_struct" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string {</div>
+<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">format_help</a>(<a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>, <a class="code hl_variable" href="namespacecli.html#a6daa0c1a38f127f7ba2d372eb77b7328">recurse_help</a>);</div>
+<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>  }</div>
 </div>
-<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span></div>
-<div class="foldopen" id="foldopen00752" data-start="{" data-end="}">
-<div class="line"><a id="l00752" name="l00752"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">  752</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">format_help</a>(<a class="code hl_enumeration" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode, <a class="code hl_struct" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string {</div>
-<div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">cli::format_help&lt;T&gt;</a>(scratch_, program_name_, color_mode, <span class="keyword">true</span>);</div>
-<div class="line"><a id="l00754" name="l00754"></a><span class="lineno">  754</span>  }</div>
+<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span></div>
+<div class="foldopen" id="foldopen00757" data-start="{" data-end="}">
+<div class="line"><a id="l00757" name="l00757"></a><span class="lineno"><a class="line" href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">  757</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">format_help</a>(<a class="code hl_enumeration" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode, <a class="code hl_struct" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string {</div>
+<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">cli::format_help&lt;T&gt;</a>(scratch_, program_name_, color_mode, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span>  }</div>
 </div>
-<div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span> </div>
-<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>  T scratch_{};</div>
-<div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span> </div>
-<div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span>  <span class="comment">// Iterate every field of val, calling fn(field) for each.</span></div>
-<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span>  <span class="keyword">template</span> &lt;<span class="keyword">class</span> Fn&gt;</div>
-<div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span>  <span class="keyword">static</span> <span class="keyword">auto</span> for_each_field(T&amp; val, Fn fn) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l00762" name="l00762"></a><span class="lineno">  762</span>    std::apply([&amp;fn](<span class="keyword">auto</span>&amp;... f) -&gt; <span class="keyword">auto</span> { (..., fn(f)); }, <a class="code hl_function" href="namespacecli.html#acd53497000ad272a20bc2203271ace24">as_tuple</a>(val));</div>
-<div class="line"><a id="l00763" name="l00763"></a><span class="lineno">  763</span>  }</div>
-<div class="line"><a id="l00764" name="l00764"></a><span class="lineno">  764</span>  <span class="keyword">template</span> &lt;<span class="keyword">class</span> Fn&gt;</div>
-<div class="line"><a id="l00765" name="l00765"></a><span class="lineno">  765</span>  <span class="keyword">static</span> <span class="keyword">auto</span> for_each_field(<span class="keyword">const</span> T&amp; val, Fn fn) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l00766" name="l00766"></a><span class="lineno">  766</span>    std::apply([&amp;fn](<span class="keyword">const</span> <span class="keyword">auto</span>&amp;... f) -&gt; <span class="keyword">auto</span> { (..., fn(f)); }, <a class="code hl_function" href="namespacecli.html#acd53497000ad272a20bc2203271ace24">as_tuple</a>(val));</div>
-<div class="line"><a id="l00767" name="l00767"></a><span class="lineno">  767</span>  }</div>
-<div class="line"><a id="l00768" name="l00768"></a><span class="lineno">  768</span> </div>
-<div class="line"><a id="l00769" name="l00769"></a><span class="lineno">  769</span>  <span class="comment">// Build the option spec-map and command-name set from the field types of val.</span></div>
-<div class="line"><a id="l00770" name="l00770"></a><span class="lineno">  770</span>  <span class="keyword">auto</span> get_option_spec_map(<span class="keyword">const</span> T&amp; val)</div>
-<div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>      -&gt; std::pair&lt;std::unordered_map&lt;std::string, Nargs&gt;,</div>
-<div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>                   std::unordered_set&lt;std::string&gt;&gt; {</div>
-<div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>    std::unordered_map&lt;std::string, Nargs&gt; spec_map;</div>
-<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>    std::unordered_set&lt;std::string&gt; command_names;</div>
-<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>    for_each_field(val, [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
-<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
-<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
-<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7">option_prefixes</a>)</div>
-<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>          spec_map.emplace(p + std::string(F::name.view()), F::nargs);</div>
-<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (F::short_name != <span class="charliteral">&#39;\0&#39;</span>)</div>
-<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>          spec_map.emplace(</div>
-<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>              cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#a4579006db5a11a4eac48c69463833733">short_option_prefix</a> + std::string(1, F::short_name),</div>
-<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>              F::nargs);</div>
-<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>      }</div>
-<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, CommandTag&gt;)</div>
-<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>        command_names.emplace(std::string(F::command_name()));</div>
-<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>    });</div>
-<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>    <span class="keywordflow">return</span> {spec_map, command_names};</div>
-<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>  }</div>
-<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span> </div>
-<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>  <span class="comment">// Find the option field matching (prefix, bare), notify it, and invoke its</span></div>
-<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>  <span class="comment">// action on each value token.  notify_option_seen() is called once;</span></div>
-<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>  <span class="comment">// invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.</span></div>
-<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>  <span class="keyword">auto</span> dispatch_option(T&amp; val, std::string_view prefix, std::string_view bare,</div>
-<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>                       std::span&lt;const Token&gt; vals, std::size_t first_index,</div>
-<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>                       std::size_t option_position) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
-<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
-<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>    <span class="keywordtype">bool</span> found = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
-<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
-<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
-<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>        <span class="keywordflow">if</span> (found) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>        <span class="keywordtype">bool</span> match = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7">option_prefixes</a>)</div>
-<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>          <span class="keywordflow">if</span> (p == prefix &amp;&amp; F::name.view() == bare) {</div>
-<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>            match = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span>          }</div>
-<div class="line"><a id="l00809" name="l00809"></a><span class="lineno">  809</span>        <span class="keywordflow">if</span> (!match &amp;&amp; F::short_name != <span class="charliteral">&#39;\0&#39;</span> &amp;&amp;</div>
-<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>            cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#a4579006db5a11a4eac48c69463833733">short_option_prefix</a> == prefix &amp;&amp; bare.size() == 1 &amp;&amp;</div>
-<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span>            bare[0] == F::short_name)</div>
-<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>          match = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>        <span class="keywordflow">if</span> (!match) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>        found = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>        f.notify_option_seen();</div>
-<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (F::nargs.min == 0 &amp;&amp; F::nargs.max == 0) {</div>
-<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span>          res = f.invoke_flag(option_position + first_index);</div>
-<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>          <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; vt : vals) {</div>
-<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>            <span class="keywordflow">if</span> (res.has_error()) <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>            res = f.invoke_action(vt.text, vt.position + first_index);</div>
-<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>          }</div>
-<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>        }</div>
-<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>        <span class="keywordflow">if</span> (!res.has_error()) f.fire_on_parse();</div>
-<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>      }</div>
-<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>    });</div>
-<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>  }</div>
-<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span> </div>
-<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span>  <span class="comment">// Fill the pos_idx-th positional field with text.  Advances pos_idx/pos_cnt</span></div>
-<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>  <span class="comment">// when the current field reaches its nargs.max.</span></div>
-<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>  <span class="keyword">static</span> <span class="keyword">auto</span> dispatch_positional(T&amp; val, std::size_t&amp; pos_idx,</div>
-<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>                                  std::size_t&amp; pos_cnt, std::string_view text,</div>
-<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>                                  std::size_t position) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
-<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
-<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>    <span class="keywordtype">bool</span> invoked = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>    std::size_t cur = 0;</div>
-<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
-<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
-<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, PositionalTag&gt;) {</div>
-<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>        <span class="keywordflow">if</span> (cur++ != pos_idx || invoked) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>        invoked = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>        res = f.invoke_action(text, position);</div>
-<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>        <span class="keywordflow">if</span> (res.has_value()) {</div>
-<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>          ++pos_cnt;</div>
-<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>          <span class="keywordflow">if</span> (F::nargs.max != -1 &amp;&amp;</div>
-<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>              pos_cnt &gt;= <span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(F::nargs.max)) {</div>
-<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>            ++pos_idx;</div>
-<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span>            pos_cnt = 0;</div>
-<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>          }</div>
-<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>        }</div>
-<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>      }</div>
-<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>    });</div>
-<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>    <span class="keywordflow">if</span> (!invoked)</div>
-<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>      <span class="keywordflow">return</span> <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(</div>
-<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>          <a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{.code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97afc44e65b9262033b66b3a1107c866f28">ErrorCode::unexpected_argument</a>,</div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>                     .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>                     .position = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(position),</div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>                     .subject = std::string(text)});</div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>  }</div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span> </div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>  <span class="keyword">auto</span> dispatch_command(T&amp; val, std::string_view name,</div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>                        std::span&lt;const std::string_view&gt; args,</div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>                        std::size_t first_index) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
-<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>    <span class="keywordtype">bool</span> found = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, CommandTag&gt;) {</div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>        <span class="keywordflow">if</span> (found || F::command_name() != name) {</div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>          <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>        }</div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>        found = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>        f.mark_provided();</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>        <span class="keyword">auto</span> sub_parser = <a class="code hl_struct" href="structcli_1_1Parser.html">Parser&lt;typename F::argument_type&gt;</a>{};</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>        sub_parser.program_name_ =</div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>            std::format(<span class="stringliteral">&quot;{} {}&quot;</span>, program_name_, F::command_name());</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>        <span class="keyword">auto</span> sub = sub_parser.parse(args, first_index);</div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>        <span class="keywordflow">if</span> (sub.has_error()) {</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>          res = <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(std::move(sub.error));</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>          <span class="keyword">static_cast&lt;</span>typename F::argument_type&amp;<span class="keyword">&gt;</span>(f) = std::move(sub.value);</div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>          f.mark_provided();</div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>        }</div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>      }</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>    });</div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>    <span class="keywordflow">if</span> (!found) {</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>      <span class="keywordflow">return</span> <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{</div>
-<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>          .code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97a3d5bf453f3e2135b2286abb2b1c5e591">ErrorCode::unknown_command</a>,</div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>          .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>          .position = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(first_index - 1),</div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>          .subject = std::string(name),</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>      });</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>    }</div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>  }</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span> </div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>  <span class="keyword">static</span> <span class="keyword">auto</span> validate_required(T&amp; val) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt; ||</div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>                    std::derived_from&lt;F, PositionalTag&gt;) {</div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>        <span class="keywordflow">if</span> (res.has_error()) {</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>          <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>        }</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        <span class="keywordflow">if</span> (f.presence == <a class="code hl_enumvalue" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">Presence::required</a> &amp;&amp; !f.provided()) {</div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>          std::string subject;</div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>            subject = std::string(F::name.view());</div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>          } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>            subject = <span class="stringliteral">&quot;&lt;positional&gt;&quot;</span>;</div>
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>          }</div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>          res = <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{</div>
-<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>              .code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97af6c29ae73451ab6997c55effd0a64e99">ErrorCode::missing_required</a>,</div>
-<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>              .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
-<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>              .subject = std::move(subject),</div>
-<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>          });</div>
-<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>        }</div>
-<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>      }</div>
-<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>    });</div>
-<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>  }</div>
-<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span> </div>
-<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>  <span class="keyword">auto</span> finalize_special_error(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a> error) -&gt; <a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a> {</div>
-<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>    <span class="keywordflow">if</span> (error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a1a86ceace823b7995db498eda11f19c3">code</a> == <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97ae42676cdb92fefd591b0b1286d8f96a7">ErrorCode::help_requested</a> &amp;&amp; error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a39949995e758bdb607d9f1f7812a8757">detail</a>.empty()) {</div>
-<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>      error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a39949995e758bdb607d9f1f7812a8757">detail</a> = <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">format_help</a>(<a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ac7561db7a418dd39b2201dfe110ab4a4">ColorMode::never</a>);</div>
-<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>    }</div>
-<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span>    <span class="keywordflow">return</span> error;</div>
-<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>  }</div>
-<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>};</div>
+<div class="line"><a id="l00760" name="l00760"></a><span class="lineno">  760</span> </div>
+<div class="line"><a id="l00761" name="l00761"></a><span class="lineno">  761</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00762" name="l00762"></a><span class="lineno">  762</span>  T scratch_{};</div>
+<div class="line"><a id="l00763" name="l00763"></a><span class="lineno">  763</span> </div>
+<div class="line"><a id="l00764" name="l00764"></a><span class="lineno">  764</span>  <span class="comment">// Iterate every field of val, calling fn(field) for each.</span></div>
+<div class="line"><a id="l00765" name="l00765"></a><span class="lineno">  765</span>  <span class="keyword">template</span> &lt;<span class="keyword">class</span> Fn&gt;</div>
+<div class="line"><a id="l00766" name="l00766"></a><span class="lineno">  766</span>  <span class="keyword">static</span> <span class="keyword">auto</span> for_each_field(T&amp; val, Fn fn) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l00767" name="l00767"></a><span class="lineno">  767</span>    std::apply([&amp;fn](<span class="keyword">auto</span>&amp;... f) -&gt; <span class="keyword">auto</span> { (..., fn(f)); }, <a class="code hl_function" href="namespacecli.html#acd53497000ad272a20bc2203271ace24">as_tuple</a>(val));</div>
+<div class="line"><a id="l00768" name="l00768"></a><span class="lineno">  768</span>  }</div>
+<div class="line"><a id="l00769" name="l00769"></a><span class="lineno">  769</span>  <span class="keyword">template</span> &lt;<span class="keyword">class</span> Fn&gt;</div>
+<div class="line"><a id="l00770" name="l00770"></a><span class="lineno">  770</span>  <span class="keyword">static</span> <span class="keyword">auto</span> for_each_field(<span class="keyword">const</span> T&amp; val, Fn fn) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>    std::apply([&amp;fn](<span class="keyword">const</span> <span class="keyword">auto</span>&amp;... f) -&gt; <span class="keyword">auto</span> { (..., fn(f)); }, <a class="code hl_function" href="namespacecli.html#acd53497000ad272a20bc2203271ace24">as_tuple</a>(val));</div>
+<div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>  }</div>
+<div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span> </div>
+<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>  <span class="comment">// Build the option spec-map and command-name set from the field types of val.</span></div>
+<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>  <span class="keyword">auto</span> get_option_spec_map(<span class="keyword">const</span> T&amp; val)</div>
+<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>      -&gt; std::pair&lt;std::unordered_map&lt;std::string, Nargs&gt;,</div>
+<div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>                   std::unordered_set&lt;std::string&gt;&gt; {</div>
+<div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>    std::unordered_map&lt;std::string, Nargs&gt; spec_map;</div>
+<div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>    std::unordered_set&lt;std::string&gt; command_names;</div>
+<div class="line"><a id="l00780" name="l00780"></a><span class="lineno">  780</span>    for_each_field(val, [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00781" name="l00781"></a><span class="lineno">  781</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
+<div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7">option_prefixes</a>)</div>
+<div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>          spec_map.emplace(p + std::string(F::name.view()), F::nargs);</div>
+<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (F::short_name != <span class="charliteral">&#39;\0&#39;</span>)</div>
+<div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>          spec_map.emplace(</div>
+<div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>              cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#a4579006db5a11a4eac48c69463833733">short_option_prefix</a> + std::string(1, F::short_name),</div>
+<div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>              F::nargs);</div>
+<div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span>      }</div>
+<div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, CommandTag&gt;)</div>
+<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>        command_names.emplace(std::string(F::command_name()));</div>
+<div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>    });</div>
+<div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>    <span class="keywordflow">return</span> {spec_map, command_names};</div>
+<div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>  }</div>
+<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span> </div>
+<div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span>  <span class="comment">// Find the option field matching (prefix, bare), notify it, and invoke its</span></div>
+<div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>  <span class="comment">// action on each value token.  notify_option_seen() is called once;</span></div>
+<div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span>  <span class="comment">// invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.</span></div>
+<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>  <span class="keyword">auto</span> dispatch_option(T&amp; val, std::string_view prefix, std::string_view bare,</div>
+<div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>                       std::span&lt;const Token&gt; vals, std::size_t first_index,</div>
+<div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>                       std::size_t option_position) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
+<div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>    <span class="keywordtype">bool</span> found = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
+<div class="line"><a id="l00807" name="l00807"></a><span class="lineno">  807</span>        <span class="keywordflow">if</span> (found) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00808" name="l00808"></a><span class="lineno">  808</span>        <span class="keywordtype">bool</span> match = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00809" name="l00809"></a><span class="lineno">  809</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7">option_prefixes</a>)</div>
+<div class="line"><a id="l00810" name="l00810"></a><span class="lineno">  810</span>          <span class="keywordflow">if</span> (p == prefix &amp;&amp; F::name.view() == bare) {</div>
+<div class="line"><a id="l00811" name="l00811"></a><span class="lineno">  811</span>            match = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>          }</div>
+<div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>        <span class="keywordflow">if</span> (!match &amp;&amp; F::short_name != <span class="charliteral">&#39;\0&#39;</span> &amp;&amp;</div>
+<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>            cfg_.<a class="code hl_variable" href="structcli_1_1TokenizerConfig.html#a4579006db5a11a4eac48c69463833733">short_option_prefix</a> == prefix &amp;&amp; bare.size() == 1 &amp;&amp;</div>
+<div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>            bare[0] == F::short_name)</div>
+<div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span>          match = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>        <span class="keywordflow">if</span> (!match) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>        found = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>        f.notify_option_seen();</div>
+<div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (F::nargs.min == 0 &amp;&amp; F::nargs.max == 0) {</div>
+<div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>          res = f.invoke_flag(option_position + first_index);</div>
+<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>          <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; vt : vals) {</div>
+<div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>            <span class="keywordflow">if</span> (res.has_error()) <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>            res = f.invoke_action(vt.text, vt.position + first_index);</div>
+<div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>          }</div>
+<div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>        }</div>
+<div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>        <span class="keywordflow">if</span> (!res.has_error()) f.fire_on_parse();</div>
+<div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span>      }</div>
+<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>    });</div>
+<div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>    <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>  }</div>
+<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span> </div>
+<div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>  <span class="comment">// Fill the pos_idx-th positional field with text.  Advances pos_idx/pos_cnt</span></div>
+<div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>  <span class="comment">// when the current field reaches its nargs.max.</span></div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>  <span class="keyword">static</span> <span class="keyword">auto</span> dispatch_positional(T&amp; val, std::size_t&amp; pos_idx,</div>
+<div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>                                  std::size_t&amp; pos_cnt, std::string_view text,</div>
+<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>                                  std::size_t position) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
+<div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
+<div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>    <span class="keywordtype">bool</span> invoked = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>    std::size_t cur = 0;</div>
+<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, PositionalTag&gt;) {</div>
+<div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>        <span class="keywordflow">if</span> (cur++ != pos_idx || invoked) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00847" name="l00847"></a><span class="lineno">  847</span>        invoked = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00848" name="l00848"></a><span class="lineno">  848</span>        res = f.invoke_action(text, position);</div>
+<div class="line"><a id="l00849" name="l00849"></a><span class="lineno">  849</span>        <span class="keywordflow">if</span> (res.has_value()) {</div>
+<div class="line"><a id="l00850" name="l00850"></a><span class="lineno">  850</span>          ++pos_cnt;</div>
+<div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>          <span class="keywordflow">if</span> (F::nargs.max != -1 &amp;&amp;</div>
+<div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>              pos_cnt &gt;= <span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(F::nargs.max)) {</div>
+<div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>            ++pos_idx;</div>
+<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>            pos_cnt = 0;</div>
+<div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>          }</div>
+<div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>        }</div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>      }</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>    });</div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    <span class="keywordflow">if</span> (!invoked)</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>      <span class="keywordflow">return</span> <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>          <a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{.code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97afc44e65b9262033b66b3a1107c866f28">ErrorCode::unexpected_argument</a>,</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>                     .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>                     .position = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(position),</div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>                     .subject = std::string(text)});</div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>    <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>  }</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span> </div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>  <span class="keyword">auto</span> dispatch_command(T&amp; val, std::string_view name,</div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>                        std::span&lt;const std::string_view&gt; args,</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>                        std::size_t first_index) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>    <span class="keywordtype">bool</span> found = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, CommandTag&gt;) {</div>
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>        <span class="keywordflow">if</span> (found || F::command_name() != name) {</div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>          <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>        }</div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>        found = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>        f.mark_provided();</div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>        <span class="keyword">auto</span> sub_parser = <a class="code hl_struct" href="structcli_1_1Parser.html">Parser&lt;typename F::argument_type&gt;</a>{};</div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>        sub_parser.program_name_ =</div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>            std::format(<span class="stringliteral">&quot;{} {}&quot;</span>, program_name_, F::command_name());</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>        <span class="keyword">auto</span> sub = sub_parser.parse(args, first_index);</div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>        <span class="keywordflow">if</span> (sub.has_error()) {</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>          res = <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(std::move(sub.error));</div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>          <span class="keyword">static_cast&lt;</span>typename F::argument_type&amp;<span class="keyword">&gt;</span>(f) = std::move(sub.value);</div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>          f.mark_provided();</div>
+<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>        }</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>      }</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>    });</div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>    <span class="keywordflow">if</span> (!found) {</div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>      <span class="keywordflow">return</span> <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>          .code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97a3d5bf453f3e2135b2286abb2b1c5e591">ErrorCode::unknown_command</a>,</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>          .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>          .position = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(first_index - 1),</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>          .subject = std::string(name),</div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>      });</div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>    }</div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>    <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>  }</div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span> </div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>  <span class="keyword">static</span> <span class="keyword">auto</span> validate_required(T&amp; val) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt; ||</div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>                    std::derived_from&lt;F, PositionalTag&gt;) {</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>        <span class="keywordflow">if</span> (res.has_error()) {</div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>          <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>        }</div>
+<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>        <span class="keywordflow">if</span> (f.presence == <a class="code hl_enumvalue" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">Presence::required</a> &amp;&amp; !f.provided()) {</div>
+<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span>          std::string subject;</div>
+<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
+<div class="line"><a id="l00916" name="l00916"></a><span class="lineno">  916</span>            subject = <span class="stringliteral">&quot;--&quot;</span> + std::string(F::name.view());</div>
+<div class="line"><a id="l00917" name="l00917"></a><span class="lineno">  917</span>          } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00918" name="l00918"></a><span class="lineno">  918</span>            subject = <span class="stringliteral">&quot;&lt;positional&gt;&quot;</span>;</div>
+<div class="line"><a id="l00919" name="l00919"></a><span class="lineno">  919</span>          }</div>
+<div class="line"><a id="l00920" name="l00920"></a><span class="lineno">  920</span>          res = <a class="code hl_function" href="structcli_1_1ActionResult.html#a35a5d55ac8a93248edadaaa227cc31e0">ActionResult&lt;void&gt;::fail</a>(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a>{</div>
+<div class="line"><a id="l00921" name="l00921"></a><span class="lineno">  921</span>              .code = <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97af6c29ae73451ab6997c55effd0a64e99">ErrorCode::missing_required</a>,</div>
+<div class="line"><a id="l00922" name="l00922"></a><span class="lineno">  922</span>              .kind = <a class="code hl_enumvalue" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">ErrorKind::parse</a>,</div>
+<div class="line"><a id="l00923" name="l00923"></a><span class="lineno">  923</span>              .subject = std::move(subject),</div>
+<div class="line"><a id="l00924" name="l00924"></a><span class="lineno">  924</span>          });</div>
+<div class="line"><a id="l00925" name="l00925"></a><span class="lineno">  925</span>        }</div>
+<div class="line"><a id="l00926" name="l00926"></a><span class="lineno">  926</span>      }</div>
+<div class="line"><a id="l00927" name="l00927"></a><span class="lineno">  927</span>    });</div>
+<div class="line"><a id="l00928" name="l00928"></a><span class="lineno">  928</span>    <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00929" name="l00929"></a><span class="lineno">  929</span>  }</div>
+<div class="line"><a id="l00930" name="l00930"></a><span class="lineno">  930</span> </div>
+<div class="line"><a id="l00931" name="l00931"></a><span class="lineno">  931</span>  <span class="keyword">auto</span> apply_env_fallback(T&amp; val) -&gt; <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> {</div>
+<div class="line"><a id="l00932" name="l00932"></a><span class="lineno">  932</span>    <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;void&gt;</a> res = <a class="code hl_function" href="structcli_1_1ActionResult.html#aa333eaa972eec0b9e01651e897b972b4">ActionResult&lt;void&gt;::ok</a>();</div>
+<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span>    for_each_field(val, [&amp;](<span class="keyword">auto</span>&amp; f) -&gt; <span class="keyword">auto</span> {</div>
+<div class="line"><a id="l00934" name="l00934"></a><span class="lineno">  934</span>      <span class="keyword">using </span>F = std::remove_cvref_t&lt;<span class="keyword">decltype</span>(f)&gt;;</div>
+<div class="line"><a id="l00935" name="l00935"></a><span class="lineno">  935</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (std::derived_from&lt;F, OptionTag&gt;) {</div>
+<div class="line"><a id="l00936" name="l00936"></a><span class="lineno">  936</span>        <span class="keywordflow">if</span> (res.has_error() || f.provided() || f.env.empty()) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00937" name="l00937"></a><span class="lineno">  937</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00938" name="l00938"></a><span class="lineno">  938</span>        <span class="keywordtype">char</span>* raw_buf = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00939" name="l00939"></a><span class="lineno">  939</span>        std::size_t raw_len = 0;</div>
+<div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>        _dupenv_s(&amp;raw_buf, &amp;raw_len, std::string(f.env).c_str());</div>
+<div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span>        std::unique_ptr&lt;char, <span class="keyword">decltype</span>(&amp;free)&gt; raw_guard(raw_buf, &amp;free);</div>
+<div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* raw = raw_buf;</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span>        <span class="keyword">const</span> <span class="keywordtype">char</span>* raw = std::getenv(std::string(f.env).c_str());</div>
+<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>        <span class="keywordflow">if</span> (!raw) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>        f.notify_option_seen();</div>
+<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (F::nargs.min == 0 &amp;&amp; F::nargs.max == 0) {</div>
+<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span>          res = f.invoke_flag(0);</div>
+<div class="line"><a id="l00950" name="l00950"></a><span class="lineno">  950</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00951" name="l00951"></a><span class="lineno">  951</span>          res = f.invoke_action(std::string_view(raw), 0);</div>
+<div class="line"><a id="l00952" name="l00952"></a><span class="lineno">  952</span>        }</div>
+<div class="line"><a id="l00953" name="l00953"></a><span class="lineno">  953</span>        <span class="keywordflow">if</span> (!res.has_error()) f.fire_on_parse();</div>
+<div class="line"><a id="l00954" name="l00954"></a><span class="lineno">  954</span>      }</div>
+<div class="line"><a id="l00955" name="l00955"></a><span class="lineno">  955</span>    });</div>
+<div class="line"><a id="l00956" name="l00956"></a><span class="lineno">  956</span>    <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00957" name="l00957"></a><span class="lineno">  957</span>  }</div>
+<div class="line"><a id="l00958" name="l00958"></a><span class="lineno">  958</span> </div>
+<div class="line"><a id="l00959" name="l00959"></a><span class="lineno">  959</span>  <span class="keyword">auto</span> finalize_special_error(<a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a> error) -&gt; <a class="code hl_struct" href="structcli_1_1ParseError.html">ParseError</a> {</div>
+<div class="line"><a id="l00960" name="l00960"></a><span class="lineno">  960</span>    <span class="keywordflow">if</span> (error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a1a86ceace823b7995db498eda11f19c3">code</a> == <a class="code hl_enumvalue" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97ae42676cdb92fefd591b0b1286d8f96a7">ErrorCode::help_requested</a> &amp;&amp; error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a39949995e758bdb607d9f1f7812a8757">detail</a>.empty()) {</div>
+<div class="line"><a id="l00961" name="l00961"></a><span class="lineno">  961</span>      error.<a class="code hl_variable" href="structcli_1_1ParseError.html#a39949995e758bdb607d9f1f7812a8757">detail</a> = <a class="code hl_function" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">format_help</a>(<a class="code hl_enumvalue" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ac7561db7a418dd39b2201dfe110ab4a4">ColorMode::never</a>);</div>
+<div class="line"><a id="l00962" name="l00962"></a><span class="lineno">  962</span>    }</div>
+<div class="line"><a id="l00963" name="l00963"></a><span class="lineno">  963</span>    <span class="keywordflow">return</span> error;</div>
+<div class="line"><a id="l00964" name="l00964"></a><span class="lineno">  964</span>  }</div>
+<div class="line"><a id="l00965" name="l00965"></a><span class="lineno">  965</span>};</div>
 </div>
-<div class="line"><a id="l00933" name="l00933"></a><span class="lineno">  933</span></div>
-<div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
-<div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span><span class="comment">// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)</span></div>
-<div class="foldopen" id="foldopen00946" data-start="{" data-end="}">
-<div class="line"><a id="l00946" name="l00946"></a><span class="lineno"><a class="line" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">  946</a></span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">parse</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]) -&gt; <a class="code hl_struct" href="structcli_1_1ParseResult.html">ParseResult&lt;T&gt;</a> {</div>
-<div class="line"><a id="l00947" name="l00947"></a><span class="lineno">  947</span>  <span class="keywordflow">return</span> <a class="code hl_struct" href="structcli_1_1Parser.html">Parser&lt;T&gt;</a>{}.<a class="code hl_function" href="structcli_1_1Parser.html#ac88ef2863f9a226be716ae56534a1731">parse</a>(argc, argv);</div>
-<div class="line"><a id="l00948" name="l00948"></a><span class="lineno">  948</span>}</div>
+<div class="line"><a id="l00966" name="l00966"></a><span class="lineno">  966</span></div>
+<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
+<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span><span class="comment">// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)</span></div>
+<div class="foldopen" id="foldopen00979" data-start="{" data-end="}">
+<div class="line"><a id="l00979" name="l00979"></a><span class="lineno"><a class="line" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">  979</a></span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">parse</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[]) -&gt; <a class="code hl_struct" href="structcli_1_1ParseResult.html">ParseResult&lt;T&gt;</a> {</div>
+<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>  <span class="keywordflow">return</span> <a class="code hl_struct" href="structcli_1_1Parser.html">Parser&lt;T&gt;</a>{}.<a class="code hl_function" href="structcli_1_1Parser.html#ac88ef2863f9a226be716ae56534a1731">parse</a>(argc, argv);</div>
+<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>}</div>
 </div>
-<div class="line"><a id="l00949" name="l00949"></a><span class="lineno">  949</span></div>
-<div class="line"><a id="l00969" name="l00969"></a><span class="lineno">  969</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
-<div class="line"><a id="l00970" name="l00970"></a><span class="lineno">  970</span><span class="comment">// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)</span></div>
-<div class="foldopen" id="foldopen00971" data-start="{" data-end="}">
-<div class="line"><a id="l00971" name="l00971"></a><span class="lineno"><a class="line" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">  971</a></span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">parse_or_exit</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[], std::ostream&amp; out = std::cout,</div>
-<div class="line"><a id="l00972" name="l00972"></a><span class="lineno">  972</span>                   std::ostream&amp; err = std::cerr) -&gt; T {</div>
-<div class="line"><a id="l00973" name="l00973"></a><span class="lineno">  973</span>  <span class="keyword">auto</span> result = <a class="code hl_function" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">parse&lt;T&gt;</a>(argc, argv);</div>
-<div class="line"><a id="l00974" name="l00974"></a><span class="lineno">  974</span>  <span class="keywordflow">if</span> (!result) {</div>
-<div class="line"><a id="l00975" name="l00975"></a><span class="lineno">  975</span>    <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> message = result.error.message(); !message.empty()) {</div>
-<div class="line"><a id="l00976" name="l00976"></a><span class="lineno">  976</span>      <span class="keyword">auto</span>&amp; stream = result.error.use_stdout() ? out : err;</div>
-<div class="line"><a id="l00977" name="l00977"></a><span class="lineno">  977</span>      stream &lt;&lt; message &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
-<div class="line"><a id="l00978" name="l00978"></a><span class="lineno">  978</span>    }</div>
-<div class="line"><a id="l00979" name="l00979"></a><span class="lineno">  979</span>    std::exit(result.error.exit_code());</div>
-<div class="line"><a id="l00980" name="l00980"></a><span class="lineno">  980</span>  }</div>
-<div class="line"><a id="l00981" name="l00981"></a><span class="lineno">  981</span>  <span class="keywordflow">return</span> std::move(result.value);</div>
-<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span>}</div>
+<div class="line"><a id="l00982" name="l00982"></a><span class="lineno">  982</span></div>
+<div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
+<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span><span class="comment">// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)</span></div>
+<div class="foldopen" id="foldopen01004" data-start="{" data-end="}">
+<div class="line"><a id="l01004" name="l01004"></a><span class="lineno"><a class="line" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7"> 1004</a></span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">parse_or_exit</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[], std::ostream&amp; out = std::cout,</div>
+<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span>                   std::ostream&amp; err = std::cerr) -&gt; T {</div>
+<div class="line"><a id="l01006" name="l01006"></a><span class="lineno"> 1006</span>  <span class="keyword">auto</span> result = <a class="code hl_function" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">parse&lt;T&gt;</a>(argc, argv);</div>
+<div class="line"><a id="l01007" name="l01007"></a><span class="lineno"> 1007</span>  <span class="keywordflow">if</span> (!result) {</div>
+<div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span>    <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> message = result.error.message(); !message.empty()) {</div>
+<div class="line"><a id="l01009" name="l01009"></a><span class="lineno"> 1009</span>      <span class="keyword">auto</span>&amp; stream = result.error.use_stdout() ? out : err;</div>
+<div class="line"><a id="l01010" name="l01010"></a><span class="lineno"> 1010</span>      stream &lt;&lt; message &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>    }</div>
+<div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span>    std::exit(result.error.exit_code());</div>
+<div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>  }</div>
+<div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span>  <span class="keywordflow">return</span> std::move(result.value);</div>
+<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>}</div>
 </div>
-<div class="line"><a id="l00983" name="l00983"></a><span class="lineno">  983</span> </div>
-<div class="line"><a id="l00984" name="l00984"></a><span class="lineno">  984</span><span class="preprocessor">#ifdef _WIN32</span></div>
-<div class="line"><a id="l00985" name="l00985"></a><span class="lineno">  985</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
-<div class="line"><a id="l00986" name="l00986"></a><span class="lineno">  986</span><span class="keyword">auto</span> parse(<span class="keywordtype">int</span> argc, <span class="keywordtype">wchar_t</span>* argv[]) -&gt; ParseResult&lt;T&gt; {</div>
-<div class="line"><a id="l00987" name="l00987"></a><span class="lineno">  987</span>  <span class="keywordflow">return</span> Parser&lt;T&gt;{}.parse(argc, argv);</div>
-<div class="line"><a id="l00988" name="l00988"></a><span class="lineno">  988</span>}</div>
-<div class="line"><a id="l00989" name="l00989"></a><span class="lineno">  989</span> </div>
-<div class="line"><a id="l00990" name="l00990"></a><span class="lineno">  990</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
-<div class="line"><a id="l00991" name="l00991"></a><span class="lineno">  991</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">parse_or_exit</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">wchar_t</span>* argv[], std::ostream&amp; out = std::cout,</div>
-<div class="line"><a id="l00992" name="l00992"></a><span class="lineno">  992</span>                   std::ostream&amp; err = std::cerr) -&gt; T {</div>
-<div class="line"><a id="l00993" name="l00993"></a><span class="lineno">  993</span>  <span class="keyword">auto</span> result = parse&lt;T&gt;(argc, argv);</div>
-<div class="line"><a id="l00994" name="l00994"></a><span class="lineno">  994</span>  <span class="keywordflow">if</span> (!result) {</div>
-<div class="line"><a id="l00995" name="l00995"></a><span class="lineno">  995</span>    <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> message = result.error.message(); !message.empty()) {</div>
-<div class="line"><a id="l00996" name="l00996"></a><span class="lineno">  996</span>      <span class="keyword">auto</span>&amp; stream = result.error.use_stdout() ? out : err;</div>
-<div class="line"><a id="l00997" name="l00997"></a><span class="lineno">  997</span>      stream &lt;&lt; message &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
-<div class="line"><a id="l00998" name="l00998"></a><span class="lineno">  998</span>    }</div>
-<div class="line"><a id="l00999" name="l00999"></a><span class="lineno">  999</span>    std::exit(result.error.exit_code());</div>
-<div class="line"><a id="l01000" name="l01000"></a><span class="lineno"> 1000</span>  }</div>
-<div class="line"><a id="l01001" name="l01001"></a><span class="lineno"> 1001</span>  <span class="keywordflow">return</span> std::move(result.value);</div>
-<div class="line"><a id="l01002" name="l01002"></a><span class="lineno"> 1002</span>}</div>
-<div class="line"><a id="l01003" name="l01003"></a><span class="lineno"> 1003</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l01004" name="l01004"></a><span class="lineno"> 1004</span> </div>
-<div class="line"><a id="l01005" name="l01005"></a><span class="lineno"> 1005</span>};  <span class="comment">// namespace cli</span></div>
+<div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span> </div>
+<div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
+<div class="line"><a id="l01019" name="l01019"></a><span class="lineno"> 1019</span><span class="keyword">auto</span> parse(<span class="keywordtype">int</span> argc, <span class="keywordtype">wchar_t</span>* argv[]) -&gt; ParseResult&lt;T&gt; {</div>
+<div class="line"><a id="l01020" name="l01020"></a><span class="lineno"> 1020</span>  <span class="keywordflow">return</span> Parser&lt;T&gt;{}.parse(argc, argv);</div>
+<div class="line"><a id="l01021" name="l01021"></a><span class="lineno"> 1021</span>}</div>
+<div class="line"><a id="l01022" name="l01022"></a><span class="lineno"> 1022</span> </div>
+<div class="line"><a id="l01023" name="l01023"></a><span class="lineno"> 1023</span><span class="keyword">template</span> &lt;ArgumentSpec T&gt;</div>
+<div class="line"><a id="l01024" name="l01024"></a><span class="lineno"> 1024</span><span class="keyword">auto</span> <a class="code hl_function" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">parse_or_exit</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">wchar_t</span>* argv[], std::ostream&amp; out = std::cout,</div>
+<div class="line"><a id="l01025" name="l01025"></a><span class="lineno"> 1025</span>                   std::ostream&amp; err = std::cerr) -&gt; T {</div>
+<div class="line"><a id="l01026" name="l01026"></a><span class="lineno"> 1026</span>  <span class="keyword">auto</span> result = parse&lt;T&gt;(argc, argv);</div>
+<div class="line"><a id="l01027" name="l01027"></a><span class="lineno"> 1027</span>  <span class="keywordflow">if</span> (!result) {</div>
+<div class="line"><a id="l01028" name="l01028"></a><span class="lineno"> 1028</span>    <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> message = result.error.message(); !message.empty()) {</div>
+<div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span>      <span class="keyword">auto</span>&amp; stream = result.error.use_stdout() ? out : err;</div>
+<div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span>      stream &lt;&lt; message &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>    }</div>
+<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>    std::exit(result.error.exit_code());</div>
+<div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span>  }</div>
+<div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>  <span class="keywordflow">return</span> std::move(result.value);</div>
+<div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span>}</div>
+<div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span> </div>
+<div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span>};  <span class="comment">// namespace cli</span></div>
 <div class="ttc" id="aargument_8hh_html"><div class="ttname"><a href="argument_8hh.html">argument.hh</a></div></div>
 <div class="ttc" id="aerror_8hh_html"><div class="ttname"><a href="error_8hh.html">error.hh</a></div></div>
 <div class="ttc" id="ahelp_8hh_html"><div class="ttname"><a href="help_8hh.html">help.hh</a></div></div>
 <div class="ttc" id="anamespacecli_1_1nargs_html"><div class="ttname"><a href="namespacecli_1_1nargs.html">cli::nargs</a></div><div class="ttdoc">Predefined Nargs constants for common value-count patterns.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00069">argument.hh:69</a></div></div>
 <div class="ttc" id="anamespacecli_1_1pack_html_a96845f625a5575985c9d694699a41483"><div class="ttname"><a href="namespacecli_1_1pack.html#a96845f625a5575985c9d694699a41483">cli::pack::push</a></div><div class="ttdeci">constexpr auto push</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01616">action.hh:1616</a></div></div>
 <div class="ttc" id="anamespacecli_html"><div class="ttname"><a href="namespacecli.html">cli</a></div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00027">action.hh:27</a></div></div>
-<div class="ttc" id="anamespacecli_html_a0645662cc14bf44d5eaaec1149056f55"><div class="ttname"><a href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">cli::parse</a></div><div class="ttdeci">auto parse(int argc, char *argv[]) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Convenience free function that parses argc/argv into type T.</div><div class="ttdef"><b>Definition</b> <a href="#l00946">parser.hh:946</a></div></div>
+<div class="ttc" id="anamespacecli_html_a0645662cc14bf44d5eaaec1149056f55"><div class="ttname"><a href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">cli::parse</a></div><div class="ttdeci">auto parse(int argc, char *argv[]) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Convenience free function that parses argc/argv into type T.</div><div class="ttdef"><b>Definition</b> <a href="#l00979">parser.hh:979</a></div></div>
 <div class="ttc" id="anamespacecli_html_a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd"><div class="ttname"><a href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">cli::ErrorKind::parse</a></div><div class="ttdeci">@ parse</div><div class="ttdef"><b>Definition</b> <a href="error_8hh_source.html#l00054">error.hh:54</a></div></div>
 <div class="ttc" id="anamespacecli_html_a5d1140c4af51437650f5bbd5bee1b083"><div class="ttname"><a href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083">cli::tokenize</a></div><div class="ttdeci">auto tokenize(std::span&lt; const std::string_view &gt; args, const std::unordered_map&lt; std::string, Nargs &gt; &amp;spec_map, const std::unordered_set&lt; std::string &gt; &amp;command_names={}, const TokenizerConfig &amp;cfg={}) -&gt; TokenizeResult</div><div class="ttdoc">Converts a raw argument span into an ordered sequence of typed tokens.</div><div class="ttdef"><b>Definition</b> <a href="#l00179">parser.hh:179</a></div></div>
 <div class="ttc" id="anamespacecli_html_a6daa0c1a38f127f7ba2d372eb77b7328"><div class="ttname"><a href="namespacecli.html#a6daa0c1a38f127f7ba2d372eb77b7328">cli::recurse_help</a></div><div class="ttdeci">constexpr RecurseHelpTag recurse_help</div><div class="ttdoc">Convenience instance of RecurseHelpTag.</div><div class="ttdef"><b>Definition</b> <a href="color_8hh_source.html#l00035">color.hh:35</a></div></div>
-<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="#l00971">parser.hh:971</a></div></div>
+<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="#l01004">parser.hh:1004</a></div></div>
 <div class="ttc" id="anamespacecli_html_ab117880aa75b79c0192736576986aec8"><div class="ttname"><a href="namespacecli.html#ab117880aa75b79c0192736576986aec8">cli::TokenType</a></div><div class="ttdeci">TokenType</div><div class="ttdoc">Classifies a single token produced by tokenize().</div><div class="ttdef"><b>Definition</b> <a href="#l00058">parser.hh:58</a></div></div>
 <div class="ttc" id="anamespacecli_html_ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f"><div class="ttname"><a href="namespacecli.html#ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f">cli::TokenType::command</a></div><div class="ttdeci">@ command</div><div class="ttdef"><b>Definition</b> <a href="#l00062">parser.hh:62</a></div></div>
 <div class="ttc" id="anamespacecli_html_ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804"><div class="ttname"><a href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">cli::TokenType::value</a></div><div class="ttdeci">@ value</div><div class="ttdef"><b>Definition</b> <a href="#l00060">parser.hh:60</a></div></div>
@@ -967,15 +1000,15 @@ $(function(){initNavTree('parser_8hh_source.html','',''); });
 <div class="ttc" id="astructcli_1_1ParseResult_html_a9562facd8dd88c8b3c3e557d3112e1c8"><div class="ttname"><a href="structcli_1_1ParseResult.html#a9562facd8dd88c8b3c3e557d3112e1c8">cli::ParseResult::fail</a></div><div class="ttdeci">static constexpr auto fail(ParseError error) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Creates a failure result carrying error.</div><div class="ttdef"><b>Definition</b> <a href="#l00467">parser.hh:467</a></div></div>
 <div class="ttc" id="astructcli_1_1ParseResult_html_ab9a8dd5c73014851bc0115cac0b0fc81"><div class="ttname"><a href="structcli_1_1ParseResult.html#ab9a8dd5c73014851bc0115cac0b0fc81">cli::ParseResult::ok</a></div><div class="ttdeci">static constexpr auto ok(U &amp;&amp;value) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Creates a success result holding value.</div><div class="ttdef"><b>Definition</b> <a href="#l00453">parser.hh:453</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html"><div class="ttname"><a href="structcli_1_1Parser.html">cli::Parser</a></div><div class="ttdoc">The main parsing engine for a typed argument specification.</div><div class="ttdef"><b>Definition</b> <a href="#l00495">parser.hh:495</a></div></div>
-<div class="ttc" id="astructcli_1_1Parser_html_a05f66237cfa5faca93528b9eef939505"><div class="ttname"><a href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(ColorMode color_mode=ColorMode::auto_) -&gt; std::string</div><div class="ttdoc">Generates a help string for the argument specification.</div><div class="ttdef"><b>Definition</b> <a href="#l00732">parser.hh:732</a></div></div>
+<div class="ttc" id="astructcli_1_1Parser_html_a05f66237cfa5faca93528b9eef939505"><div class="ttname"><a href="structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(ColorMode color_mode=ColorMode::auto_) -&gt; std::string</div><div class="ttdoc">Generates a help string for the argument specification.</div><div class="ttdef"><b>Definition</b> <a href="#l00737">parser.hh:737</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a2fa0b88c092afc70ec56e4447628af6c"><div class="ttname"><a href="structcli_1_1Parser.html#a2fa0b88c092afc70ec56e4447628af6c">cli::Parser::parse</a></div><div class="ttdeci">auto parse(T initial, std::span&lt; const std::string_view &gt; args, std::size_t first_index=0) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses a span starting from a pre-initialised argument struct.</div><div class="ttdef"><b>Definition</b> <a href="#l00625">parser.hh:625</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a5642897c33fd4f15b1f9c38f341ce346"><div class="ttname"><a href="structcli_1_1Parser.html#a5642897c33fd4f15b1f9c38f341ce346">cli::Parser::parse</a></div><div class="ttdeci">auto parse(T initial, int argc, char *argv[]) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses argc/argv starting from a pre-initialised argument struct.</div><div class="ttdef"><b>Definition</b> <a href="#l00532">parser.hh:532</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a56b10c96993538aa1d31af32ac4dfb0f"><div class="ttname"><a href="structcli_1_1Parser.html#a56b10c96993538aa1d31af32ac4dfb0f">cli::Parser::parse</a></div><div class="ttdeci">auto parse(std::span&lt; const std::string_view &gt; args, std::size_t first_index=0) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses a span of string views, skipping first_index elements.</div><div class="ttdef"><b>Definition</b> <a href="#l00590">parser.hh:590</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a5b3e60ad1d49675fc2f1a1e015c3dbbf"><div class="ttname"><a href="structcli_1_1Parser.html#a5b3e60ad1d49675fc2f1a1e015c3dbbf">cli::Parser::Parser</a></div><div class="ttdeci">friend struct Parser</div><div class="ttdef"><b>Definition</b> <a href="#l00497">parser.hh:497</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a7da45cdeb4b4bfd52c54370fc7abb81d"><div class="ttname"><a href="structcli_1_1Parser.html#a7da45cdeb4b4bfd52c54370fc7abb81d">cli::Parser::parse</a></div><div class="ttdeci">auto parse(std::span&lt; const std::string_view &gt; args, std::string_view program_name, std::size_t first_index=0) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses a span with an explicit program name for help output.</div><div class="ttdef"><b>Definition</b> <a href="#l00605">parser.hh:605</a></div></div>
-<div class="ttc" id="astructcli_1_1Parser_html_a8c5394da44fc1fb0b7fe54e33b8cbbdb"><div class="ttname"><a href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(RecurseHelpTag) -&gt; std::string</div><div class="ttdoc">Generates a help string including recursive subcommand help.</div><div class="ttdef"><b>Definition</b> <a href="#l00741">parser.hh:741</a></div></div>
+<div class="ttc" id="astructcli_1_1Parser_html_a8c5394da44fc1fb0b7fe54e33b8cbbdb"><div class="ttname"><a href="structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(RecurseHelpTag) -&gt; std::string</div><div class="ttdoc">Generates a help string including recursive subcommand help.</div><div class="ttdef"><b>Definition</b> <a href="#l00746">parser.hh:746</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_a8f880c458c1355caf5231deed6cc28ff"><div class="ttname"><a href="structcli_1_1Parser.html#a8f880c458c1355caf5231deed6cc28ff">cli::Parser::parse</a></div><div class="ttdeci">auto parse(T initial, std::span&lt; const std::string_view &gt; args, std::string_view program_name, std::size_t first_index=0) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses a span with a pre-initialised struct and explicit program name.</div><div class="ttdef"><b>Definition</b> <a href="#l00643">parser.hh:643</a></div></div>
-<div class="ttc" id="astructcli_1_1Parser_html_a929913f2ab7a848533b02d428eeb467c"><div class="ttname"><a href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(ColorMode color_mode, RecurseHelpTag) -&gt; std::string</div><div class="ttdoc">Generates a help string with explicit color mode and recursive subcommand help.</div><div class="ttdef"><b>Definition</b> <a href="#l00752">parser.hh:752</a></div></div>
+<div class="ttc" id="astructcli_1_1Parser_html_a929913f2ab7a848533b02d428eeb467c"><div class="ttname"><a href="structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c">cli::Parser::format_help</a></div><div class="ttdeci">auto format_help(ColorMode color_mode, RecurseHelpTag) -&gt; std::string</div><div class="ttdoc">Generates a help string with explicit color mode and recursive subcommand help.</div><div class="ttdef"><b>Definition</b> <a href="#l00757">parser.hh:757</a></div></div>
 <div class="ttc" id="astructcli_1_1Parser_html_ac88ef2863f9a226be716ae56534a1731"><div class="ttname"><a href="structcli_1_1Parser.html#ac88ef2863f9a226be716ae56534a1731">cli::Parser::parse</a></div><div class="ttdeci">auto parse(int argc, char *argv[]) -&gt; ParseResult&lt; T &gt;</div><div class="ttdoc">Parses standard C-style argc/argv, using argv[0] as the program name.</div><div class="ttdef"><b>Definition</b> <a href="#l00508">parser.hh:508</a></div></div>
 <div class="ttc" id="astructcli_1_1RecurseHelpTag_html"><div class="ttname"><a href="structcli_1_1RecurseHelpTag.html">cli::RecurseHelpTag</a></div><div class="ttdoc">Tag type passed to format_help() to request recursive sub-command output.</div><div class="ttdef"><b>Definition</b> <a href="color_8hh_source.html#l00032">color.hh:32</a></div></div>
 <div class="ttc" id="astructcli_1_1Token_html"><div class="ttname"><a href="structcli_1_1Token.html">cli::Token</a></div><div class="ttdoc">A single token produced by tokenize().</div><div class="ttdef"><b>Definition</b> <a href="#l00068">parser.hh:68</a></div></div>

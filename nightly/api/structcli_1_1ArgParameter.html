@@ -118,6 +118,8 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a01c78628844c52288266560d7de5aeba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default value when the argument is absent.  <br /></td></tr>
 <tr class="memitem:a2ed3069cff07e313eb419c8ab93edd95" id="r_a2ed3069cff07e313eb419c8ab93edd95"><td class="memItemLeft">std::function&lt; void(const T &amp;)&gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2ed3069cff07e313eb419c8ab93edd95">on_parse</a> {}</td></tr>
 <tr class="memdesc:a2ed3069cff07e313eb419c8ab93edd95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback invoked once after parsing completes.  <br /></td></tr>
+<tr class="memitem:a67eb7e7a36e50fb2ae64beb73b683686" id="r_a67eb7e7a36e50fb2ae64beb73b683686"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a67eb7e7a36e50fb2ae64beb73b683686">env</a> {}</td></tr>
+<tr class="memdesc:a67eb7e7a36e50fb2ae64beb73b683686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Environment variable name to fall back to when the option is absent from the command line.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class T&gt;<br />
@@ -128,7 +130,7 @@ struct cli::ArgParameter&lt; T &gt;</div><p>Parameter bag used when constructing
 <div class="line">    .default_value = 1,</div>
 <div class="line">}};</div>
 <div class="ttc" id="anamespacecli_html_a2f2a157655195ae5d1328b4b9955a3b7"><div class="ttname"><a href="namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7">cli::required</a></div><div class="ttdeci">constexpr auto required</div><div class="ttdoc">Convenience constant for Presence::required.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00061">argument.hh:61</a></div></div>
-<div class="ttc" id="anamespacecli_html_af1c2740179c6ccc154e1045e3d1e527a"><div class="ttname"><a href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a">cli::Option</a></div><div class="ttdeci">Arg&lt; Name, ShortName, detail::ActionFor&lt; T &gt;::set_once &gt; Option</div><div class="ttdoc">A single-value option that stores the parsed result in std::optional&lt;T&gt;.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00818">argument.hh:818</a></div></div>
+<div class="ttc" id="anamespacecli_html_af1c2740179c6ccc154e1045e3d1e527a"><div class="ttname"><a href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a">cli::Option</a></div><div class="ttdeci">Arg&lt; Name, ShortName, detail::ActionFor&lt; T &gt;::set_once &gt; Option</div><div class="ttdoc">A single-value option that stores the parsed result in std::optional&lt;T&gt;.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00823">argument.hh:823</a></div></div>
 <div class="ttc" id="astructcli_1_1ArgParameter_html"><div class="ttname"><a href="structcli_1_1ArgParameter.html">cli::ArgParameter</a></div><div class="ttdoc">Parameter bag used when constructing ArgImpl or PositionalImpl with named fields.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00378">argument.hh:378</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -156,6 +158,26 @@ template&lt;class T&gt; </div>
 <p>Default value when the argument is absent. </p>
 
 <p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00381">381</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a67eb7e7a36e50fb2ae64beb73b683686" name="a67eb7e7a36e50fb2ae64beb73b683686"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67eb7e7a36e50fb2ae64beb73b683686">&#9670;&#160;</a></span>env</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view <a class="el" href="structcli_1_1ArgParameter.html">cli::ArgParameter</a>&lt; T &gt;::env {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Environment variable name to fall back to when the option is absent from the command line. </p>
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00384">384</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

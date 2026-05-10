@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"structcli_1_1conversion_1_1ExistingFile.html#a8bfc6462eaa9bdcf088364e22236dcf3":[2,0,0,0,5,1],
+"structcli_1_1conversion_1_1Floating.html":[0,0,0,0,1],
 "structcli_1_1conversion_1_1Floating.html":[2,0,0,0,1],
 "structcli_1_1conversion_1_1Floating.html#a4e8a8ae0f3610fb803387c06bfacefa8":[0,0,0,0,1,0],
 "structcli_1_1conversion_1_1Floating.html#a4e8a8ae0f3610fb803387c06bfacefa8":[2,0,0,0,1,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "structcli_1_1validation_1_1Max.html":[2,0,0,1,1],
 "structcli_1_1validation_1_1Max.html#a0bc542d4b328b4d4e54603db0f33479c":[0,0,0,1,1,1],
 "structcli_1_1validation_1_1Max.html#a0bc542d4b328b4d4e54603db0f33479c":[2,0,0,1,1,1],
-"structcli_1_1validation_1_1Max.html#a1321e5eaff63cd97d4fe09d528867993":[0,0,0,1,1,3],
-"structcli_1_1validation_1_1Max.html#a1321e5eaff63cd97d4fe09d528867993":[2,0,0,1,1,3],
-"structcli_1_1validation_1_1Max.html#a2b446355a07593f079b85408fb57090a":[0,0,0,1,1,0]
+"structcli_1_1validation_1_1Max.html#a1321e5eaff63cd97d4fe09d528867993":[0,0,0,1,1,3]
 };
