@@ -58,16 +58,20 @@ function SpinnerIcon() {
 }
 
 type HistoryEntry = {args: string; output: string; exitCode: number};
+type EnvRow = {id: number; key: string; value: string};
 
 export function ExamplePlayground({
   name,
   defaultArgs = '--help',
   setupFs,
+  initialEnv,
 }: {
   name: string;
   defaultArgs?: string;
   /** Optional callback to populate the Emscripten virtual FS before each run. */
   setupFs?: (fs: any) => void;
+  /** If provided, show an env-var editor panel above the terminal. */
+  initialEnv?: Record<string, string>;
 }) {
   const wasmUrl = useBaseUrl(`/wasm/${name}.js`);
   const factoryRef = useRef<Promise<(opts: object) => Promise<any>> | null>(null);
@@ -85,6 +89,37 @@ export function ExamplePlayground({
   // Track cursor position so the block cursor renders at the right place.
   const [cursorPos, setCursorPos] = useState(0);
 
+  // Env editor — active only when initialEnv prop is provided.
+  const showEnvEditor = initialEnv !== undefined;
+  const [envRows, setEnvRows] = useState<EnvRow[]>(() =>
+    initialEnv
+      ? Object.entries(initialEnv).map(([key, value], i) => ({id: i, key, value}))
+      : [],
+  );
+  const nextIdRef = useRef(initialEnv ? Object.keys(initialEnv).length : 0);
+
+  const addEnvRow = () => {
+    setEnvRows((rows) => [
+      ...rows,
+      {id: nextIdRef.current++, key: '', value: ''},
+    ]);
+  };
+  const removeEnvRow = (id: number) => {
+    setEnvRows((rows) => rows.filter((r) => r.id !== id));
+  };
+  const updateEnvRow = (id: number, field: 'key' | 'value', val: string) => {
+    setEnvRows((rows) =>
+      rows.map((r) => (r.id === id ? {...r, [field]: val} : r)),
+    );
+  };
+  const buildEnv = (): Record<string, string> => {
+    const env: Record<string, string> = {};
+    for (const row of envRows) {
+      if (row.key.trim()) env[row.key.trim()] = row.value;
+    }
+    return env;
+  };
+
   const run = async (overrideArgs?: string) => {
     if (runningRef.current) return;
     runningRef.current = true;
@@ -92,6 +127,7 @@ export function ExamplePlayground({
     setLoadError(null);
 
     const usedArgs = overrideArgs ?? args;
+    const usedEnv = buildEnv();
     let out = '';
     let exitCode = 0;
 
@@ -113,6 +149,13 @@ export function ExamplePlayground({
         },
         noExitRuntime: false,
       });
+
+      // Inject env vars via setenv (requires _setenv + ccall in EXPORTED_FUNCTIONS/METHODS).
+      if (mod.ccall) {
+        for (const [k, v] of Object.entries(usedEnv)) {
+          mod.ccall('setenv', 'number', ['string', 'string', 'number'], [k, v, 1]);
+        }
+      }
 
       // Populate the virtual FS after the module is fully initialised.
       try {
@@ -240,6 +283,50 @@ export function ExamplePlayground({
 
   return (
     <div className="pg-wrap">
+      {showEnvEditor && (
+        <div className="pg-env-panel">
+          <div className="pg-env-header">
+            <span className="pg-env-title">Environment</span>
+            <button className="pg-env-add" onClick={addEnvRow} type="button">
+              + Add
+            </button>
+          </div>
+          {envRows.length === 0 ? (
+            <div className="pg-env-empty">No environment variables — click + Add to set one</div>
+          ) : (
+            <div className="pg-env-rows">
+              {envRows.map((row) => (
+                <div key={row.id} className="pg-env-row">
+                  <input
+                    className="pg-env-input pg-env-key"
+                    placeholder="KEY"
+                    value={row.key}
+                    onChange={(e) => updateEnvRow(row.id, 'key', e.target.value)}
+                    spellCheck={false}
+                  />
+                  <span className="pg-env-eq">=</span>
+                  <input
+                    className="pg-env-input pg-env-val"
+                    placeholder="value"
+                    value={row.value}
+                    onChange={(e) =>
+                      updateEnvRow(row.id, 'value', e.target.value)
+                    }
+                    spellCheck={false}
+                  />
+                  <button
+                    className="pg-env-remove"
+                    onClick={() => removeEnvRow(row.id)}
+                    type="button"
+                    aria-label="Remove variable">
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div
         className="pg-terminal"
         onClick={() => inputRef.current?.focus()}>

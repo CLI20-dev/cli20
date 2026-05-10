@@ -913,7 +913,7 @@ struct Parser {
         if (f.presence == Presence::required && !f.provided()) {
           std::string subject;
           if constexpr (std::derived_from<F, OptionTag>) {
-            subject = std::string(F::name.view());
+            subject = "--" + std::string(F::name.view());
           } else {
             subject = "<positional>";
           }
