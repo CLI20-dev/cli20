@@ -5,4 +5,4 @@
 - [ ] `range` / `choice` — built-in validation constraints
 - [ ] env fallback — populate unprovided options from environment variables
 - [ ] completion — shell completion script generation
-- [ ] short cluster / attached value — `-xvf`, `-ofile`
+- [x] short cluster / attached value — `-xvf`, `-ofile`

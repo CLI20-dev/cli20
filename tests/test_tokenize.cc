@@ -83,14 +83,15 @@ TEST(Tokenize, FlagEmitsOptionTokenOnly) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
-  EXPECT_EQ(r.tokens[0].text, "--verbose");
+  EXPECT_EQ(r.tokens[0].text, "verbose");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
 }
 
 TEST(Tokenize, FlagDoesNotConsumeNextToken) {
   auto r = tokenize({"--verbose", "file.txt"}, {{"--verbose", kFlag}});
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(texts(r, TokenType::option),
-            (std::vector<std::string_view>{"--verbose"}));
+            (std::vector<std::string_view>{"verbose"}));
   EXPECT_EQ(texts(r, TokenType::positional),
             (std::vector<std::string_view>{"file.txt"}));
   EXPECT_TRUE(of_type(r, TokenType::value).empty());
@@ -100,7 +101,7 @@ TEST(Tokenize, TwoFlagsInSequence) {
   auto r = tokenize({"--foo", "--bar"}, {{"--foo", kFlag}, {"--bar", kFlag}});
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(texts(r, TokenType::option),
-            (std::vector<std::string_view>{"--foo", "--bar"}));
+            (std::vector<std::string_view>{"foo", "bar"}));
   EXPECT_TRUE(of_type(r, TokenType::value).empty());
 }
 
@@ -111,7 +112,8 @@ TEST(Tokenize, OptionExactlyOneValue) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
-  EXPECT_EQ(r.tokens[0].text, "--name");
+  EXPECT_EQ(r.tokens[0].text, "name");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
   EXPECT_EQ(r.tokens[0].position, 0u);
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "Alice");
@@ -133,7 +135,7 @@ TEST(Tokenize, OptionStopsAtNextKnownOption) {
             (std::vector<std::string_view>{"Alice", "f.txt"}));
   // option tokens in order
   EXPECT_EQ(texts(r, TokenType::option),
-            (std::vector<std::string_view>{"--name", "--out"}));
+            (std::vector<std::string_view>{"name", "out"}));
 }
 
 TEST(Tokenize, ZeroOrMoreConsumesAllBareValues) {
@@ -156,7 +158,7 @@ TEST(Tokenize, ZeroOrMoreStopsBeforeNextKnownOption) {
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"a"}));
   EXPECT_EQ(texts(r, TokenType::option),
-            (std::vector<std::string_view>{"--list", "--flag"}));
+            (std::vector<std::string_view>{"list", "flag"}));
 }
 
 TEST(Tokenize, OnePlusCollectsMultipleValues) {
@@ -173,7 +175,8 @@ TEST(Tokenize, InlineSyntaxSplitsIntoOptionAndValueAtSamePosition) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
-  EXPECT_EQ(r.tokens[0].text, "--name");
+  EXPECT_EQ(r.tokens[0].text, "name");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
   EXPECT_EQ(r.tokens[0].position, 0u);
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "Alice");
@@ -225,11 +228,11 @@ TEST(Tokenize, TokenOrderIsPreserved) {
   EXPECT_EQ(r.tokens[0].type, TokenType::positional);
   EXPECT_EQ(r.tokens[0].text, "pos1");
   EXPECT_EQ(r.tokens[1].type, TokenType::option);
-  EXPECT_EQ(r.tokens[1].text, "--name");
+  EXPECT_EQ(r.tokens[1].text, "name");
   EXPECT_EQ(r.tokens[2].type, TokenType::value);
   EXPECT_EQ(r.tokens[2].text, "Alice");
   EXPECT_EQ(r.tokens[3].type, TokenType::option);
-  EXPECT_EQ(r.tokens[3].text, "--verbose");
+  EXPECT_EQ(r.tokens[3].text, "verbose");
   EXPECT_EQ(r.tokens[4].type, TokenType::positional);
   EXPECT_EQ(r.tokens[4].text, "pos2");
 }
@@ -450,7 +453,7 @@ TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
-  EXPECT_EQ(r.tokens[0].text, "+verbose");
+  EXPECT_EQ(r.tokens[0].text, "verbose");
   EXPECT_EQ(r.tokens[0].matched_prefix, "+");
 }
 
@@ -489,7 +492,7 @@ TEST(TokenizeInlineSep, ColonSeparator) {
   auto r = tokenize_cfg({"--name:Alice"}, {{"--name", kOne}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
-  EXPECT_EQ(r.tokens[0].text, "--name");
+  EXPECT_EQ(r.tokens[0].text, "name");
   EXPECT_EQ(r.tokens[1].text, "Alice");
 }
 
@@ -505,5 +508,81 @@ TEST(TokenizeInlineSep, EqualsTreatedAsValueWhenSepIsColon) {
   cli::TokenizerConfig cfg{.inline_value_separator = ':'};
   auto r = tokenize_cfg({"--name=Alice"}, {{"--name=Alice", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
-  EXPECT_EQ(r.tokens[0].text, "--name=Alice");
+  EXPECT_EQ(r.tokens[0].text, "name=Alice");
+}
+
+// ---- short cluster: -xvf -------------------------------------------------
+
+TEST(TokenizeCluster, AllFlagsExpanded) {
+  SpecMap spec{{"-x", kFlag}, {"-v", kFlag}, {"-f", kFlag}};
+  auto r = tokenize({"-xvf"}, spec);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::option),
+            (std::vector<std::string_view>{"x", "v", "f"}));
+  EXPECT_TRUE(of_type(r, TokenType::value).empty());
+  // All three share the same original arg position
+  for (const auto& t : of_type(r, TokenType::option))
+    EXPECT_EQ(t.position, 0u);
+}
+
+TEST(TokenizeCluster, SingleFlagStillWorks) {
+  // A single known short flag should still be handled by the existing path.
+  SpecMap spec{{"-v", kFlag}};
+  auto r = tokenize({"-v"}, spec);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 1u);
+  EXPECT_EQ(r.tokens[0].text, "v");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+}
+
+TEST(TokenizeCluster, FlagsThenValueNextToken) {
+  // -xo val  →  flag 'x', option 'o', value "val"
+  SpecMap spec{{"-x", kFlag}, {"-o", kOne}};
+  auto r = tokenize({"-xo", "val"}, spec);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::option),
+            (std::vector<std::string_view>{"x", "o"}));
+  EXPECT_EQ(texts(r, TokenType::value),
+            (std::vector<std::string_view>{"val"}));
+}
+
+TEST(TokenizeCluster, AttachedValueOnly) {
+  // -ofile  →  option 'o', value "file"
+  SpecMap spec{{"-o", kOne}};
+  auto r = tokenize({"-ofile"}, spec);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 2u);
+  EXPECT_EQ(r.tokens[0].text, "o");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+  EXPECT_EQ(r.tokens[1].type, TokenType::value);
+  EXPECT_EQ(r.tokens[1].text, "file");
+  EXPECT_EQ(r.tokens[1].position, 0u);
+}
+
+TEST(TokenizeCluster, FlagsThenAttachedValue) {
+  // -xofile  →  flag 'x', option 'o', attached value "file"
+  SpecMap spec{{"-x", kFlag}, {"-o", kOne}};
+  auto r = tokenize({"-xofile"}, spec);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::option),
+            (std::vector<std::string_view>{"x", "o"}));
+  EXPECT_EQ(texts(r, TokenType::value),
+            (std::vector<std::string_view>{"file"}));
+}
+
+TEST(TokenizeCluster, UnknownCharInCluster) {
+  SpecMap spec{{"-x", kFlag}};
+  auto r = tokenize({"-xy"}, spec);
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error.code, ErrorCode::unknown_option);
+  EXPECT_EQ(r.error.subject, "-y");
+}
+
+TEST(TokenizeCluster, MissingValueForLastChar) {
+  // -xo with no following token → missing_value for 'o'
+  SpecMap spec{{"-x", kFlag}, {"-o", kOne}};
+  auto r = tokenize({"-xo"}, spec);
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error.code, ErrorCode::missing_value);
+  EXPECT_EQ(r.error.subject, "-o");
 }
