@@ -380,7 +380,7 @@ struct ArgParameter {
   Presence presence{Presence::optional};  ///< Whether the argument is required.
   T default_value{};  ///< Default value when the argument is absent.
   std::function<void(const T&)>
-      on_parse{};  ///< Callback invoked once after parsing completes.
+      on_parse{};          ///< Callback invoked once after parsing completes.
   std::string_view env{};  ///< Environment variable name to fall back to when
                            ///< the option is absent from the command line.
 };
