@@ -934,7 +934,15 @@ struct Parser {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag>) {
         if (res.has_error() || f.provided() || f.env.empty()) return;
+#ifdef _WIN32
+        char* raw_buf = nullptr;
+        std::size_t raw_len = 0;
+        _dupenv_s(&raw_buf, &raw_len, std::string(f.env).c_str());
+        std::unique_ptr<char, decltype(&free)> raw_guard(raw_buf, &free);
+        const char* raw = raw_buf;
+#else
         const char* raw = std::getenv(std::string(f.env).c_str());
+#endif
         if (!raw) return;
         f.notify_option_seen();
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
