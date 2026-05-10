@@ -1,0 +1,412 @@
+---
+sidebar_position: 3
+title: Actions & Pipelines
+---
+
+# Actions & Pipelines
+
+## What Is a Pipeline?
+
+When you write `--threads 8` on the command line, the parser receives the raw
+string `"8"`. Before that value can be stored as an `int`, three things must
+happen in order:
+
+1. **Conversion** — parse `"8"` into `8` (or fail with an error).
+2. **Validation** — verify the integer satisfies any constraints (e.g. 1–32).
+3. **Pack** — write the final value into the option's storage.
+
+cli20 calls this sequence an **action pipeline**. A pipeline is a value of type
+`Action<Fn1, Fn2, ...>` where each `Fn` is a constexpr-constructible callable.
+
+### Why type-checking is deferred to `Arg<>`
+
+The `|` operator simply appends a step to the list without checking type
+compatibility. Type checking happens when the pipeline is passed to
+`cli::Arg<>`, where the `ActionValue` concept calls `pipeline.validate()` at
+compile time.
+
+This is a deliberate design decision. Validation steps like
+`validation::range<1, 32>` are intentionally polymorphic — `after_type<Prev> =
+Prev` means the same step works for `int`, `long`, `unsigned`, or any
+totally-ordered type. Encoding the "current output type" into `Action` at `|`
+time would fix the type at composition and destroy that polymorphism.
+
+The tradeoff: type-mismatch errors appear at the `cli::Arg<>` declaration rather
+than at the `|` line. In practice this is the same translation unit and rarely
+more than a few lines away.
+
+There is no runtime overhead from the composition itself.
+
+```
+string_view ──► [Conversion] ──► T ──► [Validation] ──► T ──► [Pack] ──► storage
+                     │                      │                     │
+                  on error              on error              on error
+                     └──────────────────────┴─────────────────────► ParseError
+```
+
+Any step can short-circuit the chain by returning a `ParseError`. Downstream
+steps are skipped automatically.
+
+---
+
+## Building Pipelines
+
+Pipelines are assembled with the `|` operator. The three families of building
+blocks live in `cli::conversion`, `cli::validation`, and `cli::pack`.
+
+### Conversion
+
+Conversions turn a `std::string_view` into a typed value. They must appear
+first.
+
+| Expression | Output type |
+|---|---|
+| `conversion::integer<T>` | `T` (any integral type) |
+| `conversion::floating<T>` | `T` (any floating-point type) |
+| `conversion::string` | `std::string` |
+| `conversion::boolean` | `bool` (`true`/`false`/`1`/`0`) |
+| `conversion::path` | `std::filesystem::path` |
+| `conversion::negatable<"prefix">` | `NegatableResult{name, enabled}` |
+| `conversion::choice<T, mapper>` | `T` (mapped from string; fails on unknown) |
+
+### Validation
+
+Validations filter the converted value, passing it through unchanged on
+success.
+
+| Expression | Condition |
+|---|---|
+| `validation::range<Min, Max>` | `Min ≤ value ≤ Max` |
+| `validation::min<N>` | `value ≥ N` |
+| `validation::max<N>` | `value ≤ N` |
+| `validation::positive` | `value > 0` |
+| `validation::non_negative` | `value ≥ 0` |
+| `validation::non_empty` | container / string not empty |
+| `validation::not_blank` | string not all-whitespace |
+| `validation::matches<"regex">` | full regex match |
+| `validation::one_of<A, B, ...>` | equals one of the listed constants |
+| `validation::exists` | `std::filesystem::path` exists |
+| `validation::is_regular_file` | path is a regular file |
+| `validation::is_directory` | path is a directory |
+| `validation::parent_exists` | parent directory exists |
+| `validation::predicate<fn>` | `fn(value)` returns `true` |
+
+### Pack
+
+Pack actions are **terminal**: they write the value into the option's storage
+and return `ActionResult<void>`. Every pipeline must end with exactly one pack
+action.
+
+| Expression | Storage type | Behaviour |
+|---|---|---|
+| `pack::set_once` | `std::optional<T>` | stores once; rejects duplicates |
+| `pack::push` | `std::vector<T>` | appends on each occurrence |
+| `pack::push_unique` | `std::vector<T>` | appends; rejects duplicate values |
+| `pack::insert` | `std::set<T>` | inserts into set |
+| `pack::insert_or_assign` | `std::map<K,V>` | inserts/updates map entry (used with `negatable`) |
+| `pack::set_true` | `bool` | always stores `true` |
+| `pack::set_false` | `bool` | always stores `false` |
+| `pack::toggle` | `bool` | flips on each occurrence |
+| `pack::increment` | `std::size_t` | increments on each occurrence |
+| `pack::store_into<T>` | `T*` | writes through a pointer |
+| `pack::callback<fn>` | `std::monostate` | calls `fn` with the value |
+
+### Examples
+
+```cpp
+// Integer with range constraint, stored once.
+constexpr auto port_action =
+    cli::conversion::integer<int>
+    | cli::validation::range<1, 65535>
+    | cli::pack::set_once;
+
+// Case-insensitive profile name: validated by regex, collected into a vector.
+constexpr auto profile_action =
+    cli::conversion::string
+    | cli::validation::matches<"[a-z][a-z0-9_-]*">
+    | cli::pack::push;
+
+// Warning flags toggled on/off, stored in a map.
+constexpr auto warning_action =
+    cli::conversion::negatable<"no-">
+    | cli::pack::insert_or_assign;
+
+// Config file that must exist and be a regular file.
+constexpr auto config_action =
+    cli::conversion::path
+    | cli::validation::exists
+    | cli::validation::is_regular_file
+    | cli::pack::set_once;
+```
+
+Use the pipeline with `cli::Arg`:
+
+```cpp
+struct Args {
+  cli::Arg<"port", 'p', cli::conversion::integer<int>
+                        | cli::validation::range<1, 65535>
+                        | cli::pack::set_once>
+      port{{.help = "Port number", .presence = cli::required}};
+};
+```
+
+---
+
+## Evaluating a Pipeline Standalone
+
+You can invoke a pipeline directly without going through the parser. This is
+useful for unit-testing custom actions. Note that `invoke` skips the
+compile-time `validate()` check — type mismatches between steps will only
+surface as compile errors when the pipeline is used inside `cli::Arg<>`.
+
+```cpp
+#include "cli/action.hh"
+
+// Build a pipeline.
+constexpr auto pipeline =
+    cli::conversion::integer<int>
+    | cli::validation::range<1, 32>
+    | cli::pack::set_once;
+
+// Provide context and seed the chain with the raw token.
+cli::ActionCtx<void> ctx;  // intermediate-step context (no storage reference)
+auto result = pipeline.invoke(ctx, cli::ActionResult<std::string_view>::ok("8"));
+
+if (result.has_value()) {
+    // result.value is std::optional<int>{8}
+} else {
+    // result.error.code, .subject, .detail carry the failure reason
+}
+```
+
+`ActionCtx` fields you may want to set:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `index` | `std::size_t` | `argv` position of the token (used in error messages) |
+| `occurrences` | `std::size_t` | how many times this option token has been seen |
+| `invoke_count` | `std::size_t` | how many times this action has been invoked so far |
+
+For pack actions (which need the storage reference) use `ActionCtx<StorageType>`:
+
+```cpp
+std::optional<int> storage;
+cli::ActionCtx<std::optional<int>> ctx;
+ctx.arg = storage;
+```
+
+---
+
+## Defining a Custom Pipeline as a Callable
+
+A pipeline step is any `constexpr`-constructible struct that exposes three
+type-level traits and an `operator()`. The traits let `Action` check pipeline
+compatibility at compile time.
+
+```cpp
+template <class Prev>
+static constexpr bool accepts_input;     // can this step follow a Prev-valued step?
+
+template <class Prev>
+using after_type = ...;                  // output type (= Prev for validation steps)
+
+template <class Prev>
+using storage_type = ...;                // void for non-terminal; storage T for pack
+```
+
+### Custom Conversion
+
+```cpp
+// Parses "HH:MM" into std::pair<int,int>.
+struct HHMMConversion {
+  template <class Prev>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Prev>, std::string_view>;
+
+  template <class Prev>
+  using after_type = std::pair<int, int>;
+
+  template <class Prev>
+  using storage_type = void;  // not terminal
+
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<std::string_view> input) const
+      -> cli::ActionResult<std::pair<int, int>> {
+    auto sv = input.value;
+    auto colon = sv.find(':');
+    if (colon == sv.npos)
+      return cli::ActionResult<std::pair<int, int>>::fail(
+          cli::detail::invalid_value_error(
+              cli::ErrorKind::conversion, ctx.index,
+              std::string(sv), "expected HH:MM"));
+    // ... parse hours and minutes ...
+    return cli::ActionResult<std::pair<int, int>>::ok({h, m});
+  }
+};
+
+inline constexpr auto hhmm = cli::Action<HHMMConversion{}>{};
+
+// Pipeline:
+constexpr auto schedule_action = hhmm | cli::pack::push;
+```
+
+### Custom Validation
+
+```cpp
+// Reject values not divisible by a compile-time divisor.
+template <int Divisor>
+struct DivisibleBy {
+  template <class Prev>
+  static constexpr bool accepts_input = std::integral<std::remove_cvref_t<Prev>>;
+
+  template <class Prev>
+  using after_type = Prev;   // pass value through unchanged
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class Prev>
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<Prev> input) const
+      -> cli::ActionResult<Prev> {
+    if (input.value % Divisor != 0)
+      return cli::ActionResult<Prev>::fail(
+          cli::detail::validation_failed_error(
+              ctx.index,
+              cli::detail::to_error_subject(input.value),
+              std::format("must be divisible by {}", Divisor)));
+    return input;
+  }
+};
+
+template <int D>
+inline constexpr auto divisible_by = cli::Action<DivisibleBy<D>{}>{};
+
+// Pipeline:
+constexpr auto chunk_action =
+    cli::conversion::integer<int>
+    | divisible_by<4>
+    | cli::pack::set_once;
+```
+
+### Custom Pack
+
+```cpp
+// Store only the maximum value seen across multiple occurrences.
+template <class T>
+struct StoreMax {
+  template <class Prev>
+  static constexpr bool accepts_input =
+      std::totally_ordered<std::remove_cvref_t<Prev>>;
+
+  template <class Prev>
+  using after_type = void;
+
+  template <class Prev>
+  using storage_type = std::optional<std::remove_cvref_t<Prev>>;
+
+  template <class Prev>
+  auto operator()(cli::ActionCtx<storage_type<Prev>>& ctx,
+                  cli::ActionResult<Prev> input) const
+      -> cli::ActionResult<void> {
+    auto& stored = ctx.arg.get();
+    if (!stored.has_value() || input.value > *stored)
+      stored = input.value;
+    return cli::ActionResult<void>::ok();
+  }
+};
+
+inline constexpr auto store_max = cli::Action<StoreMax<void>{}>{};
+
+// Pipeline:
+constexpr auto latency_action =
+    cli::conversion::integer<int>
+    | cli::validation::positive
+    | store_max;
+```
+
+---
+
+## Utility Suggestions for Custom Actions
+
+Writing the three traits and `operator()` from scratch is mechanical. The
+patterns below reduce boilerplate.
+
+### `PassThrough<Fn>` — Validation Without Boilerplate
+
+Wrap a predicate in a `PassThrough` helper to get a validation step that
+passes the value through when `fn(value)` is true:
+
+```cpp
+template <auto Fn, StringLiteral Msg>
+struct PassThrough {
+  template <class Prev>
+  static constexpr bool accepts_input =
+      std::invocable<decltype(Fn), Prev>;
+
+  template <class Prev>
+  using after_type = Prev;
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class Prev>
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<Prev> input) const
+      -> cli::ActionResult<Prev> {
+    if (!Fn(input.value))
+      return cli::ActionResult<Prev>::fail(
+          cli::detail::validation_failed_error(
+              ctx.index,
+              cli::detail::to_error_subject(input.value),
+              std::string(Msg.view())));
+    return input;
+  }
+};
+```
+
+### `MapConversion<Fn>` — Stateless String Mapping
+
+For conversions that are just a function from `string_view → std::optional<T>`:
+
+```cpp
+template <auto Fn>
+struct MapConversion {
+  using output_type = std::remove_cvref_t<
+      decltype(*std::invoke(Fn, std::string_view{}))>;
+
+  template <class Prev>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Prev>, std::string_view>;
+
+  template <class Prev>
+  using after_type = output_type;
+
+  template <class Prev>
+  using storage_type = void;
+
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<std::string_view> input) const
+      -> cli::ActionResult<output_type> {
+    if (auto v = Fn(input.value))
+      return cli::ActionResult<output_type>::ok(std::move(*v));
+    return cli::ActionResult<output_type>::fail(
+        cli::detail::invalid_value_error(
+            cli::ErrorKind::conversion, ctx.index,
+            std::string(input.value)));
+  }
+};
+```
+
+### Error Helper Cheatsheet
+
+| Helper | Error code | Typical use |
+|---|---|---|
+| `detail::invalid_value_error(kind, index, subject, detail)` | `invalid_value` | conversion failure |
+| `detail::validation_failed_error(index, subject, detail)` | `validation_failed` | constraint not satisfied |
+| `detail::duplicate_argument_error(index, subject)` | `duplicate_argument` | pack rejects second occurrence |
+| `detail::invalid_choice_error(index, subject)` | `invalid_choice` | unknown enum/choice value |
+| `detail::to_error_subject(value)` | — | format any value as a subject string |
+
+`ErrorKind::conversion` should be used in conversion steps;
+`ErrorKind::validation` in validation and pack steps.
