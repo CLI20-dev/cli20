@@ -5,15 +5,11 @@
 #include <vector>
 
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
+#include <stdlib.h>
 static auto setenv(const char* name, const char* value, int) -> int {
-  return SetEnvironmentVariableA(name, value) ? 0 : -1;
+  return _putenv_s(name, value);
 }
-static auto unsetenv(const char* name) -> void {
-  SetEnvironmentVariableA(name, nullptr);
-}
+static auto unsetenv(const char* name) -> void { _putenv_s(name, ""); }
 #endif
 
 #include "cli/argument.hh"
