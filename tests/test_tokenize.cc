@@ -521,8 +521,7 @@ TEST(TokenizeCluster, AllFlagsExpanded) {
             (std::vector<std::string_view>{"x", "v", "f"}));
   EXPECT_TRUE(of_type(r, TokenType::value).empty());
   // All three share the same original arg position
-  for (const auto& t : of_type(r, TokenType::option))
-    EXPECT_EQ(t.position, 0u);
+  for (const auto& t : of_type(r, TokenType::option)) EXPECT_EQ(t.position, 0u);
 }
 
 TEST(TokenizeCluster, SingleFlagStillWorks) {
@@ -542,8 +541,7 @@ TEST(TokenizeCluster, FlagsThenValueNextToken) {
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(texts(r, TokenType::option),
             (std::vector<std::string_view>{"x", "o"}));
-  EXPECT_EQ(texts(r, TokenType::value),
-            (std::vector<std::string_view>{"val"}));
+  EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"val"}));
 }
 
 TEST(TokenizeCluster, AttachedValueOnly) {
@@ -566,8 +564,7 @@ TEST(TokenizeCluster, FlagsThenAttachedValue) {
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(texts(r, TokenType::option),
             (std::vector<std::string_view>{"x", "o"}));
-  EXPECT_EQ(texts(r, TokenType::value),
-            (std::vector<std::string_view>{"file"}));
+  EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"file"}));
 }
 
 TEST(TokenizeCluster, UnknownCharInCluster) {

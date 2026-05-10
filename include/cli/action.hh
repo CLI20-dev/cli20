@@ -1453,7 +1453,9 @@ struct InsertOrAssign {
   using after_type = void;
 
   template <class Prev, bool = detail::PairLike<Prev>>
-  struct storage_type_impl { using type = void; };
+  struct storage_type_impl {
+    using type = void;
+  };
   template <class Prev>
   struct storage_type_impl<Prev, true> {
     using type = std::map<
