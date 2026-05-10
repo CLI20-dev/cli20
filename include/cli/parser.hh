@@ -717,6 +717,11 @@ struct Parser {
       }
     });
 
+    if (auto err = apply_env_fallback(result.value); err.has_error()) {
+      result.error = std::move(err.error);
+      return;
+    }
+
     if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
     }
@@ -918,6 +923,26 @@ struct Parser {
               .subject = std::move(subject),
           });
         }
+      }
+    });
+    return res;
+  }
+
+  auto apply_env_fallback(T& val) -> ActionResult<void> {
+    ActionResult<void> res = ActionResult<void>::ok();
+    for_each_field(val, [&](auto& f) -> auto {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, OptionTag>) {
+        if (res.has_error() || f.provided() || f.env.empty()) return;
+        const char* raw = std::getenv(std::string(f.env).c_str());
+        if (!raw) return;
+        f.notify_option_seen();
+        if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
+          res = f.invoke_flag(0);
+        } else {
+          res = f.invoke_action(std::string_view(raw), 0);
+        }
+        if (!res.has_error()) f.fire_on_parse();
       }
     });
     return res;
