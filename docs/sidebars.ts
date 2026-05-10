@@ -4,7 +4,6 @@ const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     'intro',
     'tutorial',
-    'env-fallback',
     {
       type: 'category',
       label: 'Examples',
