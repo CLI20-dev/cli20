@@ -18,6 +18,50 @@ happen in order:
 cli20 calls this sequence an **action pipeline**. A pipeline is a value of type
 `Action<Fn1, Fn2, ...>` where each `Fn` is a constexpr-constructible callable.
 
+### How `Arg<>` validates a pipeline
+
+When a pipeline is passed to `cli::Arg<>`, the `ActionValue` concept calls
+`pipeline.validate()` at compile time. Internally this runs
+`validate_impl<Prev, Steps...>()` as a compile-time recursion:
+
+1. Start with `Prev = std::string_view`.
+2. For each step `Head` in order:
+   - Check `Head::accepts_input<Prev>` — propagate `false` if the type is
+     incompatible.
+   - Compute the next intermediate type: `Head::after_type<Prev>`.
+3. When the **last** step is reached, `Head::storage_type<Prev>` must not be
+   `void` (a `static_assert` enforces this — the pipeline must end with a pack
+   action).
+4. Return `pair<bool, type_identity<StorageType>>`. `Arg<>` extracts
+   `StorageType` and uses it as the field's `value_type`.
+
+The whole traversal is `constexpr` and has zero runtime cost.
+
+### Why the three traits instead of just `operator()`?
+
+For non-terminal steps the traits are redundant in theory:
+- `accepts_input<Prev>` ≈ `std::invocable<Fn, ActionCtx<void>&, ActionResult<Prev>>`
+- `after_type<Prev>` ≈ the `T` in `std::invoke_result_t<...>` → `ActionResult<T>`
+
+For **terminal (pack) steps** the story is different. A generic pack step like
+`pack::set_once` has the signature:
+
+```cpp
+template <class Prev>
+auto operator()(ActionCtx<std::optional<Prev>>&, ActionResult<Prev>) -> ActionResult<void>;
+```
+
+The storage type `std::optional<Prev>` is embedded in the first parameter,
+and `Prev` itself is not known until the pipeline is validated. There is no
+way to extract that type alias without an explicit `storage_type<Prev>`
+declaration — you would need to solve for the template parameter of
+`ActionCtx<?>`, which requires a trait or an additional overload.
+
+So the explicit traits are load-bearing for pack steps. Once `storage_type`
+must exist anyway, keeping `accepts_input` and `after_type` explicit costs
+nothing and gives cleaner static-assert messages than substitution failures
+deep inside `invoke_result_t`.
+
 ### Why type-checking is deferred to `Arg<>`
 
 The `|` operator simply appends a step to the list without checking type
@@ -187,47 +231,68 @@ if (result.has_value()) {
 | `occurrences` | `std::size_t` | how many times this option token has been seen |
 | `invoke_count` | `std::size_t` | how many times this action has been invoked so far |
 
-For pack actions (which need the storage reference) use `ActionCtx<StorageType>`:
+For pack actions (which need the storage reference) use `ActionCtx<StorageType>`,
+initialised with designated initialisers:
 
 ```cpp
 std::optional<int> storage;
-cli::ActionCtx<std::optional<int>> ctx;
-ctx.arg = storage;
+cli::ActionCtx<std::optional<int>> ctx{.arg = std::ref(storage)};
 ```
 
 ---
 
-## Defining a Custom Pipeline as a Callable
+## Defining Custom Pipeline Steps
 
-A pipeline step is any `constexpr`-constructible struct that exposes three
-type-level traits and an `operator()`. The traits let `Action` check pipeline
-compatibility at compile time.
+A pipeline step is a `constexpr`-constructible struct with an `operator()` and
+three type-level traits. cli20 provides two deduction helpers —
+`cli::deduce_accepts_input` and `cli::deduce_after_type` — that derive two of
+those traits from `operator()`, so you only write what is unique to your step.
+
+### Deduction helpers
+
+| Helper | What it deduces |
+|---|---|
+| `cli::deduce_accepts_input<Step, Input>` | `true` when `operator()(ActionCtx<void>, ActionResult<Input>)` is callable |
+| `cli::deduce_after_type<Step, Input>` | `T` extracted from the return type `ActionResult<T>` — **ill-formed** if `deduce_accepts_input` is `false` |
+
+Use them in the three-trait declarations to eliminate boilerplate for
+conversion and validation steps:
 
 ```cpp
-template <class Prev>
-static constexpr bool accepts_input;     // can this step follow a Prev-valued step?
+struct MyStep {
+  template <class Input>
+  static constexpr bool accepts_input =
+      cli::deduce_accepts_input<MyStep, Input>;
 
-template <class Prev>
-using after_type = ...;                  // output type (= Prev for validation steps)
+  template <class Input>
+  using after_type = cli::deduce_after_type<MyStep, Input>;
 
-template <class Prev>
-using storage_type = ...;                // void for non-terminal; storage T for pack
+  template <class Input>
+  using storage_type = void;  // always void for non-terminal steps
+
+  // operator() ...
+};
 ```
+
+`deduce_after_type` is deliberately ill-formed for incompatible inputs (rather
+than silently falling back to `void`).  Because `validate_impl` always checks
+`accepts_input` before accessing `after_type`, this never fires inside a valid
+pipeline — but it gives a clear error if the alias is instantiated incorrectly.
 
 ### Custom Conversion
 
 ```cpp
 // Parses "HH:MM" into std::pair<int,int>.
 struct HHMMConversion {
-  template <class Prev>
+  template <class Input>
   static constexpr bool accepts_input =
-      std::same_as<std::remove_cvref_t<Prev>, std::string_view>;
+      cli::deduce_accepts_input<HHMMConversion, Input>;
 
-  template <class Prev>
-  using after_type = std::pair<int, int>;
+  template <class Input>
+  using after_type = cli::deduce_after_type<HHMMConversion, Input>;
 
-  template <class Prev>
-  using storage_type = void;  // not terminal
+  template <class Input>
+  using storage_type = void;
 
   auto operator()(cli::ActionCtx<void> ctx,
                   cli::ActionResult<std::string_view> input) const
@@ -245,24 +310,24 @@ struct HHMMConversion {
 };
 
 inline constexpr auto hhmm = cli::Action<HHMMConversion{}>{};
-
-// Pipeline:
 constexpr auto schedule_action = hhmm | cli::pack::push;
 ```
 
-### Custom Validation
+Validation steps follow the same pattern — a template `operator()` that passes
+the value through unchanged on success:
 
 ```cpp
 // Reject values not divisible by a compile-time divisor.
 template <int Divisor>
 struct DivisibleBy {
-  template <class Prev>
-  static constexpr bool accepts_input = std::integral<std::remove_cvref_t<Prev>>;
+  template <class Input>
+  static constexpr bool accepts_input =
+      cli::deduce_accepts_input<DivisibleBy, Input>;
 
-  template <class Prev>
-  using after_type = Prev;   // pass value through unchanged
+  template <class Input>
+  using after_type = cli::deduce_after_type<DivisibleBy, Input>;
 
-  template <class Prev>
+  template <class Input>
   using storage_type = void;
 
   template <class Prev>
@@ -282,7 +347,6 @@ struct DivisibleBy {
 template <int D>
 inline constexpr auto divisible_by = cli::Action<DivisibleBy<D>{}>{};
 
-// Pipeline:
 constexpr auto chunk_action =
     cli::conversion::integer<int>
     | divisible_by<4>
@@ -291,13 +355,17 @@ constexpr auto chunk_action =
 
 ### Custom Pack
 
+Pack steps are terminal: they write a value into storage and return
+`ActionResult<void>`. `storage_type` must always be declared explicitly —
+it is the only trait that cannot be derived from `operator()` (see
+[Why `storage_type` cannot be inferred](#why-storage_type-cannot-be-inferred)).
+
 ```cpp
 // Store only the maximum value seen across multiple occurrences.
-template <class T>
 struct StoreMax {
   template <class Prev>
   static constexpr bool accepts_input =
-      std::totally_ordered<std::remove_cvref_t<Prev>>;
+      !std::same_as<std::remove_cvref_t<Prev>, void>;
 
   template <class Prev>
   using after_type = void;
@@ -306,7 +374,7 @@ struct StoreMax {
   using storage_type = std::optional<std::remove_cvref_t<Prev>>;
 
   template <class Prev>
-  auto operator()(cli::ActionCtx<storage_type<Prev>>& ctx,
+  auto operator()(cli::ActionCtx<storage_type<Prev>> ctx,
                   cli::ActionResult<Prev> input) const
       -> cli::ActionResult<void> {
     auto& stored = ctx.arg.get();
@@ -316,38 +384,67 @@ struct StoreMax {
   }
 };
 
-inline constexpr auto store_max = cli::Action<StoreMax<void>{}>{};
+inline constexpr auto store_max = cli::Action<StoreMax{}>{};
 
-// Pipeline:
 constexpr auto latency_action =
     cli::conversion::integer<int>
     | cli::validation::positive
     | store_max;
 ```
 
+### Why `storage_type` cannot be inferred {#why-storage_type-cannot-be-inferred}
+
+`deduce_accepts_input` and `deduce_after_type` work because non-terminal steps
+always take `ActionCtx<void>` — a concrete type that can be used as a probe for
+`std::invocable` / `std::invoke_result_t`.
+
+Pack steps take `ActionCtx<storage_type<Prev>>`. The template argument depends
+on `Prev`, and there is no way to recover `storage_type<Prev>` from the
+parameter type of `operator()` without reverse-engineering a template argument —
+not feasible for generic or constrained operators.  Declaring `storage_type`
+explicitly is the minimal remaining obligation for pack steps.
+
+### Advanced: writing all three traits manually
+
+For cases where the deduction helpers don't fit — e.g. an `operator()` with
+constraints so complex that `std::invocable` gives the wrong answer — write
+all three traits explicitly:
+
+```cpp
+struct MyStep {
+  template <class Prev>
+  static constexpr bool accepts_input = /* condition */;
+
+  template <class Prev>
+  using after_type = /* output type */;
+
+  template <class Prev>
+  using storage_type = void;  // void for non-terminal; storage T for pack
+
+  // operator() ...
+};
+```
+
 ---
 
 ## Utility Suggestions for Custom Actions
 
-Writing the three traits and `operator()` from scratch is mechanical. The
-patterns below reduce boilerplate.
-
 ### `PassThrough<Fn>` — Validation Without Boilerplate
 
-Wrap a predicate in a `PassThrough` helper to get a validation step that
-passes the value through when `fn(value)` is true:
+Use `deduce_accepts_input` / `deduce_after_type` to build a reusable
+predicate-based validation step with no manual trait logic:
 
 ```cpp
 template <auto Fn, StringLiteral Msg>
 struct PassThrough {
-  template <class Prev>
+  template <class Input>
   static constexpr bool accepts_input =
-      std::invocable<decltype(Fn), Prev>;
+      cli::deduce_accepts_input<PassThrough, Input>;
 
-  template <class Prev>
-  using after_type = Prev;
+  template <class Input>
+  using after_type = cli::deduce_after_type<PassThrough, Input>;
 
-  template <class Prev>
+  template <class Input>
   using storage_type = void;
 
   template <class Prev>
@@ -367,7 +464,7 @@ struct PassThrough {
 
 ### `MapConversion<Fn>` — Stateless String Mapping
 
-For conversions that are just a function from `string_view → std::optional<T>`:
+For conversions that are a function from `string_view → std::optional<T>`:
 
 ```cpp
 template <auto Fn>
@@ -375,14 +472,14 @@ struct MapConversion {
   using output_type = std::remove_cvref_t<
       decltype(*std::invoke(Fn, std::string_view{}))>;
 
-  template <class Prev>
+  template <class Input>
   static constexpr bool accepts_input =
-      std::same_as<std::remove_cvref_t<Prev>, std::string_view>;
+      cli::deduce_accepts_input<MapConversion, Input>;
 
-  template <class Prev>
-  using after_type = output_type;
+  template <class Input>
+  using after_type = cli::deduce_after_type<MapConversion, Input>;
 
-  template <class Prev>
+  template <class Input>
   using storage_type = void;
 
   auto operator()(cli::ActionCtx<void> ctx,
