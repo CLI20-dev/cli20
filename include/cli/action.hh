@@ -310,6 +310,21 @@ template <class T>
 concept StringLike = std::same_as<decay_t<T>, std::string> ||
                      std::same_as<decay_t<T>, std::string_view>;
 
+// Lazily extracts the value_type of an ActionResult return type.
+// Falls back to void when Derived is not invocable with ActionCtx<void>&.
+template <
+    class Derived, class Prev,
+    bool = std::invocable<const Derived&, ActionCtx<void>, ActionResult<Prev>>>
+struct SimpleAfterType {
+  using type = void;
+};
+
+template <class Derived, class Prev>
+struct SimpleAfterType<Derived, Prev, true> {
+  using type = typename std::invoke_result_t<const Derived&, ActionCtx<void>,
+                                             ActionResult<Prev>>::value_type;
+};
+
 }  // namespace detail
 
 /**
@@ -341,7 +356,6 @@ template <auto... Fns>
     {
       std::remove_cvref_t<decltype(Fns)>::template accepts_input<void>
     } -> std::convertible_to<bool>;
-    typename std::remove_cvref_t<decltype(Fns)>::template after_type<void>;
     typename std::remove_cvref_t<decltype(Fns)>::template storage_type<void>;
   } && ...)
 struct Action {
@@ -446,6 +460,61 @@ template <auto Fn, auto... Fns>
 constexpr auto operator|(Action<Fns...>, Action<Fn>) {
   return Action<Fns..., Fn>{};
 }
+
+/**
+ * @brief Deduces `accepts_input` for a non-terminal step from its `operator()`.
+ *
+ * Evaluates to `true` when `Step::operator()` is callable with
+ * `ActionCtx<void>` and `ActionResult<Input>`, i.e. the step accepts a
+ * pipeline value of type `Input`.  Use this to avoid writing the
+ * `accepts_input` trait by hand for conversion and validation steps:
+ *
+ * ```cpp
+ * struct MyStep {
+ *   template <class Input>
+ *   static constexpr bool accepts_input =
+ *       cli::deduce_accepts_input<MyStep, Input>;
+ *   // ...
+ * };
+ * ```
+ *
+ * @tparam Step  The action step type.
+ * @tparam Input The pipeline value type to test.
+ */
+template <class Step, class Input>
+inline constexpr bool deduce_accepts_input =
+    std::invocable<const Step&, ActionCtx<void>, ActionResult<Input>>;
+
+/**
+ * @brief Deduces `after_type` for a non-terminal step from its `operator()`.
+ *
+ * Extracts the value type `T` from the `ActionResult<T>` returned by
+ * `Step::operator()(ActionCtx<void>, ActionResult<Input>)`.
+ *
+ * This alias is **ill-formed** when `deduce_accepts_input<Step, Input>` is
+ * `false`, i.e. `operator()` is not callable with `ActionResult<Input>`.
+ * This is intentional: `after_type` is only meaningful for compatible inputs,
+ * and a compile error at the alias instantiation is clearer than a silent
+ * fallback.  Because `validate_impl` always checks `accepts_input` before
+ * accessing `after_type`, the ill-formed case is never reached inside a
+ * well-formed pipeline.
+ *
+ * ```cpp
+ * struct MyStep {
+ *   template <class Input>
+ *   using after_type = cli::deduce_after_type<MyStep, Input>;
+ *   // ...
+ * };
+ * ```
+ *
+ * @tparam Step  The action step type.
+ * @tparam Input The pipeline value type.
+ */
+template <class Step, class Input>
+  requires deduce_accepts_input<Step, Input>
+using deduce_after_type =
+    typename std::invoke_result_t<const Step&, ActionCtx<void>,
+                                  ActionResult<Input>>::value_type;
 
 /**
  * @brief Actions that convert a raw `std::string_view` token to a typed value.

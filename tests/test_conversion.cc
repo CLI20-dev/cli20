@@ -165,3 +165,125 @@ TEST(Conversion, NegatablePrefixInMiddleIsNotStripped) {
   EXPECT_EQ(r.value.name, "lno-to");
   EXPECT_TRUE(r.value.enabled);
 }
+
+// ── SimpleAction / PackAction CRTP helpers ────────────────────────────────
+
+namespace {
+
+// Parses "R,G,B" into std::tuple<int,int,int>.
+struct RGBConversion {
+  template <class Input>
+  static constexpr bool accepts_input =
+      cli::deduce_accepts_input<RGBConversion, Input>;
+
+  template <class Input>
+  using after_type = cli::deduce_after_type<RGBConversion, Input>;
+
+  template <class Input>
+  using storage_type = void;
+
+  auto operator()(cli::ActionCtx<void>,
+                  cli::ActionResult<std::string_view> input) const
+      -> cli::ActionResult<std::tuple<int, int, int>> {
+    auto sv = input.value;
+    auto p1 = sv.find(',');
+    auto p2 = (p1 != sv.npos) ? sv.find(',', p1 + 1) : sv.npos;
+    if (p1 == sv.npos || p2 == sv.npos) {
+      return cli::ActionResult<std::tuple<int, int, int>>::fail(
+          cli::detail::invalid_value_error(cli::ErrorKind::conversion, 0,
+                                           std::string(sv), "expected R,G,B"));
+    }
+    auto to_int = [](std::string_view s) -> int {
+      int v = 0;
+      std::from_chars(s.data(), s.data() + s.size(), v);
+      return v;
+    };
+    return cli::ActionResult<std::tuple<int, int, int>>::ok(std::make_tuple(
+        to_int(sv.substr(0, p1)), to_int(sv.substr(p1 + 1, p2 - p1 - 1)),
+        to_int(sv.substr(p2 + 1))));
+  }
+};
+
+// Stores only the maximum value seen across multiple invocations.
+struct StoreMax {
+  template <class Prev>
+  static constexpr bool accepts_input =
+      !std::same_as<std::remove_cvref_t<Prev>, void>;
+
+  template <class Prev>
+  using after_type = void;
+
+  template <class Prev>
+  using storage_type = std::optional<std::remove_cvref_t<Prev>>;
+
+  template <class Prev>
+  auto operator()(cli::ActionCtx<storage_type<Prev>> ctx,
+                  cli::ActionResult<Prev> input) const
+      -> cli::ActionResult<void> {
+    auto& stored = ctx.arg.get();
+    if (!stored.has_value() || input.value > *stored) {
+      stored = input.value;
+    }
+    return cli::ActionResult<void>::ok();
+  }
+};
+
+// Compile-time trait assertions.
+static_assert(RGBConversion::accepts_input<std::string_view>);
+static_assert(!RGBConversion::accepts_input<int>);
+static_assert(std::same_as<RGBConversion::after_type<std::string_view>,
+                           std::tuple<int, int, int>>);
+static_assert(std::same_as<RGBConversion::storage_type<std::string_view>, void>);
+
+static_assert(StoreMax::accepts_input<int>);
+static_assert(!StoreMax::accepts_input<void>);
+static_assert(std::same_as<StoreMax::after_type<int>, void>);
+static_assert(std::same_as<StoreMax::storage_type<int>, std::optional<int>>);
+
+}  // namespace
+
+TEST(SimpleAction, ConversionTraitsAndInvoke) {
+  cli::ActionCtx<void> c;
+  auto r =
+      RGBConversion{}(c, cli::ActionResult<std::string_view>::ok("10,20,30"));
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(r.value, (std::tuple{10, 20, 30}));
+}
+
+TEST(SimpleAction, ConversionBadInputFails) {
+  cli::ActionCtx<void> c;
+  auto r = RGBConversion{}(c, cli::ActionResult<std::string_view>::ok("bad"));
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error.code, cli::ErrorCode::invalid_value);
+}
+
+TEST(PackAction, StoreMaxKeepsLargest) {
+  std::optional<int> storage;
+  cli::ActionCtx<std::optional<int>> c{.arg = std::ref(storage)};
+
+  StoreMax{}(c, cli::ActionResult<int>::ok(5));
+  StoreMax{}(c, cli::ActionResult<int>::ok(9));
+  StoreMax{}(c, cli::ActionResult<int>::ok(3));
+
+  ASSERT_TRUE(storage.has_value());
+  EXPECT_EQ(*storage, 9);
+}
+
+TEST(SimpleAction, PipelineWithSimpleAndPackActions) {
+  constexpr auto pipeline =
+      cli::Action<RGBConversion{}>{} | cli::Action<StoreMax{}>{};
+
+  std::optional<std::tuple<int, int, int>> storage;
+  cli::ActionCtx<std::optional<std::tuple<int, int, int>>> ctx{
+      .arg = std::ref(storage)};
+
+  auto r1 =
+      pipeline.invoke(ctx, cli::ActionResult<std::string_view>::ok("1,2,3"));
+  ASSERT_TRUE(r1.has_value());
+  auto r2 =
+      pipeline.invoke(ctx, cli::ActionResult<std::string_view>::ok("5,6,7"));
+  ASSERT_TRUE(r2.has_value());
+
+  ASSERT_TRUE(storage.has_value());
+  EXPECT_EQ(*storage, (std::tuple{5, 6, 7}));
+}
