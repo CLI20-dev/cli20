@@ -583,3 +583,77 @@ TEST(TokenizeCluster, MissingValueForLastChar) {
   EXPECT_EQ(r.error.code, ErrorCode::missing_value);
   EXPECT_EQ(r.error.subject, "-o");
 }
+
+TEST(TokenizeCluster, ValueOptionBodyIsValue) {
+  // -ov where -o takes a value and -v is a known flag:
+  // "v" is consumed as the attached value for -o, NOT parsed as flag -v.
+  SpecMap spec{{"-o", kOne}, {"-v", kFlag}};
+  auto r = tokenize({"-ov"}, spec);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::option), (std::vector<std::string_view>{"o"}));
+  EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"v"}));
+}
+
+TEST(TokenizeCluster, AttachedValueNargs2MissingSecond) {
+  // -ofile where -o requires 2 values: first is attached, second is missing.
+  SpecMap spec{{"-o", kTwo}};
+  auto r = tokenize({"-ofile"}, spec);
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error.code, ErrorCode::missing_value);
+  EXPECT_EQ(r.error.subject, "-o");
+}
+
+TEST(TokenizeCluster, GreedyStopsBeforeNextKnownOption) {
+  // -o a -v where -o is one_or_more: greedily takes "a", then stops at known -v.
+  SpecMap spec{{"-o", kOnePlus}, {"-v", kFlag}};
+  auto r = tokenize({"-o", "a", "-v"}, spec);
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"a"}));
+  EXPECT_EQ(texts(r, TokenType::option),
+            (std::vector<std::string_view>{"o", "v"}));
+}
+
+// ---- single dash and negative numbers ------------------------------------
+
+TEST(Tokenize, SingleDashIsPositional) {
+  // A bare "-" has no body after the prefix (size not > prefix size),
+  // so find_prefix returns empty and it is treated as a positional.
+  auto r = tokenize({"-"}, {});
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 1u);
+  EXPECT_EQ(r.tokens[0].type, TokenType::positional);
+  EXPECT_EQ(r.tokens[0].text, "-");
+}
+
+TEST(Tokenize, NegativeNumberConsumedAsOptionValue) {
+  // --name -1: the greedy loop sees "-1" as option-looking but it is not in
+  // the spec and count=0 with min=1, so it is consumed as the value.
+  auto r = tokenize({"--name", "-1"}, {{"--name", kOne}});
+  ASSERT_TRUE(r.has_value());
+  EXPECT_EQ(texts(r, TokenType::value), (std::vector<std::string_view>{"-1"}));
+}
+
+// ---- short option inline separator (-o=val) ------------------------------
+
+TEST(Tokenize, ShortOptionInlineSeparator) {
+  // -o=file uses the same inline-separator path as --opt=val.
+  SpecMap spec{{"-o", kOne}};
+  auto r = tokenize({"-o=file"}, spec);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 2u);
+  EXPECT_EQ(r.tokens[0].type, TokenType::option);
+  EXPECT_EQ(r.tokens[0].text, "o");
+  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+  EXPECT_EQ(r.tokens[1].type, TokenType::value);
+  EXPECT_EQ(r.tokens[1].text, "file");
+}
+
+TEST(Tokenize, ShortOptionInlineEmptyValue) {
+  // -o= produces an empty string value, consistent with --opt= behaviour.
+  SpecMap spec{{"-o", kOne}};
+  auto r = tokenize({"-o="}, spec);
+  ASSERT_TRUE(r.has_value());
+  ASSERT_EQ(r.tokens.size(), 2u);
+  EXPECT_EQ(r.tokens[1].type, TokenType::value);
+  EXPECT_EQ(r.tokens[1].text, "");
+}

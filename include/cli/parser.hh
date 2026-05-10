@@ -259,9 +259,36 @@ inline auto tokenize(std::span<const std::string_view> args,
             push(TokenType::option, char_bare, i, char_prefix);
             if (!is_flag) {
               if (k + 1 < body.size()) {
-                // Attached value: rest of body
+                // First value is attached (rest of body).
                 push(TokenType::value, tok.substr(prefix.size() + k + 1), i);
                 ++i;
+                // Consume additional tokens for nargs > 1.
+                int count = 1;
+                while (i < args.size()) {
+                  const std::string_view next = args[i];
+                  if (next == cfg.end_of_options_separator) break;
+                  if (command_names.contains(std::string(next))) break;
+                  if (nargs.max != -1 && count >= nargs.max) break;
+                  if (!find_prefix(next).empty()) {
+                    const auto next_sep = next.find(sep);
+                    const std::string next_opt{
+                        next_sep != std::string_view::npos
+                            ? next.substr(0, next_sep)
+                            : next};
+                    if (spec_map.contains(next_opt)) break;
+                    if (count >= 1 || nargs.min == 0) break;
+                  }
+                  push(TokenType::value, args[i], i);
+                  ++i;
+                  ++count;
+                }
+                if (count < nargs.min) {
+                  return result.fail(
+                      ErrorCode::missing_value, i, char_full,
+                      std::format("option requires at least {} value(s), but {} "
+                                  "provided",
+                                  nargs.min, count));
+                }
               } else {
                 // Consume next token(s) greedily as values
                 ++i;

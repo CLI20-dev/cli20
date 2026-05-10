@@ -270,3 +270,42 @@ TEST(ParseCluster, FlagsThenValueNextToken) {
   ASSERT_TRUE(result.value.output.value().has_value());
   EXPECT_EQ(*result.value.output.value(), "out.txt");
 }
+
+// ---- cluster with nargs=2 option -------------------------------------------
+
+namespace {
+
+struct ClusterNargs2Args {
+  cli::Flag<"verbose", 'v'> verbose;
+  cli::Flag<"xray", 'x'> xray;
+  cli::ListOption<std::string, "output", 'o', cli::nargs::exactly<2>> output;
+  cli::Positional<std::string, cli::nargs::zero_or_more> files;
+};
+
+}  // namespace
+
+TEST(ParseClusterNargs2, AttachedFirstValueThenNextToken) {
+  // -ofile1 file2 file3  →  output={"file1","file2"}, files={"file3"}
+  auto args = argv({"prog", "-ofile1", "file2", "file3"});
+  auto result = cli::Parser<ClusterNargs2Args>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value.output.value(),
+            (std::vector<std::string>{"file1", "file2"}));
+  EXPECT_EQ(result.value.files.value(),
+            (std::vector<std::string>{"file3"}));
+}
+
+TEST(ParseClusterNargs2, FlagsThenValueNextTokens) {
+  // -vxo file1 file2 file3  →  verbose, xray, output={"file1","file2"}, files={"file3"}
+  auto args = argv({"prog", "-vxo", "file1", "file2", "file3"});
+  auto result = cli::Parser<ClusterNargs2Args>{}.parse(
+      std::span<const std::string_view>(args), 1);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_TRUE(result.value.verbose.value());
+  EXPECT_TRUE(result.value.xray.value());
+  EXPECT_EQ(result.value.output.value(),
+            (std::vector<std::string>{"file1", "file2"}));
+  EXPECT_EQ(result.value.files.value(),
+            (std::vector<std::string>{"file3"}));
+}
