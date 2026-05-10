@@ -68,7 +68,7 @@ TEST(Parse, MissingRequiredOptionFails) {
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
-  EXPECT_EQ(result.error.subject, "count");
+  EXPECT_EQ(result.error.subject, "--count");
 }
 
 TEST(Parse, DuplicateSetOnceFails) {
@@ -102,7 +102,7 @@ TEST(Parse, MissingRequiredSubcommandOptionFailsInsideCommand) {
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
-  EXPECT_EQ(result.error.subject, "threads");
+  EXPECT_EQ(result.error.subject, "--threads");
 }
 
 #ifdef _WIN32
@@ -207,7 +207,7 @@ TEST(ParseWide, MissingRequiredOptionFails) {
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
-  EXPECT_EQ(result.error.subject, "name");
+  EXPECT_EQ(result.error.subject, "--name");
 }
 
 // Free-function parse() overload for wchar_t*.

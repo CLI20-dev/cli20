@@ -16,3 +16,11 @@ export function setupValidationFs(fs: any) {
   // --output requires parent_exists. /tmp gives users a writable parent to try.
   fs.mkdir('/tmp');
 }
+
+export function setupEnvFallbackFs(fs: any) {
+  // --config expects a *.toml path. Pre-create one so users can try it directly.
+  fs.writeFile('/job.toml', '');
+  // /configs/ lets users try paths like configs/prod.toml (parent_exists variant).
+  fs.mkdir('/configs');
+  fs.writeFile('/configs/prod.toml', '');
+}

@@ -104,5 +104,5 @@ TEST(Sugar, RequiredAliasStillEnforcesPresence) {
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
-  EXPECT_EQ(result.error.subject, "port");
+  EXPECT_EQ(result.error.subject, "--port");
 }

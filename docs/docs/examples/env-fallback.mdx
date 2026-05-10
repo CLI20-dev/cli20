@@ -1,0 +1,60 @@
+---
+sidebar_position: 10
+title: 9. Env Fallback
+---
+
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+import {setupEnvFallbackFs} from '@site/src/components/exampleSetups';
+
+# Env Fallback
+
+Options can be populated from environment variables when they are not provided
+on the command line. The `.env` field on any option names the environment
+variable to check. The same type conversion and validation pipeline runs
+regardless of whether the value came from the CLI or the environment.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/env_fallback.cc',
+  }}
+/>
+
+## What This Example Shows
+
+- **`--threads` / `NUM_THREADS`** — an integer option with `range<1, 32>`
+  validation. If `NUM_THREADS` is set in the environment, it is parsed and
+  validated exactly like a CLI argument. A value outside 1–32 is an error.
+- **`--config` / `CONFIG_FILE`** — a string option with `matches<".*\\.toml">`
+  validation. The env value must end in `.toml` or parsing fails.
+- **`--verbose` / `VERBOSE`** — a flag. When the env var is present (any
+  value), the flag is set to `true`.
+- **CLI takes precedence** — if the option is supplied on the command line,
+  the environment variable is ignored.
+
+## Try It
+
+Edit the environment variables in the panel below, then run the program.
+
+<ExamplePlayground
+  name="env_fallback"
+  defaultArgs="build-job"
+  setupFs={setupEnvFallbackFs}
+  initialEnv={{NUM_THREADS: '4', CONFIG_FILE: 'job.toml'}}
+/>
+
+Things to try:
+
+- **Env only** — `build-job` with `NUM_THREADS=4` and `CONFIG_FILE=job.toml` set
+- **CLI overrides env** — `--threads 8 build-job` while `NUM_THREADS=4` is set
+- **Validation via env** — set `NUM_THREADS=99` to see a range error
+- **Bad config name** — set `CONFIG_FILE=settings.json` to see the regex fail
+- **Verbose from env** — add `VERBOSE=1` and run `build-job`
+- **Help** — `--help`
+
+## Related Examples
+
+- [Validation](/docs/examples/validation)
+- [Simple API](/docs/examples/simple-api)
