@@ -1,0 +1,60 @@
+---
+title: Compiler Wrapper
+---
+
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+
+
+# Compiler Wrapper
+
+This example shows two techniques that compilers and build tools commonly need:
+short-cluster flags (`-vv`, `-O2`) and negatable key-value options
+(`-Werror`, `-Wno-unused`, `--feature=lto`, `--feature=no-pgo`).
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/compiler.cc',
+  }}
+/>
+
+## What This Example Shows
+
+**Short-cluster flags** — `-vv` is parsed as two `-v` occurrences, incrementing
+the `verbose` counter. `-O2` passes `2` as the attached value to `optimize`.
+
+**`conversion::negatable<"no-">`** — converts a string token to
+`std::pair<std::string, bool>` by detecting the compile-time prefix:
+
+| Input | Output |
+|---|---|
+| `"error"` | `{"error", true}` |
+| `"no-unused"` | `{"unused", false}` |
+
+**`pack::insert_or_assign`** — stores the pair into a `std::map<std::string, bool>`,
+so later occurrences of the same key overwrite earlier ones.
+
+Combining them gives `-Werror -Wno-unused` → `warnings = {{"error", true}, {"unused", false}}`.
+
+## Try It
+
+<ExamplePlayground
+  name="compiler"
+  defaultArgs="-O2 -vv -Werror -Wno-unused --feature=lto --feature=no-pgo main.cc"
+/>
+
+Things to try:
+
+- **Happy path** — `-O2 -vv -Werror -Wno-unused --feature=lto --feature=no-pgo main.cc`
+- **Cluster flags** — `-vvv main.cc` to see verbosity count 3
+- **Attached value** — `-O3 main.cc` vs `-O 3 main.cc` (both work)
+- **Override** — `-Werror -Wno-error main.cc` to see the last value win (`error = false`)
+- **Out-of-range level** — `-O5 main.cc` to see range validation reject it
+- **Help** — `-h` or `--help`
+
+## Related Examples
+
+- [Advanced](/docs/examples/advanced)
+- [Validation](/docs/examples/validation)
