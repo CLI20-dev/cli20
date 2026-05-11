@@ -404,7 +404,9 @@ struct ArgImpl : public OptionTag {
   using value_type =
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
   ArgImpl() : ArgImpl(ArgParameter<value_type>{}) {}
-  ArgImpl(ArgParameter<value_type> param) : param_(param) {}
+  ArgImpl(ArgParameter<value_type> param)
+      : param_(std::move(param)),
+        value_(param_.default_value.value_or(value_type{})) {}
 
   // Convenience constructor for StoreInto variants (value_type == T*).
   ArgImpl(std::remove_pointer_t<value_type>& ref)
@@ -468,7 +470,7 @@ struct ArgImpl : public OptionTag {
   auto notify_option_seen() -> void { ++occurrence_count_; }
 
   // Called once per value token associated with this option.
-  auto invoke_action(std::string_view text, std::size_t arg_index,
+  auto invoke_action(std::optional<std::string_view> text, std::size_t arg_index,
                      std::size_t occurrence_nargs, std::size_t value_index,
                      bool mark_provided = true) -> ActionResult<void> {
     if (mark_provided) provided_ = true;
@@ -481,43 +483,14 @@ struct ArgImpl : public OptionTag {
         .arg = std::ref(value_),
     };
     ++total_values_;
-    auto invoke_result = [&]() -> auto {
-      if constexpr (decltype(A)::entry_is_optional) {
-        return decltype(A)::invoke(
-            ctx, ActionResult<std::optional<std::string_view>>::ok(
-                     std::optional<std::string_view>{text}));
-      } else {
-        return decltype(A)::invoke(ctx,
-                                   ActionResult<std::string_view>::ok(text));
-      }
-    }();
-    if (invoke_result.has_error()) {
-      return ActionResult<void>::fail(std::move(invoke_result.error));
-    }
-    if (invoke_result.has_value()) value_present_ = true;
-    return ActionResult<void>::ok();
-  }
 
-  // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag(std::size_t arg_index, std::size_t occurrence_nargs,
-                   bool mark_provided = true) -> ActionResult<void> {
-    if (mark_provided) provided_ = true;
-    ActionCtx<value_type> ctx{
-        .index = arg_index,
-        .occurrences = occurrence_count_,
-        .nargs = occurrence_nargs,
-        .value_index = 0,
-        .total_values = total_values_,
-        .arg = std::ref(value_),
-    };
-    auto invoke_result = [&]() -> auto {
-      if constexpr (decltype(A)::entry_is_optional) {
+    auto invoke_result = [&ctx, &text]() -> auto {
+      if constexpr (entry_is_optional) {
         return decltype(A)::invoke(
-            ctx, ActionResult<std::optional<std::string_view>>::ok(
-                     std::optional<std::string_view>{std::nullopt}));
+            ctx, ActionResult<std::optional<std::string_view>>::ok(text));
       } else {
         return decltype(A)::invoke(
-            ctx, ActionResult<std::string_view>::ok(std::string_view{}));
+            ctx, ActionResult<std::string_view>::ok(text.value_or("")));
       }
     }();
     if (invoke_result.has_error()) {
@@ -602,8 +575,10 @@ struct PositionalImpl : public PositionalTag {
   using value_type =
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
 
-  PositionalImpl() = default;
-  PositionalImpl(ArgParameter<value_type> param) : param_(param) {}
+  PositionalImpl() : PositionalImpl(ArgParameter<value_type>{}) {}
+  PositionalImpl(ArgParameter<value_type> param)
+      : value_(param.default_value.value_or(value_type{})),
+        param_(std::move(param)) {}
 
   static constexpr auto nargs = N;
 

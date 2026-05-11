@@ -789,12 +789,23 @@ struct Parser {
 
   // Iterate every field of val, calling fn(field) for each.
   template <class Fn>
-  static auto for_each_field(T& val, Fn fn) -> void {
-    std::apply([&fn](auto&... f) -> auto { (..., fn(f)); }, as_tuple(val));
+  static constexpr void for_each_field(T& val, Fn fn) {
+    auto&& tup = as_tuple(val);
+    [&]<std::size_t... I>(std::index_sequence<I...>)
+        -> auto {
+      (fn(std::get<I>(tup)), ...);
+    }(std::make_index_sequence<
+            std::tuple_size_v<std::remove_reference_t<decltype(tup)>>>{});
   }
+
   template <class Fn>
-  static auto for_each_field(const T& val, Fn fn) -> void {
-    std::apply([&fn](const auto&... f) -> auto { (..., fn(f)); }, as_tuple(val));
+  static constexpr void for_each_field(const T& val, Fn fn) {
+    auto&& tup = as_tuple(val);
+    [&]<std::size_t... I>(std::index_sequence<I...>)
+        -> auto {
+      (fn(std::get<I>(tup)), ...);
+    }(std::make_index_sequence<
+            std::tuple_size_v<std::remove_reference_t<decltype(tup)>>>{});
   }
 
   // Build the option spec-map and command-name set from the field types of val.
@@ -820,8 +831,9 @@ struct Parser {
   }
 
   // Find the option field matching (prefix, bare), notify it, and invoke its
-  // action on each value token.  notify_option_seen() is called once;
-  // invoke_action() (or invoke_flag() for nargs={0,0}) once per value token.
+  // action on each value token. notify_option_seen() is called once;
+  // invoke_action() is called once for flags / missing optional entries, or
+  // once per value token otherwise.
   auto dispatch_option(T& val, std::string_view prefix, std::string_view bare,
                        std::span<const Token> vals, std::size_t first_index,
                        std::size_t option_position) -> ActionResult<void> {
@@ -830,33 +842,37 @@ struct Parser {
     for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag>) {
-        if (found) return;
+        if (found) {
+          return;
+        }
         bool match = false;
-        for (const auto& p : cfg_.option_prefixes)
+        for (const auto& p : cfg_.option_prefixes) {
           if (p == prefix && F::name.view() == bare) {
             match = true;
             break;
           }
+        }
         if (!match && F::short_name != '\0' &&
             cfg_.short_option_prefix == prefix && bare.size() == 1 &&
-            bare[0] == F::short_name)
+            bare[0] == F::short_name) {
           match = true;
-        if (!match) return;
+        }
+        if (!match) {
+          return;
+        }
         found = true;
         f.notify_option_seen();
-        if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag(option_position + first_index, vals.size());
-        } else {
-          if (vals.empty() && F::entry_is_optional) {
-            res = f.invoke_flag(option_position + first_index, 0);
-          } else {
-            const std::size_t nargs = vals.size();
-            for (std::size_t vi = 0; vi < vals.size(); ++vi) {
-              if (res.has_error()) break;
-              res = f.invoke_action(vals[vi].text,
-                                    vals[vi].position + first_index, nargs, vi);
-            }
+        if constexpr (F::entry_is_optional) {
+          res = f.invoke_action(std::nullopt, option_position + first_index,
+                                vals.size(), 0);
+        }
+        const std::size_t nargs = vals.size();
+        for (std::size_t vi = 0; vi < vals.size(); ++vi) {
+          if (res.has_error()) {
+            break;
           }
+          res = f.invoke_action(vals[vi].text, vals[vi].position + first_index,
+                                nargs, vi);
         }
         if (!res.has_error()) f.on_parse();
       }
@@ -978,7 +994,7 @@ struct Parser {
 #endif
         if (!raw) return;
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag(0, 0, false);
+          res = f.invoke_action(std::nullopt, 0, 0, 0, false);
         } else {
           res = f.invoke_action(std::string_view(raw), 0, 1, 0, false);
         }
