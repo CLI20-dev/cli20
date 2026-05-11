@@ -42,13 +42,13 @@ constexpr auto jobs_or_nproc =
     [](cli::ActionCtx<void> ctx,
        cli::ActionResult<std::optional<std::string_view>> input)
     -> cli::ActionResult<int> {
-    if (!input.have_value()) return cli::fail<int>(input.error);
-    if (input.value.has_value()) {
-      return cli::conversion::integer<int>.invoke(
-          ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
-    }
-    return cli::ActionResult<int>::ok(nproc_dummy());
-  };
+  if (!input.have_value()) return cli::fail<int>(input.error);
+  if (input.value.has_value()) {
+    return cli::conversion::integer<int>.invoke(
+        ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
+  }
+  return cli::ActionResult<int>::ok(nproc_dummy());
+};
 
 struct JobsArgs {
   cli::StringOption<"config", 'c'> config{
@@ -64,13 +64,13 @@ struct JobsArgs {
 inline std::vector<std::size_t>* observed_total_values = nullptr;
 
 constexpr auto record_total_values =
-    []<class T>(cli::ActionCtx<void> ctx, cli::ActionResult<T> input)
-    -> cli::ActionResult<T> {
-    if (observed_total_values) {
-      observed_total_values->push_back(ctx.total_values);
-    }
-    return input;
-  };
+    []<class T>(cli::ActionCtx<void> ctx,
+                cli::ActionResult<T> input) -> cli::ActionResult<T> {
+  if (observed_total_values) {
+    observed_total_values->push_back(ctx.total_values);
+  }
+  return input;
+};
 
 struct TotalValuesArgs {
   cli::Arg<"mode", 'm',
@@ -248,8 +248,10 @@ struct UnicodeArgs {
 // ASCII via wide argv — basic sanity check.
 TEST(ParseWide, AsciiRoundtrip) {
   auto args = wide_argv({L"prog", L"--name", L"hello"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.name);
@@ -259,8 +261,10 @@ TEST(ParseWide, AsciiRoundtrip) {
 // Japanese: テスト (U+30C6 U+30B9 U+30C8) — 3-byte UTF-8 sequences.
 TEST(ParseWide, JapaneseOption) {
   auto args = wide_argv({L"prog", L"--name", L"\u30C6\u30B9\u30C8"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.name);
@@ -270,8 +274,10 @@ TEST(ParseWide, JapaneseOption) {
 // Chinese: 你好 (U+4F60 U+597D).
 TEST(ParseWide, ChineseOption) {
   auto args = wide_argv({L"prog", L"--name", L"\u4F60\u597D"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.name);
@@ -281,8 +287,10 @@ TEST(ParseWide, ChineseOption) {
 // Emoji: 😀 (U+1F600) — 4-byte UTF-8 / surrogate pair in UTF-16.
 TEST(ParseWide, EmojiOption) {
   auto args = wide_argv({L"prog", L"--name", L"\U0001F600"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.name);
@@ -293,8 +301,10 @@ TEST(ParseWide, EmojiOption) {
 TEST(ParseWide, UnicodePositionals) {
   auto args = wide_argv(
       {L"prog", L"--name", L"x", L"\u30A2\u30A4\u30A6", L"\u6587\u4EF6"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result.value.files.value(),
@@ -307,8 +317,10 @@ TEST(ParseWide, UnicodePositionals) {
 // Unicode program name is stored correctly.
 TEST(ParseWide, UnicodeProgramName) {
   auto args = wide_argv({L"\u30A2\u30D7\u30EA", L"--name", L"x"});
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
   cli::Parser<UnicodeArgs> parser;
-  auto result = parser.parse(static_cast<int>(args.size()), args.data());
+  auto result = parser.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   // program_name_ is not directly exposed, but parse succeeds without
@@ -318,19 +330,22 @@ TEST(ParseWide, UnicodeProgramName) {
 // Error path: missing required option still works through wide argv.
 TEST(ParseWide, MissingRequiredOptionFails) {
   auto args = wide_argv({L"prog"});
-  auto result = cli::Parser<UnicodeArgs>{}.parse(static_cast<int>(args.size()),
-                                                 args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result =
+      cli::Parser<UnicodeArgs>{}.parse(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
   EXPECT_EQ(result.error.subject, "--name");
 }
 
-// Free-function parse() overload for wchar_t*.
-TEST(ParseWide, FreeFunctionParse) {
+// Free-function parse() works after the explicit UTF-16 to UTF-8 conversion.
+TEST(ParseWide, Utf16ToUtf8WithFreeFunctionParse) {
   auto args = wide_argv({L"prog", L"--name", L"\u30C6\u30B9\u30C8"});
-  auto result =
-      cli::parse<UnicodeArgs>(static_cast<int>(args.size()), args.data());
+  auto argv_utf8 =
+      cli::utf16_to_utf8(static_cast<int>(args.size()), args.data());
+  auto result = cli::parse<UnicodeArgs>(argv_utf8.size(), argv_utf8.data());
 
   ASSERT_TRUE(result.has_value());
   ASSERT_TRUE(result.value.name);

@@ -5,6 +5,7 @@
 #include <format>
 #include <iostream>
 #include <span>
+#include <string>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
@@ -29,22 +30,65 @@ namespace detail {
  * @brief Converts a wide-character string to UTF-8.
  *
  * Uses `WideCharToMultiByte` with code page `CP_UTF8`. Returns an empty string
- * for a null pointer or a zero-length conversion result.
+ * for a null pointer, an empty string, or a conversion failure.
  *
  * @param wide Null-terminated wide-character string, or `nullptr`.
  * @return The UTF-8 encoded equivalent, or `""` on failure.
  */
 inline auto wide_to_utf8(const wchar_t* wide) -> std::string {
   if (!wide) return {};
-  int len =
-      WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr);
+  constexpr DWORD flags = WC_ERR_INVALID_CHARS;
+  int len = WideCharToMultiByte(CP_UTF8, flags, wide, -1, nullptr, 0, nullptr,
+                                nullptr);
   if (len <= 1) return {};
   std::string result(static_cast<std::size_t>(len) - 1, '\0');
-  WideCharToMultiByte(CP_UTF8, 0, wide, -1, result.data(), len, nullptr,
-                      nullptr);
+  const int written = WideCharToMultiByte(CP_UTF8, flags, wide, -1,
+                                          result.data(), len, nullptr, nullptr);
+  if (written != len) return {};
   return result;
 }
 }  // namespace detail
+
+/**
+ * @brief Owns UTF-8 strings converted from a Windows UTF-16 `argv`.
+ *
+ * The pointer array returned by `data()` is compatible with APIs that accept
+ * `char* argv[]`, including `cli::parse(argc, argv)`.
+ */
+struct Utf8Argv {
+  std::vector<std::string> storage;
+  std::vector<char*> pointers;
+
+  [[nodiscard]] auto size() const -> int {
+    return static_cast<int>(pointers.size());
+  }
+
+  [[nodiscard]] auto data() -> char** { return pointers.data(); }
+};
+
+/**
+ * @brief Converts a Windows UTF-16 `argv` to an owned UTF-8 `argv` wrapper.
+ *
+ * This is intentionally separate from parsing. `wmain` entry points can convert
+ * once and then call the ordinary UTF-8 parser overload:
+ *
+ * @code
+ * auto argv_utf8 = cli::utf16_to_utf8(argc, argv);
+ * auto args = cli::parse_or_exit<Args>(argv_utf8.size(), argv_utf8.data());
+ * @endcode
+ */
+inline auto utf16_to_utf8(int argc, wchar_t* argv[]) -> Utf8Argv {
+  Utf8Argv result;
+  result.storage.reserve(static_cast<std::size_t>(argc));
+  result.pointers.reserve(static_cast<std::size_t>(argc));
+  for (int i = 0; i < argc; ++i) {
+    result.storage.emplace_back(detail::wide_to_utf8(argv[i]));
+  }
+  for (std::string& arg : result.storage) {
+    result.pointers.push_back(arg.data());
+  }
+  return result;
+}
 #endif
 
 /**
@@ -487,8 +531,8 @@ struct ParseResult {
  * - `parse(initial, ...)` — pre-initialised variants; useful for `BoundOption` /
  * `on_parse`.
  *
- * On Windows, `wchar_t*` overloads are also provided; they convert arguments to
- * UTF-8 via `detail::wide_to_utf8` before processing.
+ * On Windows, use `cli::utf16_to_utf8(argc, argv)` in `wmain` and pass the
+ * converted UTF-8 argv to the standard `char*` overload.
  *
  * @tparam T The argument specification type (must satisfy `ArgumentSpec`).
  */
@@ -542,43 +586,6 @@ struct Parser {
     return this->parse(std::move(initial),
                        std::span<const std::string_view>(args), 1);
   }
-
-#ifdef _WIN32
-  auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
-    std::vector<std::string> owned;
-    owned.reserve(static_cast<std::size_t>(argc));
-    for (int i = 0; i < argc; ++i) {
-      owned.emplace_back(detail::wide_to_utf8(argv[i]));
-    }
-    std::vector<std::string_view> args;
-    args.reserve(owned.size());
-    for (const auto& s : owned) {
-      args.emplace_back(s);
-    }
-    if (argc > 0) {
-      set_program_name(owned[0]);
-    }
-    return this->parse(std::span<const std::string_view>(args), 1);
-  }
-
-  auto parse(T initial, int argc, wchar_t* argv[]) -> ParseResult<T> {
-    std::vector<std::string> owned;
-    owned.reserve(static_cast<std::size_t>(argc));
-    for (int i = 0; i < argc; ++i) {
-      owned.emplace_back(detail::wide_to_utf8(argv[i]));
-    }
-    std::vector<std::string_view> args;
-    args.reserve(owned.size());
-    for (const auto& s : owned) {
-      args.emplace_back(s);
-    }
-    if (argc > 0) {
-      set_program_name(owned[0]);
-    }
-    return this->parse(std::move(initial),
-                       std::span<const std::string_view>(args), 1);
-  }
-#endif
 
   /**
    * @brief Parses a span of string views, skipping `first_index` elements.
@@ -1062,25 +1069,4 @@ auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
   return std::move(result.value);
 }
 
-#ifdef _WIN32
-template <ArgumentSpec T>
-auto parse(int argc, wchar_t* argv[]) -> ParseResult<T> {
-  return Parser<T>{}.parse(argc, argv);
-}
-
-template <ArgumentSpec T>
-auto parse_or_exit(int argc, wchar_t* argv[], std::ostream& out = std::cout,
-                   std::ostream& err = std::cerr) -> T {
-  auto result = parse<T>(argc, argv);
-  if (!result) {
-    if (const auto message = result.error.message(); !message.empty()) {
-      auto& stream = result.error.use_stdout() ? out : err;
-      stream << message << '\n';
-    }
-    std::exit(result.error.exit_code());
-  }
-  return std::move(result.value);
-}
-#endif
-
-};  // namespace cli
+}  // namespace cli

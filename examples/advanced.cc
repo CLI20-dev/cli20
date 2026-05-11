@@ -18,13 +18,13 @@ constexpr auto jobs_or_nproc =
     [](cli::ActionCtx<void> ctx,
        cli::ActionResult<std::optional<std::string_view>> input)
     -> cli::ActionResult<int> {
-    if (!input.have_value()) return cli::fail<int>(input.error);
-    if (input.value.has_value()) {
-      return cli::conversion::integer<int>.invoke(
-          ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
-    }
-    return cli::ActionResult<int>::ok(nproc_dummy());
-  };
+  if (!input.have_value()) return cli::fail<int>(input.error);
+  if (input.value.has_value()) {
+    return cli::conversion::integer<int>.invoke(
+        ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
+  }
+  return cli::ActionResult<int>::ok(nproc_dummy());
+};
 
 struct Args {
   cli::Description description{

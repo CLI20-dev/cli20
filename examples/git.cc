@@ -166,8 +166,8 @@ auto main(int argc, char* argv[]) -> int {
       return 0;
     }
 
-    const auto& message =
-        args.stash.push.provided() ? args.stash.push.message : args.stash.message;
+    const auto& message = args.stash.push.provided() ? args.stash.push.message
+                                                     : args.stash.message;
     std::cout << "Pushing ";
     if (message) {
       std::cout << '"' << *message << '"';
