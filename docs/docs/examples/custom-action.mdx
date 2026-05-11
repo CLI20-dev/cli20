@@ -1,0 +1,65 @@
+---
+sidebar_position: 7
+title: 7. Custom Action
+---
+
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+
+# Custom Action
+
+This example shows the full struct-based form for defining a reusable action
+pipeline step. Use this pattern when a conversion or validation should become
+part of your program's reusable vocabulary.
+
+For one-off transformations, prefer `cli::action::custom<fn>` as shown in the
+[Advanced](./advanced) example. For reusable actions, define a struct with:
+
+- `accepts_input<Input>`
+- `after_type<Input>`
+- `storage_type<Input>`
+- `operator()(ActionCtx<void>, ActionResult<Input>)`
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/custom_action.cc',
+  }}
+/>
+
+## What This Example Shows
+
+The example defines `HHMMConversion`, a custom conversion from `HH:MM` strings
+to a `MinutesSinceMidnight` value. The action is then wrapped as:
+
+```cpp
+inline constexpr auto hhmm = cli::Action<HHMMConversion{}>{};
+```
+
+and reused by two options:
+
+```cpp
+cli::Arg<"start", 's', hhmm | cli::pack::set_once> start;
+cli::Arg<"end", 'e', hhmm | cli::pack::set_once> end;
+```
+
+## Try It
+
+<ExamplePlayground
+  name="custom_action"
+  defaultArgs="--start 09:30 --end 17:45"
+/>
+
+Things to try:
+
+- **Happy path** — `--start 09:30 --end 17:45`
+- **Invalid format** — `--start 9am --end 17:45`
+- **Out of range** — `--start 24:00 --end 17:45`
+- **Missing required option** — `--start 09:30`
+- **Help** — `-h` or `--help`
+
+## Related Examples
+
+- [Advanced](./advanced)
+- [Validation](./validation)

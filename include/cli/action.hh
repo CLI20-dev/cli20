@@ -1800,13 +1800,22 @@ struct StoreInto {
   }
 };
 
+template <auto Fn, class T>
+concept CallbackInvocable = requires(ActionCtx<std::monostate> ctx, T& value) {
+  { Fn(ctx, value) } -> std::same_as<void>;
+} || requires(T& value) {
+  { Fn(value) } -> std::same_as<void>;
+} || requires {
+  { Fn() } -> std::same_as<void>;
+};
+
 /**
  * @brief Invokes a compile-time callable `Fn` with the parsed value as a
  * terminal action.
  *
  * `Fn` may have any of the following signatures:
- * - `(ActionCtx<void>, T value)` — receives context and value.
- * - `(T value)` — receives value only.
+ * - `(ActionCtx<std::monostate>, T&)` — receives context and value.
+ * - `(T&)` — receives value only.
  * - `()` — receives nothing.
  *
  * Storage type: `std::monostate` (no value is stored; the callback is the only
@@ -1817,7 +1826,7 @@ struct StoreInto {
 template <auto Fn>
 struct Callback {
   template <class Prev>
-  static constexpr bool accepts_input = true;
+  static constexpr bool accepts_input = CallbackInvocable<Fn, Prev>;
 
   template <class Prev>
   using after_type = void;
@@ -1826,12 +1835,13 @@ struct Callback {
   using storage_type = std::monostate;
 
   template <class T>
+    requires CallbackInvocable<Fn, T>
   auto operator()(ActionCtx<std::monostate> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
     if (!input.have_value()) return fail<void>(input.error);
-    if constexpr (requires { Fn(ctx, input.value); }) {
+    if constexpr (requires(T& value) { Fn(ctx, value); }) {
       Fn(ctx, input.value);
-    } else if constexpr (requires { Fn(input.value); }) {
+    } else if constexpr (requires(T& value) { Fn(value); }) {
       Fn(input.value);
     } else {
       Fn();
@@ -1863,6 +1873,48 @@ inline constexpr auto write_to = Action<StoreInto<T>{}>{};
  * @brief Actions that control the parser's control flow (help, exit).
  */
 namespace action {
+
+/**
+ * @brief Wraps a user-defined callable as a non-terminal action pipeline step.
+ *
+ * `Fn` must be invocable as:
+ *
+ * @code
+ * ActionResult<U> Fn(ActionCtx<void> ctx, ActionResult<T> input);
+ * @endcode
+ *
+ * for each input type `T` it supports. The returned `ActionResult<U>` becomes
+ * the input to the next action in the pipeline.
+ *
+ * This is the escape hatch for conversions or transformations that do not fit
+ * the built-in `conversion` or `validation` actions. Unlike `pack::callback`,
+ * `Custom` does not terminate the pipeline and does not store a value; its
+ * `storage_type` is always `void`.
+ *
+ * @tparam Fn A constexpr callable used to transform the current pipeline
+ * value.
+ */
+template <auto Fn>
+struct Custom {
+  template <class Prev>
+  static constexpr bool accepts_input =
+      std::invocable<decltype(Fn), ActionCtx<void>, ActionResult<Prev>>;
+
+  template <class Prev>
+  using after_type =
+      typename std::invoke_result_t<decltype(Fn), ActionCtx<void>,
+                                    ActionResult<Prev>>::value_type;
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class T>
+    requires accepts_input<T>
+  auto operator()(ActionCtx<void> ctx, ActionResult<T> input) const
+      -> ActionResult<after_type<T>> {
+    return Fn(ctx, std::move(input));
+  }
+};
 
 /**
  * @brief Wraps the current value in a `HelpRequested<T>` sentinel type.
@@ -1929,6 +1981,8 @@ struct ExitSuccess {
 
 inline constexpr auto print_help = Action<PrintHelp{}>{};
 inline constexpr auto exit_success = Action<ExitSuccess{}>{};
+template <auto Fn>
+inline constexpr auto custom = Action<Custom<Fn>{}>{};
 
 }  // namespace action
 

@@ -203,3 +203,6 @@ The pipeline is split into three conceptual layers:
 | Packing | `cli::pack::*` | Store the final value into the field |
 
 Use the sugar API for the common case and drop down to `Arg` only when you need stronger validation or custom conversion behavior.
+
+For one-off lambda-based steps and reusable struct-based actions, see
+[Actions & Pipelines: Defining Custom Pipeline Steps](./actions#defining-custom-pipeline-steps).

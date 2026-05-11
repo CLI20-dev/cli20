@@ -1,0 +1,69 @@
+---
+sidebar_position: 8
+title: 8. Git
+---
+
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+import {ExamplePlayground} from '@site/src/components/ExamplePlayground';
+
+# Git
+
+This example mirrors the core behavior of clap's `git.rs` example using cli20's
+typed subcommand model. It demonstrates a command-heavy CLI with nested
+subcommands and optional positional interpretation.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/git.cc',
+  }}
+/>
+
+## What This Example Shows
+
+The top-level command provides:
+
+- `clone <REMOTE>`
+- `diff [base] [head] [path] [--color[=WHEN]]`
+- `push <REMOTE>`
+- `add <PATH>...`
+- `stash`, with nested `push`, `pop`, and `apply`
+
+The `diff` command follows the clap example's shifting behavior:
+
+- no positional args: `stage..worktree`
+- one positional arg: treat it as `path`
+- two positional args: treat them as `base` and `path`
+- three positional args: treat them as `base`, `head`, and `path`
+
+The clap example also allows external subcommands. cli20 does not currently
+model external subcommands, so this example focuses on the declared command
+tree.
+
+## Try It
+
+<ExamplePlayground
+  name="git"
+  defaultArgs="diff main feature src/lib.cc --color=always"
+/>
+
+Things to try:
+
+- **Clone** — `clone https://example.com/repo.git`
+- **Diff defaults** — `diff`
+- **Diff path only** — `diff src/main.cc`
+- **Diff base/path** — `diff main src/main.cc`
+- **Diff full form** — `diff main feature src/main.cc --color=always`
+- **Push** — `push origin`
+- **Add paths** — `add src/main.cc include/cli/action.hh`
+- **Default stash push** — `stash -m wip`
+- **Explicit stash push** — `stash push -m wip`
+- **Stash pop** — `stash pop stash@{0}`
+- **Stash apply** — `stash apply stash@{1}`
+- **Help** — `--help`, `diff --help`, or `stash --help`
+
+## Related Examples
+
+- [Subcommands](./subcommand)
+- [Advanced](./advanced)

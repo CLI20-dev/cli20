@@ -16,19 +16,23 @@ Each one is small enough to copy into a project, but specific enough to answer
    The smallest useful typed-schema CLI: help, a flag, an option, and a required positional.
 2. [Subcommands](./subcommand)  
    Nested commands with their own help output and behavior.
-3. [Validation](./validation)  
+3. [Validation](./validation)
    Parse-time checks for numbers, names, and filesystem arguments.
-4. [Bind](./bind)  
+4. [Bind](./bind)
    Write values directly into existing variables.
-5. [Callback Entry Point](./callback-entry-point)  
+5. [Callback Entry Point](./callback-entry-point)
    Fill application state during parsing, then call the real entry point.
-6. [Advanced](./advanced)  
+6. [Advanced](./advanced)
    Lower-level composition with explicit conversion, validation, and packing steps.
-7. [Compiler Wrapper](./compiler)  
+7. [Custom Action](./custom-action)
+   Full struct-based action definition with `accepts_input`, `after_type`, and `storage_type`.
+8. [Git](./git)
+   A command-heavy CLI inspired by clap's git example, including nested subcommands.
+9. [Compiler Wrapper](./compiler)
    Short-cluster flags, negatable key-value options, and `std::map` storage with `insert_or_assign`.
-8. [Distribution and Platform Examples](./distribution-and-platform)  
+10. [Distribution and Platform Examples](./distribution-and-platform)
    Single-header usage, C++20 modules, and the Windows Unicode sample used by CI.
-9. [Env Fallback](./env-fallback)  
+11. [Env Fallback](./env-fallback)
    Populate options from environment variables with the same conversion and validation pipeline.
 
 ## Building
