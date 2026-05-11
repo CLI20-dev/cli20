@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
@@ -46,7 +47,7 @@ template <class T>
 struct ActionResult {
   using value_type = T;
 
-  enum class State : uint8_t { ok, error, ignore };
+  enum class State : std::uint8_t { ok, error, ignore };
 
   State state{State::ok};
   ParseError error{};
@@ -122,7 +123,7 @@ template <>
 struct ActionResult<void> {
   using value_type = void;
 
-  enum class State : uint8_t { ok, error, ignore };
+  enum class State : std::uint8_t { ok, error, ignore };
 
   State state{State::ok};
   ParseError error{};
@@ -399,8 +400,8 @@ concept StringLike = std::same_as<decay_t<T>, std::string> ||
  *                            | cli::pack::set_once;
  * @endcode
  *
- * At pipeline invocation, if any step returns a failure the error is
- * short-circuited to the end without invoking subsequent steps.
+ * At pipeline invocation, `ignore` short-circuits the remaining steps while
+ * `error` is passed through so downstream steps can preserve or react to it.
  *
  * @tparam Fns Pack of constexpr action objects forming the pipeline.
  */

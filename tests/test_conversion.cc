@@ -13,8 +13,10 @@ namespace {
 
 using cli::ActionCtx;
 using cli::ActionResult;
+using cli::Action;
 using cli::ErrorCode;
 using cli::conversion::Bool;
+using cli::conversion::DefaultMissingValue;
 using cli::conversion::ExistingDirectory;
 using cli::conversion::ExistingFile;
 using cli::conversion::Floating;
@@ -29,6 +31,22 @@ constexpr auto parse_mode = [](std::string_view value) -> std::optional<int> {
     return 2;
   }
   return std::nullopt;
+};
+
+struct IgnoreStep {
+  template <class Prev>
+  static constexpr bool accepts_input = true;
+
+  template <class Prev>
+  using after_type = Prev;
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class T>
+  auto operator()(ActionCtx<void>, ActionResult<T>) const -> ActionResult<T> {
+    return ActionResult<T>::ignore();
+  }
 };
 
 class TempPathGuard {
@@ -164,6 +182,28 @@ TEST(Conversion, NegatablePrefixInMiddleIsNotStripped) {
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(r.value.name, "lno-to");
   EXPECT_TRUE(r.value.enabled);
+}
+
+TEST(Conversion, IgnorePropagatesThroughPipelineWithoutWritingStorage) {
+  bool storage = false;
+  ActionCtx<bool> storage_ctx{.arg = std::ref(storage)};
+
+  constexpr auto pipeline = Action<IgnoreStep{}>{} | cli::pack::mark_present;
+  auto result = decltype(pipeline)::invoke(
+      storage_ctx, ActionResult<std::string_view>::ignore());
+
+  EXPECT_TRUE(result.is_ignored());
+  EXPECT_FALSE(storage);
+}
+
+TEST(Conversion, DefaultMissingValueIgnoresWhenValueWillArriveLater) {
+  ActionCtx<void> missing_ctx{};
+  missing_ctx.nargs = 1;
+  auto result = DefaultMissingValue<"auto">{}(
+      missing_ctx,
+      ActionResult<std::optional<std::string_view>>::ok(std::nullopt));
+
+  EXPECT_TRUE(result.is_ignored());
 }
 
 // ── SimpleAction / PackAction CRTP helpers ────────────────────────────────
