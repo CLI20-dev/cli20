@@ -2,7 +2,8 @@
 // Parses --name and positional file arguments, then echoes each value to
 // stdout in "key=value\n" format so CI scripts can compare output.
 //
-// Build and run via wmain on Windows; falls back to main elsewhere.
+// Windows converts wmain's UTF-16 argv explicitly, then uses the normal UTF-8
+// parser path. Non-Windows builds use main directly.
 
 #include <iostream>
 
@@ -17,10 +18,12 @@ struct Args {
 
 #ifdef _WIN32
 auto wmain(int argc, wchar_t* argv[]) -> int {
+  auto argv_utf8 = cli::utf16_to_utf8(argc, argv);
+  const auto args = cli::parse_or_exit<Args>(argv_utf8.size(), argv_utf8.data());
 #else
 auto main(int argc, char* argv[]) -> int {
-#endif
   const auto args = cli::parse_or_exit<Args>(argc, argv);
+#endif
 
   if (args.name) {
     std::cout << "name=" << *args.name << '\n';
