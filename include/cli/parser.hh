@@ -513,7 +513,7 @@ struct Parser {
       args.emplace_back(argv[i]);
     }
     if (argc > 0) {
-      program_name_ = argv[0];
+      set_program_name(argv[0]);
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
@@ -537,7 +537,7 @@ struct Parser {
       args.emplace_back(argv[i]);
     }
     if (argc > 0) {
-      program_name_ = argv[0];
+      set_program_name(argv[0]);
     }
     return this->parse(std::move(initial),
                        std::span<const std::string_view>(args), 1);
@@ -556,7 +556,7 @@ struct Parser {
       args.emplace_back(s);
     }
     if (argc > 0) {
-      program_name_ = owned[0];
+      set_program_name(owned[0]);
     }
     return this->parse(std::span<const std::string_view>(args), 1);
   }
@@ -573,7 +573,7 @@ struct Parser {
       args.emplace_back(s);
     }
     if (argc > 0) {
-      program_name_ = owned[0];
+      set_program_name(owned[0]);
     }
     return this->parse(std::move(initial),
                        std::span<const std::string_view>(args), 1);
@@ -606,7 +606,7 @@ struct Parser {
   auto parse(std::span<const std::string_view> args,
              std::string_view program_name, std::size_t first_index = 0)
       -> ParseResult<T> {
-    program_name_ = std::string(program_name);
+    set_program_name(std::string(program_name));
     ParseResult<T> result;
     parse_body(result, args, first_index);
     return result;
@@ -644,11 +644,27 @@ struct Parser {
   auto parse(T initial, std::span<const std::string_view> args,
              std::string_view program_name, std::size_t first_index = 0)
       -> ParseResult<T> {
-    program_name_ = std::string(program_name);
+    set_program_name(program_name);
     ParseResult<T> result;
     result.value = std::move(initial);
     parse_body(result, args, first_index);
     return result;
+  }
+
+  /**
+   * @brief Get the program name used in help output.
+   * @return The program name string.
+   */
+  [[nodiscard]] auto program_name() const -> const std::string& {
+    return program_name_;
+  }
+
+  /**
+   * @brief Set the program name used in help output.
+   * @param name The program name string to set.
+   */
+  auto set_program_name(std::string name) -> void {
+    program_name_ = std::move(name);
   }
 
  private:
@@ -714,7 +730,7 @@ struct Parser {
     for_each_field(result.value, [](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, PositionalTag>) {
-        if (f.provided()) f.fire_on_parse();
+        if (f.provided()) f.on_parse();
       }
     });
 
@@ -842,7 +858,7 @@ struct Parser {
             }
           }
         }
-        if (!res.has_error()) f.fire_on_parse();
+        if (!res.has_error()) f.on_parse();
       }
     });
     return res;
@@ -895,8 +911,8 @@ struct Parser {
         found = true;
         f.mark_provided();
         auto sub_parser = Parser<typename F::argument_type>{};
-        sub_parser.program_name_ =
-            std::format("{} {}", program_name_, F::command_name());
+        sub_parser.set_program_name(
+            std::format("{} {}", program_name_, F::command_name()));
         auto sub = sub_parser.parse(args, first_index);
         if (sub.has_error()) {
           res = ActionResult<void>::fail(std::move(sub.error));
@@ -926,7 +942,8 @@ struct Parser {
         if (res.has_error()) {
           return;
         }
-        if (f.presence == Presence::required && !static_cast<bool>(f)) {
+        if (f.get_param().presence == Presence::required &&
+            !static_cast<bool>(f)) {
           std::string subject;
           if constexpr (std::derived_from<F, OptionTag>) {
             subject = "--" + std::string(F::name.view());
@@ -949,15 +966,15 @@ struct Parser {
     for_each_field(val, [&](auto& f) -> auto {
       using F = std::remove_cvref_t<decltype(f)>;
       if constexpr (std::derived_from<F, OptionTag>) {
-        if (res.has_error() || f.provided() || f.env.empty()) return;
+        if (res.has_error() || f.provided() || f.get_param().env.empty()) return;
 #ifdef _WIN32
         char* raw_buf = nullptr;
         std::size_t raw_len = 0;
-        _dupenv_s(&raw_buf, &raw_len, std::string(f.env).c_str());
+        _dupenv_s(&raw_buf, &raw_len, std::string(f.get_param().env).c_str());
         std::unique_ptr<char, decltype(&free)> raw_guard(raw_buf, &free);
         const char* raw = raw_buf;
 #else
-        const char* raw = std::getenv(std::string(f.env).c_str());
+        const char* raw = std::getenv(std::string(f.get_param().env).c_str());
 #endif
         if (!raw) return;
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
@@ -965,7 +982,7 @@ struct Parser {
         } else {
           res = f.invoke_action(std::string_view(raw), 0, 1, 0, false);
         }
-        if (!res.has_error()) f.fire_on_parse();
+        if (!res.has_error()) f.on_parse();
       }
     });
     return res;

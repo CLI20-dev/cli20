@@ -343,9 +343,9 @@ auto render_help_row(Field& field, std::string_view label, std::size_t width)
     -> std::string {
   std::string out = "  ";
   out += label;
-  if (!field.help.empty()) {
+  if (!field.help_text().empty()) {
     out.append(width - label.size() + 2, ' ');
-    append_wrapped_description(out, field.help, width + 4);
+    append_wrapped_description(out, field.help_text(), width + 4);
   } else {
     out += '\n';
   }
@@ -445,11 +445,12 @@ auto format_help_impl(T& value, std::string_view program_name,
               if constexpr (std::derived_from<F, OptionTag>) {
                 auto label = field_usage_label<F>();
                 option_width = std::max(option_width, label.size());
-                option_rows.emplace_back(std::move(label), fields.help);
+                option_rows.emplace_back(std::move(label), fields.help_text());
               } else if constexpr (std::derived_from<F, PositionalTag>) {
                 auto label = field_usage_label<F>();
                 positional_width = std::max(positional_width, label.size());
-                positional_rows.emplace_back(std::move(label), fields.help);
+                positional_rows.emplace_back(std::move(label),
+                                             fields.help_text());
               } else if constexpr (std::derived_from<F, CommandTag>) {
                 auto label = field_usage_label<F>();
                 command_width = std::max(command_width, label.size());
