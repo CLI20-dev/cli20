@@ -14,9 +14,9 @@ struct Args {
 auto main(int argc, char* argv[]) -> int {
   const auto args = cli::parse_or_exit<Args>(argc, argv);
   std::cout << "verbose: " << std::boolalpha << args.verbose.value() << '\n';
-  if (args.config.value()) {
-    std::cout << "config: " << *args.config.value() << '\n';
+  if (args.config) {
+    std::cout << "config: " << *args.config << '\n';
   }
-  std::cout << "input: " << *args.input.value() << '\n';
+  std::cout << "input: " << *args.input << '\n';
   return 0;
 }

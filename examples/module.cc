@@ -24,7 +24,7 @@ struct Args {
 auto main(int argc, char* argv[]) -> int {
   const Args args = cli::parse_or_exit<Args>(argc, argv);
   if (args.port.value()) {
-    std::cout << "port: " << *args.port.value() << '\n';
+    std::cout << "port: " << *args.port << '\n';
   }
   for (const string& file : args.files.value()) {
     std::cout << "file: " << file << '\n';

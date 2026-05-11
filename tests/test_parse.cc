@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -35,6 +36,42 @@ struct ParseArgs {
   cli::Command<"build", BuildArgs> build{{.help = "Build subcommand"}};
 };
 
+auto nproc_dummy() -> int { return 4; }
+
+struct JobsOrNproc {
+  template <class Input>
+  static constexpr bool accepts_input =
+      cli::deduce_accepts_input<JobsOrNproc, Input>;
+
+  template <class Input>
+  using after_type = cli::deduce_after_type<JobsOrNproc, Input>;
+
+  template <class Prev>
+  using storage_type = void;
+
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<std::optional<std::string_view>> input) const
+      -> cli::ActionResult<int> {
+    if (!input.have_value()) return cli::propagate<int>(input);
+    if (input.value.has_value()) {
+      return cli::conversion::integer<int>.invoke(
+          ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
+    }
+    return cli::ActionResult<int>::ok(nproc_dummy());
+  }
+};
+
+struct JobsArgs {
+  cli::StringOption<"config", 'c'> config{
+      {.help = "Config file", .presence = cli::Presence::required}};
+  cli::Arg<"jobs", 'j',
+           cli::Action<JobsOrNproc{}>{} | cli::validation::range<1, 64> |
+               cli::pack::set_once,
+           cli::nargs::zero_or_one>
+      jobs_arg{{.help = "Parallel job count (default 1; -j uses nproc_dummy())",
+                .default_value = 1}};
+};
+
 auto argv(std::initializer_list<std::string_view> values)
     -> std::vector<std::string_view> {
   return {values};
@@ -51,13 +88,13 @@ TEST(Parse, ParsesOptionsPositionalsAndSubcommand) {
 
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result.value.verbose.value());
-  ASSERT_TRUE(result.value.count.value().has_value());
-  EXPECT_EQ(*result.value.count.value(), 2);
+  ASSERT_TRUE(result.value.count);
+  EXPECT_EQ(*result.value.count, 2);
   EXPECT_EQ((result.value.files.value()),
             (std::vector<std::string>{"a.txt", "b.txt"}));
   EXPECT_TRUE(result.value.build.provided());
-  ASSERT_TRUE(result.value.build.threads.value().has_value());
-  EXPECT_EQ(*result.value.build.threads.value(), 4);
+  ASSERT_TRUE(result.value.build.threads);
+  EXPECT_EQ(*result.value.build.threads, 4);
 }
 
 TEST(Parse, MissingRequiredOptionFails) {
@@ -105,6 +142,61 @@ TEST(Parse, MissingRequiredSubcommandOptionFailsInsideCommand) {
   EXPECT_EQ(result.error.subject, "--threads");
 }
 
+TEST(Parse, JobsOptionUsesDefaultValueAndAvoidsDuplicateOnFlagStyleInvocation) {
+  {
+    auto args = argv({"prog", "--config", "flake.lock"});
+    auto result = cli::Parser<JobsArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result.value.config);
+    EXPECT_EQ(*result.value.config, "flake.lock");
+    EXPECT_EQ(result.value.jobs_arg.value(), 1);
+  }
+
+  {
+    auto args = argv({"prog", "-j", "--config", "flake.lock"});
+    auto result = cli::Parser<JobsArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result.value.config);
+    EXPECT_EQ(*result.value.config, "flake.lock");
+    EXPECT_EQ(result.value.jobs_arg.value(), 4);
+  }
+
+  {
+    auto args = argv({"prog", "-j", "6", "--config", "flake.lock"});
+    auto result = cli::Parser<JobsArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result.value.config);
+    EXPECT_EQ(*result.value.config, "flake.lock");
+    EXPECT_EQ(result.value.jobs_arg.value(), 6);
+  }
+}
+
+TEST(Parse, JobsOptionRejectsDuplicateOccurrences) {
+  {
+    auto args = argv({"prog", "-j", "-j", "--config", "flake.lock"});
+    auto result = cli::Parser<JobsArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_error());
+    EXPECT_EQ(result.error.code, cli::ErrorCode::duplicate_argument);
+  }
+
+  {
+    auto args = argv({"prog", "-j", "6", "-j", "--config", "flake.lock"});
+    auto result = cli::Parser<JobsArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_error());
+    EXPECT_EQ(result.error.code, cli::ErrorCode::duplicate_argument);
+  }
+}
+
 #ifdef _WIN32
 namespace {
 
@@ -136,8 +228,8 @@ TEST(ParseWide, AsciiRoundtrip) {
                                                  args.data());
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.name.value().has_value());
-  EXPECT_EQ(*result.value.name.value(), "hello");
+  ASSERT_TRUE(result.value.name);
+  EXPECT_EQ(*result.value.name, "hello");
 }
 
 // Japanese: テスト (U+30C6 U+30B9 U+30C8) — 3-byte UTF-8 sequences.
@@ -147,8 +239,8 @@ TEST(ParseWide, JapaneseOption) {
                                                  args.data());
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.name.value().has_value());
-  EXPECT_EQ(*result.value.name.value(), "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
+  ASSERT_TRUE(result.value.name);
+  EXPECT_EQ(*result.value.name, "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
 }
 
 // Chinese: 你好 (U+4F60 U+597D).
@@ -158,8 +250,8 @@ TEST(ParseWide, ChineseOption) {
                                                  args.data());
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.name.value().has_value());
-  EXPECT_EQ(*result.value.name.value(), "\xe4\xbd\xa0\xe5\xa5\xbd");
+  ASSERT_TRUE(result.value.name);
+  EXPECT_EQ(*result.value.name, "\xe4\xbd\xa0\xe5\xa5\xbd");
 }
 
 // Emoji: 😀 (U+1F600) — 4-byte UTF-8 / surrogate pair in UTF-16.
@@ -169,8 +261,8 @@ TEST(ParseWide, EmojiOption) {
                                                  args.data());
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.name.value().has_value());
-  EXPECT_EQ(*result.value.name.value(), "\xf0\x9f\x98\x80");
+  ASSERT_TRUE(result.value.name);
+  EXPECT_EQ(*result.value.name, "\xf0\x9f\x98\x80");
 }
 
 // Unicode in positional arguments.
@@ -217,8 +309,8 @@ TEST(ParseWide, FreeFunctionParse) {
       cli::parse<UnicodeArgs>(static_cast<int>(args.size()), args.data());
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.name.value().has_value());
-  EXPECT_EQ(*result.value.name.value(), "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
+  ASSERT_TRUE(result.value.name);
+  EXPECT_EQ(*result.value.name, "\xe3\x83\x86\xe3\x82\xb9\xe3\x83\x88");
 }
 #endif
 
@@ -252,8 +344,8 @@ TEST(ParseCluster, AttachedValue) {
   auto result = cli::Parser<ClusterArgs>{}.parse(
       std::span<const std::string_view>(args), 1);
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.output.value().has_value());
-  EXPECT_EQ(*result.value.output.value(), "file");
+  ASSERT_TRUE(result.value.output);
+  EXPECT_EQ(*result.value.output, "file");
 }
 
 TEST(ParseCluster, FlagsThenAttachedValue) {
@@ -264,8 +356,8 @@ TEST(ParseCluster, FlagsThenAttachedValue) {
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result.value.verbose.value());
   EXPECT_TRUE(result.value.xray.value());
-  ASSERT_TRUE(result.value.output.value().has_value());
-  EXPECT_EQ(*result.value.output.value(), "file");
+  ASSERT_TRUE(result.value.output);
+  EXPECT_EQ(*result.value.output, "file");
 }
 
 TEST(ParseCluster, FlagsThenValueNextToken) {
@@ -276,8 +368,8 @@ TEST(ParseCluster, FlagsThenValueNextToken) {
   ASSERT_TRUE(result.has_value());
   EXPECT_TRUE(result.value.verbose.value());
   EXPECT_TRUE(result.value.xray.value());
-  ASSERT_TRUE(result.value.output.value().has_value());
-  EXPECT_EQ(*result.value.output.value(), "out.txt");
+  ASSERT_TRUE(result.value.output);
+  EXPECT_EQ(*result.value.output, "out.txt");
 }
 
 // ---- cluster with nargs=2 option -------------------------------------------
@@ -337,8 +429,10 @@ TEST(ParseEnv, FallsBackToEnvWhenOptionAbsent) {
       cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_OUTPUT");
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.output.value().has_value());
-  EXPECT_EQ(*result.value.output.value(), "from_env");
+  ASSERT_TRUE(result.value.output);
+  EXPECT_EQ(*result.value.output, "from_env");
+  EXPECT_FALSE(result.value.output.provided());
+  EXPECT_EQ(result.value.output.occurrences(), 0U);
 }
 
 TEST(ParseEnv, CliTakesPrecedenceOverEnv) {
@@ -348,8 +442,8 @@ TEST(ParseEnv, CliTakesPrecedenceOverEnv) {
       cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_OUTPUT");
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.output.value().has_value());
-  EXPECT_EQ(*result.value.output.value(), "from_cli");
+  ASSERT_TRUE(result.value.output);
+  EXPECT_EQ(*result.value.output, "from_cli");
 }
 
 TEST(ParseEnv, EnvSatisfiesRequiredOption) {
@@ -363,7 +457,7 @@ TEST(ParseEnv, EnvSatisfiesRequiredOption) {
       std::span<const std::string_view>(args), 1);
   unsetenv("TEST_OUTPUT");
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(*result.value.output.value(), "env_val");
+  EXPECT_EQ(*result.value.output, "env_val");
 }
 
 TEST(ParseEnv, MissingEnvStillFailsForRequired) {
@@ -386,8 +480,10 @@ TEST(ParseEnv, IntOptionFromEnv) {
       cli::Parser<EnvArgs>{}.parse(std::span<const std::string_view>(args), 1);
   unsetenv("TEST_COUNT");
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.count.value().has_value());
-  EXPECT_EQ(*result.value.count.value(), 42);
+  ASSERT_TRUE(result.value.count);
+  EXPECT_EQ(*result.value.count, 42);
+  EXPECT_FALSE(result.value.count.provided());
+  EXPECT_EQ(result.value.count.occurrences(), 0U);
 }
 
 TEST(ParseEnv, FlagFromEnv) {

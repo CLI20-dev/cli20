@@ -48,14 +48,14 @@ For **terminal (pack) steps** the story is different. A generic pack step like
 
 ```cpp
 template <class Prev>
-auto operator()(ActionCtx<std::optional<Prev>>&, ActionResult<Prev>) -> ActionResult<void>;
+auto operator()(ActionCtx<Prev>&, ActionResult<Prev>) -> ActionResult<void>;
 ```
 
-The storage type `std::optional<Prev>` is embedded in the first parameter,
-and `Prev` itself is not known until the pipeline is validated. There is no
-way to extract that type alias without an explicit `storage_type<Prev>`
-declaration — you would need to solve for the template parameter of
-`ActionCtx<?>`, which requires a trait or an additional overload.
+The storage type `Prev` is embedded in the first parameter, and `Prev`
+itself is not known until the pipeline is validated. There is no way to
+extract that type alias without an explicit `storage_type<Prev>` declaration
+— you would need to solve for the template parameter of `ActionCtx<?>`,
+which requires a trait or an additional overload.
 
 So the explicit traits are load-bearing for pack steps. Once `storage_type`
 must exist anyway, keeping `accepts_input` and `after_type` explicit costs
@@ -144,7 +144,7 @@ action.
 
 | Expression | Storage type | Behaviour |
 |---|---|---|
-| `pack::set_once` | `std::optional<T>` | stores once; rejects duplicates |
+| `pack::set_once` | `T` | stores once; rejects duplicates |
 | `pack::push` | `std::vector<T>` | appends on each occurrence |
 | `pack::push_unique` | `std::vector<T>` | appends; rejects duplicate values |
 | `pack::insert` | `std::set<T>` | inserts into set |
@@ -215,16 +215,15 @@ constexpr auto pipeline =
     | cli::validation::range<1, 32>
     | cli::pack::set_once;
 
-// pack::set_once writes into std::optional<int>, so the ctx must carry
-// a reference to that storage.
-std::optional<int> storage;
-cli::ActionCtx<std::optional<int>> ctx{.arg = std::ref(storage)};
+// pack::set_once writes into int, so the ctx must carry a reference to it.
+int storage{};
+cli::ActionCtx<int> ctx{.arg = std::ref(storage)};
 
 auto result = pipeline.invoke(ctx, cli::ActionResult<std::string_view>::ok("8"));
 
 if (result.has_value()) {
     // The packed value is in storage, not in result.
-    // storage == std::optional<int>{8}
+    // storage == 8
 } else {
     // result.error.code, .subject, .detail carry the failure reason
 }
@@ -242,8 +241,8 @@ For pack actions (which need the storage reference) use `ActionCtx<StorageType>`
 initialised with designated initialisers:
 
 ```cpp
-std::optional<int> storage;
-cli::ActionCtx<std::optional<int>> ctx{.arg = std::ref(storage)};
+int storage{};
+cli::ActionCtx<int> ctx{.arg = std::ref(storage)};
 ```
 
 ---

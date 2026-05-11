@@ -44,12 +44,7 @@ auto main(int argc, char* argv[]) -> int {
       .on_parse = [&state](const bool& value) { state.verbose = value; },
   }};
   args.jobs = cli::IntOption<"jobs", 'j'>{{
-      .on_parse =
-          [&state](const std::optional<int>& value) {
-            if (value) {
-              state.jobs = *value;
-            }
-          },
+      .on_parse = [&state](const int& value) { state.jobs = value; },
   }};
   args.includes =
       cli::ListOption<std::string, "include", 'I', cli::nargs::exactly<1>>{{

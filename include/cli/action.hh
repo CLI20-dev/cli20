@@ -2,10 +2,10 @@
 
 #include <algorithm>
 #include <cctype>
-#include <cstdint>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <format>
 #include <functional>
@@ -492,16 +492,16 @@ struct Action {
 
  private:
   template <auto First, auto...>
-  struct first_fn_type {
+  struct FirstFnType {
     using type = std::remove_cvref_t<decltype(First)>;
   };
 
  public:
-  static constexpr bool entry_is_optional = first_fn_type<
+  static constexpr bool entry_is_optional = FirstFnType<
       Fns...>::type::template accepts_input<std::optional<std::string_view>>;
 
   static constexpr auto validate() -> auto {
-    using FirstFn = typename first_fn_type<Fns...>::type;
+    using FirstFn = typename FirstFnType<Fns...>::type;
     if constexpr (FirstFn::template accepts_input<
                       std::optional<std::string_view>>) {
       return validate_impl<std::optional<std::string_view>, Fns...>();
@@ -934,11 +934,11 @@ struct Negatable {
     constexpr std::string_view prefix = Prefix.view();
     const std::string_view val = input.value;
     if (val.starts_with(prefix)) {
-      return ActionResult<NegatableResult>::ok(
-          NegatableResult{std::string(val.substr(prefix.size())), false});
+      return ActionResult<NegatableResult>::ok(NegatableResult{
+          .name = std::string(val.substr(prefix.size())), .enabled = false});
     }
     return ActionResult<NegatableResult>::ok(
-        NegatableResult{std::string(val), true});
+        NegatableResult{.name = std::string(val), .enabled = true});
   }
 };
 
@@ -1559,11 +1559,10 @@ struct RejectDuplicate {
 };
 
 /**
- * @brief Stores the value in `std::optional<T>` and rejects subsequent
- * occurrences.
+ * @brief Stores the input value and rejects subsequent occurrences.
  *
- * Storage type: `std::optional<T>`. Returns `ErrorCode::duplicate_argument` if
- * the option appears more than once. This is the default terminal action for
+ * Storage type: `T`. Returns `ErrorCode::duplicate_argument` if the option
+ * appears more than once. This is the default terminal action for
  * `Option<T, ...>`.
  */
 struct SetOnce {
@@ -1575,13 +1574,13 @@ struct SetOnce {
   using after_type = void;
 
   template <class Prev>
-  using storage_type = std::optional<detail::decay_t<Prev>>;
+  using storage_type = detail::decay_t<Prev>;
 
   template <class T>
-  auto operator()(ActionCtx<std::optional<detail::decay_t<T>>> ctx,
-                  ActionResult<T> input) const -> ActionResult<void> {
+  auto operator()(ActionCtx<detail::decay_t<T>> ctx, ActionResult<T> input) const
+      -> ActionResult<void> {
     if (!input.have_value()) return propagate<void>(input);
-    if (ctx.arg.get().has_value() || ctx.occurrences > 1) {
+    if (ctx.occurrences > 1) {
       return ActionResult<void>::fail(detail::duplicate_argument_error(
           ctx.index, detail::to_error_subject(input.value)));
     }
@@ -1682,18 +1681,18 @@ struct InsertOrAssign {
   using after_type = void;
 
   template <class Prev, bool = detail::PairLike<Prev>>
-  struct storage_type_impl {
+  struct StorageTypeImpl {
     using type = void;
   };
   template <class Prev>
-  struct storage_type_impl<Prev, true> {
+  struct StorageTypeImpl<Prev, true> {
     using type = std::map<
         std::remove_cvref_t<std::tuple_element_t<0, detail::decay_t<Prev>>>,
         std::remove_cvref_t<std::tuple_element_t<1, detail::decay_t<Prev>>>>;
   };
 
   template <class Prev>
-  using storage_type = typename storage_type_impl<Prev>::type;
+  using storage_type = typename StorageTypeImpl<Prev>::type;
 
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const

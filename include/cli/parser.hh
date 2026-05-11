@@ -926,7 +926,7 @@ struct Parser {
         if (res.has_error()) {
           return;
         }
-        if (f.presence == Presence::required && !f.provided()) {
+        if (f.presence == Presence::required && !static_cast<bool>(f)) {
           std::string subject;
           if constexpr (std::derived_from<F, OptionTag>) {
             subject = "--" + std::string(F::name.view());
@@ -960,11 +960,10 @@ struct Parser {
         const char* raw = std::getenv(std::string(f.env).c_str());
 #endif
         if (!raw) return;
-        f.notify_option_seen();
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag(0, 0);
+          res = f.invoke_flag(0, 0, false);
         } else {
-          res = f.invoke_action(std::string_view(raw), 0, 1, 0);
+          res = f.invoke_action(std::string_view(raw), 0, 1, 0, false);
         }
         if (!res.has_error()) f.fire_on_parse();
       }

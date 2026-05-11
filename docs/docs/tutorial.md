@@ -45,11 +45,11 @@ cli::ListOption<std::string, "include", 'I'> include_dirs;
 | `cli::DoubleOption<"ratio">` | `cli::Option<double, "ratio">` |
 | `cli::PathOption<"output">` | `cli::Option<std::filesystem::path, "output">` |
 
-Scalar options store `std::optional<T>`. List options store `std::vector<T>`.
+Scalar options store `T`. List options store `std::vector<T>`.
 
 ```cpp
-if (args.output.value()) {
-  std::cout << "output: " << *args.output.value() << '\n';
+if (args.output) {
+  std::cout << "output: " << *args.output << '\n';
 }
 ```
 
@@ -58,12 +58,12 @@ if (args.output.value()) {
 Positional arguments are matched by position rather than name.
 
 ```cpp
-cli::Positional<std::string>                         src;   // optional<string>
+cli::Positional<std::string>                         src;   // string
 cli::Positional<std::string, cli::nargs::one_or_more> files; // vector<string>
 cli::Positional<int>                                 count;
 ```
 
-If `nargs.max == 1`, the storage type is `std::optional<T>`.  
+If `nargs.max == 1`, the storage type is `T`.  
 If `nargs.max != 1`, the storage type is `std::vector<T>`.
 
 ```cpp
@@ -111,7 +111,7 @@ Check whether the subcommand was provided with `.provided()`:
 
 ```cpp
 if (args.build.provided()) {
-  std::cout << "jobs: " << *args.build.jobs.value() << '\n';
+  std::cout << "jobs: " << *args.build.jobs << '\n';
 }
 ```
 
@@ -158,7 +158,7 @@ auto main(int argc, char* argv[]) -> int {
   }
 
   if (args.build.provided()) {
-    std::cout << "jobs: " << *args.build.jobs.value() << '\n';
+    std::cout << "jobs: " << *args.build.jobs << '\n';
   }
 
   return 0;

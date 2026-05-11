@@ -41,7 +41,7 @@ auto main(int argc, char* argv[]) -> int {
       std::cout << "release: true\n";
     }
     if (args.build.jobs.value()) {
-      std::cout << "jobs: " << *args.build.jobs.value() << '\n';
+      std::cout << "jobs: " << *args.build.jobs << '\n';
     }
     for (const std::string& input : args.build.inputs.value()) {
       std::cout << "input: " << input << '\n';
@@ -50,7 +50,7 @@ auto main(int argc, char* argv[]) -> int {
 
   if (args.publish.provided()) {
     std::cout << "command: publish\n";
-    std::cout << "registry: " << *args.publish.registry.value() << '\n';
+    std::cout << "registry: " << *args.publish.registry << '\n';
     std::cout << "dry-run: " << std::boolalpha << args.publish.dry_run.value()
               << '\n';
   }

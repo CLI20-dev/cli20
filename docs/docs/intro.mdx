@@ -102,11 +102,11 @@ auto main(int argc, char* argv[]) -> int {
     std::cout << "verbose mode on\n";
   }
 
-  if (args.output.value()) {
-    std::cout << "output: " << *args.output.value() << '\n';
+  if (args.output) {
+    std::cout << "output: " << *args.output << '\n';
   }
 
-  std::cout << "input: " << *args.input.value() << '\n';
+  std::cout << "input: " << *args.input << '\n';
   return 0;
 }
 ```
