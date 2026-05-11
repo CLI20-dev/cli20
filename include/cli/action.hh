@@ -107,18 +107,6 @@ struct ActionResult {
   [[nodiscard]] static constexpr auto ignore() -> ActionResult {
     return {.state = State::ignore};
   }
-
-  /**
-   * @brief Propagates the non-ok state to a different type.
-   *
-   * @tparam U The target value type.
-   * @return An `ActionResult<U>` carrying the same error or ignore state.
-   */
-  template <class U>
-  [[nodiscard]] constexpr auto propagate() const -> ActionResult<U> {
-    if (state == State::error) return ActionResult<U>::fail(error);
-    return ActionResult<U>::ignore();
-  }
 };
 
 /**
@@ -191,19 +179,38 @@ struct ActionResult<void> {
   [[nodiscard]] static constexpr auto ignore() -> ActionResult<void> {
     return {.state = State::ignore};
   }
-
-  /**
-   * @brief Propagates the non-ok state to a different type.
-   *
-   * @tparam U The target value type.
-   * @return An `ActionResult<U>` carrying the same error or ignore state.
-   */
-  template <class U>
-  [[nodiscard]] constexpr auto propagate() const -> ActionResult<U> {
-    if (state == State::error) return ActionResult<U>::fail(error);
-    return ActionResult<U>::ignore();
-  }
 };
+
+/**
+ * @brief Propagates a non-ok ActionResult to a different value type.
+ *
+ * This preserves error versus ignore state while adapting the held value type.
+ *
+ * @tparam U The target value type.
+ * @tparam T The source value type.
+ * @param input The source result to propagate.
+ * @return An `ActionResult<U>` carrying the same error or ignore state.
+ */
+template <class U, class T>
+[[nodiscard]] constexpr auto propagate(const ActionResult<T>& input)
+    -> ActionResult<U> {
+  if (input.has_error()) return ActionResult<U>::fail(input.error);
+  return ActionResult<U>::ignore();
+}
+
+/**
+ * @brief Propagates a non-ok ActionResult<void> to a different value type.
+ *
+ * @tparam U The target value type.
+ * @param input The source result to propagate.
+ * @return An `ActionResult<U>` carrying the same error or ignore state.
+ */
+template <class U>
+[[nodiscard]] constexpr auto propagate(const ActionResult<void>& input)
+    -> ActionResult<U> {
+  if (input.has_error()) return ActionResult<U>::fail(input.error);
+  return ActionResult<U>::ignore();
+}
 
 /**
  * @brief Context passed to each action function during pipeline execution.
@@ -618,7 +625,7 @@ struct Integer {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return input.template propagate<T>();
+    if (!input.have_value()) return propagate<T>(input);
     T result{};
     auto r = std::from_chars(input.value.data(),
                              input.value.data() + input.value.size(), result);
@@ -670,7 +677,7 @@ struct Floating {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return input.template propagate<T>();
+    if (!input.have_value()) return propagate<T>(input);
     T result{};
     auto r = std::from_chars(input.value.data(),
                              input.value.data() + input.value.size(), result);
@@ -713,7 +720,7 @@ struct String {
   constexpr auto operator()(ActionCtx<void>,
                             ActionResult<std::string_view> input) const
       -> ActionResult<std::string> {
-    if (!input.have_value()) return input.template propagate<std::string>();
+    if (!input.have_value()) return propagate<std::string>(input);
     return ActionResult<std::string>::ok(std::string(input.value));
   }
 };
@@ -739,7 +746,7 @@ struct Bool {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<bool> {
-    if (!input.have_value()) return input.template propagate<bool>();
+    if (!input.have_value()) return propagate<bool>(input);
     const std::string_view val = input.value;
     if (val == "true" || val == "1") {
       return ActionResult<bool>::ok(true);
@@ -769,8 +776,7 @@ struct Path {
 
   auto operator()(ActionCtx<void>, ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value())
-      return input.template propagate<std::filesystem::path>();
+    if (!input.have_value()) return propagate<std::filesystem::path>(input);
     return ActionResult<std::filesystem::path>::ok(
         std::filesystem::path{input.value});
   }
@@ -796,8 +802,7 @@ struct ExistingFile {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value())
-      return input.template propagate<std::filesystem::path>();
+    if (!input.have_value()) return propagate<std::filesystem::path>(input);
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) ||
         !std::filesystem::is_regular_file(path)) {
@@ -830,8 +835,7 @@ struct ExistingDirectory {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value())
-      return input.template propagate<std::filesystem::path>();
+    if (!input.have_value()) return propagate<std::filesystem::path>(input);
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
       return ActionResult<std::filesystem::path>::fail(
@@ -868,7 +872,7 @@ struct Choice {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return input.template propagate<T>();
+    if (!input.have_value()) return propagate<T>(input);
     if (auto value = Mapper(input.value); value.has_value()) {
       return ActionResult<T>::ok(*std::move(value));
     }
@@ -925,7 +929,7 @@ struct Negatable {
   constexpr auto operator()(ActionCtx<void>,
                             ActionResult<std::string_view> input) const
       -> ActionResult<NegatableResult> {
-    if (!input.have_value()) return input.template propagate<NegatableResult>();
+    if (!input.have_value()) return propagate<NegatableResult>(input);
     constexpr std::string_view prefix = Prefix.view();
     const std::string_view val = input.value;
     if (val.starts_with(prefix)) {
@@ -973,7 +977,7 @@ struct DefaultMissingValue {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::optional<std::string_view>> input) const
       -> ActionResult<std::string_view> {
-    if (!input.have_value()) return input.template propagate<std::string_view>();
+    if (!input.have_value()) return propagate<std::string_view>(input);
     if (input.value.has_value()) {
       // actual value provided: unwrap and pass through
       return ActionResult<std::string_view>::ok(*input.value);
@@ -1457,7 +1461,7 @@ struct SetTrue {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get() = true;
     return ActionResult<void>::ok();
   }
@@ -1477,7 +1481,7 @@ struct SetFalse {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get() = false;
     return ActionResult<void>::ok();
   }
@@ -1497,7 +1501,7 @@ struct Toggle {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get() = !ctx.arg.get();
     return ActionResult<void>::ok();
   }
@@ -1517,7 +1521,7 @@ struct Increment {
   template <class T>
   auto operator()(ActionCtx<std::size_t> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ++ctx.arg.get();
     return ActionResult<void>::ok();
   }
@@ -1575,7 +1579,7 @@ struct SetOnce {
   template <class T>
   auto operator()(ActionCtx<std::optional<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     if (ctx.arg.get().has_value() || ctx.occurrences > 1) {
       return ActionResult<void>::fail(detail::duplicate_argument_error(
           ctx.index, detail::to_error_subject(input.value)));
@@ -1605,7 +1609,7 @@ struct PushUnique {
   template <class T>
   auto operator()(ActionCtx<std::vector<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     auto& values = ctx.arg.get();
     if (std::ranges::find(values, input.value) != values.end()) {
       return ActionResult<void>::fail(detail::duplicate_argument_error(
@@ -1636,7 +1640,7 @@ struct Push {
   template <class T>
   auto operator()(ActionCtx<std::vector<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get().push_back(std::move(input.value));
     return ActionResult<void>::ok();
   }
@@ -1663,7 +1667,7 @@ struct Insert {
   template <class T>
   auto operator()(ActionCtx<std::set<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get().insert(std::move(input.value));
     return ActionResult<void>::ok();
   }
@@ -1693,7 +1697,7 @@ struct InsertOrAssign {
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     auto&& [key, value] = input.value;
     ctx.arg.get().insert_or_assign(key, value);
     return ActionResult<void>::ok();
@@ -1716,7 +1720,7 @@ struct Extend {
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     auto& out = ctx.arg.get();
     for (auto&& value : input.value) {
       out.emplace_back(value);
@@ -1745,7 +1749,7 @@ struct MarkPresent {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     ctx.arg.get() = true;
     return ActionResult<void>::ok();
   }
@@ -1773,7 +1777,7 @@ struct StoreInto {
 
   auto operator()(ActionCtx<T*> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     if (T* ptr = ctx.arg.get(); ptr != nullptr) {
       *ptr = std::move(input.value);
       return ActionResult<void>::ok();
@@ -1812,7 +1816,7 @@ struct Callback {
   template <class T>
   auto operator()(ActionCtx<std::monostate> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return input.template propagate<void>();
+    if (!input.have_value()) return propagate<void>(input);
     if constexpr (requires { Fn(ctx, input.value); }) {
       Fn(ctx, input.value);
     } else if constexpr (requires { Fn(input.value); }) {
@@ -1868,7 +1872,7 @@ struct PrintHelp {
   template <class Arg, class T>
   auto operator()(ActionCtx<Arg>, ActionResult<T> input) const
       -> ActionResult<after_type<T>> {
-    if (!input.have_value()) return input.template propagate<after_type<T>>();
+    if (!input.have_value()) return propagate<after_type<T>>(input);
     return ActionResult<after_type<T>>::ok(
         after_type<T>{.value = std::move(input.value)});
   }

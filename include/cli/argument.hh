@@ -440,6 +440,8 @@ struct ArgImpl : public OptionTag {
   static constexpr auto name = Name;
   static constexpr auto short_name = ShortName;
   static constexpr auto nargs = N;
+  static constexpr bool entry_is_optional =
+      std::remove_cvref_t<decltype(A)>::entry_is_optional;
 
   // Called once when the option token is seen (before processing its values).
   auto notify_option_seen() -> void { ++occurrence_count_; }
@@ -590,6 +592,8 @@ struct PositionalImpl : public PositionalTag {
   value_type default_value{};
 
   static constexpr auto nargs = N;
+  static constexpr bool entry_is_optional =
+      std::remove_cvref_t<decltype(A)>::entry_is_optional;
 
   // Called once per value token for this positional.
   auto invoke_action(std::string_view text, std::size_t arg_index,

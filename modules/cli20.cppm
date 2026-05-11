@@ -68,6 +68,7 @@ using cli::conversion::String;
 using cli::conversion::boolean;
 using cli::conversion::choice;
 using cli::conversion::enumeration;
+using cli::conversion::default_missing_value;
 using cli::conversion::existing_directory;
 using cli::conversion::existing_file;
 using cli::conversion::floating;
