@@ -190,9 +190,9 @@ struct RGBConversion {
     auto p1 = sv.find(',');
     auto p2 = (p1 != sv.npos) ? sv.find(',', p1 + 1) : sv.npos;
     if (p1 == sv.npos || p2 == sv.npos) {
-      return Ret::fail(cli::detail::invalid_value_error(
-          cli::ErrorKind::conversion, ctx.index, std::string(sv),
-          "expected R,G,B"));
+      return Ret::fail(
+          cli::detail::invalid_value_error(cli::ErrorKind::conversion, ctx.index,
+                                           std::string(sv), "expected R,G,B"));
     }
     auto to_int = [&](std::string_view s) -> std::optional<int> {
       int v = 0;
