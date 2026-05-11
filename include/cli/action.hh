@@ -218,11 +218,13 @@ struct ActionResult<void> {
  */
 template <class T = void>
 struct ActionCtx {
-  size_t index{};        ///< Zero-based index into `argv` of the current token.
-  size_t occurrences{};  ///< Number of times the parent option token has appeared.
-  size_t nargs{};        ///< Number of values in this option occurrence.
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t nargs{};     ///< Number of values in this option occurrence.
   size_t value_index{};  ///< 0-based index of current value in this occurrence.
-  size_t total_values{}; ///< Total values across all occurrences of this option.
+  size_t
+      total_values{};  ///< Total values across all occurrences of this option.
   std::reference_wrapper<T>
       arg{};  ///< Reference to the argument's storage value.
 };
@@ -238,11 +240,13 @@ struct ActionCtx {
  */
 template <>
 struct ActionCtx<void> {
-  size_t index{};        ///< Zero-based index into `argv` of the current token.
-  size_t occurrences{};  ///< Number of times the parent option token has appeared.
-  size_t nargs{};        ///< Number of values in this option occurrence.
+  size_t index{};  ///< Zero-based index into `argv` of the current token.
+  size_t
+      occurrences{};  ///< Number of times the parent option token has appeared.
+  size_t nargs{};     ///< Number of values in this option occurrence.
   size_t value_index{};  ///< 0-based index of current value in this occurrence.
-  size_t total_values{}; ///< Total values across all occurrences of this option.
+  size_t
+      total_values{};  ///< Total values across all occurrences of this option.
 
   /**
    * @brief Constructs from a typed `ActionCtx<T>`, copying the counters.
@@ -404,28 +408,27 @@ struct Action {
   template <class Arg, class Result>
   [[nodiscard]]
   static constexpr auto invoke(ActionCtx<Arg>& ctx, ActionResult<Result> input) {
-    return
-        []<auto FnHead, auto... FnTail>(
-            ActionCtx<Arg>& ctx, ActionResult<Result> input) -> decltype(auto) {
-          using Head = std::remove_cvref_t<decltype(FnHead)>;
-          using Next = typename Head::template after_type<Result>;
+    return []<auto FnHead, auto... FnTail>(
+               ActionCtx<Arg>& ctx,
+               ActionResult<Result> input) -> decltype(auto) {
+      using Head = std::remove_cvref_t<decltype(FnHead)>;
+      using Next = typename Head::template after_type<Result>;
 
-          if (input.is_ignored()) {
-            if constexpr (sizeof...(FnTail) == 0) {
-              return ActionResult<Next>::ignore();
-            } else {
-              return Action<FnTail...>::invoke(
-                  ctx, ActionResult<Next>::ignore());
-            }
-          }
+      if (input.is_ignored()) {
+        if constexpr (sizeof...(FnTail) == 0) {
+          return ActionResult<Next>::ignore();
+        } else {
+          return Action<FnTail...>::invoke(ctx, ActionResult<Next>::ignore());
+        }
+      }
 
-          auto next = FnHead(ctx, std::move(input));
-          if constexpr (sizeof...(FnTail) == 0) {
-            return next;
-          } else {
-            return Action<FnTail...>::invoke(ctx, std::move(next));
-          }
-        }.template operator()<Fns...>(ctx, std::move(input));
+      auto next = FnHead(ctx, std::move(input));
+      if constexpr (sizeof...(FnTail) == 0) {
+        return next;
+      } else {
+        return Action<FnTail...>::invoke(ctx, std::move(next));
+      }
+    }.template operator()<Fns...>(ctx, std::move(input));
   }
 
   template <class Arg, class Result>
@@ -442,8 +445,7 @@ struct Action {
         if constexpr (sizeof...(FnTail) == 0) {
           return ActionResult<Next>::ignore();
         } else {
-          return Action<FnTail...>::invoke(
-              ctx, ActionResult<Next>::ignore());
+          return Action<FnTail...>::invoke(ctx, ActionResult<Next>::ignore());
         }
       }
 
@@ -487,9 +489,8 @@ struct Action {
   };
 
  public:
-  static constexpr bool entry_is_optional =
-      first_fn_type<Fns...>::type::template accepts_input<
-          std::optional<std::string_view>>;
+  static constexpr bool entry_is_optional = first_fn_type<
+      Fns...>::type::template accepts_input<std::optional<std::string_view>>;
 
   static constexpr auto validate() -> auto {
     using FirstFn = typename first_fn_type<Fns...>::type;
@@ -768,7 +769,8 @@ struct Path {
 
   auto operator()(ActionCtx<void>, ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return input.template propagate<std::filesystem::path>();
+    if (!input.have_value())
+      return input.template propagate<std::filesystem::path>();
     return ActionResult<std::filesystem::path>::ok(
         std::filesystem::path{input.value});
   }
@@ -794,7 +796,8 @@ struct ExistingFile {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return input.template propagate<std::filesystem::path>();
+    if (!input.have_value())
+      return input.template propagate<std::filesystem::path>();
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) ||
         !std::filesystem::is_regular_file(path)) {
@@ -827,7 +830,8 @@ struct ExistingDirectory {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return input.template propagate<std::filesystem::path>();
+    if (!input.have_value())
+      return input.template propagate<std::filesystem::path>();
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
       return ActionResult<std::filesystem::path>::fail(
@@ -946,7 +950,8 @@ inline constexpr auto existing_directory = Action<ExistingDirectory{}>{};
  * flag (no value provided).
  *
  * Accepts `std::optional<std::string_view>` as input:
- * - If the optional has a value (actual value provided), unwrap and pass through.
+ * - If the optional has a value (actual value provided), unwrap and pass
+ * through.
  * - If nullopt (flag-only invocation) and `nargs == 0`, inject the compile-time
  *   default string.
  * - If nullopt but nargs > 0 (value coming separately), return ignore.
@@ -984,7 +989,8 @@ struct DefaultMissingValue {
 };
 
 template <StringLiteral Value>
-inline constexpr auto default_missing_value = Action<DefaultMissingValue<Value>{}>{};
+inline constexpr auto default_missing_value =
+    Action<DefaultMissingValue<Value>{}>{};
 
 }  // namespace conversion
 
@@ -1886,7 +1892,8 @@ struct ExitSuccess {
   using storage_type = std::monostate;
 
   template <class Arg, class T>
-  auto operator()(ActionCtx<Arg> ctx, ActionResult<T> input) const -> ActionResult<T> {
+  auto operator()(ActionCtx<Arg> ctx, ActionResult<T> input) const
+      -> ActionResult<T> {
     if (!input.have_value()) return input;
     using U = std::remove_cvref_t<T>;
     if constexpr (detail::IsHelpRequested<U>::value) {
