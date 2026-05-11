@@ -197,8 +197,9 @@ template <class T>
 }
 
 /**
- * @brief Helper function for constructing `ActionResult` objects with void
+ * @brief Helper function for constructing a successful `ActionResult<void>`.
  *
+ * @return A successful `ActionResult<void>`.
  */
 [[nodiscard]] constexpr auto ok() -> ActionResult<void> {
   return ActionResult<void>::ok();
@@ -1898,11 +1899,11 @@ template <auto Fn>
 struct Custom {
   template <class Prev>
   static constexpr bool accepts_input =
-      std::invocable<decltype(Fn), ActionCtx<void>, ActionResult<Prev>>;
+      std::invocable<decltype(Fn), ActionCtx<void>&, ActionResult<Prev>>;
 
   template <class Prev>
   using after_type =
-      typename std::invoke_result_t<decltype(Fn), ActionCtx<void>,
+      typename std::invoke_result_t<decltype(Fn), ActionCtx<void>&,
                                     ActionResult<Prev>>::value_type;
 
   template <class Prev>
