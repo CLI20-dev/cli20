@@ -106,3 +106,33 @@ TEST(Sugar, RequiredAliasStillEnforcesPresence) {
   EXPECT_EQ(result.error.code, cli::ErrorCode::missing_required);
   EXPECT_EQ(result.error.subject, "--port");
 }
+
+TEST(Sugar, DefaultMissingValueSupportsFlagAndExplicitValue) {
+  struct DefaultArgs {
+    cli::Arg<"mode",
+             cli::conversion::default_missing_value<"auto"> |
+                 cli::conversion::string | cli::pack::set_once,
+             cli::nargs::zero_or_one>
+        mode{{.help = "Mode", .presence = cli::Presence::optional}};
+  };
+
+  {
+    auto args = argv({"prog", "--mode"});
+    auto result = cli::Parser<DefaultArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result.value.mode.value().has_value());
+    EXPECT_EQ(*result.value.mode.value(), "auto");
+  }
+
+  {
+    auto args = argv({"prog", "--mode", "manual"});
+    auto result = cli::Parser<DefaultArgs>{}.parse(
+        std::span<const std::string_view>(args), 1);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result.value.mode.value().has_value());
+    EXPECT_EQ(*result.value.mode.value(), "manual");
+  }
+}

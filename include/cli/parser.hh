@@ -831,11 +831,15 @@ struct Parser {
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
           res = f.invoke_flag(option_position + first_index, vals.size());
         } else {
-          const std::size_t nargs = vals.size();
-          for (std::size_t vi = 0; vi < vals.size(); ++vi) {
-            if (res.has_error()) break;
-            res = f.invoke_action(vals[vi].text, vals[vi].position + first_index,
-                                  nargs, vi);
+          if (vals.empty() && F::entry_is_optional) {
+            res = f.invoke_flag(option_position + first_index, 0);
+          } else {
+            const std::size_t nargs = vals.size();
+            for (std::size_t vi = 0; vi < vals.size(); ++vi) {
+              if (res.has_error()) break;
+              res = f.invoke_action(vals[vi].text,
+                                    vals[vi].position + first_index, nargs, vi);
+            }
           }
         }
         if (!res.has_error()) f.fire_on_parse();
