@@ -16,6 +16,8 @@ var hierarchy =
     [ "cli::pack::Callback&lt; Fn &gt;", "structcli_1_1pack_1_1Callback.html", null ],
     [ "cli::conversion::Choice&lt; T, Mapper &gt;", "structcli_1_1conversion_1_1Choice.html", null ],
     [ "cli::CommandParameter", "structcli_1_1CommandParameter.html", null ],
+    [ "cli::ConstraintResult", "structcli_1_1ConstraintResult.html", null ],
+    [ "cli::conversion::DefaultMissingValue&lt; Value &gt;", "structcli_1_1conversion_1_1DefaultMissingValue.html", null ],
     [ "cli::conversion::ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", null ],
     [ "cli::conversion::ExistingFile", "structcli_1_1conversion_1_1ExistingFile.html", null ],
     [ "cli::validation::Exists", "structcli_1_1validation_1_1Exists.html", null ],
@@ -71,8 +73,8 @@ var hierarchy =
         [ "cli::PositionalImpl< N, A >", "structcli_1_1PositionalImpl.html", null ]
       ] ]
     ] ],
-    [ "cli::pack::InsertOrAssign::storage_type_impl&lt; Prev, bool &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1storage__type__impl.html", null ],
-    [ "cli::pack::InsertOrAssign::storage_type_impl&lt; Prev, true &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1storage__type__impl_3_01Prev_00_01true_01_4.html", null ],
+    [ "cli::pack::InsertOrAssign::StorageTypeImpl&lt; Prev, bool &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1StorageTypeImpl.html", null ],
+    [ "cli::pack::InsertOrAssign::StorageTypeImpl&lt; Prev, true &gt;", "structcli_1_1pack_1_1InsertOrAssign_1_1StorageTypeImpl_3_01Prev_00_01true_01_4.html", null ],
     [ "cli::pack::StoreInto&lt; T &gt;", "structcli_1_1pack_1_1StoreInto.html", null ],
     [ "cli::conversion::String", "structcli_1_1conversion_1_1String.html", null ],
     [ "cli::StringLiteral&lt; N &gt;", "structcli_1_1StringLiteral.html", null ],

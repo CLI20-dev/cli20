@@ -15,7 +15,7 @@ var argument_8hh =
     [ "cli::Arg", "namespacecli.html#ae00c69a0b5d1bc9699fef3ebfeb4139c", null ],
     [ "cli::BoundDoubleOption", "namespacecli.html#ab420d43bd1f4d0ce6464592a1c015cec", null ],
     [ "cli::BoundIntOption", "namespacecli.html#a5be9253c01c140f51f981f748e082068", null ],
-    [ "cli::BoundOption", "namespacecli.html#a0724688c79b8a9741b65e2baaa074411", null ],
+    [ "cli::BoundOption", "namespacecli.html#a38ccd21299f3c3f0b51f93b04d3f5aad", null ],
     [ "cli::BoundPathOption", "namespacecli.html#a6a46890e92224a51106cb313b8cd5323", null ],
     [ "cli::BoundStringOption", "namespacecli.html#abf24cd3268a638d58fd5e59aa8e3cc96", null ],
     [ "cli::DoubleOption", "namespacecli.html#a21f4d51c5e5100de28d2a1834c6aea05", null ],

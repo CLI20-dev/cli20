@@ -119,7 +119,7 @@ Classes</h2></td></tr>
 <tr class="memitem:RejectDuplicate" id="r_RejectDuplicate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1pack_1_1RejectDuplicate.html">RejectDuplicate</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Passes the value through unchanged, but returns <span class="tt"><a class="el" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97aa1ee06634722f65fb1a4b59c4188d1b9" title="An option or positional that forbids repetition was seen more than once.">ErrorCode::duplicate_argument</a></span> if the option has been seen more than once.  <a href="structcli_1_1pack_1_1RejectDuplicate.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SetOnce" id="r_SetOnce"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1pack_1_1SetOnce.html">SetOnce</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the value in <span class="tt">std::optional&lt;T&gt;</span> and rejects subsequent occurrences.  <a href="structcli_1_1pack_1_1SetOnce.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the input value and rejects subsequent occurrences.  <a href="structcli_1_1pack_1_1SetOnce.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PushUnique" id="r_PushUnique"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1pack_1_1PushUnique.html">PushUnique</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends the value to a <span class="tt">std::vector&lt;T&gt;</span>, rejecting duplicate values.  <a href="structcli_1_1pack_1_1PushUnique.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Push" id="r_Push"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1pack_1_1Push.html">Push</a></td></tr>
@@ -150,15 +150,15 @@ Variables</h2></td></tr>
 <tr class="memitem:aae9bda57f0efac3e615043c32dee4d29" id="r_aae9bda57f0efac3e615043c32dee4d29"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aae9bda57f0efac3e615043c32dee4d29">mark_present</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1MarkPresent.html">MarkPresent</a>{}&gt;{}</td></tr>
 <tr class="memitem:adeecd921f590b75c6ec9bbe147c351e7" id="r_adeecd921f590b75c6ec9bbe147c351e7"><td class="memTemplParams" colspan="2">template&lt;auto Fn&gt; </td></tr>
 <tr class="memitem:adeecd921f590b75c6ec9bbe147c351e7 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#adeecd921f590b75c6ec9bbe147c351e7">callback</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1Callback.html">Callback</a>&lt;Fn&gt;{}&gt;{}</td></tr>
-<tr class="memitem:a20c012c4bae824a6aa6884ba8e4b6219" id="r_a20c012c4bae824a6aa6884ba8e4b6219"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
-<tr class="memitem:a20c012c4bae824a6aa6884ba8e4b6219 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a20c012c4bae824a6aa6884ba8e4b6219">store_into</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1StoreInto.html">StoreInto</a>&lt;T&gt;{}&gt;{}</td></tr>
+<tr class="memitem:acee19f87b01798bfdaed85b875e06421" id="r_acee19f87b01798bfdaed85b875e06421"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
+<tr class="memitem:acee19f87b01798bfdaed85b875e06421 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#acee19f87b01798bfdaed85b875e06421">write_to</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1StoreInto.html">StoreInto</a>&lt;T&gt;{}&gt;{}</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Terminal actions that write the converted (and validated) value into argument storage. </p>
 <p>Pack actions are always the last step in an action pipeline. They define the <span class="tt">storage_type</span> alias that determines the type of the field's <span class="tt">.<a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">value()</a></span> member.</p>
 <p>Example: </p><div class="fragment"><div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> my_action = <a class="code hl_variable" href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer&lt;int&gt;</a> | <a class="code hl_variable" href="#a96845f625a5575985c9d694699a41483">cli::pack::push</a>;</div>
-<div class="ttc" id="anamespacecli_1_1conversion_html_a117568ca281d1a124f5368550ef3600b"><div class="ttname"><a href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer</a></div><div class="ttdeci">constexpr auto integer</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00796">action.hh:796</a></div></div>
-<div class="ttc" id="anamespacecli_1_1pack_html_a96845f625a5575985c9d694699a41483"><div class="ttname"><a href="#a96845f625a5575985c9d694699a41483">cli::pack::push</a></div><div class="ttdeci">constexpr auto push</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01670">action.hh:1670</a></div></div>
+<div class="ttc" id="anamespacecli_1_1conversion_html_a117568ca281d1a124f5368550ef3600b"><div class="ttname"><a href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer</a></div><div class="ttdeci">constexpr auto integer</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00889">action.hh:889</a></div></div>
+<div class="ttc" id="anamespacecli_1_1pack_html_a96845f625a5575985c9d694699a41483"><div class="ttname"><a href="#a96845f625a5575985c9d694699a41483">cli::pack::push</a></div><div class="ttdeci">constexpr auto push</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01838">action.hh:1838</a></div></div>
 </div><!-- fragment --> </div><a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
 <a id="adeecd921f590b75c6ec9bbe147c351e7" name="adeecd921f590b75c6ec9bbe147c351e7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adeecd921f590b75c6ec9bbe147c351e7">&#9670;&#160;</a></span>callback</h2>
@@ -182,7 +182,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01676">1676</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01844">1844</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -206,7 +206,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01666">1666</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01834">1834</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -230,7 +230,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01671">1671</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01839">1839</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -254,7 +254,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01672">1672</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01840">1840</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -278,7 +278,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01674">1674</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01842">1842</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -302,7 +302,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01670">1670</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01838">1838</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -326,7 +326,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01669">1669</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01837">1837</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -350,7 +350,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01668">1668</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01836">1836</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -374,7 +374,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01664">1664</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01832">1832</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -398,7 +398,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01667">1667</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01835">1835</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -422,33 +422,7 @@ template&lt;auto Fn&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01663">1663</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
-
-</div>
-</div>
-<a id="a20c012c4bae824a6aa6884ba8e4b6219" name="a20c012c4bae824a6aa6884ba8e4b6219"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20c012c4bae824a6aa6884ba8e4b6219">&#9670;&#160;</a></span>store_into</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">auto cli::pack::store_into = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1StoreInto.html">StoreInto</a>&lt;T&gt;{}&gt;{}</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01678">1678</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01831">1831</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -472,7 +446,33 @@ template&lt;class T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01665">1665</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01833">1833</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="acee19f87b01798bfdaed85b875e06421" name="acee19f87b01798bfdaed85b875e06421"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acee19f87b01798bfdaed85b875e06421">&#9670;&#160;</a></span>write_to</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::pack::write_to = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1pack_1_1StoreInto.html">StoreInto</a>&lt;T&gt;{}&gt;{}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01846">1846</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

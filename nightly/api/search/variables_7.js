@@ -6,7 +6,6 @@ var searchData=
   ['insert_3',['insert',['../namespacecli_1_1pack.html#a727e12c2519525ff1732452df0925d48',1,'cli::pack']]],
   ['insert_5for_5fassign_4',['insert_or_assign',['../namespacecli_1_1pack.html#abdbe05c4c6224e85a6a3d3b22242bde2',1,'cli::pack']]],
   ['integer_5',['integer',['../namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b',1,'cli::conversion']]],
-  ['invoke_5fcount_6',['invoke_count',['../structcli_1_1ActionCtx.html#a12469af231ff62a7cd9e0adc3fd1935e',1,'cli::ActionCtx::invoke_count'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a125fd503226b0e3446a2fa4270265eaa',1,'cli::ActionCtx&lt; void &gt;::invoke_count']]],
-  ['is_5fdirectory_7',['is_directory',['../namespacecli_1_1validation.html#ac481457a5a7bd76427a3186bc9850cff',1,'cli::validation']]],
-  ['is_5fregular_5ffile_8',['is_regular_file',['../namespacecli_1_1validation.html#ab9975e4c6a83ab290a985a0c67db130d',1,'cli::validation']]]
+  ['is_5fdirectory_6',['is_directory',['../namespacecli_1_1validation.html#ac481457a5a7bd76427a3186bc9850cff',1,'cli::validation']]],
+  ['is_5fregular_5ffile_7',['is_regular_file',['../namespacecli_1_1validation.html#ab9975e4c6a83ab290a985a0c67db130d',1,'cli::validation']]]
 ];

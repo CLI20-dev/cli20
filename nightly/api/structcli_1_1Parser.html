@@ -116,12 +116,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a5642897c33fd4f15b1f9c38f341ce346"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses <span class="tt">argc</span>/<span class="tt">argv</span> starting from a pre-initialised argument struct.  <br /></td></tr>
 <tr class="memitem:a56b10c96993538aa1d31af32ac4dfb0f" id="r_a56b10c96993538aa1d31af32ac4dfb0f"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a56b10c96993538aa1d31af32ac4dfb0f">parse</a> (std::span&lt; const std::string_view &gt; args, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
 <tr class="memdesc:a56b10c96993538aa1d31af32ac4dfb0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a span of string views, skipping <span class="tt">first_index</span> elements.  <br /></td></tr>
-<tr class="memitem:a7da45cdeb4b4bfd52c54370fc7abb81d" id="r_a7da45cdeb4b4bfd52c54370fc7abb81d"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a7da45cdeb4b4bfd52c54370fc7abb81d">parse</a> (std::span&lt; const std::string_view &gt; args, std::string_view program_name, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
+<tr class="memitem:a7da45cdeb4b4bfd52c54370fc7abb81d" id="r_a7da45cdeb4b4bfd52c54370fc7abb81d"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a7da45cdeb4b4bfd52c54370fc7abb81d">parse</a> (std::span&lt; const std::string_view &gt; args, std::string_view <a class="el" href="#a1a91cde7e7b6d268c26ab2d09976db6a">program_name</a>, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
 <tr class="memdesc:a7da45cdeb4b4bfd52c54370fc7abb81d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a span with an explicit program name for help output.  <br /></td></tr>
 <tr class="memitem:a2fa0b88c092afc70ec56e4447628af6c" id="r_a2fa0b88c092afc70ec56e4447628af6c"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a2fa0b88c092afc70ec56e4447628af6c">parse</a> (T initial, std::span&lt; const std::string_view &gt; args, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
 <tr class="memdesc:a2fa0b88c092afc70ec56e4447628af6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a span starting from a pre-initialised argument struct.  <br /></td></tr>
-<tr class="memitem:a8f880c458c1355caf5231deed6cc28ff" id="r_a8f880c458c1355caf5231deed6cc28ff"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a8f880c458c1355caf5231deed6cc28ff">parse</a> (T initial, std::span&lt; const std::string_view &gt; args, std::string_view program_name, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
+<tr class="memitem:a8f880c458c1355caf5231deed6cc28ff" id="r_a8f880c458c1355caf5231deed6cc28ff"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a8f880c458c1355caf5231deed6cc28ff">parse</a> (T initial, std::span&lt; const std::string_view &gt; args, std::string_view <a class="el" href="#a1a91cde7e7b6d268c26ab2d09976db6a">program_name</a>, std::size_t first_index=0) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
 <tr class="memdesc:a8f880c458c1355caf5231deed6cc28ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a span with a pre-initialised struct and explicit program name.  <br /></td></tr>
+<tr class="memitem:a1a91cde7e7b6d268c26ab2d09976db6a" id="r_a1a91cde7e7b6d268c26ab2d09976db6a"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a1a91cde7e7b6d268c26ab2d09976db6a">program_name</a> () const -&gt; const std::string &amp;</td></tr>
+<tr class="memdesc:a1a91cde7e7b6d268c26ab2d09976db6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the program name used in help output.  <br /></td></tr>
+<tr class="memitem:a66a6cdaac79ada55d217ba7f98040bc7" id="r_a66a6cdaac79ada55d217ba7f98040bc7"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a66a6cdaac79ada55d217ba7f98040bc7">set_program_name</a> (std::string name) -&gt; void</td></tr>
+<tr class="memdesc:a66a6cdaac79ada55d217ba7f98040bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the program name used in help output.  <br /></td></tr>
 <tr class="memitem:a05f66237cfa5faca93528b9eef939505" id="r_a05f66237cfa5faca93528b9eef939505"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a05f66237cfa5faca93528b9eef939505">format_help</a> (<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode=<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>) -&gt; std::string</td></tr>
 <tr class="memdesc:a05f66237cfa5faca93528b9eef939505"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a help string for the argument specification.  <br /></td></tr>
 <tr class="memitem:a8c5394da44fc1fb0b7fe54e33b8cbbdb" id="r_a8c5394da44fc1fb0b7fe54e33b8cbbdb"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a8c5394da44fc1fb0b7fe54e33b8cbbdb">format_help</a> (<a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string</td></tr>
@@ -141,7 +145,7 @@ struct cli::Parser&lt; T &gt;</div><p>The main parsing engine for a typed argume
 <p><b>Entry points:</b></p><ul>
 <li><span class="tt">parse(argc, argv)</span> — standard C-style interface; sets program name from <span class="tt">argv[0]</span>.</li>
 <li><span class="tt">parse(span, first_index)</span> — span-based interface with optional offset.</li>
-<li><span class="tt">parse(initial, ...)</span> — pre-initialised variants; useful for <span class="tt"><a class="el" href="namespacecli.html#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> / <span class="tt">on_parse</span>.</li>
+<li><span class="tt">parse(initial, ...)</span> — pre-initialised variants; useful for <span class="tt"><a class="el" href="namespacecli.html#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> / <span class="tt">on_parse</span>.</li>
 </ul>
 <p>On Windows, <span class="tt">wchar_t*</span> overloads are also provided; they convert arguments to UTF-8 via <span class="tt">detail::wide_to_utf8</span> before processing.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -151,7 +155,7 @@ struct cli::Parser&lt; T &gt;</div><p>The main parsing engine for a typed argume
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00495">495</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00496">496</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a929913f2ab7a848533b02d428eeb467c" name="a929913f2ab7a848533b02d428eeb467c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a929913f2ab7a848533b02d428eeb467c">&#9670;&#160;</a></span>format_help() <span class="overload">[1/3]</span></h2>
@@ -191,7 +195,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string with all subcommand sections appended. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00757">757</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00783">783</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -229,7 +233,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00737">737</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00763">763</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -261,7 +265,7 @@ template&lt;ArgumentSpec T&gt; </div>
 <p>Generates a help string including recursive subcommand help. </p>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string with all subcommand sections appended. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00746">746</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00772">772</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -304,7 +308,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00508">508</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00509">509</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -347,7 +351,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00590">590</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00591">591</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -389,14 +393,14 @@ template&lt;ArgumentSpec T&gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">args</td><td>The full argument span. </td></tr>
-    <tr><td class="paramname">program_name</td><td>The name to display in usage/help text. </td></tr>
+    <tr><td class="paramname"><a class="el" href="#a1a91cde7e7b6d268c26ab2d09976db6a" title="Get the program name used in help output.">program_name</a></td><td>The name to display in usage/help text. </td></tr>
     <tr><td class="paramname">first_index</td><td>Index of the first argument to parse (default: 0). </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00605">605</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00606">606</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -435,7 +439,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </div><div class="memdoc">
 
 <p>Parses <span class="tt">argc</span>/<span class="tt">argv</span> starting from a pre-initialised argument struct. </p>
-<p>Useful when fields of <span class="tt">T</span> need to be configured before parsing (e.g. <span class="tt"><a class="el" href="namespacecli.html#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> pointer targets or <span class="tt">on_parse</span> callbacks set on the struct).</p>
+<p>Useful when fields of <span class="tt">T</span> need to be configured before parsing (e.g. <span class="tt"><a class="el" href="namespacecli.html#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> pointer targets or <span class="tt">on_parse</span> callbacks set on the struct).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">initial</td><td>The pre-initialised argument struct. </td></tr>
@@ -446,7 +450,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00532">532</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00533">533</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -485,7 +489,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </div><div class="memdoc">
 
 <p>Parses a span starting from a pre-initialised argument struct. </p>
-<p>Useful with <span class="tt"><a class="el" href="namespacecli.html#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> / <span class="tt">on_parse</span> so that pointer targets and callbacks set before this call are preserved.</p>
+<p>Useful with <span class="tt"><a class="el" href="namespacecli.html#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> / <span class="tt">on_parse</span> so that pointer targets and callbacks set before this call are preserved.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">initial</td><td>The pre-initialised argument struct. </td></tr>
@@ -496,7 +500,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00625">625</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00626">626</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -544,14 +548,83 @@ template&lt;ArgumentSpec T&gt; </div>
   <table class="params">
     <tr><td class="paramname">initial</td><td>The pre-initialised argument struct. </td></tr>
     <tr><td class="paramname">args</td><td>The full argument span. </td></tr>
-    <tr><td class="paramname">program_name</td><td>The name to display in usage/help text. </td></tr>
+    <tr><td class="paramname"><a class="el" href="#a1a91cde7e7b6d268c26ab2d09976db6a" title="Get the program name used in help output.">program_name</a></td><td>The name to display in usage/help text. </td></tr>
     <tr><td class="paramname">first_index</td><td>Index of the first argument to parse (default: 0). </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00643">643</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00644">644</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a1a91cde7e7b6d268c26ab2d09976db6a" name="a1a91cde7e7b6d268c26ab2d09976db6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a91cde7e7b6d268c26ab2d09976db6a">&#9670;&#160;</a></span>program_name()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Parser.html">cli::Parser</a>&lt; T &gt;::program_name </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; const std::string &amp;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the program name used in help output. </p>
+<dl class="section return"><dt>Returns</dt><dd>The program name string. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00658">658</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a66a6cdaac79ada55d217ba7f98040bc7" name="a66a6cdaac79ada55d217ba7f98040bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a6cdaac79ada55d217ba7f98040bc7">&#9670;&#160;</a></span>set_program_name()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Parser.html">cli::Parser</a>&lt; T &gt;::set_program_name </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td> -&gt; void</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the program name used in help output. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>The program name string to set. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00666">666</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -580,11 +653,12 @@ template&lt;ArgumentSpec&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00497">497</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00498">498</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<hr/>The documentation for this struct was generated from the following files:<ul>
+<li>include/cli/<a class="el" href="argument_8hh_source.html">argument.hh</a></li>
 <li>include/cli/<a class="el" href="parser_8hh_source.html">parser.hh</a></li>
 </ul>
 </div><!-- contents -->

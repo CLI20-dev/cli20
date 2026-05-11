@@ -121,8 +121,12 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:ae980f8e4315ea71e7e8d853e84a0203b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zero-based index into <span class="tt">argv</span> of the current token.  <br /></td></tr>
 <tr class="memitem:add8875887bb8c0113c76676ae890bc88" id="r_add8875887bb8c0113c76676ae890bc88"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#add8875887bb8c0113c76676ae890bc88">occurrences</a> {}</td></tr>
 <tr class="memdesc:add8875887bb8c0113c76676ae890bc88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of times the parent option token has appeared.  <br /></td></tr>
-<tr class="memitem:a125fd503226b0e3446a2fa4270265eaa" id="r_a125fd503226b0e3446a2fa4270265eaa"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#a125fd503226b0e3446a2fa4270265eaa">invoke_count</a> {}</td></tr>
-<tr class="memdesc:a125fd503226b0e3446a2fa4270265eaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of times this action has been invoked for the current option.  <br /></td></tr>
+<tr class="memitem:a6376431030c1f0074f7056fd223ae202" id="r_a6376431030c1f0074f7056fd223ae202"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#a6376431030c1f0074f7056fd223ae202">nargs</a> {}</td></tr>
+<tr class="memdesc:a6376431030c1f0074f7056fd223ae202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of values in this option occurrence.  <br /></td></tr>
+<tr class="memitem:a7b9b06332cc5e47ad1de2846079d3f12" id="r_a7b9b06332cc5e47ad1de2846079d3f12"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#a7b9b06332cc5e47ad1de2846079d3f12">value_index</a> {}</td></tr>
+<tr class="memdesc:a7b9b06332cc5e47ad1de2846079d3f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">0-based index of current value in this occurrence.  <br /></td></tr>
+<tr class="memitem:a1f812bf1c2893516589dc1fca7cc228c" id="r_a1f812bf1c2893516589dc1fca7cc228c"><td class="memItemLeft">size_t&#160;</td><td class="memItemRight"><a class="el" href="#a1f812bf1c2893516589dc1fca7cc228c">total_values</a> {}</td></tr>
+<tr class="memdesc:a1f812bf1c2893516589dc1fca7cc228c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total values across all occurrences of this option.  <br /></td></tr>
 <tr class="memitem:af3a22047c2a588ecf44fbfbacedaac55" id="r_af3a22047c2a588ecf44fbfbacedaac55"><td class="memItemLeft">std::reference_wrapper&lt; void &gt;&#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ActionCtx.html#af3a22047c2a588ecf44fbfbacedaac55">arg</a></td></tr>
 <tr class="memdesc:af3a22047c2a588ecf44fbfbacedaac55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the argument's storage value.  <br /></td></tr>
 </table>
@@ -130,7 +134,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>Partial specialisation of <span class="tt"><a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a></span> used for intermediate pipeline steps. </p>
 <p>Conversion and validation actions do not have access to the final storage; they receive <span class="tt"><a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a>&lt;void&gt;</span> which carries only the positional counters. This specialisation also provides a converting constructor from <span class="tt"><a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a>&lt;T&gt;</span> so that the parser can downcast when invoking non-terminal actions. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00185">185</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00250">250</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a27013903c89eb7e0ba60e7992df03535" name="a27013903c89eb7e0ba60e7992df03535"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a27013903c89eb7e0ba60e7992df03535">&#9670;&#160;</a></span>ActionCtx() <span class="overload">[1/2]</span></h2>
@@ -171,7 +175,7 @@ template&lt;class T&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00199">199</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00266">266</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -215,7 +219,7 @@ template&lt;class T&gt; </div>
 
 <p>Reference to the argument's storage value. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00172">172</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00237">237</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -233,25 +237,25 @@ template&lt;class T&gt; </div>
 
 <p>Zero-based index into <span class="tt">argv</span> of the current token. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00186">186</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00251">251</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
-<a id="a125fd503226b0e3446a2fa4270265eaa" name="a125fd503226b0e3446a2fa4270265eaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a125fd503226b0e3446a2fa4270265eaa">&#9670;&#160;</a></span>invoke_count</h2>
+<a id="a6376431030c1f0074f7056fd223ae202" name="a6376431030c1f0074f7056fd223ae202"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6376431030c1f0074f7056fd223ae202">&#9670;&#160;</a></span>nargs</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t <a class="el" href="structcli_1_1ActionCtx.html">cli::ActionCtx</a>&lt; void &gt;::invoke_count {}</td>
+          <td class="memname">size_t <a class="el" href="structcli_1_1ActionCtx.html">cli::ActionCtx</a>&lt; void &gt;::nargs {}</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Number of times this action has been invoked for the current option. </p>
+<p>Number of values in this option occurrence. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00189">189</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00254">254</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -269,7 +273,43 @@ template&lt;class T&gt; </div>
 
 <p>Number of times the parent option token has appeared. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00188">188</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00253">253</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="a1f812bf1c2893516589dc1fca7cc228c" name="a1f812bf1c2893516589dc1fca7cc228c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f812bf1c2893516589dc1fca7cc228c">&#9670;&#160;</a></span>total_values</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="structcli_1_1ActionCtx.html">cli::ActionCtx</a>&lt; void &gt;::total_values {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Total values across all occurrences of this option. </p>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00257">257</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="a7b9b06332cc5e47ad1de2846079d3f12" name="a7b9b06332cc5e47ad1de2846079d3f12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b9b06332cc5e47ad1de2846079d3f12">&#9670;&#160;</a></span>value_index</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t <a class="el" href="structcli_1_1ActionCtx.html">cli::ActionCtx</a>&lt; void &gt;::value_index {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>0-based index of current value in this occurrence. </p>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00255">255</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

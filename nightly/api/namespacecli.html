@@ -115,6 +115,8 @@ Namespaces</h2></td></tr>
 <tr class="memdesc:namespacecli_1_1action"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actions that control the parser's control flow (help, exit). <br /></td></tr>
 <tr class="memitem:nargs" id="r_nargs"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html">nargs</a></td></tr>
 <tr class="memdesc:namespacecli_1_1nargs"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predefined <span class="tt"><a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a></span> constants for common value-count patterns. <br /></td></tr>
+<tr class="memitem:constraint" id="r_constraint"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1constraint.html">constraint</a></td></tr>
+<tr class="memdesc:namespacecli_1_1constraint"><td class="mdescLeft">&#160;</td><td class="mdescRight">Post-parse constraint helpers. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -141,6 +143,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag base class for the <span class="tt"><a class="el" href="structcli_1_1Description.html" title="A DescriptionTag field that carries the top-level CLI description.">Description</a></span> field that provides the CLI's help text.  <a href="structcli_1_1DescriptionTag.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Nargs" id="r_Nargs"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Nargs.html">Nargs</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the minimum and maximum number of values an option or positional accepts.  <a href="structcli_1_1Nargs.html#details">More...</a><br /></td></tr>
+<tr class="memitem:Parser" id="r_Parser"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Parser.html">Parser</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main parsing engine for a typed argument specification.  <a href="structcli_1_1Parser.html#details">More...</a><br /></td></tr>
 <tr class="memitem:ArgParameter" id="r_ArgParameter"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ArgParameter.html">ArgParameter</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter bag used when constructing <span class="tt">ArgImpl</span> or <span class="tt"><a class="el" href="structcli_1_1PositionalImpl.html">PositionalImpl</a></span> with named fields.  <a href="structcli_1_1ArgParameter.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PositionalImpl" id="r_PositionalImpl"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1PositionalImpl.html">PositionalImpl</a></td></tr>
@@ -152,6 +156,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A named subcommand that nests another argument specification.  <a href="structcli_1_1Command.html#details">More...</a><br /></td></tr>
 <tr class="memitem:RecurseHelpTag" id="r_RecurseHelpTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag type passed to <span class="tt"><a class="el" href="#ad61be7335428fa47f47d222273e338bb" title="Generates a complete help string for an argument specification.">format_help()</a></span> to request recursive sub-command output.  <a href="structcli_1_1RecurseHelpTag.html#details">More...</a><br /></td></tr>
+<tr class="memitem:ConstraintResult" id="r_ConstraintResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ConstraintResult.html">ConstraintResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result type returned by a <span class="tt">constraints()</span> post-parse hook.  <a href="structcli_1_1ConstraintResult.html#details">More...</a><br /></td></tr>
 <tr class="memitem:ParseError" id="r_ParseError"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ParseError.html">ParseError</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Carries all context about a single parse/validation failure.  <a href="structcli_1_1ParseError.html#details">More...</a><br /></td></tr>
 <tr class="memitem:Token" id="r_Token"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Token.html">Token</a></td></tr>
@@ -162,8 +168,6 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls how <span class="tt"><a class="el" href="#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax.  <a href="structcli_1_1TokenizerConfig.html#details">More...</a><br /></td></tr>
 <tr class="memitem:ParseResult" id="r_ParseResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ParseResult.html">ParseResult</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result returned by <span class="tt"><a class="el" href="structcli_1_1Parser.html#ac88ef2863f9a226be716ae56534a1731" title="Parses standard C-style argc/argv, using argv[0] as the program name.">Parser::parse()</a></span> and the free <span class="tt"><a class="el" href="#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">cli::parse()</a></span> function.  <a href="structcli_1_1ParseResult.html#details">More...</a><br /></td></tr>
-<tr class="memitem:Parser" id="r_Parser"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Parser.html">Parser</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main parsing engine for a typed argument specification.  <a href="structcli_1_1Parser.html#details">More...</a><br /></td></tr>
 <tr class="memitem:StringLiteral" id="r_StringLiteral"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time string type usable as a non-type template parameter.  <a href="structcli_1_1StringLiteral.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -183,27 +187,27 @@ Typedefs</h2></td></tr>
 <tr class="memitem:acf8bcaca8749b9dffa40246ea13153b2" id="r_acf8bcaca8749b9dffa40246ea13153b2"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:acf8bcaca8749b9dffa40246ea13153b2 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#acf8bcaca8749b9dffa40246ea13153b2">Flag</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, <a class="el" href="namespacecli_1_1pack.html#af3260ecdd5ae6a15a49ac972801f4a90">pack::set_true</a>, <a class="el" href="namespacecli_1_1nargs.html#a68874bbf441fc82b3d70695abc0df9fa">nargs::none</a>&gt;</td></tr>
 <tr class="memdesc:acf8bcaca8749b9dffa40246ea13153b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">A boolean flag option that stores <span class="tt">true</span> when present.  <br /></td></tr>
-<tr class="memitem:a0724688c79b8a9741b65e2baaa074411" id="r_a0724688c79b8a9741b65e2baaa074411"><td class="memTemplParams" colspan="2">template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
-<tr class="memitem:a0724688c79b8a9741b65e2baaa074411 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::store_into&gt;</td></tr>
-<tr class="memdesc:a0724688c79b8a9741b65e2baaa074411"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option whose parsed value is written directly into an external variable.  <br /></td></tr>
+<tr class="memitem:a38ccd21299f3c3f0b51f93b04d3f5aad" id="r_a38ccd21299f3c3f0b51f93b04d3f5aad"><td class="memTemplParams" colspan="2">template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
+<tr class="memitem:a38ccd21299f3c3f0b51f93b04d3f5aad template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::write_to&gt;</td></tr>
+<tr class="memdesc:a38ccd21299f3c3f0b51f93b04d3f5aad"><td class="mdescLeft">&#160;</td><td class="mdescRight">An option whose parsed value is written directly into an external variable.  <br /></td></tr>
 <tr class="memitem:abf24cd3268a638d58fd5e59aa8e3cc96" id="r_abf24cd3268a638d58fd5e59aa8e3cc96"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
-<tr class="memitem:abf24cd3268a638d58fd5e59aa8e3cc96 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#abf24cd3268a638d58fd5e59aa8e3cc96">BoundStringOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;std::string, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:abf24cd3268a638d58fd5e59aa8e3cc96"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::string</span>.  <br /></td></tr>
+<tr class="memitem:abf24cd3268a638d58fd5e59aa8e3cc96 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#abf24cd3268a638d58fd5e59aa8e3cc96">BoundStringOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;std::string, Name, ShortName&gt;</td></tr>
+<tr class="memdesc:abf24cd3268a638d58fd5e59aa8e3cc96"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::string</span>.  <br /></td></tr>
 <tr class="memitem:a5be9253c01c140f51f981f748e082068" id="r_a5be9253c01c140f51f981f748e082068"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
-<tr class="memitem:a5be9253c01c140f51f981f748e082068 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a5be9253c01c140f51f981f748e082068">BoundIntOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;int, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:a5be9253c01c140f51f981f748e082068"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">int</span>.  <br /></td></tr>
+<tr class="memitem:a5be9253c01c140f51f981f748e082068 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a5be9253c01c140f51f981f748e082068">BoundIntOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;int, Name, ShortName&gt;</td></tr>
+<tr class="memdesc:a5be9253c01c140f51f981f748e082068"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">int</span>.  <br /></td></tr>
 <tr class="memitem:ab420d43bd1f4d0ce6464592a1c015cec" id="r_ab420d43bd1f4d0ce6464592a1c015cec"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
-<tr class="memitem:ab420d43bd1f4d0ce6464592a1c015cec template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#ab420d43bd1f4d0ce6464592a1c015cec">BoundDoubleOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;double, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:ab420d43bd1f4d0ce6464592a1c015cec"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">double</span>.  <br /></td></tr>
+<tr class="memitem:ab420d43bd1f4d0ce6464592a1c015cec template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#ab420d43bd1f4d0ce6464592a1c015cec">BoundDoubleOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;double, Name, ShortName&gt;</td></tr>
+<tr class="memdesc:ab420d43bd1f4d0ce6464592a1c015cec"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">double</span>.  <br /></td></tr>
 <tr class="memitem:a6a46890e92224a51106cb313b8cd5323" id="r_a6a46890e92224a51106cb313b8cd5323"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
-<tr class="memitem:a6a46890e92224a51106cb313b8cd5323 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a6a46890e92224a51106cb313b8cd5323">BoundPathOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;std::filesystem::path, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:a6a46890e92224a51106cb313b8cd5323"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::filesystem::path</span>.  <br /></td></tr>
+<tr class="memitem:a6a46890e92224a51106cb313b8cd5323 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a6a46890e92224a51106cb313b8cd5323">BoundPathOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;std::filesystem::path, Name, ShortName&gt;</td></tr>
+<tr class="memdesc:a6a46890e92224a51106cb313b8cd5323"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::filesystem::path</span>.  <br /></td></tr>
 <tr class="memitem:a027641d00d18b18aec164ec8a1b10854" id="r_a027641d00d18b18aec164ec8a1b10854"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name = &quot;help&quot;, char ShortName = 'h'&gt; </td></tr>
 <tr class="memitem:a027641d00d18b18aec164ec8a1b10854 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a027641d00d18b18aec164ec8a1b10854">Help</a></td></tr>
 <tr class="memdesc:a027641d00d18b18aec164ec8a1b10854"><td class="mdescLeft">&#160;</td><td class="mdescRight">A built-in help flag that prints help and exits with code 0.  <br /></td></tr>
 <tr class="memitem:af1c2740179c6ccc154e1045e3d1e527a" id="r_af1c2740179c6ccc154e1045e3d1e527a"><td class="memTemplParams" colspan="2">template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:af1c2740179c6ccc154e1045e3d1e527a template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a">Option</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::set_once&gt;</td></tr>
-<tr class="memdesc:af1c2740179c6ccc154e1045e3d1e527a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single-value option that stores the parsed result in <span class="tt">std::optional&lt;T&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:af1c2740179c6ccc154e1045e3d1e527a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single-value option that stores the parsed result in <span class="tt">T</span>.  <br /></td></tr>
 <tr class="memitem:a32d4dd1a69eb7d5d77f5029c07bec31c" id="r_a32d4dd1a69eb7d5d77f5029c07bec31c"><td class="memTemplParams" colspan="2">template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0', <a class="el" href="structcli_1_1Nargs.html">Nargs</a> N = nargs::one_or_more&gt; </td></tr>
 <tr class="memitem:a32d4dd1a69eb7d5d77f5029c07bec31c template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a32d4dd1a69eb7d5d77f5029c07bec31c">ListOption</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::push, N&gt;</td></tr>
 <tr class="memdesc:a32d4dd1a69eb7d5d77f5029c07bec31c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A multi-value option that appends each occurrence to a <span class="tt">std::vector&lt;T&gt;</span>.  <br /></td></tr>
@@ -212,16 +216,16 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:a17d8754380963925cc07c70b2a115566"><td class="mdescLeft">&#160;</td><td class="mdescRight">A typed positional argument.  <br /></td></tr>
 <tr class="memitem:a49a25887678335a2b51e4fd058378f13" id="r_a49a25887678335a2b51e4fd058378f13"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:a49a25887678335a2b51e4fd058378f13 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a49a25887678335a2b51e4fd058378f13">StringOption</a> = <a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a">Option</a>&lt;std::string, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:a49a25887678335a2b51e4fd058378f13"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;std::string, Name, ShortName&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:a49a25887678335a2b51e4fd058378f13"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;std::string, Name, ShortName&gt;</span>.  <br /></td></tr>
 <tr class="memitem:a63e188dda009359b627c2327bb1ef512" id="r_a63e188dda009359b627c2327bb1ef512"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:a63e188dda009359b627c2327bb1ef512 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a63e188dda009359b627c2327bb1ef512">IntOption</a> = <a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a">Option</a>&lt;int, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:a63e188dda009359b627c2327bb1ef512"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;int, Name, ShortName&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:a63e188dda009359b627c2327bb1ef512"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;int, Name, ShortName&gt;</span>.  <br /></td></tr>
 <tr class="memitem:a21f4d51c5e5100de28d2a1834c6aea05" id="r_a21f4d51c5e5100de28d2a1834c6aea05"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:a21f4d51c5e5100de28d2a1834c6aea05 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a21f4d51c5e5100de28d2a1834c6aea05">DoubleOption</a> = <a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a">Option</a>&lt;double, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:a21f4d51c5e5100de28d2a1834c6aea05"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;double, Name, ShortName&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:a21f4d51c5e5100de28d2a1834c6aea05"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;double, Name, ShortName&gt;</span>.  <br /></td></tr>
 <tr class="memitem:aa2e71751990e973a4cde94ac9d2d4398" id="r_aa2e71751990e973a4cde94ac9d2d4398"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:aa2e71751990e973a4cde94ac9d2d4398 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#aa2e71751990e973a4cde94ac9d2d4398">PathOption</a> = <a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</td></tr>
-<tr class="memdesc:aa2e71751990e973a4cde94ac9d2d4398"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</span>.  <br /></td></tr>
+<tr class="memdesc:aa2e71751990e973a4cde94ac9d2d4398"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</span>.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -271,6 +275,12 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a827e1c94764ffdb189ecf1acf9808b28" id="r_a827e1c94764ffdb189ecf1acf9808b28"><td class="memTemplParams" colspan="2">template&lt;class U, class T&gt; </td></tr>
+<tr class="memitem:a827e1c94764ffdb189ecf1acf9808b28 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a827e1c94764ffdb189ecf1acf9808b28">propagate</a> (const <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt; &amp;input) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; U &gt;</td></tr>
+<tr class="memdesc:a827e1c94764ffdb189ecf1acf9808b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propagates a non-ok <a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a> to a different value type.  <br /></td></tr>
+<tr class="memitem:a6fd0ec2ac18f99b784935feb1e4f99a5" id="r_a6fd0ec2ac18f99b784935feb1e4f99a5"><td class="memTemplParams" colspan="2">template&lt;class U&gt; </td></tr>
+<tr class="memitem:a6fd0ec2ac18f99b784935feb1e4f99a5 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a6fd0ec2ac18f99b784935feb1e4f99a5">propagate</a> (const <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt; &amp;input) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; U &gt;</td></tr>
+<tr class="memdesc:a6fd0ec2ac18f99b784935feb1e4f99a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Propagates a non-ok <a class="el" href="structcli_1_1ActionResult_3_01void_01_4.html" title="Specialisation of ActionResult for terminal (pack) actions that produce no value.">ActionResult&lt;void&gt;</a> to a different value type.  <br /></td></tr>
 <tr class="memitem:ae626b8b159d8a531615ff09462080b68" id="r_ae626b8b159d8a531615ff09462080b68"><td class="memTemplParams" colspan="2">template&lt;auto Fn, auto... Fns&gt; </td></tr>
 <tr class="memitem:ae626b8b159d8a531615ff09462080b68 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#ae626b8b159d8a531615ff09462080b68">operator|</a> (<a class="el" href="structcli_1_1Action.html">Action</a>&lt; Fns... &gt;, <a class="el" href="structcli_1_1Action.html">Action</a>&lt; Fn &gt;)</td></tr>
 <tr class="memitem:a6e6caba2405cd8a1854f7325d8c33679" id="r_a6e6caba2405cd8a1854f7325d8c33679"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a6e6caba2405cd8a1854f7325d8c33679">to_string</a> (<a class="el" href="#ab273a2fec3161e54e544961483ffbe97">ErrorCode</a> code) noexcept -&gt; std::string_view</td></tr>
@@ -338,7 +348,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 <td class="markdownTableBodyNone"><span class="tt">&lt;Name, ShortName, <a class="el" href="structcli_1_1Action.html" title="A compile-time pipeline of action functions applied sequentially to a parsed token.">Action</a>, <a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a>&gt;</span>  </td><td class="markdownTableBodyNone">With short name; custom arity.  </td></tr>
 </table>
 <p>The short name character (if present) must appear before the action, and the <span class="tt"><a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a></span> value (if present) must appear after the action.</p>
-<p>Most users should prefer higher-level aliases such as <span class="tt"><a class="el" href="#acf8bcaca8749b9dffa40246ea13153b2" title="A boolean flag option that stores true when present.">Flag</a></span>, <span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a></span>, and <span class="tt"><a class="el" href="#a32d4dd1a69eb7d5d77f5029c07bec31c" title="A multi-value option that appends each occurrence to a std::vector&lt;T&gt;.">ListOption</a></span> for common argument kinds.</p>
+<p>Most users should prefer higher-level aliases such as <span class="tt"><a class="el" href="#acf8bcaca8749b9dffa40246ea13153b2" title="A boolean flag option that stores true when present.">Flag</a></span>, <span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a></span>, and <span class="tt"><a class="el" href="#a32d4dd1a69eb7d5d77f5029c07bec31c" title="A multi-value option that appends each occurrence to a std::vector&lt;T&gt;.">ListOption</a></span> for common argument kinds.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Name</td><td>Long option name without the leading <span class="tt">--</span>. </td></tr>
@@ -347,7 +357,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00754">754</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00801">801</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -360,14 +370,14 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#ab420d43bd1f4d0ce6464592a1c015cec">cli::BoundDoubleOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;double, Name, ShortName&gt;</td>
+          <td class="memname">using <a class="el" href="#ab420d43bd1f4d0ce6464592a1c015cec">cli::BoundDoubleOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;double, Name, ShortName&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">double</span>. </p>
+<p><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">double</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00793">793</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00840">840</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -380,19 +390,19 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#a5be9253c01c140f51f981f748e082068">cli::BoundIntOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;int, Name, ShortName&gt;</td>
+          <td class="memname">using <a class="el" href="#a5be9253c01c140f51f981f748e082068">cli::BoundIntOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;int, Name, ShortName&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">int</span>. </p>
+<p><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">int</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00789">789</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00836">836</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
-<a id="a0724688c79b8a9741b65e2baaa074411" name="a0724688c79b8a9741b65e2baaa074411"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0724688c79b8a9741b65e2baaa074411">&#9670;&#160;</a></span>BoundOption</h2>
+<a id="a38ccd21299f3c3f0b51f93b04d3f5aad" name="a38ccd21299f3c3f0b51f93b04d3f5aad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38ccd21299f3c3f0b51f93b04d3f5aad">&#9670;&#160;</a></span>BoundOption</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -400,7 +410,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">cli::BoundOption</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::store_into&gt;</td>
+          <td class="memname">using <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">cli::BoundOption</a> = <a class="el" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>&lt;Name, ShortName, detail::ActionFor&lt;T&gt;::write_to&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -417,7 +427,7 @@ template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">String
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00781">781</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00828">828</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -430,14 +440,14 @@ template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">String
 template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#a6a46890e92224a51106cb313b8cd5323">cli::BoundPathOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;std::filesystem::path, Name, ShortName&gt;</td>
+          <td class="memname">using <a class="el" href="#a6a46890e92224a51106cb313b8cd5323">cli::BoundPathOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;std::filesystem::path, Name, ShortName&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::filesystem::path</span>. </p>
+<p><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::filesystem::path</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00797">797</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00844">844</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -450,14 +460,14 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#abf24cd3268a638d58fd5e59aa8e3cc96">cli::BoundStringOption</a> = <a class="el" href="#a0724688c79b8a9741b65e2baaa074411">BoundOption</a>&lt;std::string, Name, ShortName&gt;</td>
+          <td class="memname">using <a class="el" href="#abf24cd3268a638d58fd5e59aa8e3cc96">cli::BoundStringOption</a> = <a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad">BoundOption</a>&lt;std::string, Name, ShortName&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#a0724688c79b8a9741b65e2baaa074411" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::string</span>. </p>
+<p><span class="tt"><a class="el" href="#a38ccd21299f3c3f0b51f93b04d3f5aad" title="An option whose parsed value is written directly into an external variable.">BoundOption</a></span> specialisation for <span class="tt">std::string</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00785">785</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00832">832</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -477,7 +487,7 @@ template&lt;class Step, class Input&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typename</span> std::invoke_result_t&lt;const Step&amp;, ActionCtx&lt;void&gt;,</div>
 <div class="line">                              <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;Input&gt;</a>&gt;::value_type</div>
-<div class="ttc" id="astructcli_1_1ActionResult_html"><div class="ttname"><a href="structcli_1_1ActionResult.html">cli::ActionResult</a></div><div class="ttdoc">The result type produced and consumed at each step of an action pipeline.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00044">action.hh:44</a></div></div>
+<div class="ttc" id="astructcli_1_1ActionResult_html"><div class="ttname"><a href="structcli_1_1ActionResult.html">cli::ActionResult</a></div><div class="ttdoc">The result type produced and consumed at each step of an action pipeline.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00047">action.hh:47</a></div></div>
 </div><!-- fragment -->
 <p>Deduces <span class="tt">after_type</span> for a non-terminal step from its <span class="tt">operator()</span>. </p>
 <p>Extracts the value type <span class="tt">T</span> from the <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span> returned by <span class="tt">Step::operator()(<a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a>&lt;void&gt;, <a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;Input&gt;)</span>.</p>
@@ -487,7 +497,7 @@ template&lt;class Step, class Input&gt; </div>
 <div class="line">  <span class="keyword">using </span>after_type = <a class="code hl_typedef" href="#a5d1b970085b6a9a15e1fe97bc841bcae">cli::deduce_after_type&lt;MyStep, Input&gt;</a>;</div>
 <div class="line">  <span class="comment">// ...</span></div>
 <div class="line">};</div>
-<div class="ttc" id="anamespacecli_html_a5d1b970085b6a9a15e1fe97bc841bcae"><div class="ttname"><a href="#a5d1b970085b6a9a15e1fe97bc841bcae">cli::deduce_after_type</a></div><div class="ttdeci">typename std::invoke_result_t&lt; const Step &amp;, ActionCtx&lt; void &gt;, ActionResult&lt; Input &gt; &gt;::value_type deduce_after_type</div><div class="ttdoc">Deduces after_type for a non-terminal step from its operator().</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00500">action.hh:500</a></div></div>
+<div class="ttc" id="anamespacecli_html_a5d1b970085b6a9a15e1fe97bc841bcae"><div class="ttname"><a href="#a5d1b970085b6a9a15e1fe97bc841bcae">cli::deduce_after_type</a></div><div class="ttdeci">typename std::invoke_result_t&lt; const Step &amp;, ActionCtx&lt; void &gt;, ActionResult&lt; Input &gt; &gt;::value_type deduce_after_type</div><div class="ttdoc">Deduces after_type for a non-terminal step from its operator().</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00585">action.hh:585</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Step</td><td>The action step type. </td></tr>
@@ -496,7 +506,7 @@ template&lt;class Step, class Input&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00500">500</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00585">585</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -514,9 +524,9 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;double, Name, ShortName&gt;</span>. </p>
+<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;double, Name, ShortName&gt;</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00864">864</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00909">909</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -544,7 +554,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00765">765</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00812">812</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -563,7 +573,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line"><a class="code hl_typedef" href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg&lt;Name, ShortName, action::print_help | action::exit_success, nargs::none&gt;</a></div>
-<div class="ttc" id="anamespacecli_html_ae00c69a0b5d1bc9699fef3ebfeb4139c"><div class="ttname"><a href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">cli::Arg</a></div><div class="ttdeci">typename detail::ArgAlias&lt; Name, Args... &gt;::type Arg</div><div class="ttdoc">Defines a typed command-line argument specification.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00754">argument.hh:754</a></div></div>
+<div class="ttc" id="anamespacecli_html_ae00c69a0b5d1bc9699fef3ebfeb4139c"><div class="ttname"><a href="#ae00c69a0b5d1bc9699fef3ebfeb4139c">cli::Arg</a></div><div class="ttdeci">typename detail::ArgAlias&lt; Name, Args... &gt;::type Arg</div><div class="ttdoc">Defines a typed command-line argument specification.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00801">argument.hh:801</a></div></div>
 </div><!-- fragment -->
 <p>A built-in help flag that prints help and exits with code 0. </p>
 <p>Default names: <span class="tt">--help</span> / <span class="tt">-h</span>. Override via template parameters.</p>
@@ -575,7 +585,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00808">808</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00855">855</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -593,9 +603,9 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;int, Name, ShortName&gt;</span>. </p>
+<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;int, Name, ShortName&gt;</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00860">860</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00905">905</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -625,7 +635,7 @@ template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">String
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00838">838</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00884">884</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -643,8 +653,8 @@ template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">String
       </table>
 </div><div class="memdoc">
 
-<p>A single-value option that stores the parsed result in <span class="tt">std::optional&lt;T&gt;</span>. </p>
-<p>Storage type: <span class="tt">std::optional&lt;T&gt;</span>. Present when the option was supplied on the command line, absent (nullopt) otherwise.</p>
+<p>A single-value option that stores the parsed result in <span class="tt">T</span>. </p>
+<p>Storage type: <span class="tt">T</span>. Use <span class="tt">operator bool()</span> to check whether a value is present and <span class="tt">provided()</span> / <span class="tt">occurrences()</span> to check command-line occurrences.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The value type to parse (e.g. <span class="tt">int</span>, <span class="tt">std::string</span>). </td></tr>
@@ -654,7 +664,7 @@ template&lt;class T, <a class="el" href="structcli_1_1StringLiteral.html">String
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00823">823</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00869">869</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -672,9 +682,9 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</span>. </p>
+<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00868">868</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00913">913</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -693,7 +703,7 @@ template&lt;class T, <a class="el" href="structcli_1_1Nargs.html">Nargs</a> N = 
 </div><div class="memdoc">
 
 <p>A typed positional argument. </p>
-<p>Storage type: <span class="tt">std::optional&lt;T&gt;</span> for <span class="tt">N.max == 1</span>, <span class="tt">std::vector&lt;T&gt;</span> for multi-value.</p>
+<p>Storage type: <span class="tt">T</span> for <span class="tt">N.max == 1</span>, <span class="tt">std::vector&lt;T&gt;</span> for multi-value.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The value type to parse. </td></tr>
@@ -702,7 +712,7 @@ template&lt;class T, <a class="el" href="structcli_1_1Nargs.html">Nargs</a> N = 
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00850">850</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00895">895</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -720,9 +730,9 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
       </table>
 </div><div class="memdoc">
 
-<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;std::string, Name, ShortName&gt;</span>. </p>
+<p><span class="tt"><a class="el" href="#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;std::string, Name, ShortName&gt;</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00856">856</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00901">901</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -891,7 +901,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 <tr><td class="fieldname"><a id="ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d" name="ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d"></a>optional&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00058">58</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00059">59</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -929,7 +939,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 <tr><td class="fieldname"><a id="ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f" name="ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f"></a>command&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00058">58</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00059">59</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -1073,7 +1083,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="help_8hh_source.html#l00532">532</a> of file <a class="el" href="help_8hh_source.html">help.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="help_8hh_source.html#l00533">533</a> of file <a class="el" href="help_8hh_source.html">help.hh</a>.</p>
 
 </div>
 </div>
@@ -1106,7 +1116,7 @@ template&lt;auto Fn, auto... Fns&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00445">445</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00530">530</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -1148,7 +1158,7 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1ParseResult.html" title="The result returned by Parser::parse() and the free cli::parse() function.">ParseResult</a>&lt;T&gt;</span> containing the parsed struct or an error. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00979">979</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l01027">1027</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -1186,7 +1196,7 @@ template&lt;ArgumentSpec T&gt; </div>
 <p>Parses <span class="tt">argc</span>/<span class="tt">argv</span> and exits the process on failure. </p>
 <p>If parsing fails, writes the error message to <span class="tt">err</span> (or <span class="tt">out</span> for help/exit-success) and calls <span class="tt">std::exit</span> with the appropriate exit code. On success, returns the fully populated argument struct by value.</p>
 <p>This is the typical one-liner entry point for command-line tools: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> args = <a class="code hl_function" href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit&lt;MyArgs&gt;</a>(argc, argv);</div>
-<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l01004">parser.hh:1004</a></div></div>
+<div class="ttc" id="anamespacecli_html_a8c40765bc81b89079e8bf98ae74b9fa7"><div class="ttname"><a href="#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a></div><div class="ttdeci">auto parse_or_exit(int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</div><div class="ttdoc">Parses argc/argv and exits the process on failure.</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l01052">parser.hh:1052</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The argument specification type. </td></tr>
@@ -1204,7 +1214,97 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The parsed argument struct (never returns on failure). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l01004">1004</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l01052">1052</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a827e1c94764ffdb189ecf1acf9808b28" name="a827e1c94764ffdb189ecf1acf9808b28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a827e1c94764ffdb189ecf1acf9808b28">&#9670;&#160;</a></span>propagate() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class U, class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::propagate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>input</em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; U &gt;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Propagates a non-ok <a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a> to a different value type. </p>
+<p>This preserves error versus ignore state while adapting the held value type.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">U</td><td>The target value type. </td></tr>
+    <tr><td class="paramname">T</td><td>The source value type. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>The source result to propagate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;U&gt;</span> carrying the same error or ignore state. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00196">196</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="a6fd0ec2ac18f99b784935feb1e4f99a5" name="a6fd0ec2ac18f99b784935feb1e4f99a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fd0ec2ac18f99b784935feb1e4f99a5">&#9670;&#160;</a></span>propagate() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class U&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::propagate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>input</em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; U &gt;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Propagates a non-ok <a class="el" href="structcli_1_1ActionResult_3_01void_01_4.html" title="Specialisation of ActionResult for terminal (pack) actions that produce no value.">ActionResult&lt;void&gt;</a> to a different value type. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">U</td><td>The target value type. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>The source result to propagate. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;U&gt;</span> carrying the same error or ignore state. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00210">210</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -1321,7 +1421,7 @@ template&lt;std::size_t N&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <span class="tt"><a class="el" href="structcli_1_1TokenizeResult.html" title="The result returned by tokenize().">TokenizeResult</a></span> containing the token list on success, or a <span class="tt"><a class="el" href="structcli_1_1ParseError.html" title="Carries all context about a single parse/validation failure.">ParseError</a></span> on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00179">179</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00180">180</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -1358,7 +1458,7 @@ template&lt;class Step, class Input&gt; </div>
 <div class="line">      <a class="code hl_variable" href="#ad6d38d9fb5bfdb74f3698b4713406d66">cli::deduce_accepts_input&lt;MyStep, Input&gt;</a>;</div>
 <div class="line">  <span class="comment">// ...</span></div>
 <div class="line">};</div>
-<div class="ttc" id="anamespacecli_html_ad6d38d9fb5bfdb74f3698b4713406d66"><div class="ttname"><a href="#ad6d38d9fb5bfdb74f3698b4713406d66">cli::deduce_accepts_input</a></div><div class="ttdeci">constexpr bool deduce_accepts_input</div><div class="ttdoc">Deduces accepts_input for a non-terminal step from its operator().</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00470">action.hh:470</a></div></div>
+<div class="ttc" id="anamespacecli_html_ad6d38d9fb5bfdb74f3698b4713406d66"><div class="ttname"><a href="#ad6d38d9fb5bfdb74f3698b4713406d66">cli::deduce_accepts_input</a></div><div class="ttdeci">constexpr bool deduce_accepts_input</div><div class="ttdoc">Deduces accepts_input for a non-terminal step from its operator().</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00555">action.hh:555</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Step</td><td>The action step type. </td></tr>
@@ -1367,7 +1467,7 @@ template&lt;class Step, class Input&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00470">470</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00555">555</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -1393,7 +1493,7 @@ template&lt;class Step, class Input&gt; </div>
 
 <p>Convenience constant for <span class="tt"><a class="el" href="#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">Presence::optional</a></span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00064">64</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00065">65</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -1445,7 +1545,7 @@ template&lt;class Step, class Input&gt; </div>
 
 <p>Convenience constant for <span class="tt"><a class="el" href="#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">Presence::required</a></span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00061">61</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00062">62</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

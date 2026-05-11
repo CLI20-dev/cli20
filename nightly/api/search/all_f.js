@@ -6,5 +6,6 @@ var searchData=
   ['recursehelptag_3',['RecurseHelpTag',['../structcli_1_1RecurseHelpTag.html',1,'cli']]],
   ['reject_5fduplicate_4',['reject_duplicate',['../namespacecli_1_1pack.html#a75d87b3d60d15bea7f673c4d660b1edf',1,'cli::pack']]],
   ['rejectduplicate_5',['RejectDuplicate',['../structcli_1_1pack_1_1RejectDuplicate.html',1,'cli::pack']]],
-  ['required_6',['required',['../namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7',1,'cli::required'],['../namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485',1,'cli::required']]]
+  ['required_6',['required',['../namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7',1,'cli::required'],['../namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485',1,'cli::required']]],
+  ['requires_5fif_7',['requires_if',['../namespacecli_1_1constraint.html#aa8a91ea4be7218fafbe92065782164de',1,'cli::constraint']]]
 ];

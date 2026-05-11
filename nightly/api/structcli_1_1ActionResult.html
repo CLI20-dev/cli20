@@ -110,37 +110,49 @@ $(function(){initNavTree('structcli_1_1ActionResult.html','','structcli_1_1Actio
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-types" class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
+<tr class="memitem:aff93dc1fc10572d915b6cc7ad80ed429" id="r_aff93dc1fc10572d915b6cc7ad80ed429"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429">State</a> : std::uint8_t { <a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429a444bcb3a3fcf8389296c49467f27e1d6">ok</a>
+, <a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429acb5e100e5a9a3e7f6d1fd97512215282">error</a>
+, <a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429a567bc1d268f135496de3d5b946b691f3">ignore</a>
+ }</td></tr>
 <tr class="memitem:a03ee470592a532bd706485c402ca0655" id="r_a03ee470592a532bd706485c402ca0655"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a03ee470592a532bd706485c402ca0655">value_type</a> = T</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a039d8bf549cfc2188590d784789ced0e" id="r_a039d8bf549cfc2188590d784789ced0e"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a039d8bf549cfc2188590d784789ced0e">operator bool</a> () const noexcept</td></tr>
 <tr class="memdesc:a039d8bf549cfc2188590d784789ced0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <span class="tt">true</span> when the result represents success.  <br /></td></tr>
+<tr class="memitem:ae2cdb93816a2cae0b0541a18243bfec7" id="r_ae2cdb93816a2cae0b0541a18243bfec7"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#ae2cdb93816a2cae0b0541a18243bfec7">have_value</a> () const noexcept -&gt; bool</td></tr>
+<tr class="memdesc:ae2cdb93816a2cae0b0541a18243bfec7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <span class="tt">true</span> when the result represents success.  <br /></td></tr>
 <tr class="memitem:aab81d09f88f901940df92e4bcc242331" id="r_aab81d09f88f901940df92e4bcc242331"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aab81d09f88f901940df92e4bcc242331">has_value</a> () const noexcept -&gt; bool</td></tr>
 <tr class="memdesc:aab81d09f88f901940df92e4bcc242331"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <span class="tt">true</span> when the result represents success.  <br /></td></tr>
 <tr class="memitem:a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5" id="r_a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5">has_error</a> () const noexcept -&gt; bool</td></tr>
 <tr class="memdesc:a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <span class="tt">true</span> when the result represents failure.  <br /></td></tr>
+<tr class="memitem:a8484435e9652c971ffbadb7f42d9ad46" id="r_a8484435e9652c971ffbadb7f42d9ad46"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a8484435e9652c971ffbadb7f42d9ad46">is_ignored</a> () const noexcept -&gt; bool</td></tr>
+<tr class="memdesc:a8484435e9652c971ffbadb7f42d9ad46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <span class="tt">true</span> when the result represents an ignored step.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-methods" class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa333eaa972eec0b9e01651e897b972b4" id="r_aa333eaa972eec0b9e01651e897b972b4"><td class="memTemplParams" colspan="2">template&lt;class U&gt; </td></tr>
-<tr class="memitem:aa333eaa972eec0b9e01651e897b972b4 template"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aa333eaa972eec0b9e01651e897b972b4">ok</a> (U &amp;&amp;<a class="el" href="#a547b5c3d493347410fe4358fc63e4e66">value</a>) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td></tr>
-<tr class="memdesc:aa333eaa972eec0b9e01651e897b972b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a success result holding <span class="tt"><a class="el" href="#a547b5c3d493347410fe4358fc63e4e66">value</a></span>.  <br /></td></tr>
-<tr class="memitem:a35a5d55ac8a93248edadaaa227cc31e0" id="r_a35a5d55ac8a93248edadaaa227cc31e0"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a35a5d55ac8a93248edadaaa227cc31e0">fail</a> (<a class="el" href="structcli_1_1ParseError.html">ParseError</a> <a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a>) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td></tr>
-<tr class="memdesc:a35a5d55ac8a93248edadaaa227cc31e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a failure result carrying <span class="tt"><a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a></span>.  <br /></td></tr>
+<tr class="memitem:a2b3bee1ba96d6a711fdf660d91a926c0" id="r_a2b3bee1ba96d6a711fdf660d91a926c0"><td class="memTemplParams" colspan="2">template&lt;class U&gt; </td></tr>
+<tr class="memitem:a2b3bee1ba96d6a711fdf660d91a926c0 template"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a2b3bee1ba96d6a711fdf660d91a926c0">ok</a> (U &amp;&amp;v) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td></tr>
+<tr class="memdesc:a2b3bee1ba96d6a711fdf660d91a926c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a success result holding <span class="tt"><a class="el" href="#a547b5c3d493347410fe4358fc63e4e66">value</a></span>.  <br /></td></tr>
+<tr class="memitem:ab20ba0a93bbbacce6b2f511d0b1e945b" id="r_ab20ba0a93bbbacce6b2f511d0b1e945b"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#ab20ba0a93bbbacce6b2f511d0b1e945b">fail</a> (<a class="el" href="structcli_1_1ParseError.html">ParseError</a> e) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td></tr>
+<tr class="memdesc:ab20ba0a93bbbacce6b2f511d0b1e945b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a failure result carrying <span class="tt"><a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a></span>.  <br /></td></tr>
+<tr class="memitem:aaeaacf5fef668eca724f5400fd6f036d" id="r_aaeaacf5fef668eca724f5400fd6f036d"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aaeaacf5fef668eca724f5400fd6f036d">ignore</a> () -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td></tr>
+<tr class="memdesc:aaeaacf5fef668eca724f5400fd6f036d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an ignore result.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:ab921c992a5a4d87658fb4efa6569c688" id="r_ab921c992a5a4d87658fb4efa6569c688"><td class="memItemLeft"><a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429">State</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab921c992a5a4d87658fb4efa6569c688">state</a> {<a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429a444bcb3a3fcf8389296c49467f27e1d6">State::ok</a>}</td></tr>
 <tr class="memitem:ad6b2a588dd7d2be7ec33eeec0313f28b" id="r_ad6b2a588dd7d2be7ec33eeec0313f28b"><td class="memItemLeft"><a class="el" href="structcli_1_1ParseError.html">ParseError</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a> {}</td></tr>
 <tr class="memitem:a547b5c3d493347410fe4358fc63e4e66" id="r_a547b5c3d493347410fe4358fc63e4e66"><td class="memItemLeft">T&#160;</td><td class="memItemRight"><a class="el" href="#a547b5c3d493347410fe4358fc63e4e66">value</a> {}</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class T&gt;<br />
 struct cli::ActionResult&lt; T &gt;</div><p>The result type produced and consumed at each step of an action pipeline. </p>
-<p>An <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span> is either a <em>success</em> carrying a value of type <span class="tt">T</span>, or a <em>failure</em> carrying a <span class="tt"><a class="el" href="structcli_1_1ParseError.html" title="Carries all context about a single parse/validation failure.">ParseError</a></span>. The <span class="tt">operator bool()</span>, <span class="tt"><a class="el" href="#aab81d09f88f901940df92e4bcc242331" title="Returns true when the result represents success.">has_value()</a></span>, and <span class="tt"><a class="el" href="#a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5" title="Returns true when the result represents failure.">has_error()</a></span> methods make it easy to check the state inline.</p>
+<p>An <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span> is a 3-state type: ok (carrying a value of type <span class="tt">T</span>), error (carrying a <span class="tt"><a class="el" href="structcli_1_1ParseError.html" title="Carries all context about a single parse/validation failure.">ParseError</a></span>), or ignore (silent skip). The <span class="tt">operator bool()</span>, <span class="tt"><a class="el" href="#ae2cdb93816a2cae0b0541a18243bfec7" title="Returns true when the result represents success.">have_value()</a></span>, <span class="tt"><a class="el" href="#aab81d09f88f901940df92e4bcc242331" title="Returns true when the result represents success.">has_value()</a></span>, <span class="tt"><a class="el" href="#a9ef0c6fe81bb7d5959ed9f5ebbf4a2d5" title="Returns true when the result represents failure.">has_error()</a></span>, and <span class="tt"><a class="el" href="#a8484435e9652c971ffbadb7f42d9ad46" title="Returns true when the result represents an ignored step.">is_ignored()</a></span> methods make it easy to check the state inline.</p>
 <p>Factory methods:</p><ul>
 <li><span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;::ok(value)</span> — create a success result.</li>
 <li><span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;::fail(error)</span> — create a failure result.</li>
+<li><span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;::<a class="el" href="#aaeaacf5fef668eca724f5400fd6f036d" title="Creates an ignore result.">ignore()</a></span> — create an ignore result.</li>
 </ul>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -149,7 +161,7 @@ struct cli::ActionResult&lt; T &gt;</div><p>The result type produced and consume
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00044">44</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00047">47</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a03ee470592a532bd706485c402ca0655" name="a03ee470592a532bd706485c402ca0655"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a03ee470592a532bd706485c402ca0655">&#9670;&#160;</a></span>value_type</h2>
@@ -165,13 +177,45 @@ template&lt;class T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00045">45</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00048">48</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Member Enumeration Documentation</h2>
+<a id="aff93dc1fc10572d915b6cc7ad80ed429" name="aff93dc1fc10572d915b6cc7ad80ed429"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff93dc1fc10572d915b6cc7ad80ed429">&#9670;&#160;</a></span>State</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429">cli::ActionResult::State</a> : std::uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aff93dc1fc10572d915b6cc7ad80ed429a444bcb3a3fcf8389296c49467f27e1d6" name="aff93dc1fc10572d915b6cc7ad80ed429a444bcb3a3fcf8389296c49467f27e1d6"></a>ok&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aff93dc1fc10572d915b6cc7ad80ed429acb5e100e5a9a3e7f6d1fd97512215282" name="aff93dc1fc10572d915b6cc7ad80ed429acb5e100e5a9a3e7f6d1fd97512215282"></a>error&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aff93dc1fc10572d915b6cc7ad80ed429a567bc1d268f135496de3d5b946b691f3" name="aff93dc1fc10572d915b6cc7ad80ed429a567bc1d268f135496de3d5b946b691f3"></a>ignore&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00050">50</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a35a5d55ac8a93248edadaaa227cc31e0" name="a35a5d55ac8a93248edadaaa227cc31e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35a5d55ac8a93248edadaaa227cc31e0">&#9670;&#160;</a></span>fail()</h2>
+<a id="ab20ba0a93bbbacce6b2f511d0b1e945b" name="ab20ba0a93bbbacce6b2f511d0b1e945b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab20ba0a93bbbacce6b2f511d0b1e945b">&#9670;&#160;</a></span>fail()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,8 +228,8 @@ template&lt;class T&gt; </div>
         <tr>
           <td class="memname">constexpr auto <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::fail </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structcli_1_1ParseError.html">ParseError</a></td>          <td class="paramname"><span class="paramname"><em>error</em></span></td><td>)</td>
-          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>
+          <td class="paramtype"><a class="el" href="structcli_1_1ParseError.html">ParseError</a></td>          <td class="paramname"><span class="paramname"><em>e</em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td>
         </tr>
       </table>
   </td>
@@ -198,13 +242,13 @@ template&lt;class T&gt; </div>
 <p>Creates a failure result carrying <span class="tt"><a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a></span>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="#ad6b2a588dd7d2be7ec33eeec0313f28b">error</a></td><td>The error to store. </td></tr>
+    <tr><td class="paramname">e</td><td>The error to store. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A failed <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00091">91</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00099">99</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -235,7 +279,7 @@ template&lt;class T&gt; </div>
 
 <p>Returns <span class="tt">true</span> when the result represents failure. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00064">64</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00072">72</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -266,12 +310,106 @@ template&lt;class T&gt; </div>
 
 <p>Returns <span class="tt">true</span> when the result represents success. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00058">58</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00067">67</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
-<a id="aa333eaa972eec0b9e01651e897b972b4" name="aa333eaa972eec0b9e01651e897b972b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa333eaa972eec0b9e01651e897b972b4">&#9670;&#160;</a></span>ok()</h2>
+<a id="ae2cdb93816a2cae0b0541a18243bfec7" name="ae2cdb93816a2cae0b0541a18243bfec7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2cdb93816a2cae0b0541a18243bfec7">&#9670;&#160;</a></span>have_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::have_value </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; bool</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns <span class="tt">true</span> when the result represents success. </p>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00062">62</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="aaeaacf5fef668eca724f5400fd6f036d" name="aaeaacf5fef668eca724f5400fd6f036d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeaacf5fef668eca724f5400fd6f036d">&#9670;&#160;</a></span>ignore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::ignore </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates an ignore result. </p>
+<dl class="section return"><dt>Returns</dt><dd>An ignored <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span>. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00108">108</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="a8484435e9652c971ffbadb7f42d9ad46" name="a8484435e9652c971ffbadb7f42d9ad46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8484435e9652c971ffbadb7f42d9ad46">&#9670;&#160;</a></span>is_ignored()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::is_ignored </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; bool</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns <span class="tt">true</span> when the result represents an ignored step. </p>
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00077">77</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="a2b3bee1ba96d6a711fdf660d91a926c0" name="a2b3bee1ba96d6a711fdf660d91a926c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b3bee1ba96d6a711fdf660d91a926c0">&#9670;&#160;</a></span>ok()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -286,8 +424,8 @@ template&lt;class U&gt; </div>
         <tr>
           <td class="memname">constexpr auto <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::ok </td>
           <td>(</td>
-          <td class="paramtype">U &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
-          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>
+          <td class="paramtype">U &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>v</em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a></td>
         </tr>
       </table>
   </td>
@@ -306,13 +444,13 @@ template&lt;class U&gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="#a547b5c3d493347410fe4358fc63e4e66">value</a></td><td>The value to store. </td></tr>
+    <tr><td class="paramname">v</td><td>The value to store. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A successful <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;T&gt;</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00077">77</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00089">89</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -343,7 +481,7 @@ template&lt;class T&gt; </div>
 
 <p>Returns <span class="tt">true</span> when the result represents success. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00052">52</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00057">57</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -362,7 +500,25 @@ template&lt;class T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00047">47</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00053">53</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
+<a id="ab921c992a5a4d87658fb4efa6569c688" name="ab921c992a5a4d87658fb4efa6569c688"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab921c992a5a4d87658fb4efa6569c688">&#9670;&#160;</a></span>state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429">State</a> <a class="el" href="structcli_1_1ActionResult.html">cli::ActionResult</a>&lt; T &gt;::state {<a class="el" href="#aff93dc1fc10572d915b6cc7ad80ed429a444bcb3a3fcf8389296c49467f27e1d6">State::ok</a>}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00052">52</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -380,7 +536,7 @@ template&lt;class T&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00048">48</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00054">54</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

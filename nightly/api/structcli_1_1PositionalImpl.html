@@ -121,23 +121,35 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1774ede2bb37044a5a6ee0953cb830ce" id="r_a1774ede2bb37044a5a6ee0953cb830ce"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a1774ede2bb37044a5a6ee0953cb830ce">PositionalImpl</a> ()=default</td></tr>
+<tr class="memitem:aae78ab785cc3b61f5783570d1d40422d" id="r_aae78ab785cc3b61f5783570d1d40422d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#aae78ab785cc3b61f5783570d1d40422d">PositionalImpl</a> ()</td></tr>
 <tr class="memitem:ae67f69a9206543d903d5a637d088fd98" id="r_ae67f69a9206543d903d5a637d088fd98"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ae67f69a9206543d903d5a637d088fd98">PositionalImpl</a> (<a class="el" href="structcli_1_1ArgParameter.html">ArgParameter</a>&lt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &gt; param)</td></tr>
-<tr class="memitem:a9f404bf50663cb8de12156f046b5b041" id="r_a9f404bf50663cb8de12156f046b5b041"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a9f404bf50663cb8de12156f046b5b041">invoke_action</a> (std::string_view text, std::size_t arg_index) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td></tr>
-<tr class="memitem:afb2e6568ed314ed5b293232cf3683665" id="r_afb2e6568ed314ed5b293232cf3683665"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#afb2e6568ed314ed5b293232cf3683665">fire_on_parse</a> () -&gt; void</td></tr>
+<tr class="memitem:adcf61b67379581872f135c4b3fab8672" id="r_adcf61b67379581872f135c4b3fab8672"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#adcf61b67379581872f135c4b3fab8672">on_parse</a> () -&gt; void</td></tr>
 <tr class="memitem:abc743de4aa02b85653b857833207f2ad" id="r_abc743de4aa02b85653b857833207f2ad"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#abc743de4aa02b85653b857833207f2ad">value</a> () const -&gt; const <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td></tr>
 <tr class="memitem:ae2943097d1dbfda71833257031cf48be" id="r_ae2943097d1dbfda71833257031cf48be"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#ae2943097d1dbfda71833257031cf48be">value</a> () -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td></tr>
 <tr class="memitem:a063753a2a3f1484297c28daed41b348b" id="r_a063753a2a3f1484297c28daed41b348b"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a063753a2a3f1484297c28daed41b348b">provided</a> () const -&gt; bool</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a0856b8e40aaf1e26ce51bdf7e49f276a" id="r_a0856b8e40aaf1e26ce51bdf7e49f276a"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a0856b8e40aaf1e26ce51bdf7e49f276a">help</a> {}</td></tr>
-<tr class="memitem:a38f565e8a21debde9b9a26eab5c7c06d" id="r_a38f565e8a21debde9b9a26eab5c7c06d"><td class="memItemLeft"><a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebd">cli::Presence</a>&#160;</td><td class="memItemRight"><a class="el" href="#a38f565e8a21debde9b9a26eab5c7c06d">presence</a> {<a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">Presence::optional</a>}</td></tr>
-<tr class="memitem:a0eb32bbc74218fc24090305f29034c1b" id="r_a0eb32bbc74218fc24090305f29034c1b"><td class="memItemLeft"><a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a>&#160;</td><td class="memItemRight"><a class="el" href="#a0eb32bbc74218fc24090305f29034c1b">default_value</a> {}</td></tr>
+<tr class="memitem:aec3e87277113ea43a09f9da9ad2af463" id="r_aec3e87277113ea43a09f9da9ad2af463"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#aec3e87277113ea43a09f9da9ad2af463">occurrences</a> () const -&gt; std::size_t</td></tr>
+<tr class="memitem:a255fb1594dd9d0d05ea696691d6cf451" id="r_a255fb1594dd9d0d05ea696691d6cf451"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a255fb1594dd9d0d05ea696691d6cf451">operator bool</a> () const</td></tr>
+<tr class="memitem:ab0222da5b4372610fa83aaeea41277cd" id="r_ab0222da5b4372610fa83aaeea41277cd"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#ab0222da5b4372610fa83aaeea41277cd">operator*</a> () -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td></tr>
+<tr class="memitem:a3ddc390e2a66f468c3c9dfe02035e906" id="r_a3ddc390e2a66f468c3c9dfe02035e906"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a3ddc390e2a66f468c3c9dfe02035e906">operator*</a> () const -&gt; const <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td></tr>
+<tr class="memitem:aee7d349ad225174948e59ec5ca1ef7b4" id="r_aee7d349ad225174948e59ec5ca1ef7b4"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#aee7d349ad225174948e59ec5ca1ef7b4">operator-&gt;</a> () -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> *</td></tr>
+<tr class="memitem:a55e74efaabc5e24b52ffee704c468217" id="r_a55e74efaabc5e24b52ffee704c468217"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a55e74efaabc5e24b52ffee704c468217">operator-&gt;</a> () const -&gt; const <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> *</td></tr>
+<tr class="memitem:ad8db23ea6132835b072e4e895f7abe25" id="r_ad8db23ea6132835b072e4e895f7abe25"><td class="memTemplParams" colspan="2">template&lt;class U&gt; </td></tr>
+<tr class="memitem:ad8db23ea6132835b072e4e895f7abe25 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#ad8db23ea6132835b072e4e895f7abe25">value_or</a> (U &amp;&amp;fallback) const -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a></td></tr>
+<tr class="memitem:a122c063d006e3254aa562c160a46ca60" id="r_a122c063d006e3254aa562c160a46ca60"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a122c063d006e3254aa562c160a46ca60">operator std::optional&lt; value_type &gt;</a> () const</td></tr>
+<tr class="memitem:a53f2a4f2a9532922e711cdc7558935c5" id="r_a53f2a4f2a9532922e711cdc7558935c5"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a53f2a4f2a9532922e711cdc7558935c5">help_text</a> () const -&gt; const std::string_view</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a51ec67e89ea8c2bc4bc5732a6e665427" id="r_a51ec67e89ea8c2bc4bc5732a6e665427"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a51ec67e89ea8c2bc4bc5732a6e665427">nargs</a> = N</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a7b0813bf6925136828573ded5c030c4e" id="r_a7b0813bf6925136828573ded5c030c4e"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a7b0813bf6925136828573ded5c030c4e">get_param</a> () const -&gt; const <a class="el" href="structcli_1_1ArgParameter.html">ArgParameter</a>&lt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &gt; &amp;</td></tr>
+<tr class="memitem:a0a623427bf933242cd66b66033177c42" id="r_a0a623427bf933242cd66b66033177c42"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a0a623427bf933242cd66b66033177c42">invoke_action</a> (std::string_view text, std::size_t arg_index, std::size_t occurrence_nargs=1, std::size_t value_index=0) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
+<tr class="memitem:a4c8e2b3a119f24a8fe3804787b1d2bb0" id="r_a4c8e2b3a119f24a8fe3804787b1d2bb0"><td class="memItemLeft">static constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a4c8e2b3a119f24a8fe3804787b1d2bb0">entry_is_optional</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-friends" class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -148,7 +160,7 @@ Friends</h2></td></tr>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt;<br />
 requires requires { 0 &lt;= N.min; -1 &lt;= N.max; (N.max == -1 || N.min &lt;= N.max); }<br />
 struct cli::PositionalImpl&lt; N, A &gt;</div>
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00554">554</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00574">574</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a9d6e3ca32da4077cf63b5bcbb35983c8" name="a9d6e3ca32da4077cf63b5bcbb35983c8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9d6e3ca32da4077cf63b5bcbb35983c8">&#9670;&#160;</a></span>value_type</h2>
@@ -166,13 +178,13 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="keyword">typename</span> std::remove_cvref_t&lt;<span class="keyword">decltype</span>(A.validate().second)&gt;::type</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00555">555</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00575">575</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a1774ede2bb37044a5a6ee0953cb830ce" name="a1774ede2bb37044a5a6ee0953cb830ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1774ede2bb37044a5a6ee0953cb830ce">&#9670;&#160;</a></span>PositionalImpl() <span class="overload">[1/2]</span></h2>
+<a id="aae78ab785cc3b61f5783570d1d40422d" name="aae78ab785cc3b61f5783570d1d40422d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae78ab785cc3b61f5783570d1d40422d">&#9670;&#160;</a></span>PositionalImpl() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -191,10 +203,12 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel default">default</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00578">578</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -223,13 +237,13 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00559">559</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00579">579</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="afb2e6568ed314ed5b293232cf3683665" name="afb2e6568ed314ed5b293232cf3683665"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb2e6568ed314ed5b293232cf3683665">&#9670;&#160;</a></span>fire_on_parse()</h2>
+<a id="a7b0813bf6925136828573ded5c030c4e" name="a7b0813bf6925136828573ded5c030c4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b0813bf6925136828573ded5c030c4e">&#9670;&#160;</a></span>get_param()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -240,25 +254,54 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::fire_on_parse </td>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::get_param </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> -&gt; void</td>
+          <td> const -&gt; const <a class="el" href="structcli_1_1ArgParameter.html">ArgParameter</a>&lt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &gt; &amp;</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel protected">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00594">594</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00618">618</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
-<a id="a9f404bf50663cb8de12156f046b5b041" name="a9f404bf50663cb8de12156f046b5b041"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f404bf50663cb8de12156f046b5b041">&#9670;&#160;</a></span>invoke_action()</h2>
+<a id="a53f2a4f2a9532922e711cdc7558935c5" name="a53f2a4f2a9532922e711cdc7558935c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53f2a4f2a9532922e711cdc7558935c5">&#9670;&#160;</a></span>help_text()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::help_text </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; const std::string_view</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00613">613</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a0a623427bf933242cd66b66033177c42" name="a0a623427bf933242cd66b66033177c42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a623427bf933242cd66b66033177c42">&#9670;&#160;</a></span>invoke_action()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -276,7 +319,75 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>arg_index</em></span>&#160;) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>arg_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>occurrence_nargs</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>value_index</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;) -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00626">626</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="aec3e87277113ea43a09f9da9ad2af463" name="aec3e87277113ea43a09f9da9ad2af463"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec3e87277113ea43a09f9da9ad2af463">&#9670;&#160;</a></span>occurrences()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::occurrences </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; std::size_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00593">593</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="adcf61b67379581872f135c4b3fab8672" name="adcf61b67379581872f135c4b3fab8672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcf61b67379581872f135c4b3fab8672">&#9670;&#160;</a></span>on_parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::on_parse </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> -&gt; void</td>
         </tr>
       </table>
   </td>
@@ -286,7 +397,181 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00574">574</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00586">586</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a255fb1594dd9d0d05ea696691d6cf451" name="a255fb1594dd9d0d05ea696691d6cf451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a255fb1594dd9d0d05ea696691d6cf451">&#9670;&#160;</a></span>operator bool()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator bool </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel explicit">explicit</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00596">596</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a122c063d006e3254aa562c160a46ca60" name="a122c063d006e3254aa562c160a46ca60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a122c063d006e3254aa562c160a46ca60">&#9670;&#160;</a></span>operator std::optional&lt; value_type &gt;()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator std::optional&lt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &gt; </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel explicit">explicit</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00608">608</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="ab0222da5b4372610fa83aaeea41277cd" name="ab0222da5b4372610fa83aaeea41277cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0222da5b4372610fa83aaeea41277cd">&#9670;&#160;</a></span>operator*() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator* </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00597">597</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a3ddc390e2a66f468c3c9dfe02035e906" name="a3ddc390e2a66f468c3c9dfe02035e906"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ddc390e2a66f468c3c9dfe02035e906">&#9670;&#160;</a></span>operator*() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator* </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; const <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> &amp;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00598">598</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="aee7d349ad225174948e59ec5ca1ef7b4" name="aee7d349ad225174948e59ec5ca1ef7b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee7d349ad225174948e59ec5ca1ef7b4">&#9670;&#160;</a></span>operator-&gt;() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator-&gt; </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> *</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00599">599</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a55e74efaabc5e24b52ffee704c468217" name="a55e74efaabc5e24b52ffee704c468217"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55e74efaabc5e24b52ffee704c468217">&#9670;&#160;</a></span>operator-&gt;() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::operator-&gt; </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; const <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> *</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00600">600</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -315,7 +600,7 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00600">600</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00592">592</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -344,7 +629,7 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00599">599</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00591">591</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -373,7 +658,38 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00598">598</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00590">590</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="ad8db23ea6132835b072e4e895f7abe25" name="ad8db23ea6132835b072e4e895f7abe25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8db23ea6132835b072e4e895f7abe25">&#9670;&#160;</a></span>value_or()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<div class="memtemplate">
+template&lt;class U&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::value_or </td>
+          <td>(</td>
+          <td class="paramtype">U &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fallback</em></span></td><td>)</td>
+          <td> const -&gt; <a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00603">603</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -402,44 +718,37 @@ template&lt;ArgumentSpec&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00604">604</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00651">651</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a0eb32bbc74218fc24090305f29034c1b" name="a0eb32bbc74218fc24090305f29034c1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0eb32bbc74218fc24090305f29034c1b">&#9670;&#160;</a></span>default_value</h2>
+<a id="a4c8e2b3a119f24a8fe3804787b1d2bb0" name="a4c8e2b3a119f24a8fe3804787b1d2bb0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c8e2b3a119f24a8fe3804787b1d2bb0">&#9670;&#160;</a></span>entry_is_optional</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="#a9d6e3ca32da4077cf63b5bcbb35983c8">value_type</a> <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::default_value {}</td>
+          <td class="memname">bool <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::entry_is_optional</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00569">569</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
-
-</div>
-</div>
-<a id="a0856b8e40aaf1e26ce51bdf7e49f276a" name="a0856b8e40aaf1e26ce51bdf7e49f276a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0856b8e40aaf1e26ce51bdf7e49f276a">&#9670;&#160;</a></span>help</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string_view <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::help {}</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00565">565</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<b>Initial value:</b><div class="fragment"><div class="line">                                    =</div>
+<div class="line">std::remove_cvref_t&lt;<span class="keyword">decltype</span>(A)&gt;<a class="code hl_variable" href="#a4c8e2b3a119f24a8fe3804787b1d2bb0">::entry_is_optional</a></div>
+<div class="ttc" id="astructcli_1_1PositionalImpl_html_a4c8e2b3a119f24a8fe3804787b1d2bb0"><div class="ttname"><a href="#a4c8e2b3a119f24a8fe3804787b1d2bb0">cli::PositionalImpl::entry_is_optional</a></div><div class="ttdeci">static constexpr bool entry_is_optional</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00622">argument.hh:622</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00622">622</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -465,25 +774,7 @@ template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00571">571</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
-
-</div>
-</div>
-<a id="a38f565e8a21debde9b9a26eab5c7c06d" name="a38f565e8a21debde9b9a26eab5c7c06d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a38f565e8a21debde9b9a26eab5c7c06d">&#9670;&#160;</a></span>presence</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="structcli_1_1Nargs.html">Nargs</a> N, <a class="el" href="structcli_1_1Action.html">Action</a> A&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebd">cli::Presence</a> <a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl</a>&lt; N, A &gt;::presence {<a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">Presence::optional</a>}</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00567">567</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00583">583</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

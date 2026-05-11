@@ -2,7 +2,7 @@ var searchData=
 [
   ['name_0',['name',['../structcli_1_1conversion_1_1NegatableResult.html#a24f09ac76b19052b4d3cfacd9f8b0732',1,'cli::conversion::NegatableResult::name'],['../structcli_1_1Command.html#adafa441c2b60b08bf99499c3fbd68be3',1,'cli::Command::name']]],
   ['nargs_1',['Nargs',['../structcli_1_1Nargs.html',1,'cli']]],
-  ['nargs_2',['nargs',['../structcli_1_1PositionalImpl.html#a51ec67e89ea8c2bc4bc5732a6e665427',1,'cli::PositionalImpl']]],
+  ['nargs_2',['nargs',['../structcli_1_1ActionCtx.html#a206cc6a76642915bf65b945ef1cfe213',1,'cli::ActionCtx::nargs'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a6376431030c1f0074f7056fd223ae202',1,'cli::ActionCtx&lt; void &gt;::nargs'],['../structcli_1_1PositionalImpl.html#a51ec67e89ea8c2bc4bc5732a6e665427',1,'cli::PositionalImpl::nargs']]],
   ['negatable_3',['Negatable',['../structcli_1_1conversion_1_1Negatable.html',1,'cli::conversion']]],
   ['negatable_4',['negatable',['../namespacecli_1_1conversion.html#a177665b2e9fabfe6777e9cb2474d1621',1,'cli::conversion']]],
   ['negatableresult_5',['NegatableResult',['../structcli_1_1conversion_1_1NegatableResult.html',1,'cli::conversion']]],

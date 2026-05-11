@@ -25,6 +25,6 @@ var namespacecli_1_1pack =
     [ "set_false", "namespacecli_1_1pack.html#a10933f389881b4130ef45d3ca8abacf7", null ],
     [ "set_once", "namespacecli_1_1pack.html#af38e6c601a84c171a0637d3f80592f88", null ],
     [ "set_true", "namespacecli_1_1pack.html#af3260ecdd5ae6a15a49ac972801f4a90", null ],
-    [ "store_into", "namespacecli_1_1pack.html#a20c012c4bae824a6aa6884ba8e4b6219", null ],
-    [ "toggle", "namespacecli_1_1pack.html#a8a431e577bff1152a7e212a95986e621", null ]
+    [ "toggle", "namespacecli_1_1pack.html#a8a431e577bff1152a7e212a95986e621", null ],
+    [ "write_to", "namespacecli_1_1pack.html#acee19f87b01798bfdaed85b875e06421", null ]
 ];

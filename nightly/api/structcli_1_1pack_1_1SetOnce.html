@@ -103,7 +103,7 @@ $(function(){initNavTree('structcli_1_1pack_1_1SetOnce.html','','structcli_1_1pa
 </div><!--header-->
 <div class="contents">
 
-<p>Stores the value in <span class="tt">std::optional&lt;T&gt;</span> and rejects subsequent occurrences.  
+<p>Stores the input value and rejects subsequent occurrences.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="action_8hh_source.html">action.hh</a>&gt;</code></p>
@@ -112,13 +112,13 @@ $(function(){initNavTree('structcli_1_1pack_1_1SetOnce.html','','structcli_1_1pa
 Public Types</h2></td></tr>
 <tr class="memitem:a2c0b4f7643e0b5cf76bb026ca1e18845" id="r_a2c0b4f7643e0b5cf76bb026ca1e18845"><td class="memTemplParams" colspan="2">template&lt;class Prev&gt; </td></tr>
 <tr class="memitem:a2c0b4f7643e0b5cf76bb026ca1e18845 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a2c0b4f7643e0b5cf76bb026ca1e18845">after_type</a> = void</td></tr>
-<tr class="memitem:ae5118dc19f06dc3de89ffe38fa384e6a" id="r_ae5118dc19f06dc3de89ffe38fa384e6a"><td class="memTemplParams" colspan="2">template&lt;class Prev&gt; </td></tr>
-<tr class="memitem:ae5118dc19f06dc3de89ffe38fa384e6a template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#ae5118dc19f06dc3de89ffe38fa384e6a">storage_type</a> = std::optional&lt;detail::decay_t&lt;Prev&gt;&gt;</td></tr>
+<tr class="memitem:ad76819134769b044e9fe1deb35f26a49" id="r_ad76819134769b044e9fe1deb35f26a49"><td class="memTemplParams" colspan="2">template&lt;class Prev&gt; </td></tr>
+<tr class="memitem:ad76819134769b044e9fe1deb35f26a49 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#ad76819134769b044e9fe1deb35f26a49">storage_type</a> = detail::decay_t&lt;Prev&gt;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4d7ade709e23c37c715fd4c18b2fcf06" id="r_a4d7ade709e23c37c715fd4c18b2fcf06"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
-<tr class="memitem:a4d7ade709e23c37c715fd4c18b2fcf06 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a4d7ade709e23c37c715fd4c18b2fcf06">operator()</a> (<a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; std::optional&lt; detail::decay_t&lt; T &gt; &gt; &gt; ctx, <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt; input) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td></tr>
+<tr class="memitem:a7775028113aa7f036d8d0ca3faa65350" id="r_a7775028113aa7f036d8d0ca3faa65350"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
+<tr class="memitem:a7775028113aa7f036d8d0ca3faa65350 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a7775028113aa7f036d8d0ca3faa65350">operator()</a> (<a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; detail::decay_t&lt; T &gt; &gt; ctx, <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt; input) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; void &gt;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -126,10 +126,10 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:a99e554f61dc0b31c0d52d485b099904c template"><td class="memItemLeft">static constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a99e554f61dc0b31c0d52d485b099904c">accepts_input</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Stores the value in <span class="tt">std::optional&lt;T&gt;</span> and rejects subsequent occurrences. </p>
-<p>Storage type: <span class="tt">std::optional&lt;T&gt;</span>. Returns <span class="tt"><a class="el" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97aa1ee06634722f65fb1a4b59c4188d1b9" title="An option or positional that forbids repetition was seen more than once.">ErrorCode::duplicate_argument</a></span> if the option appears more than once. This is the default terminal action for <span class="tt"><a class="el" href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in std::optional&lt;T&gt;.">Option</a>&lt;T, ...&gt;</span>. </p>
+<div class="textblock"><p>Stores the input value and rejects subsequent occurrences. </p>
+<p>Storage type: <span class="tt">T</span>. Returns <span class="tt"><a class="el" href="namespacecli.html#ab273a2fec3161e54e544961483ffbe97aa1ee06634722f65fb1a4b59c4188d1b9" title="An option or positional that forbids repetition was seen more than once.">ErrorCode::duplicate_argument</a></span> if the option appears more than once. This is the default terminal action for <span class="tt"><a class="el" href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;T, ...&gt;</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01409">1409</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01568">1568</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a2c0b4f7643e0b5cf76bb026ca1e18845" name="a2c0b4f7643e0b5cf76bb026ca1e18845"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2c0b4f7643e0b5cf76bb026ca1e18845">&#9670;&#160;</a></span>after_type</h2>
@@ -145,12 +145,12 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01415">1415</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01574">1574</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
-<a id="ae5118dc19f06dc3de89ffe38fa384e6a" name="ae5118dc19f06dc3de89ffe38fa384e6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae5118dc19f06dc3de89ffe38fa384e6a">&#9670;&#160;</a></span>storage_type</h2>
+<a id="ad76819134769b044e9fe1deb35f26a49" name="ad76819134769b044e9fe1deb35f26a49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad76819134769b044e9fe1deb35f26a49">&#9670;&#160;</a></span>storage_type</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -158,18 +158,18 @@ template&lt;class Prev&gt; </div>
 template&lt;class Prev&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="#ae5118dc19f06dc3de89ffe38fa384e6a">cli::pack::SetOnce::storage_type</a> = std::optional&lt;detail::decay_t&lt;Prev&gt;&gt;</td>
+          <td class="memname">using <a class="el" href="#ad76819134769b044e9fe1deb35f26a49">cli::pack::SetOnce::storage_type</a> = detail::decay_t&lt;Prev&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01418">1418</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01577">1577</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a4d7ade709e23c37c715fd4c18b2fcf06" name="a4d7ade709e23c37c715fd4c18b2fcf06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d7ade709e23c37c715fd4c18b2fcf06">&#9670;&#160;</a></span>operator()()</h2>
+<a id="a7775028113aa7f036d8d0ca3faa65350" name="a7775028113aa7f036d8d0ca3faa65350"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7775028113aa7f036d8d0ca3faa65350">&#9670;&#160;</a></span>operator()()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -182,7 +182,7 @@ template&lt;class T&gt; </div>
         <tr>
           <td class="memname">auto cli::pack::SetOnce::operator() </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; std::optional&lt; detail::decay_t&lt; T &gt; &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+          <td class="paramtype"><a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; detail::decay_t&lt; T &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -197,7 +197,7 @@ template&lt;class T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01421">1421</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01580">1580</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -226,7 +226,7 @@ template&lt;class Prev&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line">                                =</div>
 <div class="line">!std::same_as&lt;detail::decay_t&lt;Prev&gt;, <span class="keywordtype">void</span>&gt;</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01411">1411</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01570">1570</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

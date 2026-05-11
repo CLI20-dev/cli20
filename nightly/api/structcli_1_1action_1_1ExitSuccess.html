@@ -117,8 +117,8 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7bb785a015657085df62d8b1417370f6" id="r_a7bb785a015657085df62d8b1417370f6"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>, class T&gt; </td></tr>
-<tr class="memitem:a7bb785a015657085df62d8b1417370f6 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a7bb785a015657085df62d8b1417370f6">operator()</a> (<a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a> &gt; ctx, <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td></tr>
+<tr class="memitem:a507cc003e9cc16adf03299bfd79617aa" id="r_a507cc003e9cc16adf03299bfd79617aa"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a>, class T&gt; </td></tr>
+<tr class="memitem:a507cc003e9cc16adf03299bfd79617aa template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a507cc003e9cc16adf03299bfd79617aa">operator()</a> (<a class="el" href="structcli_1_1ActionCtx.html">ActionCtx</a>&lt; <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3ebfeb4139c">Arg</a> &gt; ctx, <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt; input) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -129,7 +129,7 @@ Static Public Attributes</h2></td></tr>
 <div class="textblock"><p>Terminates the pipeline by returning a <span class="tt"><a class="el" href="structcli_1_1ParseError.html" title="Carries all context about a single parse/validation failure.">ParseError</a></span> with code <span class="tt"><a class="el" href="namespacecli_1_1action.html#af0bfecc35bf8faf12446cf007370022a">exit_success</a></span> (or <span class="tt">help_requested</span> when preceded by <span class="tt"><a class="el" href="structcli_1_1action_1_1PrintHelp.html" title="Wraps the current value in a HelpRequested&lt;T&gt; sentinel type.">PrintHelp</a></span>). </p>
 <p>The parser catches these special codes and either prints help text or exits cleanly with code 0, without treating them as real errors. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01719">1719</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01888">1888</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a61df3056605854a0bf686ba5da99ce2f" name="a61df3056605854a0bf686ba5da99ce2f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a61df3056605854a0bf686ba5da99ce2f">&#9670;&#160;</a></span>after_type</h2>
@@ -145,7 +145,7 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01724">1724</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01893">1893</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -163,13 +163,13 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01727">1727</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01896">1896</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a7bb785a015657085df62d8b1417370f6" name="a7bb785a015657085df62d8b1417370f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7bb785a015657085df62d8b1417370f6">&#9670;&#160;</a></span>operator()()</h2>
+<a id="a507cc003e9cc16adf03299bfd79617aa" name="a507cc003e9cc16adf03299bfd79617aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a507cc003e9cc16adf03299bfd79617aa">&#9670;&#160;</a></span>operator()()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -187,7 +187,7 @@ template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3e
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>          <td class="paramname"><span class="paramname"><em></em></span>&#160;) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>
+          <td class="paramtype"><a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>          <td class="paramname"><span class="paramname"><em>input</em></span>&#160;) const -&gt; <a class="el" href="structcli_1_1ActionResult.html">ActionResult</a>&lt; T &gt;</td>
         </tr>
       </table>
   </td>
@@ -197,7 +197,7 @@ template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3e
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01730">1730</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01899">1899</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -224,7 +224,7 @@ template&lt;class Prev&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01721">1721</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01890">1890</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

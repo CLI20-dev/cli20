@@ -11,7 +11,8 @@ var annotated_dup =
         [ "ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", "structcli_1_1conversion_1_1ExistingDirectory" ],
         [ "Choice", "structcli_1_1conversion_1_1Choice.html", "structcli_1_1conversion_1_1Choice" ],
         [ "NegatableResult", "structcli_1_1conversion_1_1NegatableResult.html", "structcli_1_1conversion_1_1NegatableResult" ],
-        [ "Negatable", "structcli_1_1conversion_1_1Negatable.html", "structcli_1_1conversion_1_1Negatable" ]
+        [ "Negatable", "structcli_1_1conversion_1_1Negatable.html", "structcli_1_1conversion_1_1Negatable" ],
+        [ "DefaultMissingValue", "structcli_1_1conversion_1_1DefaultMissingValue.html", "structcli_1_1conversion_1_1DefaultMissingValue" ]
       ] ],
       [ "validation", "namespacecli_1_1validation.html", [
         [ "Min", "structcli_1_1validation_1_1Min.html", "structcli_1_1validation_1_1Min" ],
@@ -61,18 +62,19 @@ var annotated_dup =
       [ "CommandTag", "structcli_1_1CommandTag.html", null ],
       [ "DescriptionTag", "structcli_1_1DescriptionTag.html", null ],
       [ "Nargs", "structcli_1_1Nargs.html", "structcli_1_1Nargs" ],
+      [ "Parser", "structcli_1_1Parser.html", "structcli_1_1Parser" ],
       [ "ArgParameter", "structcli_1_1ArgParameter.html", "structcli_1_1ArgParameter" ],
       [ "PositionalImpl", "structcli_1_1PositionalImpl.html", "structcli_1_1PositionalImpl" ],
       [ "Description", "structcli_1_1Description.html", null ],
       [ "CommandParameter", "structcli_1_1CommandParameter.html", "structcli_1_1CommandParameter" ],
       [ "Command", "structcli_1_1Command.html", "structcli_1_1Command" ],
       [ "RecurseHelpTag", "structcli_1_1RecurseHelpTag.html", null ],
+      [ "ConstraintResult", "structcli_1_1ConstraintResult.html", "structcli_1_1ConstraintResult" ],
       [ "ParseError", "structcli_1_1ParseError.html", "structcli_1_1ParseError" ],
       [ "Token", "structcli_1_1Token.html", "structcli_1_1Token" ],
       [ "TokenizeResult", "structcli_1_1TokenizeResult.html", "structcli_1_1TokenizeResult" ],
       [ "TokenizerConfig", "structcli_1_1TokenizerConfig.html", "structcli_1_1TokenizerConfig" ],
       [ "ParseResult", "structcli_1_1ParseResult.html", "structcli_1_1ParseResult" ],
-      [ "Parser", "structcli_1_1Parser.html", "structcli_1_1Parser" ],
       [ "StringLiteral", "structcli_1_1StringLiteral.html", "structcli_1_1StringLiteral" ]
     ] ],
     [ "std", null, [
