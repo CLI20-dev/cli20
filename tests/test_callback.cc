@@ -35,7 +35,7 @@ TEST(Callback, CalledForIntOption) {
   int captured = -1;
   CallbackIntArgs args;
   args.count = cli::IntOption<"count", 'c'>{{
-      .on_parse = [&captured](const int& v) { captured = v; },
+      .on_parse = [&captured](const int& v) -> void { captured = v; },
   }};
 
   auto args_vec = argv({"prog", "--count", "42"});
@@ -50,7 +50,7 @@ TEST(Callback, CalledForFlag) {
   bool fired = false;
   CallbackFlagArgs args;
   args.verbose = cli::Flag<"verbose", 'v'>{{
-      .on_parse = [&fired](const bool& v) { fired = v; },
+      .on_parse = [&fired](const bool& v) -> void { fired = v; },
   }};
 
   auto args_vec = argv({"prog", "--verbose"});
@@ -65,7 +65,7 @@ TEST(Callback, NotCalledWhenFlagAbsent) {
   bool fired = false;
   CallbackFlagArgs args;
   args.verbose = cli::Flag<"verbose", 'v'>{{
-      .on_parse = [&fired](const bool& v) { fired = v; },
+      .on_parse = [&fired](const bool& v) -> void { fired = v; },
   }};
 
   auto args_vec = argv({"prog"});
@@ -83,11 +83,10 @@ TEST(Callback, CalledOncePerOccurrenceForList) {
   std::vector<std::string> last_seen;
   CallbackListArgs args;
   args.files = cli::ListOption<std::string, "file", 'f'>{{
-      .on_parse =
-          [&](const std::vector<std::string>& v) {
-            ++call_count;
-            last_seen = v;
-          },
+      .on_parse = [&](const std::vector<std::string>& v) -> void {
+        ++call_count;
+        last_seen = v;
+      },
   }};
 
   // One occurrence of --file with three values.
@@ -107,11 +106,10 @@ TEST(Callback, CalledOnceForPositional) {
   std::vector<std::string> final_value;
   CallbackPositionalArgs args;
   args.inputs = cli::Positional<std::string, cli::nargs::one_or_more>{{
-      .on_parse =
-          [&](const std::vector<std::string>& v) {
-            ++call_count;
-            final_value = v;
-          },
+      .on_parse = [&](const std::vector<std::string>& v) -> void {
+        ++call_count;
+        final_value = v;
+      },
   }};
 
   auto args_vec = argv({"prog", "foo.cc", "bar.cc", "baz.cc"});
@@ -128,7 +126,7 @@ TEST(Callback, NotCalledOnParseError) {
   int call_count = 0;
   CallbackIntArgs args;
   args.count = cli::IntOption<"count", 'c'>{{
-      .on_parse = [&call_count](const int&) { ++call_count; },
+      .on_parse = [&call_count](const int&) -> void { ++call_count; },
   }};
 
   auto args_vec = argv({"prog", "--count", "notanint"});
@@ -144,8 +142,9 @@ TEST(Callback, CallbackCountMatchesOccurrenceCount) {
   int call_count = 0;
   CallbackListArgs args;
   args.files = cli::ListOption<std::string, "file", 'f'>{{
-      .on_parse =
-          [&call_count](const std::vector<std::string>&) { ++call_count; },
+      .on_parse = [&call_count](const std::vector<std::string>&) -> void {
+        ++call_count;
+      },
   }};
 
   auto args_vec = argv({"prog", "--file", "a", "--file", "b", "--file", "c"});
