@@ -446,13 +446,13 @@ struct ArgImpl : public OptionTag {
 
   // Called once per value token associated with this option.
   auto invoke_action(std::string_view text, std::size_t arg_index,
-                     std::size_t nargs, std::size_t value_index)
+                     std::size_t occurrence_nargs, std::size_t value_index)
       -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .nargs = nargs,
+        .nargs = occurrence_nargs,
         .value_index = value_index,
         .total_values = total_values_,
         .arg = std::ref(value_),
@@ -475,13 +475,13 @@ struct ArgImpl : public OptionTag {
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag(std::size_t arg_index, std::size_t nargs)
+  auto invoke_flag(std::size_t arg_index, std::size_t occurrence_nargs)
       -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .nargs = nargs,
+        .nargs = occurrence_nargs,
         .value_index = 0,
         .total_values = total_values_,
         .arg = std::ref(value_),
@@ -593,13 +593,13 @@ struct PositionalImpl : public PositionalTag {
 
   // Called once per value token for this positional.
   auto invoke_action(std::string_view text, std::size_t arg_index,
-                     std::size_t nargs = 1, std::size_t value_index = 0)
-      -> ActionResult<void> {
+                     std::size_t occurrence_nargs = 1,
+                     std::size_t value_index = 0) -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .nargs = nargs,
+        .nargs = occurrence_nargs,
         .value_index = value_index,
         .total_values = total_values_,
         .arg = std::ref(value_),
