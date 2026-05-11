@@ -464,7 +464,8 @@ struct ArgImpl : public OptionTag {
             ctx, ActionResult<std::optional<std::string_view>>::ok(
                      std::optional<std::string_view>{text}));
       } else {
-        return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+        return decltype(A)::invoke(ctx,
+                                   ActionResult<std::string_view>::ok(text));
       }
     }();
     if (invoke_result.has_error()) {
@@ -474,7 +475,8 @@ struct ArgImpl : public OptionTag {
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag(std::size_t arg_index, std::size_t nargs) -> ActionResult<void> {
+  auto invoke_flag(std::size_t arg_index, std::size_t nargs)
+      -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
