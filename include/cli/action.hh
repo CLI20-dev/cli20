@@ -183,34 +183,50 @@ struct ActionResult<void> {
 };
 
 /**
- * @brief Propagates a non-ok ActionResult to a different value type.
+ * @brief Helper functions for constructing `ActionResult` objects with type
+ * deduction.
  *
- * This preserves error versus ignore state while adapting the held value type.
- *
- * @tparam U The target value type.
- * @tparam T The source value type.
- * @param input The source result to propagate.
- * @return An `ActionResult<U>` carrying the same error or ignore state.
+ * @tparam T The value type of the `ActionResult` to construct.
+ * @param value The value to store in a success result.
+ * @return A successful `ActionResult<T>` holding `value`.
  */
-template <class U, class T>
-[[nodiscard]] constexpr auto propagate(const ActionResult<T>& input)
-    -> ActionResult<U> {
-  if (input.has_error()) return ActionResult<U>::fail(input.error);
-  return ActionResult<U>::ignore();
+template <class T>
+[[nodiscard]] constexpr auto ok(T&& value)
+    -> ActionResult<std::remove_cvref_t<T>> {
+  return ActionResult<std::remove_cvref_t<T>>::ok(std::forward<T>(value));
 }
 
 /**
- * @brief Propagates a non-ok ActionResult<void> to a different value type.
+ * @brief Helper function for constructing `ActionResult` objects with void
  *
- * @tparam U The target value type.
- * @param input The source result to propagate.
- * @return An `ActionResult<U>` carrying the same error or ignore state.
  */
-template <class U>
-[[nodiscard]] constexpr auto propagate(const ActionResult<void>& input)
-    -> ActionResult<U> {
-  if (input.has_error()) return ActionResult<U>::fail(input.error);
-  return ActionResult<U>::ignore();
+[[nodiscard]] constexpr auto ok() -> ActionResult<void> {
+  return ActionResult<void>::ok();
+}
+
+/**
+ * @brief Helper function for constructing a failure `ActionResult` with type
+ * deduction.
+ *
+ * @tparam T The value type of the `ActionResult` to construct.
+ * @param error The error to store in the failure result.
+ * @return A failed `ActionResult<T>` carrying `error`.
+ */
+template <class T>
+[[nodiscard]] constexpr auto fail(ParseError error) -> ActionResult<T> {
+  return ActionResult<T>::fail(std::move(error));
+}
+
+/**
+ * @brief Helper function for constructing an ignore `ActionResult` with type
+ * deduction.
+ *
+ * @tparam T The value type of the `ActionResult` to construct.
+ * @return An ignored `ActionResult<T>`.
+ */
+template <class T>
+[[nodiscard]] constexpr auto ignore() -> ActionResult<T> {
+  return ActionResult<T>::ignore();
 }
 
 /**
@@ -416,27 +432,23 @@ struct Action {
   template <class Arg, class Result>
   [[nodiscard]]
   static constexpr auto invoke(ActionCtx<Arg>& ctx, ActionResult<Result> input) {
-    return []<auto FnHead, auto... FnTail>(
-               ActionCtx<Arg>& ctx,
-               ActionResult<Result> input) -> decltype(auto) {
-      using Head = std::remove_cvref_t<decltype(FnHead)>;
-      using Next = typename Head::template after_type<Result>;
+    return
+        []<auto FnHead, auto... FnTail>(
+            ActionCtx<Arg>& ctx, ActionResult<Result> input) -> decltype(auto) {
+          if (input.is_ignored()) {
+            using FinalIdentity = std::remove_cvref_t<decltype(std::get<2>(
+                Action::template validate_impl<false, Result, FnHead,
+                                               FnTail...>()))>;
+            return ActionResult<typename FinalIdentity::type>::ignore();
+          }
 
-      if (input.is_ignored()) {
-        if constexpr (sizeof...(FnTail) == 0) {
-          return ActionResult<Next>::ignore();
-        } else {
-          return Action<FnTail...>::invoke(ctx, ActionResult<Next>::ignore());
-        }
-      }
-
-      auto next = FnHead(ctx, std::move(input));
-      if constexpr (sizeof...(FnTail) == 0) {
-        return next;
-      } else {
-        return Action<FnTail...>::invoke(ctx, std::move(next));
-      }
-    }.template operator()<Fns...>(ctx, std::move(input));
+          auto next = FnHead(ctx, std::move(input));
+          if constexpr (sizeof...(FnTail) == 0) {
+            return next;
+          } else {
+            return Action<FnTail...>::invoke(ctx, std::move(next));
+          }
+        }.template operator()<Fns...>(ctx, std::move(input));
   }
 
   template <class Arg, class Result>
@@ -446,15 +458,11 @@ struct Action {
     return []<auto FnHead, auto... FnTail>(
                const ActionCtx<Arg>& ctx,
                ActionResult<Result> input) -> decltype(auto) {
-      using Head = std::remove_cvref_t<decltype(FnHead)>;
-      using Next = typename Head::template after_type<Result>;
-
       if (input.is_ignored()) {
-        if constexpr (sizeof...(FnTail) == 0) {
-          return ActionResult<Next>::ignore();
-        } else {
-          return Action<FnTail...>::invoke(ctx, ActionResult<Next>::ignore());
-        }
+        using FinalIdentity = std::remove_cvref_t<decltype(std::get<2>(
+            Action::template validate_impl<false, Result, FnHead,
+                                           FnTail...>()))>;
+        return ActionResult<typename FinalIdentity::type>::ignore();
       }
 
       auto next = FnHead(ctx, std::move(input));
@@ -466,26 +474,31 @@ struct Action {
     }.template operator()<Fns...>(ctx, std::move(input));
   }
 
-  template <class Prev, auto FnHead, auto... FnTail>
+  template <bool EnableTailCheck, class Prev, auto FnHead, auto... FnTail>
   static constexpr auto validate_impl() {
     static_assert(
-        sizeof...(FnTail) != 0 ||
-            !std::same_as<typename std::remove_cvref_t<
-                              decltype(FnHead)>::template storage_type<Prev>,
-                          void>,
+        !EnableTailCheck ||
+            (sizeof...(FnTail) != 0 ||
+             !std::same_as<typename std::remove_cvref_t<
+                               decltype(FnHead)>::template storage_type<Prev>,
+                           void>),
         "The last action must have a non-void storage type");
 
     using Head = std::remove_cvref_t<decltype(FnHead)>;
     if constexpr (sizeof...(FnTail) == 0) {
-      return std::make_pair(
+      return std::make_tuple(
           Head::template accepts_input<Prev>,
-          std::type_identity<typename Head::template storage_type<Prev>>{});
+          std::type_identity<typename Head::template storage_type<Prev>>{},
+          std::type_identity<typename Head::template after_type<Prev>>{});
     } else {
       if constexpr (!Head::template accepts_input<Prev>) {
-        return std::make_pair(false, std::type_identity<void>{});
+        static_assert(Head::template accepts_input<Prev>,
+                      "Action step does not accept the previous step's output");
+        return std::make_tuple(false, std::type_identity<void>{},
+                               std::type_identity<void>{});
       } else {
         using Next = typename Head::template after_type<Prev>;
-        return validate_impl<Next, FnTail...>();
+        return validate_impl<EnableTailCheck, Next, FnTail...>();
       }
     }
   }
@@ -504,9 +517,9 @@ struct Action {
     using FirstFn = typename FirstFnType<Fns...>::type;
     if constexpr (FirstFn::template accepts_input<
                       std::optional<std::string_view>>) {
-      return validate_impl<std::optional<std::string_view>, Fns...>();
+      return validate_impl<true, std::optional<std::string_view>, Fns...>();
     } else {
-      return validate_impl<std::string_view, Fns...>();
+      return validate_impl<true, std::string_view, Fns...>();
     }
   }
 };
@@ -522,7 +535,8 @@ struct Action<> {
   }
 
   static constexpr auto validate() -> auto {
-    return std::make_pair(true, std::type_identity<std::monostate>{});
+    return std::make_tuple(true, std::type_identity<std::monostate>{},
+                           std::type_identity<std::monostate>{});
   }
 };
 
@@ -626,7 +640,7 @@ struct Integer {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return propagate<T>(input);
+    if (!input.have_value()) return fail<T>(input.error);
     T result{};
     auto r = std::from_chars(input.value.data(),
                              input.value.data() + input.value.size(), result);
@@ -649,7 +663,7 @@ struct Integer {
           "unexpected trailing characters"));
     }
 
-    return ActionResult<T>::ok(result);
+    return ok(result);
   }
 };
 
@@ -678,7 +692,7 @@ struct Floating {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return propagate<T>(input);
+    if (!input.have_value()) return fail<T>(input.error);
     T result{};
     auto r = std::from_chars(input.value.data(),
                              input.value.data() + input.value.size(), result);
@@ -701,7 +715,7 @@ struct Floating {
           "unexpected trailing characters"));
     }
 
-    return ActionResult<T>::ok(result);
+    return ok(result);
   }
 };
 
@@ -721,8 +735,8 @@ struct String {
   constexpr auto operator()(ActionCtx<void>,
                             ActionResult<std::string_view> input) const
       -> ActionResult<std::string> {
-    if (!input.have_value()) return propagate<std::string>(input);
-    return ActionResult<std::string>::ok(std::string(input.value));
+    if (!input.have_value()) return fail<std::string>(input.error);
+    return ok(std::string(input.value));
   }
 };
 
@@ -747,13 +761,13 @@ struct Bool {
   constexpr auto operator()(ActionCtx<void> ctx,
                             ActionResult<std::string_view> input) const
       -> ActionResult<bool> {
-    if (!input.have_value()) return propagate<bool>(input);
+    if (!input.have_value()) return fail<bool>(input.error);
     const std::string_view val = input.value;
     if (val == "true" || val == "1") {
-      return ActionResult<bool>::ok(true);
+      return ok(true);
     }
     if (val == "false" || val == "0") {
-      return ActionResult<bool>::ok(false);
+      return ok(false);
     }
     return ActionResult<bool>::fail(detail::invalid_value_error(
         ErrorKind::conversion, ctx.index, std::string(input.value),
@@ -777,9 +791,8 @@ struct Path {
 
   auto operator()(ActionCtx<void>, ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return propagate<std::filesystem::path>(input);
-    return ActionResult<std::filesystem::path>::ok(
-        std::filesystem::path{input.value});
+    if (!input.have_value()) return fail<std::filesystem::path>(input.error);
+    return ok(std::filesystem::path{input.value});
   }
 };
 
@@ -803,7 +816,7 @@ struct ExistingFile {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return propagate<std::filesystem::path>(input);
+    if (!input.have_value()) return fail<std::filesystem::path>(input.error);
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) ||
         !std::filesystem::is_regular_file(path)) {
@@ -812,7 +825,7 @@ struct ExistingFile {
                                       path.string(),
                                       "expected an existing regular file"));
     }
-    return ActionResult<std::filesystem::path>::ok(std::move(path));
+    return ok(std::move(path));
   }
 };
 
@@ -836,7 +849,7 @@ struct ExistingDirectory {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<std::filesystem::path> {
-    if (!input.have_value()) return propagate<std::filesystem::path>(input);
+    if (!input.have_value()) return fail<std::filesystem::path>(input.error);
     auto path = std::filesystem::path{input.value};
     if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path)) {
       return ActionResult<std::filesystem::path>::fail(
@@ -844,7 +857,7 @@ struct ExistingDirectory {
                                       path.string(),
                                       "expected an existing directory"));
     }
-    return ActionResult<std::filesystem::path>::ok(std::move(path));
+    return ok(std::move(path));
   }
 };
 
@@ -873,9 +886,9 @@ struct Choice {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::string_view> input) const
       -> ActionResult<T> {
-    if (!input.have_value()) return propagate<T>(input);
+    if (!input.have_value()) return fail<T>(input.error);
     if (auto value = Mapper(input.value); value.has_value()) {
-      return ActionResult<T>::ok(*std::move(value));
+      return ok(*std::move(value));
     }
     return ActionResult<T>::fail(
         detail::invalid_choice_error(ctx.index, std::string(input.value)));
@@ -930,15 +943,14 @@ struct Negatable {
   constexpr auto operator()(ActionCtx<void>,
                             ActionResult<std::string_view> input) const
       -> ActionResult<NegatableResult> {
-    if (!input.have_value()) return propagate<NegatableResult>(input);
+    if (!input.have_value()) return fail<NegatableResult>(input.error);
     constexpr std::string_view prefix = Prefix.view();
     const std::string_view val = input.value;
     if (val.starts_with(prefix)) {
-      return ActionResult<NegatableResult>::ok(NegatableResult{
-          .name = std::string(val.substr(prefix.size())), .enabled = false});
+      return ok(NegatableResult{.name = std::string(val.substr(prefix.size())),
+                                .enabled = false});
     }
-    return ActionResult<NegatableResult>::ok(
-        NegatableResult{.name = std::string(val), .enabled = true});
+    return ok(NegatableResult{.name = std::string(val), .enabled = true});
   }
 };
 
@@ -978,15 +990,15 @@ struct DefaultMissingValue {
   auto operator()(ActionCtx<void> ctx,
                   ActionResult<std::optional<std::string_view>> input) const
       -> ActionResult<std::string_view> {
-    if (!input.have_value()) return propagate<std::string_view>(input);
+    if (!input.have_value()) return fail<std::string_view>(input.error);
     if (input.value.has_value()) {
       // actual value provided: unwrap and pass through
-      return ActionResult<std::string_view>::ok(*input.value);
+      return ok(std::string_view(*input.value));
     }
     // nullopt: flag invocation
     if (ctx.nargs == 0) {
       // pure flag with no value: inject the compile-time default
-      return ActionResult<std::string_view>::ok(Value.view());
+      return ok(Value.view());
     }
     // flag seen but a value is coming via separate value invocation: ignore
     return ActionResult<std::string_view>::ignore();
@@ -1462,9 +1474,9 @@ struct SetTrue {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get() = true;
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1482,9 +1494,9 @@ struct SetFalse {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get() = false;
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1502,9 +1514,9 @@ struct Toggle {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get() = !ctx.arg.get();
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1522,9 +1534,9 @@ struct Increment {
   template <class T>
   auto operator()(ActionCtx<std::size_t> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ++ctx.arg.get();
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1579,13 +1591,13 @@ struct SetOnce {
   template <class T>
   auto operator()(ActionCtx<detail::decay_t<T>> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     if (ctx.occurrences > 1) {
       return ActionResult<void>::fail(detail::duplicate_argument_error(
           ctx.index, detail::to_error_subject(input.value)));
     }
     ctx.arg.get() = std::move(input.value);
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1609,14 +1621,14 @@ struct PushUnique {
   template <class T>
   auto operator()(ActionCtx<std::vector<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     auto& values = ctx.arg.get();
     if (std::ranges::find(values, input.value) != values.end()) {
       return ActionResult<void>::fail(detail::duplicate_argument_error(
           ctx.index, detail::to_error_subject(input.value)));
     }
     values.push_back(std::move(input.value));
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1640,9 +1652,9 @@ struct Push {
   template <class T>
   auto operator()(ActionCtx<std::vector<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get().push_back(std::move(input.value));
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1667,9 +1679,9 @@ struct Insert {
   template <class T>
   auto operator()(ActionCtx<std::set<detail::decay_t<T>>> ctx,
                   ActionResult<T> input) const -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get().insert(std::move(input.value));
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1697,10 +1709,10 @@ struct InsertOrAssign {
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     auto&& [key, value] = input.value;
     ctx.arg.get().insert_or_assign(key, value);
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1720,12 +1732,12 @@ struct Extend {
   template <class T>
   auto operator()(ActionCtx<storage_type<T>> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     auto& out = ctx.arg.get();
     for (auto&& value : input.value) {
       out.emplace_back(value);
     }
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1749,9 +1761,9 @@ struct MarkPresent {
   template <class T>
   auto operator()(ActionCtx<bool> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     ctx.arg.get() = true;
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1777,10 +1789,10 @@ struct StoreInto {
 
   auto operator()(ActionCtx<T*> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     if (T* ptr = ctx.arg.get(); ptr != nullptr) {
       *ptr = std::move(input.value);
-      return ActionResult<void>::ok();
+      return ok();
     }
     return ActionResult<void>::fail(detail::validation_failed_error(
         ctx.index, "write_to",
@@ -1816,7 +1828,7 @@ struct Callback {
   template <class T>
   auto operator()(ActionCtx<std::monostate> ctx, ActionResult<T> input) const
       -> ActionResult<void> {
-    if (!input.have_value()) return propagate<void>(input);
+    if (!input.have_value()) return fail<void>(input.error);
     if constexpr (requires { Fn(ctx, input.value); }) {
       Fn(ctx, input.value);
     } else if constexpr (requires { Fn(input.value); }) {
@@ -1824,7 +1836,7 @@ struct Callback {
     } else {
       Fn();
     }
-    return ActionResult<void>::ok();
+    return ok();
   }
 };
 
@@ -1872,9 +1884,8 @@ struct PrintHelp {
   template <class Arg, class T>
   auto operator()(ActionCtx<Arg>, ActionResult<T> input) const
       -> ActionResult<after_type<T>> {
-    if (!input.have_value()) return propagate<after_type<T>>(input);
-    return ActionResult<after_type<T>>::ok(
-        after_type<T>{.value = std::move(input.value)});
+    if (!input.have_value()) return fail<after_type<T>>(input.error);
+    return ok(after_type<T>{.value = std::move(input.value)});
   }
 };
 
