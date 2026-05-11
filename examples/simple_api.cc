@@ -19,9 +19,9 @@ auto main(int argc, char* argv[]) -> int {
   if (args.verbose.value()) {
     std::cout << "verbose: true\n";
   }
-  if (args.output.value()) {
-    std::cout << "output: " << *args.output.value() << '\n';
+  if (args.output) {
+    std::cout << "output: " << *args.output << '\n';
   }
-  std::cout << "input: " << *args.input.value() << '\n';
+  std::cout << "input: " << *args.input << '\n';
   return 0;
 }

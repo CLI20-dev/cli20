@@ -22,8 +22,8 @@ auto main(int argc, char* argv[]) -> int {
 #endif
   const auto args = cli::parse_or_exit<Args>(argc, argv);
 
-  if (const auto& v = args.name.value(); v.has_value()) {
-    std::cout << "name=" << *v << '\n';
+  if (args.name) {
+    std::cout << "name=" << *args.name << '\n';
   }
   for (const auto& f : args.files.value()) {
     std::cout << "file=" << f << '\n';

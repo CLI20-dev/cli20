@@ -45,11 +45,11 @@ using FilesField =
     std::remove_cvref_t<decltype(std::declval<SugarArgs>().files)>;
 
 static_assert(std::same_as<VerboseField::value_type, bool>);
-static_assert(std::same_as<CountField::value_type, std::optional<int>>);
+static_assert(std::same_as<CountField::value_type, int>);
 static_assert(std::same_as<IncludesField::value_type, std::vector<std::string>>);
 static_assert(std::same_as<FilesField::value_type, std::vector<std::string>>);
-static_assert(std::same_as<cli::Positional<std::string>::value_type,
-                           std::optional<std::string>>);
+static_assert(
+    std::same_as<cli::Positional<std::string>::value_type, std::string>);
 static_assert(
     std::same_as<cli::ListOption<int, "ports">::value_type, std::vector<int>>);
 
@@ -65,19 +65,19 @@ TEST(Sugar, ParsesConvenienceAliases) {
 
   ASSERT_TRUE(result.has_value()) << result.error.message();
   EXPECT_TRUE(result.value.verbose.value());
-  ASSERT_TRUE(result.value.count.value().has_value());
-  EXPECT_EQ(*result.value.count.value(), 3);
+  ASSERT_TRUE(result.value.count);
+  EXPECT_EQ(*result.value.count, 3);
   EXPECT_EQ((result.value.includes.value()),
             (std::vector<std::string>{"inc/a", "inc/b"}));
   EXPECT_EQ((result.value.files.value()),
             (std::vector<std::string>{"main.cc", "util.cc"}));
   EXPECT_TRUE(result.value.build.provided());
   EXPECT_TRUE(result.value.build.release.value());
-  ASSERT_TRUE(result.value.build.jobs.value().has_value());
-  EXPECT_EQ(*result.value.build.jobs.value(), 8);
+  ASSERT_TRUE(result.value.build.jobs);
+  EXPECT_EQ(*result.value.build.jobs, 8);
 }
 
-TEST(Sugar, SinglePositionalStoresOptionalValue) {
+TEST(Sugar, SinglePositionalStoresValue) {
   struct SinglePositionalArgs {
     cli::Positional<std::string> file{
         {.help = "Input file", .presence = cli::required}};
@@ -88,8 +88,8 @@ TEST(Sugar, SinglePositionalStoresOptionalValue) {
       std::span<const std::string_view>(args), 1);
 
   ASSERT_TRUE(result.has_value());
-  ASSERT_TRUE(result.value.file.value().has_value());
-  EXPECT_EQ(*result.value.file.value(), "input.txt");
+  ASSERT_TRUE(result.value.file);
+  EXPECT_EQ(*result.value.file, "input.txt");
 }
 
 TEST(Sugar, RequiredAliasStillEnforcesPresence) {
@@ -122,8 +122,8 @@ TEST(Sugar, DefaultMissingValueSupportsFlagAndExplicitValue) {
         std::span<const std::string_view>(args), 1);
 
     ASSERT_TRUE(result.has_value());
-    ASSERT_TRUE(result.value.mode.value().has_value());
-    EXPECT_EQ(*result.value.mode.value(), "auto");
+    ASSERT_TRUE(result.value.mode);
+    EXPECT_EQ(*result.value.mode, "auto");
   }
 
   {
@@ -132,7 +132,33 @@ TEST(Sugar, DefaultMissingValueSupportsFlagAndExplicitValue) {
         std::span<const std::string_view>(args), 1);
 
     ASSERT_TRUE(result.has_value());
-    ASSERT_TRUE(result.value.mode.value().has_value());
-    EXPECT_EQ(*result.value.mode.value(), "manual");
+    ASSERT_TRUE(result.value.mode);
+    EXPECT_EQ(*result.value.mode, "manual");
   }
+}
+
+TEST(Sugar, ValueOptionExposesOptionalLikeApi) {
+  struct DefaultArgs {
+    cli::IntOption<"jobs", 'j'> jobs{{.default_value = 4}};
+    cli::StringOption<"name", 'n'> name;
+  };
+
+  auto args = argv({"prog"});
+  auto result = cli::Parser<DefaultArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_value());
+  EXPECT_FALSE(result.value.jobs.provided());
+  EXPECT_EQ(result.value.jobs.occurrences(), 0U);
+  EXPECT_TRUE(result.value.jobs);
+  EXPECT_EQ(*result.value.jobs, 4);
+  EXPECT_EQ(result.value.jobs.value_or(1), 4);
+  auto as_optional = static_cast<std::optional<int>>(result.value.jobs);
+  ASSERT_TRUE(as_optional.has_value());
+  EXPECT_EQ(*as_optional, 4);
+
+  EXPECT_FALSE(result.value.name);
+  EXPECT_EQ(result.value.name.value_or("fallback"), "fallback");
+  auto missing = static_cast<std::optional<std::string>>(result.value.name);
+  EXPECT_FALSE(missing.has_value());
 }

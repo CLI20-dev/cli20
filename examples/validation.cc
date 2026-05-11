@@ -28,10 +28,10 @@ struct Args {
 auto main(int argc, char* argv[]) -> int {
   const auto args = cli::parse_or_exit<Args>(argc, argv);
 
-  std::cout << "port: " << *args.port.value() << '\n';
-  std::cout << "profile: " << *args.profile.value() << '\n';
-  if (args.output.value()) {
-    std::cout << "output: " << args.output.value()->string() << '\n';
+  std::cout << "port: " << *args.port << '\n';
+  std::cout << "profile: " << *args.profile << '\n';
+  if (args.output) {
+    std::cout << "output: " << args.output->string() << '\n';
   }
   return 0;
 }

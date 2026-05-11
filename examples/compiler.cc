@@ -46,7 +46,7 @@ auto main(int argc, char* argv[]) -> int {
   const auto args = cli::parse_or_exit<Args>(argc, argv);
 
   if (args.optimize.value()) {
-    std::cout << "optimize: -O" << *args.optimize.value() << '\n';
+    std::cout << "optimize: -O" << *args.optimize << '\n';
   }
 
   if (const std::size_t v = args.verbose.value(); v > 0) {

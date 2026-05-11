@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,10 +35,7 @@ TEST(Callback, CalledForIntOption) {
   int captured = -1;
   CallbackIntArgs args;
   args.count = cli::IntOption<"count", 'c'>{{
-      .on_parse =
-          [&captured](const std::optional<int>& v) {
-            if (v) captured = *v;
-          },
+      .on_parse = [&captured](const int& v) { captured = v; },
   }};
 
   auto args_vec = argv({"prog", "--count", "42"});
@@ -132,7 +128,7 @@ TEST(Callback, NotCalledOnParseError) {
   int call_count = 0;
   CallbackIntArgs args;
   args.count = cli::IntOption<"count", 'c'>{{
-      .on_parse = [&call_count](const std::optional<int>&) { ++call_count; },
+      .on_parse = [&call_count](const int&) { ++call_count; },
   }};
 
   auto args_vec = argv({"prog", "--count", "notanint"});

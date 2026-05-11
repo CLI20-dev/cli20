@@ -11,9 +11,9 @@ namespace fs = std::filesystem;
 
 namespace {
 
+using cli::Action;
 using cli::ActionCtx;
 using cli::ActionResult;
-using cli::Action;
 using cli::ErrorCode;
 using cli::conversion::Bool;
 using cli::conversion::DefaultMissingValue;

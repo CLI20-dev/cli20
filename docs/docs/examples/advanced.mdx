@@ -30,9 +30,8 @@ This example builds parsing behavior from explicit conversion, validation, and
 storage steps instead of the higher-level aliases. It is the pattern to copy
 when you need lists, uniqueness, filesystem checks, or a runtime default for
 an option value with precise control over how values are stored. On success, it
-produces optional `config`, `jobs` with a default of `1` (or a
-`nproc_dummy()` value when `-j` is provided without a value), plus collected
-`includes` and `defines`.
+produces optional `config`, `jobs` with a default of `1` (`-j` with no value
+uses a `nproc_dummy()` value), plus collected `includes` and `defines`.
 
 ## Try It
 
@@ -54,11 +53,13 @@ Things to try:
 
 - **Happy path** — `--config config.toml -I /include -D DEBUG`
 - **Default jobs** — `--config config.toml` to see the `1` default
-- **Explicit jobs** — `--config config.toml --jobs 8` to override the runtime default
+- **Runtime default** — `--config config.toml -j` to see `nproc_dummy()` return `4`
+- **Explicit jobs** — `--config config.toml -j 8` to override the runtime default
+- **Duplicate jobs** — `--config config.toml -j -j` to see duplicate detection fail
 - **Multiple defines** — `--config config.toml -D FOO -D BAR -D FOO` to see `push_unique` deduplicate
 - **Directory as config** — `--config /configs` to see `is_regular_file` reject it
-- **Out-of-range jobs** — `--config config.toml --jobs 99` to see range validation fail
-- **Missing jobs value** — `--config config.toml --jobs` to see the example fall back to `nproc_dummy()`
+- **Out-of-range jobs** — `--config config.toml -j 99` to see range validation fail
+- **Missing jobs value** — `--config config.toml -j` to see the example fall back to `nproc_dummy()`
 - **Missing parent** — `-I /usr/include` to see `parent_exists` fail (`/usr` doesn't exist in the virtual FS)
 - **Help** — `-h` or `--help`
 

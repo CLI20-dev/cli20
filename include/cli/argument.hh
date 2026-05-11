@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -378,7 +379,8 @@ template <class T>
 struct ArgParameter {
   std::string_view help{};  ///< Help text shown in `--help` output.
   Presence presence{Presence::optional};  ///< Whether the argument is required.
-  T default_value{};  ///< Default value when the argument is absent.
+  std::optional<T>
+      default_value{};  ///< Default value when the argument is absent.
   std::function<void(const T&)>
       on_parse{};          ///< Callback invoked once after parsing completes.
   std::string_view env{};  ///< Environment variable name to fall back to when
@@ -403,7 +405,8 @@ struct ArgImpl : public OptionTag {
       : help(param.help),
         presence(param.presence),
         env(param.env),
-        value_(param.default_value),
+        default_value(param.default_value),
+        value_(param.default_value.value_or(value_type{})),
         on_parse_(std::move(param.on_parse)) {}
 
   // Convenience constructor for StoreInto variants (value_type == T*).
@@ -435,7 +438,7 @@ struct ArgImpl : public OptionTag {
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view env{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  value_type default_value{};
+  std::optional<value_type> default_value{};
 
   static constexpr auto name = Name;
   static constexpr auto short_name = ShortName;
@@ -448,9 +451,9 @@ struct ArgImpl : public OptionTag {
 
   // Called once per value token associated with this option.
   auto invoke_action(std::string_view text, std::size_t arg_index,
-                     std::size_t occurrence_nargs, std::size_t value_index)
-      -> ActionResult<void> {
-    provided_ = true;
+                     std::size_t occurrence_nargs, std::size_t value_index,
+                     bool mark_provided = true) -> ActionResult<void> {
+    if (mark_provided) provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
@@ -460,7 +463,7 @@ struct ArgImpl : public OptionTag {
         .arg = std::ref(value_),
     };
     ++total_values_;
-    auto invoke_result = [&] {
+    auto invoke_result = [&]() -> auto {
       if constexpr (decltype(A)::entry_is_optional) {
         return decltype(A)::invoke(
             ctx, ActionResult<std::optional<std::string_view>>::ok(
@@ -473,13 +476,14 @@ struct ArgImpl : public OptionTag {
     if (invoke_result.has_error()) {
       return ActionResult<void>::fail(std::move(invoke_result.error));
     }
+    if (invoke_result.has_value()) value_present_ = true;
     return ActionResult<void>::ok();
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag(std::size_t arg_index, std::size_t occurrence_nargs)
-      -> ActionResult<void> {
-    provided_ = true;
+  auto invoke_flag(std::size_t arg_index, std::size_t occurrence_nargs,
+                   bool mark_provided = true) -> ActionResult<void> {
+    if (mark_provided) provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
@@ -488,7 +492,7 @@ struct ArgImpl : public OptionTag {
         .total_values = total_values_,
         .arg = std::ref(value_),
     };
-    auto invoke_result = [&] {
+    auto invoke_result = [&]() -> auto {
       if constexpr (decltype(A)::entry_is_optional) {
         return decltype(A)::invoke(
             ctx, ActionResult<std::optional<std::string_view>>::ok(
@@ -501,6 +505,7 @@ struct ArgImpl : public OptionTag {
     if (invoke_result.has_error()) {
       return ActionResult<void>::fail(std::move(invoke_result.error));
     }
+    if (invoke_result.has_value()) value_present_ = true;
     return ActionResult<void>::ok();
   }
 
@@ -512,6 +517,25 @@ struct ArgImpl : public OptionTag {
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
   [[nodiscard]] auto value() -> value_type& { return value_; }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
+  [[nodiscard]] auto occurrences() const -> std::size_t {
+    return occurrence_count_;
+  }
+  [[nodiscard]] explicit operator bool() const { return value_present_; }
+  [[nodiscard]] auto operator*() -> value_type& { return value_; }
+  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
+  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
+  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
+
+  template <class U>
+  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
+    if (value_present_) return value_;
+    return static_cast<value_type>(std::forward<U>(fallback));
+  }
+
+  [[nodiscard]] explicit operator std::optional<value_type>() const {
+    if (value_present_) return value_;
+    return std::nullopt;
+  }
 
  private:
   template <ArgumentSpec>
@@ -522,6 +546,7 @@ struct ArgImpl : public OptionTag {
   std::size_t occurrence_count_{};  // times the option token appeared
   std::size_t total_values_{};      // total values across all occurrences
   bool provided_{};
+  bool value_present_{default_value.has_value()};
 };
 
 template <auto A>
@@ -582,14 +607,15 @@ struct PositionalImpl : public PositionalTag {
   PositionalImpl(ArgParameter<value_type> param)
       : help(param.help),
         presence(param.presence),
-        value_(param.default_value),
+        default_value(param.default_value),
+        value_(param.default_value.value_or(value_type{})),
         on_parse_(std::move(param.on_parse)) {}
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   std::string_view help{};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
   cli::Presence presence{Presence::optional};
   // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  value_type default_value{};
+  std::optional<value_type> default_value{};
 
   static constexpr auto nargs = N;
   static constexpr bool entry_is_optional =
@@ -600,6 +626,7 @@ struct PositionalImpl : public PositionalTag {
                      std::size_t occurrence_nargs = 1,
                      std::size_t value_index = 0) -> ActionResult<void> {
     provided_ = true;
+    ++occurrence_count_;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
@@ -608,13 +635,13 @@ struct PositionalImpl : public PositionalTag {
         .total_values = total_values_,
         .arg = std::ref(value_),
     };
-    ++occurrence_count_;
     ++total_values_;
     auto result =
         decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
     if (result.has_error()) {
       return ActionResult<void>::fail(std::move(result.error));
     }
+    if (result.has_value()) value_present_ = true;
     return ActionResult<void>::ok();
   }
 
@@ -626,6 +653,25 @@ struct PositionalImpl : public PositionalTag {
   [[nodiscard]] auto value() const -> const value_type& { return value_; }
   [[nodiscard]] auto value() -> value_type& { return value_; }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
+  [[nodiscard]] auto occurrences() const -> std::size_t {
+    return occurrence_count_;
+  }
+  [[nodiscard]] explicit operator bool() const { return value_present_; }
+  [[nodiscard]] auto operator*() -> value_type& { return value_; }
+  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
+  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
+  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
+
+  template <class U>
+  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
+    if (value_present_) return value_;
+    return static_cast<value_type>(std::forward<U>(fallback));
+  }
+
+  [[nodiscard]] explicit operator std::optional<value_type>() const {
+    if (value_present_) return value_;
+    return std::nullopt;
+  }
 
  private:
   template <ArgumentSpec>
@@ -636,6 +682,7 @@ struct PositionalImpl : public PositionalTag {
   std::size_t occurrence_count_{};  // times a value was provided
   std::size_t total_values_{};      // total values across all invocations
   bool provided_{};
+  bool value_present_{default_value.has_value()};
 };
 
 /**
@@ -836,11 +883,10 @@ using Help =
     Arg<Name, ShortName, action::print_help | action::exit_success, nargs::none>;
 
 /**
- * @brief A single-value option that stores the parsed result in
- * `std::optional<T>`.
+ * @brief A single-value option that stores the parsed result in `T`.
  *
- * Storage type: `std::optional<T>`. Present when the option was supplied on
- * the command line, absent (nullopt) otherwise.
+ * Storage type: `T`. Use `operator bool()` to check whether a value is present
+ * and `provided()` / `occurrences()` to check command-line occurrences.
  *
  * @tparam T         The value type to parse (e.g. `int`, `std::string`).
  * @tparam Name      Long option name.
@@ -867,8 +913,7 @@ using ListOption = Arg<Name, ShortName, detail::ActionFor<T>::push, N>;
 /**
  * @brief A typed positional argument.
  *
- * Storage type: `std::optional<T>` for `N.max == 1`, `std::vector<T>` for
- * multi-value.
+ * Storage type: `T` for `N.max == 1`, `std::vector<T>` for multi-value.
  *
  * @tparam T The value type to parse.
  * @tparam N `Nargs` descriptor. Default: `nargs::one`.

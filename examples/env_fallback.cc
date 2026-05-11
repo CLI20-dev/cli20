@@ -38,10 +38,10 @@ auto main(int argc, char* argv[]) -> int {
   if (args.verbose.value()) {
     std::cout << "verbose: true\n";
   }
-  std::cout << "threads: " << *args.threads.value() << '\n';
-  if (const auto& cfg = args.config.value()) {
-    std::cout << "config: " << *cfg << '\n';
+  std::cout << "threads: " << *args.threads << '\n';
+  if (args.config) {
+    std::cout << "config: " << *args.config << '\n';
   }
-  std::cout << "job: " << *args.job.value() << '\n';
+  std::cout << "job: " << *args.job << '\n';
   return 0;
 }

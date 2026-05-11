@@ -2,7 +2,6 @@
 #include <iostream>
 #include <optional>
 #include <string_view>
-#include <type_traits>
 
 #include "cli/argument.hh"
 #include "cli/parser.hh"
@@ -18,10 +17,10 @@ auto nproc_dummy() -> int {
 struct JobsOrNproc {
   template <class Input>
   static constexpr bool accepts_input =
-      std::same_as<std::remove_cvref_t<Input>, std::optional<std::string_view>>;
+      cli::deduce_accepts_input<JobsOrNproc, Input>;
 
   template <class Input>
-  using after_type = int;
+  using after_type = cli::deduce_after_type<JobsOrNproc, Input>;
 
   template <class Prev>
   using storage_type = void;
@@ -31,8 +30,8 @@ struct JobsOrNproc {
       -> cli::ActionResult<int> {
     if (!input.have_value()) return cli::propagate<int>(input);
     if (input.value.has_value()) {
-      return cli::conversion::Integer<int>{}(
-          ctx, cli::ActionResult<std::string_view>::ok(*input.value));
+      return cli::conversion::integer<int>.invoke(
+          ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
     }
     return cli::ActionResult<int>::ok(nproc_dummy());
   }
@@ -56,8 +55,8 @@ struct Args {
            cli::Action<JobsOrNproc{}>{} | cli::validation::range<1, 64> |
                cli::pack::set_once,
            cli::nargs::zero_or_one>
-      jobs{{.help = "Parallel job count (default 1; -j uses nproc_dummy())",
-            .default_value = 1}};
+      jobs_arg{{.help = "Parallel job count (default 1; -j uses nproc_dummy())",
+                .default_value = 1}};
 
   cli::Arg<"include", 'I',
            cli::conversion::path | cli::validation::parent_exists |
@@ -75,10 +74,8 @@ struct Args {
 auto main(int argc, char* argv[]) -> int {
   const auto args = cli::parse_or_exit<Args>(argc, argv);
 
-  std::cout << "config: " << args.config.value()->string() << '\n';
-  if (args.jobs.value()) {
-    std::cout << "jobs: " << *args.jobs.value() << '\n';
-  }
+  std::cout << "config: " << args.config->string() << '\n';
+  std::cout << "jobs: " << *args.jobs_arg << '\n';
   for (const fs::path& include_dir : args.includes.value()) {
     std::cout << "include: " << include_dir.string() << '\n';
   }
