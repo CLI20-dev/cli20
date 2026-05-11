@@ -5,6 +5,5 @@ var searchData=
   ['pass_2',['pass',['../structcli_1_1ConstraintResult.html#a7aa6c5ddb55190bba0c1a911bdeee61c',1,'cli::ConstraintResult']]],
   ['positionalimpl_3',['PositionalImpl',['../structcli_1_1PositionalImpl.html#aae78ab785cc3b61f5783570d1d40422d',1,'cli::PositionalImpl::PositionalImpl()'],['../structcli_1_1PositionalImpl.html#ae67f69a9206543d903d5a637d088fd98',1,'cli::PositionalImpl::PositionalImpl(ArgParameter&lt; value_type &gt; param)']]],
   ['program_5fname_4',['program_name',['../structcli_1_1Parser.html#a1a91cde7e7b6d268c26ab2d09976db6a',1,'cli::Parser']]],
-  ['propagate_5',['propagate',['../namespacecli.html#a827e1c94764ffdb189ecf1acf9808b28',1,'cli::propagate(const ActionResult&lt; T &gt; &amp;input) -&gt; ActionResult&lt; U &gt;'],['../namespacecli.html#a6fd0ec2ac18f99b784935feb1e4f99a5',1,'cli::propagate(const ActionResult&lt; void &gt; &amp;input) -&gt; ActionResult&lt; U &gt;']]],
-  ['provided_6',['provided',['../structcli_1_1PositionalImpl.html#a063753a2a3f1484297c28daed41b348b',1,'cli::PositionalImpl::provided()'],['../structcli_1_1Command.html#af8b7da523b5b4396f3c1cd3a9904fa93',1,'cli::Command::provided()']]]
+  ['provided_5',['provided',['../structcli_1_1PositionalImpl.html#a063753a2a3f1484297c28daed41b348b',1,'cli::PositionalImpl::provided()'],['../structcli_1_1Command.html#af8b7da523b5b4396f3c1cd3a9904fa93',1,'cli::Command::provided()']]]
 ];

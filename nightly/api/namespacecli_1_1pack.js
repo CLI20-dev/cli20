@@ -14,6 +14,7 @@ var namespacecli_1_1pack =
     [ "MarkPresent", "structcli_1_1pack_1_1MarkPresent.html", "structcli_1_1pack_1_1MarkPresent" ],
     [ "StoreInto", "structcli_1_1pack_1_1StoreInto.html", "structcli_1_1pack_1_1StoreInto" ],
     [ "Callback", "structcli_1_1pack_1_1Callback.html", "structcli_1_1pack_1_1Callback" ],
+    [ "CallbackInvocable", "conceptcli_1_1pack_1_1CallbackInvocable.html", null ],
     [ "callback", "namespacecli_1_1pack.html#adeecd921f590b75c6ec9bbe147c351e7", null ],
     [ "increment", "namespacecli_1_1pack.html#ac3c614ed516fe045fb91fcaec2b9fc40", null ],
     [ "insert", "namespacecli_1_1pack.html#a727e12c2519525ff1732452df0925d48", null ],

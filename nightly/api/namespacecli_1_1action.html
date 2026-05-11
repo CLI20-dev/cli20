@@ -108,6 +108,8 @@ $(function(){initNavTree('namespacecli_1_1action.html','',''); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:Custom" id="r_Custom"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1action_1_1Custom.html">Custom</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps a user-defined callable as a non-terminal action pipeline step.  <a href="structcli_1_1action_1_1Custom.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PrintHelp" id="r_PrintHelp"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1action_1_1PrintHelp.html">PrintHelp</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps the current value in a <span class="tt">HelpRequested&lt;T&gt;</span> sentinel type.  <a href="structcli_1_1action_1_1PrintHelp.html#details">More...</a><br /></td></tr>
 <tr class="memitem:ExitSuccess" id="r_ExitSuccess"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1action_1_1ExitSuccess.html">ExitSuccess</a></td></tr>
@@ -117,10 +119,38 @@ Classes</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:abc9367bf663b1ba499d91cdc93b85f84" id="r_abc9367bf663b1ba499d91cdc93b85f84"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#abc9367bf663b1ba499d91cdc93b85f84">print_help</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1action_1_1PrintHelp.html">PrintHelp</a>{}&gt;{}</td></tr>
 <tr class="memitem:af0bfecc35bf8faf12446cf007370022a" id="r_af0bfecc35bf8faf12446cf007370022a"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#af0bfecc35bf8faf12446cf007370022a">exit_success</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1action_1_1ExitSuccess.html">ExitSuccess</a>{}&gt;{}</td></tr>
+<tr class="memitem:aa9036759e5a494c11bb457f902ee5c31" id="r_aa9036759e5a494c11bb457f902ee5c31"><td class="memTemplParams" colspan="2">template&lt;auto Fn&gt; </td></tr>
+<tr class="memitem:aa9036759e5a494c11bb457f902ee5c31 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aa9036759e5a494c11bb457f902ee5c31">custom</a> = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1action_1_1Custom.html">Custom</a>&lt;Fn&gt;{}&gt;{}</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Actions that control the parser's control flow (help, exit). </p>
 </div><a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="aa9036759e5a494c11bb457f902ee5c31" name="aa9036759e5a494c11bb457f902ee5c31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9036759e5a494c11bb457f902ee5c31">&#9670;&#160;</a></span>custom</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;auto Fn&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::action::custom = <a class="el" href="structcli_1_1Action.html">Action</a>&lt;<a class="el" href="structcli_1_1action_1_1Custom.html">Custom</a>&lt;Fn&gt;{}&gt;{}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01986">1986</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+
+</div>
+</div>
 <a id="af0bfecc35bf8faf12446cf007370022a" name="af0bfecc35bf8faf12446cf007370022a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af0bfecc35bf8faf12446cf007370022a">&#9670;&#160;</a></span>exit_success</h2>
 
@@ -141,7 +171,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01920">1920</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01984">1984</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -165,7 +195,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01919">1919</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01983">1983</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

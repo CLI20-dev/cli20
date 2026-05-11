@@ -17,6 +17,7 @@ var hierarchy =
     [ "cli::conversion::Choice&lt; T, Mapper &gt;", "structcli_1_1conversion_1_1Choice.html", null ],
     [ "cli::CommandParameter", "structcli_1_1CommandParameter.html", null ],
     [ "cli::ConstraintResult", "structcli_1_1ConstraintResult.html", null ],
+    [ "cli::action::Custom&lt; Fn &gt;", "structcli_1_1action_1_1Custom.html", null ],
     [ "cli::conversion::DefaultMissingValue&lt; Value &gt;", "structcli_1_1conversion_1_1DefaultMissingValue.html", null ],
     [ "cli::conversion::ExistingDirectory", "structcli_1_1conversion_1_1ExistingDirectory.html", null ],
     [ "cli::conversion::ExistingFile", "structcli_1_1conversion_1_1ExistingFile.html", null ],

@@ -47,6 +47,7 @@ var annotated_dup =
         [ "Callback", "structcli_1_1pack_1_1Callback.html", "structcli_1_1pack_1_1Callback" ]
       ] ],
       [ "action", "namespacecli_1_1action.html", [
+        [ "Custom", "structcli_1_1action_1_1Custom.html", "structcli_1_1action_1_1Custom" ],
         [ "PrintHelp", "structcli_1_1action_1_1PrintHelp.html", "structcli_1_1action_1_1PrintHelp" ],
         [ "ExitSuccess", "structcli_1_1action_1_1ExitSuccess.html", "structcli_1_1action_1_1ExitSuccess" ]
       ] ],

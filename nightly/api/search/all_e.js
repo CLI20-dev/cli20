@@ -27,10 +27,9 @@ var searchData=
   ['print_5fhelp_24',['print_help',['../namespacecli_1_1action.html#abc9367bf663b1ba499d91cdc93b85f84',1,'cli::action']]],
   ['printhelp_25',['PrintHelp',['../structcli_1_1action_1_1PrintHelp.html',1,'cli::action']]],
   ['program_5fname_26',['program_name',['../structcli_1_1Parser.html#a1a91cde7e7b6d268c26ab2d09976db6a',1,'cli::Parser']]],
-  ['propagate_27',['propagate',['../namespacecli.html#a827e1c94764ffdb189ecf1acf9808b28',1,'cli::propagate(const ActionResult&lt; T &gt; &amp;input) -&gt; ActionResult&lt; U &gt;'],['../namespacecli.html#a6fd0ec2ac18f99b784935feb1e4f99a5',1,'cli::propagate(const ActionResult&lt; void &gt; &amp;input) -&gt; ActionResult&lt; U &gt;']]],
-  ['provided_28',['provided',['../structcli_1_1PositionalImpl.html#a063753a2a3f1484297c28daed41b348b',1,'cli::PositionalImpl::provided()'],['../structcli_1_1Command.html#af8b7da523b5b4396f3c1cd3a9904fa93',1,'cli::Command::provided()']]],
-  ['push_29',['Push',['../structcli_1_1pack_1_1Push.html',1,'cli::pack']]],
-  ['push_30',['push',['../namespacecli_1_1pack.html#a96845f625a5575985c9d694699a41483',1,'cli::pack']]],
-  ['push_5funique_31',['push_unique',['../namespacecli_1_1pack.html#a9afa999a79e80003f325482452f2f134',1,'cli::pack']]],
-  ['pushunique_32',['PushUnique',['../structcli_1_1pack_1_1PushUnique.html',1,'cli::pack']]]
+  ['provided_27',['provided',['../structcli_1_1PositionalImpl.html#a063753a2a3f1484297c28daed41b348b',1,'cli::PositionalImpl::provided()'],['../structcli_1_1Command.html#af8b7da523b5b4396f3c1cd3a9904fa93',1,'cli::Command::provided()']]],
+  ['push_28',['Push',['../structcli_1_1pack_1_1Push.html',1,'cli::pack']]],
+  ['push_29',['push',['../namespacecli_1_1pack.html#a96845f625a5575985c9d694699a41483',1,'cli::pack']]],
+  ['push_5funique_30',['push_unique',['../namespacecli_1_1pack.html#a9afa999a79e80003f325482452f2f134',1,'cli::pack']]],
+  ['pushunique_31',['PushUnique',['../structcli_1_1pack_1_1PushUnique.html',1,'cli::pack']]]
 ];

@@ -123,14 +123,14 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a2e32239a4cfe1e81191ff0829352b81b" id="r_a2e32239a4cfe1e81191ff0829352b81b"><td class="memTemplParams" colspan="2">template&lt;class Prev&gt; </td></tr>
-<tr class="memitem:a2e32239a4cfe1e81191ff0829352b81b template"><td class="memItemLeft">static constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a2e32239a4cfe1e81191ff0829352b81b">accepts_input</a> = true</td></tr>
+<tr class="memitem:a2e32239a4cfe1e81191ff0829352b81b template"><td class="memItemLeft">static constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a2e32239a4cfe1e81191ff0829352b81b">accepts_input</a> = CallbackInvocable&lt;Fn, Prev&gt;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;auto Fn&gt;<br />
 struct cli::pack::Callback&lt; Fn &gt;</div><p>Invokes a compile-time callable <span class="tt">Fn</span> with the parsed value as a terminal action. </p>
 <p><span class="tt">Fn</span> may have any of the following signatures:</p><ul>
-<li><span class="tt">(<a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a>&lt;void&gt;, T value)</span> — receives context and value.</li>
-<li><span class="tt">(T value)</span> — receives value only.</li>
+<li><span class="tt">(<a class="el" href="structcli_1_1ActionCtx.html" title="Context passed to each action function during pipeline execution.">ActionCtx</a>&lt;std::monostate&gt;, T&amp;)</span> — receives context and value.</li>
+<li><span class="tt">(T&amp;)</span> — receives value only.</li>
 <li><span class="tt">()</span> — receives nothing.</li>
 </ul>
 <p>Storage type: <span class="tt">std::monostate</span> (no value is stored; the callback is the only effect).</p>
@@ -141,7 +141,7 @@ struct cli::pack::Callback&lt; Fn &gt;</div><p>Invokes a compile-time callable <
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01806">1806</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01828">1828</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a51b74a3c2feb6bf0ec20a82c927086e0" name="a51b74a3c2feb6bf0ec20a82c927086e0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a51b74a3c2feb6bf0ec20a82c927086e0">&#9670;&#160;</a></span>after_type</h2>
@@ -159,7 +159,7 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01811">1811</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01833">1833</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -179,7 +179,7 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01814">1814</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01836">1836</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -215,7 +215,7 @@ template&lt;class T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01817">1817</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01840">1840</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -234,7 +234,7 @@ template&lt;class Prev&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="structcli_1_1pack_1_1Callback.html">cli::pack::Callback</a>&lt; Fn &gt;::accepts_input = true</td>
+          <td class="memname">bool <a class="el" href="structcli_1_1pack_1_1Callback.html">cli::pack::Callback</a>&lt; Fn &gt;::accepts_input = CallbackInvocable&lt;Fn, Prev&gt;</td>
         </tr>
       </table>
   </td>
@@ -244,7 +244,7 @@ template&lt;class Prev&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01808">1808</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01830">1830</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
