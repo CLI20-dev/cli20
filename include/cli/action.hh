@@ -1783,7 +1783,7 @@ struct StoreInto {
       return ActionResult<void>::ok();
     }
     return ActionResult<void>::fail(detail::validation_failed_error(
-        ctx.index, "store_into",
+        ctx.index, "write_to",
         "target pointer is null; did you forget to call bind()?"));
   }
 };
@@ -1843,7 +1843,7 @@ inline constexpr auto mark_present = Action<MarkPresent{}>{};
 template <auto Fn>
 inline constexpr auto callback = Action<Callback<Fn>{}>{};
 template <class T>
-inline constexpr auto store_into = Action<StoreInto<T>{}>{};
+inline constexpr auto write_to = Action<StoreInto<T>{}>{};
 
 }  // namespace pack
 

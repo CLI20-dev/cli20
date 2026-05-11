@@ -121,7 +121,7 @@ TEST(StoreInto, UnboundOptionFailsValidation) {
   ASSERT_TRUE(result.has_error());
   EXPECT_EQ(result.error.code, cli::ErrorCode::validation_failed);
   EXPECT_EQ(result.error.kind, cli::ErrorKind::validation);
-  EXPECT_EQ(result.error.subject, "store_into");
+  EXPECT_EQ(result.error.subject, "write_to");
   EXPECT_EQ(result.error.detail,
             "target pointer is null; did you forget to call bind()?");
   EXPECT_EQ(result.error.position, 2);
@@ -146,7 +146,7 @@ TEST(StoreInto, MultipleVariablesBoundToSameArgs) {
 TEST(StoreInto, DirectArgWithStoreInto) {
   struct DirectArgs {
     cli::Arg<"port", 'p',
-             cli::conversion::integer<int> | cli::pack::store_into<int>>
+             cli::conversion::integer<int> | cli::pack::write_to<int>>
         port_opt;
   };
 

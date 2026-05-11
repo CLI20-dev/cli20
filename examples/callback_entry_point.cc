@@ -41,23 +41,21 @@ auto main(int argc, char* argv[]) -> int {
   Args args;
 
   args.verbose = cli::Flag<"verbose", 'v'>{{
-      .on_parse = [&state](const bool& value) { state.verbose = value; },
+      .on_parse = [&state](const bool& value) -> void { state.verbose = value; },
   }};
   args.jobs = cli::IntOption<"jobs", 'j'>{{
-      .on_parse = [&state](const int& value) { state.jobs = value; },
+      .on_parse = [&state](const int& value) -> void { state.jobs = value; },
   }};
   args.includes =
       cli::ListOption<std::string, "include", 'I', cli::nargs::exactly<1>>{{
-          .on_parse =
-              [&state](const std::vector<std::string>& value) {
-                state.includes = value;
-              },
+          .on_parse = [&state](const std::vector<std::string>& value) -> void {
+            state.includes = value;
+          },
       }};
   args.inputs = cli::Positional<std::string, cli::nargs::one_or_more>{{
-      .on_parse =
-          [&state](const std::vector<std::string>& value) {
-            state.inputs = value;
-          },
+      .on_parse = [&state](const std::vector<std::string>& value) -> void {
+        state.inputs = value;
+      },
   }};
 
   const auto result = cli::Parser<Args>{}.parse(std::move(args), argc, argv);

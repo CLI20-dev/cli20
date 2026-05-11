@@ -360,6 +360,9 @@ concept ArgumentSpec = requires {
   requires detail::positionals_have_variadic_at_end<T>();
 };
 
+template <ArgumentSpec T>
+struct Parser;
+
 /**
  * @brief Parameter bag used when constructing `ArgImpl` or `PositionalImpl` with
  * named fields.
@@ -400,22 +403,16 @@ template <StringLiteral Name, char ShortName, Nargs N, Action A>
 struct ArgImpl : public OptionTag {
   using value_type =
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
-  ArgImpl() = default;
-  ArgImpl(ArgParameter<value_type> param)
-      : help(param.help),
-        presence(param.presence),
-        env(param.env),
-        default_value(param.default_value),
-        value_(param.default_value.value_or(value_type{})),
-        on_parse_(std::move(param.on_parse)) {}
+  ArgImpl() : ArgImpl(ArgParameter<value_type>{}) {}
+  ArgImpl(ArgParameter<value_type> param) : param_(param) {}
 
   // Convenience constructor for StoreInto variants (value_type == T*).
-  explicit ArgImpl(std::remove_pointer_t<value_type>& ref)
+  ArgImpl(std::remove_pointer_t<value_type>& ref)
     requires std::is_pointer_v<value_type>
       : value_(&ref) {}
-  ArgImpl(std::remove_pointer_t<value_type>& ref, std::string_view help_text)
+  ArgImpl(std::remove_pointer_t<value_type>& ref, ArgParameter<value_type> param)
     requires std::is_pointer_v<value_type>
-      : help(help_text), value_(&ref) {}
+      : param_(param), value_(&ref) {}
 
   // Bind to an external variable after construction.
   // Allows: opt.bind(var)  or  opt = &var
@@ -431,18 +428,39 @@ struct ArgImpl : public OptionTag {
     value_ = ptr;
     return *this;
   }
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::string_view help{};
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  cli::Presence presence{Presence::optional};
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::string_view env{};
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::optional<value_type> default_value{};
 
   static constexpr auto name = Name;
   static constexpr auto short_name = ShortName;
   static constexpr auto nargs = N;
+
+  [[nodiscard]] auto value() const -> const value_type& { return value_; }
+  [[nodiscard]] auto value() -> value_type& { return value_; }
+  [[nodiscard]] auto provided() const -> bool { return provided_; }
+  [[nodiscard]] auto occurrences() const -> std::size_t {
+    return occurrence_count_;
+  }
+  [[nodiscard]] explicit operator bool() const { return value_present_; }
+  [[nodiscard]] auto operator*() -> value_type& { return value_; }
+  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
+  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
+  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
+
+  template <class U>
+  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
+    if (value_present_) return value_;
+    return static_cast<value_type>(std::forward<U>(fallback));
+  }
+
+  [[nodiscard]] explicit operator std::optional<value_type>() const {
+    if (value_present_) return value_;
+    return std::nullopt;
+  }
+
+  [[nodiscard]] auto help_text() const -> const std::string_view {
+    return param_.help;
+  }
+
+ protected:
   static constexpr bool entry_is_optional =
       std::remove_cvref_t<decltype(A)>::entry_is_optional;
 
@@ -510,43 +528,24 @@ struct ArgImpl : public OptionTag {
   }
 
   // Called once after all value tokens for one option occurrence are processed.
-  auto fire_on_parse() -> void {
-    if (on_parse_) on_parse_(value_);
+  auto on_parse() -> void {
+    if (param_.on_parse) param_.on_parse(value_);
   }
 
-  [[nodiscard]] auto value() const -> const value_type& { return value_; }
-  [[nodiscard]] auto value() -> value_type& { return value_; }
-  [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto occurrences() const -> std::size_t {
-    return occurrence_count_;
-  }
-  [[nodiscard]] explicit operator bool() const { return value_present_; }
-  [[nodiscard]] auto operator*() -> value_type& { return value_; }
-  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
-  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
-  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
-
-  template <class U>
-  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
-    if (value_present_) return value_;
-    return static_cast<value_type>(std::forward<U>(fallback));
+  [[nodiscard]] auto get_param() const -> const ArgParameter<value_type>& {
+    return param_;
   }
 
-  [[nodiscard]] explicit operator std::optional<value_type>() const {
-    if (value_present_) return value_;
-    return std::nullopt;
-  }
+  template <ArgumentSpec>
+  friend struct ::cli::Parser;
 
  private:
-  template <ArgumentSpec>
-  friend struct Parser;
-
+  std::size_t total_values_{};  // total values across all occurrences
+  ArgParameter<value_type> param_;
   value_type value_{};
-  std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times the option token appeared
-  std::size_t total_values_{};      // total values across all occurrences
   bool provided_{};
-  bool value_present_{default_value.has_value()};
+  bool value_present_{param_.default_value.has_value()};
 };
 
 template <auto A>
@@ -604,20 +603,47 @@ struct PositionalImpl : public PositionalTag {
       typename std::remove_cvref_t<decltype(A.validate().second)>::type;
 
   PositionalImpl() = default;
-  PositionalImpl(ArgParameter<value_type> param)
-      : help(param.help),
-        presence(param.presence),
-        default_value(param.default_value),
-        value_(param.default_value.value_or(value_type{})),
-        on_parse_(std::move(param.on_parse)) {}
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::string_view help{};
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  cli::Presence presence{Presence::optional};
-  // NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-  std::optional<value_type> default_value{};
+  PositionalImpl(ArgParameter<value_type> param) : param_(param) {}
 
   static constexpr auto nargs = N;
+
+  // Called once after all tokens for this positional are consumed.
+  auto on_parse() -> void {
+    if (param_.on_parse) param_.on_parse(value_);
+  }
+
+  [[nodiscard]] auto value() const -> const value_type& { return value_; }
+  [[nodiscard]] auto value() -> value_type& { return value_; }
+  [[nodiscard]] auto provided() const -> bool { return provided_; }
+  [[nodiscard]] auto occurrences() const -> std::size_t {
+    return occurrence_count_;
+  }
+  [[nodiscard]] explicit operator bool() const { return value_present_; }
+  [[nodiscard]] auto operator*() -> value_type& { return value_; }
+  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
+  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
+  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
+
+  template <class U>
+  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
+    if (value_present_) return value_;
+    return static_cast<value_type>(std::forward<U>(fallback));
+  }
+
+  [[nodiscard]] explicit operator std::optional<value_type>() const {
+    if (value_present_) return value_;
+    return std::nullopt;
+  }
+
+  [[nodiscard]] auto help_text() const -> const std::string_view {
+    return param_.help;
+  }
+
+ protected:
+  [[nodiscard]] auto get_param() const -> const ArgParameter<value_type>& {
+    return param_;
+  }
+
   static constexpr bool entry_is_optional =
       std::remove_cvref_t<decltype(A)>::entry_is_optional;
 
@@ -645,44 +671,16 @@ struct PositionalImpl : public PositionalTag {
     return ActionResult<void>::ok();
   }
 
-  // Called once after all tokens for this positional are consumed.
-  auto fire_on_parse() -> void {
-    if (on_parse_) on_parse_(value_);
-  }
-
-  [[nodiscard]] auto value() const -> const value_type& { return value_; }
-  [[nodiscard]] auto value() -> value_type& { return value_; }
-  [[nodiscard]] auto provided() const -> bool { return provided_; }
-  [[nodiscard]] auto occurrences() const -> std::size_t {
-    return occurrence_count_;
-  }
-  [[nodiscard]] explicit operator bool() const { return value_present_; }
-  [[nodiscard]] auto operator*() -> value_type& { return value_; }
-  [[nodiscard]] auto operator*() const -> const value_type& { return value_; }
-  [[nodiscard]] auto operator->() -> value_type* { return &value_; }
-  [[nodiscard]] auto operator->() const -> const value_type* { return &value_; }
-
-  template <class U>
-  [[nodiscard]] auto value_or(U&& fallback) const -> value_type {
-    if (value_present_) return value_;
-    return static_cast<value_type>(std::forward<U>(fallback));
-  }
-
-  [[nodiscard]] explicit operator std::optional<value_type>() const {
-    if (value_present_) return value_;
-    return std::nullopt;
-  }
-
  private:
   template <ArgumentSpec>
   friend struct Parser;
 
   value_type value_{};
-  std::function<void(const value_type&)> on_parse_{};
+  ArgParameter<value_type> param_;
   std::size_t occurrence_count_{};  // times a value was provided
   std::size_t total_values_{};      // total values across all invocations
   bool provided_{};
-  bool value_present_{default_value.has_value()};
+  bool value_present_{param_.default_value.has_value()};
 };
 
 /**
@@ -749,24 +747,24 @@ template <>
 struct ActionFor<std::string> {
   inline static constexpr auto set_once = conversion::string | pack::set_once;
   inline static constexpr auto push = conversion::string | pack::push;
-  inline static constexpr auto store_into =
-      conversion::string | pack::store_into<std::string>;
+  inline static constexpr auto write_to =
+      conversion::string | pack::write_to<std::string>;
 };
 
 template <>
 struct ActionFor<bool> {
   inline static constexpr auto set_once = conversion::boolean | pack::set_once;
   inline static constexpr auto push = conversion::boolean | pack::push;
-  inline static constexpr auto store_into =
-      conversion::boolean | pack::store_into<bool>;
+  inline static constexpr auto write_to =
+      conversion::boolean | pack::write_to<bool>;
 };
 
 template <>
 struct ActionFor<std::filesystem::path> {
   inline static constexpr auto set_once = conversion::path | pack::set_once;
   inline static constexpr auto push = conversion::path | pack::push;
-  inline static constexpr auto store_into =
-      conversion::path | pack::store_into<std::filesystem::path>;
+  inline static constexpr auto write_to =
+      conversion::path | pack::write_to<std::filesystem::path>;
 };
 
 template <std::integral T>
@@ -774,8 +772,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::integer<T> | pack::set_once;
   inline static constexpr auto push = conversion::integer<T> | pack::push;
-  inline static constexpr auto store_into =
-      conversion::integer<T> | pack::store_into<T>;
+  inline static constexpr auto write_to =
+      conversion::integer<T> | pack::write_to<T>;
 };
 
 template <std::floating_point T>
@@ -783,8 +781,8 @@ struct ActionFor<T> {
   inline static constexpr auto set_once =
       conversion::floating<T> | pack::set_once;
   inline static constexpr auto push = conversion::floating<T> | pack::push;
-  inline static constexpr auto store_into =
-      conversion::floating<T> | pack::store_into<T>;
+  inline static constexpr auto write_to =
+      conversion::floating<T> | pack::write_to<T>;
 };
 
 template <class T, Nargs N>
@@ -852,7 +850,7 @@ using Flag = Arg<Name, ShortName, pack::set_true, nargs::none>;
  * @tparam ShortName Short option character, or `'\0'`.
  */
 template <class T, StringLiteral Name, char ShortName = '\0'>
-using BoundOption = Arg<Name, ShortName, detail::ActionFor<T>::store_into>;
+using BoundOption = Arg<Name, ShortName, detail::ActionFor<T>::write_to>;
 
 /** @brief `BoundOption` specialisation for `std::string`. */
 template <StringLiteral Name, char ShortName = '\0'>
