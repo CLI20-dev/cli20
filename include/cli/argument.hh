@@ -482,7 +482,7 @@ struct ArgImpl : public OptionTag {
         .total_values = total_values_,
         .arg = std::ref(value_),
     };
-    ++total_values_;
+    if (text.has_value()) ++total_values_;
 
     auto invoke_result = [&ctx, &text]() -> auto {
       if constexpr (entry_is_optional) {
