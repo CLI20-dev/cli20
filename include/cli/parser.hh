@@ -17,6 +17,7 @@
 #endif
 
 #include "cli/argument.hh"
+#include "cli/constraint.hh"
 #include "cli/error.hh"
 #include "cli/help.hh"
 
@@ -724,6 +725,15 @@ struct Parser {
 
     if (auto err = validate_required(result.value); err.has_error()) {
       result.error = std::move(err.error);
+      return;
+    }
+
+    if constexpr (requires(T& t) {
+                    { t.constraints() } -> std::same_as<ConstraintResult>;
+                  }) {
+      if (auto cr = result.value.constraints(); !cr.ok()) {
+        result.error = std::move(*cr.error);
+      }
     }
   }
 
