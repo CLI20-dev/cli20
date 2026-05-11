@@ -72,6 +72,37 @@ struct JobsArgs {
                 .default_value = 1}};
 };
 
+inline std::vector<std::size_t>* observed_total_values = nullptr;
+
+struct RecordTotalValues {
+  template <class Input>
+  static constexpr bool accepts_input = true;
+
+  template <class Input>
+  using after_type = Input;
+
+  template <class Prev>
+  using storage_type = void;
+
+  template <class T>
+  auto operator()(cli::ActionCtx<void> ctx, cli::ActionResult<T> input) const
+      -> cli::ActionResult<T> {
+    if (observed_total_values) {
+      observed_total_values->push_back(ctx.total_values);
+    }
+    return input;
+  }
+};
+
+struct TotalValuesArgs {
+  cli::Arg<"mode", 'm',
+           cli::Action<RecordTotalValues{}>{} |
+               cli::conversion::default_missing_value<"auto"> |
+               cli::pack::set_once,
+           cli::nargs::zero_or_one>
+      mode;
+};
+
 auto argv(std::initializer_list<std::string_view> values)
     -> std::vector<std::string_view> {
   return {values};
@@ -195,6 +226,21 @@ TEST(Parse, JobsOptionRejectsDuplicateOccurrences) {
     ASSERT_TRUE(result.has_error());
     EXPECT_EQ(result.error.code, cli::ErrorCode::duplicate_argument);
   }
+}
+
+TEST(Parse, MissingOptionalEntryDoesNotIncrementTotalValues) {
+  std::vector<std::size_t> seen;
+  observed_total_values = &seen;
+
+  auto args = argv({"prog", "--mode", "fast"});
+  auto result = cli::Parser<TotalValuesArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  observed_total_values = nullptr;
+
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value.mode.value(), "fast");
+  EXPECT_EQ(seen, (std::vector<std::size_t>{0, 0}));
 }
 
 #ifdef _WIN32
