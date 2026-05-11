@@ -52,7 +52,7 @@ struct JobsOrNproc {
   auto operator()(cli::ActionCtx<void> ctx,
                   cli::ActionResult<std::optional<std::string_view>> input) const
       -> cli::ActionResult<int> {
-    if (!input.have_value()) return cli::propagate<int>(input);
+    if (!input.have_value()) return cli::fail<int>(input.error);
     if (input.value.has_value()) {
       return cli::conversion::integer<int>.invoke(
           ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));

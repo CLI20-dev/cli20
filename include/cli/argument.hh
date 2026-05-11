@@ -402,7 +402,7 @@ template <StringLiteral Name, char ShortName, Nargs N, Action A>
   }
 struct ArgImpl : public OptionTag {
   using value_type =
-      typename std::remove_cvref_t<decltype(A.validate().second)>::type;
+      typename std::remove_cvref_t<decltype(std::get<1>(A.validate()))>::type;
   ArgImpl() : ArgImpl(ArgParameter<value_type>{}) {}
   ArgImpl(ArgParameter<value_type> param)
       : param_(std::move(param)),
@@ -573,7 +573,7 @@ template <Nargs N, Action A>
   }
 struct PositionalImpl : public PositionalTag {
   using value_type =
-      typename std::remove_cvref_t<decltype(A.validate().second)>::type;
+      typename std::remove_cvref_t<decltype(std::get<1>(A.validate()))>::type;
 
   PositionalImpl() : PositionalImpl(ArgParameter<value_type>{}) {}
   PositionalImpl(ArgParameter<value_type> param)
