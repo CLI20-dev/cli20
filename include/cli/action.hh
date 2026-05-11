@@ -1946,6 +1946,7 @@ auto get(NegatableResult& r) -> decltype(auto) {
   else
     return (r.enabled);
 }
+
 template <std::size_t I>
 auto get(const NegatableResult& r) -> decltype(auto) {
   if constexpr (I == 0)
