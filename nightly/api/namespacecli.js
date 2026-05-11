@@ -45,6 +45,7 @@ var namespacecli =
     [ "BoundOption", "namespacecli.html#a0724688c79b8a9741b65e2baaa074411", null ],
     [ "BoundPathOption", "namespacecli.html#a6a46890e92224a51106cb313b8cd5323", null ],
     [ "BoundStringOption", "namespacecli.html#abf24cd3268a638d58fd5e59aa8e3cc96", null ],
+    [ "deduce_after_type", "namespacecli.html#a5d1b970085b6a9a15e1fe97bc841bcae", null ],
     [ "DoubleOption", "namespacecli.html#a21f4d51c5e5100de28d2a1834c6aea05", null ],
     [ "Flag", "namespacecli.html#acf8bcaca8749b9dffa40246ea13153b2", null ],
     [ "Help", "namespacecli.html#a027641d00d18b18aec164ec8a1b10854", null ],
@@ -101,6 +102,7 @@ var namespacecli =
     [ "StringLiteral", "namespacecli.html#a17993567e9d21aa493c12de2f710f260", null ],
     [ "to_string", "namespacecli.html#a6e6caba2405cd8a1854f7325d8c33679", null ],
     [ "tokenize", "namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083", null ],
+    [ "deduce_accepts_input", "namespacecli.html#ad6d38d9fb5bfdb74f3698b4713406d66", null ],
     [ "optional", "namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624", null ],
     [ "recurse_help", "namespacecli.html#a6daa0c1a38f127f7ba2d372eb77b7328", null ],
     [ "required", "namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7", null ]
