@@ -445,38 +445,57 @@ struct ArgImpl : public OptionTag {
   auto notify_option_seen() -> void { ++occurrence_count_; }
 
   // Called once per value token associated with this option.
-  auto invoke_action(std::string_view text, std::size_t arg_index)
+  auto invoke_action(std::string_view text, std::size_t arg_index,
+                     std::size_t nargs, std::size_t value_index)
       -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .invoke_count = invoke_count_,
+        .nargs = nargs,
+        .value_index = value_index,
+        .total_values = total_values_,
         .arg = std::ref(value_),
     };
-    ++invoke_count_;
-    auto result =
-        decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
-    if (result.has_error()) {
-      return ActionResult<void>::fail(std::move(result.error));
+    ++total_values_;
+    auto invoke_result = [&] {
+      if constexpr (decltype(A)::entry_is_optional) {
+        return decltype(A)::invoke(
+            ctx, ActionResult<std::optional<std::string_view>>::ok(
+                     std::optional<std::string_view>{text}));
+      } else {
+        return decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
+      }
+    }();
+    if (invoke_result.has_error()) {
+      return ActionResult<void>::fail(std::move(invoke_result.error));
     }
     return ActionResult<void>::ok();
   }
 
   // Called once for flags (nargs = {0,0}) after the option token is seen.
-  auto invoke_flag(std::size_t arg_index) -> ActionResult<void> {
+  auto invoke_flag(std::size_t arg_index, std::size_t nargs) -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .invoke_count = invoke_count_,
+        .nargs = nargs,
+        .value_index = 0,
+        .total_values = total_values_,
         .arg = std::ref(value_),
     };
-    ++invoke_count_;
-    auto result = decltype(A)::invoke(
-        ctx, ActionResult<std::string_view>::ok(std::string_view{}));
-    if (result.has_error()) {
-      return ActionResult<void>::fail(std::move(result.error));
+    auto invoke_result = [&] {
+      if constexpr (decltype(A)::entry_is_optional) {
+        return decltype(A)::invoke(
+            ctx, ActionResult<std::optional<std::string_view>>::ok(
+                     std::optional<std::string_view>{std::nullopt}));
+      } else {
+        return decltype(A)::invoke(
+            ctx, ActionResult<std::string_view>::ok(std::string_view{}));
+      }
+    }();
+    if (invoke_result.has_error()) {
+      return ActionResult<void>::fail(std::move(invoke_result.error));
     }
     return ActionResult<void>::ok();
   }
@@ -497,7 +516,7 @@ struct ArgImpl : public OptionTag {
   value_type value_{};
   std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times the option token appeared
-  std::size_t invoke_count_{};      // times invoke_action/invoke_flag called
+  std::size_t total_values_{};      // total values across all occurrences
   bool provided_{};
 };
 
@@ -571,17 +590,20 @@ struct PositionalImpl : public PositionalTag {
   static constexpr auto nargs = N;
 
   // Called once per value token for this positional.
-  auto invoke_action(std::string_view text, std::size_t arg_index)
+  auto invoke_action(std::string_view text, std::size_t arg_index,
+                     std::size_t nargs = 1, std::size_t value_index = 0)
       -> ActionResult<void> {
     provided_ = true;
     ActionCtx<value_type> ctx{
         .index = arg_index,
         .occurrences = occurrence_count_,
-        .invoke_count = invoke_count_,
+        .nargs = nargs,
+        .value_index = value_index,
+        .total_values = total_values_,
         .arg = std::ref(value_),
     };
     ++occurrence_count_;
-    ++invoke_count_;
+    ++total_values_;
     auto result =
         decltype(A)::invoke(ctx, ActionResult<std::string_view>::ok(text));
     if (result.has_error()) {
@@ -606,8 +628,7 @@ struct PositionalImpl : public PositionalTag {
   value_type value_{};
   std::function<void(const value_type&)> on_parse_{};
   std::size_t occurrence_count_{};  // times a value was provided
-  std::size_t
-      invoke_count_{};  // times invoke_action was called (same for positionals)
+  std::size_t total_values_{};      // total values across all invocations
   bool provided_{};
 };
 

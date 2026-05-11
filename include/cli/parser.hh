@@ -829,11 +829,13 @@ struct Parser {
         found = true;
         f.notify_option_seen();
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag(option_position + first_index);
+          res = f.invoke_flag(option_position + first_index, vals.size());
         } else {
-          for (const auto& vt : vals) {
+          const std::size_t nargs = vals.size();
+          for (std::size_t vi = 0; vi < vals.size(); ++vi) {
             if (res.has_error()) break;
-            res = f.invoke_action(vt.text, vt.position + first_index);
+            res = f.invoke_action(vals[vi].text, vals[vi].position + first_index,
+                                  nargs, vi);
           }
         }
         if (!res.has_error()) f.fire_on_parse();
@@ -956,9 +958,9 @@ struct Parser {
         if (!raw) return;
         f.notify_option_seen();
         if constexpr (F::nargs.min == 0 && F::nargs.max == 0) {
-          res = f.invoke_flag(0);
+          res = f.invoke_flag(0, 0);
         } else {
-          res = f.invoke_action(std::string_view(raw), 0);
+          res = f.invoke_action(std::string_view(raw), 0, 1, 0);
         }
         if (!res.has_error()) f.fire_on_parse();
       }
