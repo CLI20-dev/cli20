@@ -1,10 +1,42 @@
 #include <filesystem>
 #include <iostream>
+#include <optional>
+#include <string_view>
+#include <type_traits>
 
 #include "cli/argument.hh"
 #include "cli/parser.hh"
 
 namespace fs = std::filesystem;
+
+auto nproc_dummy() -> int {
+  // Example-only stand-in for a runtime nproc query. Kept deterministic so it
+  // works in environments where querying host CPU count is awkward.
+  return 4;
+}
+
+struct JobsOrNproc {
+  template <class Input>
+  static constexpr bool accepts_input =
+      std::same_as<std::remove_cvref_t<Input>, std::optional<std::string_view>>;
+
+  template <class Input>
+  using after_type = int;
+
+  template <class Prev>
+  using storage_type = void;
+
+  auto operator()(cli::ActionCtx<void> ctx,
+                  cli::ActionResult<std::optional<std::string_view>> input) const
+      -> cli::ActionResult<int> {
+    if (!input.have_value()) return cli::propagate<int>(input);
+    if (input.value.has_value()) {
+      return cli::conversion::Integer<int>{}(
+          ctx, cli::ActionResult<std::string_view>::ok(*input.value));
+    }
+    return cli::ActionResult<int>::ok(nproc_dummy());
+  }
+};
 
 struct Args {
   cli::Description description{
@@ -21,9 +53,11 @@ struct Args {
       config{{.help = "Configuration file", .presence = cli::required}};
 
   cli::Arg<"jobs", 'j',
-           cli::conversion::integer<int> | cli::validation::range<1, 64> |
-               cli::pack::set_once>
-      jobs{{.help = "Parallel job count (1-64)"}};
+           cli::Action<JobsOrNproc{}>{} | cli::validation::range<1, 64> |
+               cli::pack::set_once,
+           cli::nargs::zero_or_one>
+      jobs{{.help = "Parallel job count (default 1; -j uses nproc_dummy())",
+            .default_value = 1}};
 
   cli::Arg<"include", 'I',
            cli::conversion::path | cli::validation::parent_exists |
