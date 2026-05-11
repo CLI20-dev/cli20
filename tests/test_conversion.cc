@@ -182,25 +182,33 @@ struct RGBConversion {
   template <class Input>
   using storage_type = void;
 
-  auto operator()(cli::ActionCtx<void>,
+  auto operator()(cli::ActionCtx<void> ctx,
                   cli::ActionResult<std::string_view> input) const
       -> cli::ActionResult<std::tuple<int, int, int>> {
+    using Ret = cli::ActionResult<std::tuple<int, int, int>>;
     auto sv = input.value;
     auto p1 = sv.find(',');
     auto p2 = (p1 != sv.npos) ? sv.find(',', p1 + 1) : sv.npos;
     if (p1 == sv.npos || p2 == sv.npos) {
-      return cli::ActionResult<std::tuple<int, int, int>>::fail(
-          cli::detail::invalid_value_error(cli::ErrorKind::conversion, 0,
-                                           std::string(sv), "expected R,G,B"));
+      return Ret::fail(cli::detail::invalid_value_error(
+          cli::ErrorKind::conversion, ctx.index, std::string(sv),
+          "expected R,G,B"));
     }
-    auto to_int = [](std::string_view s) -> int {
+    auto to_int = [&](std::string_view s) -> std::optional<int> {
       int v = 0;
-      std::from_chars(s.data(), s.data() + s.size(), v);
+      auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), v);
+      if (ec != std::errc{} || ptr != s.data() + s.size()) return std::nullopt;
       return v;
     };
-    return cli::ActionResult<std::tuple<int, int, int>>::ok(std::make_tuple(
-        to_int(sv.substr(0, p1)), to_int(sv.substr(p1 + 1, p2 - p1 - 1)),
-        to_int(sv.substr(p2 + 1))));
+    auto r = to_int(sv.substr(0, p1));
+    auto g = to_int(sv.substr(p1 + 1, p2 - p1 - 1));
+    auto b = to_int(sv.substr(p2 + 1));
+    if (!r || !g || !b) {
+      return Ret::fail(cli::detail::invalid_value_error(
+          cli::ErrorKind::conversion, ctx.index, std::string(sv),
+          "each component must be an integer"));
+    }
+    return Ret::ok(std::make_tuple(*r, *g, *b));
   }
 };
 

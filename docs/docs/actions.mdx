@@ -214,12 +214,16 @@ constexpr auto pipeline =
     | cli::validation::range<1, 32>
     | cli::pack::set_once;
 
-// Provide context and seed the chain with the raw token.
-cli::ActionCtx<void> ctx;  // intermediate-step context (no storage reference)
+// pack::set_once writes into std::optional<int>, so the ctx must carry
+// a reference to that storage.
+std::optional<int> storage;
+cli::ActionCtx<std::optional<int>> ctx{.arg = std::ref(storage)};
+
 auto result = pipeline.invoke(ctx, cli::ActionResult<std::string_view>::ok("8"));
 
 if (result.has_value()) {
-    // result.value is std::optional<int>{8}
+    // The packed value is in storage, not in result.
+    // storage == std::optional<int>{8}
 } else {
     // result.error.code, .subject, .detail carry the failure reason
 }
