@@ -88,8 +88,9 @@ string_view ──► [Conversion] ──► T ──► [Validation] ──► 
                      └──────────────────────┴─────────────────────► ParseError
 ```
 
-Any step can short-circuit the chain by returning a `ParseError`. Downstream
-steps are skipped automatically.
+`ignore` short-circuits the remaining steps in the chain. `error` still
+flows through downstream steps, which lets terminal actions preserve or
+reformat the failure instead of bypassing it.
 
 ---
 
