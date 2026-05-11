@@ -38,34 +38,23 @@ struct ParseArgs {
 
 auto nproc_dummy() -> int { return 4; }
 
-struct JobsOrNproc {
-  template <class Input>
-  static constexpr bool accepts_input =
-      cli::deduce_accepts_input<JobsOrNproc, Input>;
-
-  template <class Input>
-  using after_type = cli::deduce_after_type<JobsOrNproc, Input>;
-
-  template <class Prev>
-  using storage_type = void;
-
-  auto operator()(cli::ActionCtx<void> ctx,
-                  cli::ActionResult<std::optional<std::string_view>> input) const
-      -> cli::ActionResult<int> {
+constexpr auto jobs_or_nproc =
+    [](cli::ActionCtx<void> ctx,
+       cli::ActionResult<std::optional<std::string_view>> input)
+    -> cli::ActionResult<int> {
     if (!input.have_value()) return cli::fail<int>(input.error);
     if (input.value.has_value()) {
       return cli::conversion::integer<int>.invoke(
           ctx, cli::ActionResult<std::string_view>::ok(input.value.value()));
     }
     return cli::ActionResult<int>::ok(nproc_dummy());
-  }
-};
+  };
 
 struct JobsArgs {
   cli::StringOption<"config", 'c'> config{
       {.help = "Config file", .presence = cli::Presence::required}};
   cli::Arg<"jobs", 'j',
-           cli::Action<JobsOrNproc{}>{} | cli::validation::range<1, 64> |
+           cli::action::custom<jobs_or_nproc> | cli::validation::range<1, 64> |
                cli::pack::set_once,
            cli::nargs::zero_or_one>
       jobs_arg{{.help = "Parallel job count (default 1; -j uses nproc_dummy())",
@@ -74,29 +63,18 @@ struct JobsArgs {
 
 inline std::vector<std::size_t>* observed_total_values = nullptr;
 
-struct RecordTotalValues {
-  template <class Input>
-  static constexpr bool accepts_input = true;
-
-  template <class Input>
-  using after_type = Input;
-
-  template <class Prev>
-  using storage_type = void;
-
-  template <class T>
-  auto operator()(cli::ActionCtx<void> ctx, cli::ActionResult<T> input) const
-      -> cli::ActionResult<T> {
+constexpr auto record_total_values =
+    []<class T>(cli::ActionCtx<void> ctx, cli::ActionResult<T> input)
+    -> cli::ActionResult<T> {
     if (observed_total_values) {
       observed_total_values->push_back(ctx.total_values);
     }
     return input;
-  }
-};
+  };
 
 struct TotalValuesArgs {
   cli::Arg<"mode", 'm',
-           cli::Action<RecordTotalValues{}>{} |
+           cli::action::custom<record_total_values> |
                cli::conversion::default_missing_value<"auto"> |
                cli::pack::set_once,
            cli::nargs::zero_or_one>
