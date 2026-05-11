@@ -40,7 +40,7 @@ The whole traversal is `constexpr` and has zero runtime cost.
 ### Why the three traits instead of just `operator()`?
 
 For non-terminal steps the traits are redundant in theory:
-- `accepts_input<Prev>` ≈ `std::invocable<Fn, ActionCtx<void>&, ActionResult<Prev>>`
+- `accepts_input<Prev>` ≈ `std::invocable<Fn, ActionCtx<void>, ActionResult<Prev>>`
 - `after_type<Prev>` ≈ the `T` in `std::invoke_result_t<...>` → `ActionResult<T>`
 
 For **terminal (pack) steps** the story is different. A generic pack step like
@@ -199,9 +199,11 @@ struct Args {
 ## Evaluating a Pipeline Standalone
 
 You can invoke a pipeline directly without going through the parser. This is
-useful for unit-testing custom actions. Note that `invoke` skips the
-compile-time `validate()` check — type mismatches between steps will only
-surface as compile errors when the pipeline is used inside `cli::Arg<>`.
+useful for unit-testing custom actions. Note that `invoke` skips the explicit
+compile-time `validate()` check. The `|` composition itself does not fully
+type-check compatibility between steps, so mismatches are diagnosed when the
+pipeline is first used in a checking context such as `validate()`,
+`cli::Arg<>`, or `invoke()`.
 
 ```cpp
 #include "cli/action.hh"

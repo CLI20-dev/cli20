@@ -310,21 +310,6 @@ template <class T>
 concept StringLike = std::same_as<decay_t<T>, std::string> ||
                      std::same_as<decay_t<T>, std::string_view>;
 
-// Lazily extracts the value_type of an ActionResult return type.
-// Falls back to void when Derived is not invocable with ActionCtx<void>&.
-template <
-    class Derived, class Prev,
-    bool = std::invocable<const Derived&, ActionCtx<void>, ActionResult<Prev>>>
-struct SimpleAfterType {
-  using type = void;
-};
-
-template <class Derived, class Prev>
-struct SimpleAfterType<Derived, Prev, true> {
-  using type = typename std::invoke_result_t<const Derived&, ActionCtx<void>,
-                                             ActionResult<Prev>>::value_type;
-};
-
 }  // namespace detail
 
 /**
