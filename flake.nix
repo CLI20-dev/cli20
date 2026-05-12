@@ -30,7 +30,7 @@
         { pkgs, config, ... }:
         let
           version = builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile ./VERSION);
-          google_bench = pkgs.stdenv.mkDerivation rec {
+          google_bench = pkgs.libcxxStdenv.mkDerivation rec {
             pname = "google-benchmark";
             version = "1.9.5";
 
@@ -194,11 +194,11 @@
 
               for standard in 20 26; do
                 export BENCH_CXX_STANDARD="$standard"
-                bench/scripts/run-runtime.sh --benchmark_min_time=0.01s
-                bench/scripts/run-size.sh
-                bench/compile_time/scripts/run.sh "$RESULTS_DIR/compile_time/cxx$standard"
+                bash bench/scripts/run-runtime.sh --benchmark_min_time=0.01s
+                bash bench/scripts/run-size.sh
+                bash bench/compile_time/scripts/run.sh "$RESULTS_DIR/compile_time/cxx$standard"
               done
-              bench/scripts/summarize.py --output "$RESULTS_DIR/report.md"
+              python3 bench/scripts/summarize.py --output "$RESULTS_DIR/report.md"
 
               runHook postBuild
             '';
