@@ -6,6 +6,7 @@
 
 # build artifacts
 build/
+build-bench/
 *.o
 *.a
 *.so
