@@ -87,8 +87,9 @@
               google_bench
               config.treefmt.build.wrapper
               pkgs.hyperfine
-              pkgs.python3
+              pkgs.python3Packages.venvShellHook
             ];
+            venvDir = "venv";
           };
 
           packages.default = pkgs.stdenvNoCC.mkDerivation {

@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include "cli/parser.hh"
 
 // ---- Test infrastructure --------------------------------------------------
@@ -25,11 +28,21 @@ static auto tok(std::initializer_list<std::string_view> il) {
   return std::vector<std::string_view>(il);
 }
 
-// Invoke tokenize with vector args.
 static auto tokenize(std::initializer_list<std::string_view> args,
                      const SpecMap& spec, const CmdSet& cmds = {})
     -> TokenizeResult {
-  return cli::tokenize(tok(args), spec, cmds);
+  auto option_nargs = [&](std::string_view opt) -> std::optional<Nargs> {
+    if (auto it = spec.find(std::string(opt)); it != spec.end()) {
+      return it->second;
+    }
+    return std::nullopt;
+  };
+
+  auto is_command = [&](std::string_view name) -> bool {
+    return cmds.contains(std::string(name));
+  };
+
+  return cli::tokenize(tok(args), option_nargs, is_command);
 }
 
 // Collect texts of tokens with the given type, in order.
@@ -84,7 +97,7 @@ TEST(Tokenize, FlagEmitsOptionTokenOnly) {
   ASSERT_EQ(r.tokens.size(), 1u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
   EXPECT_EQ(r.tokens[0].text, "verbose");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "--");
 }
 
 TEST(Tokenize, FlagDoesNotConsumeNextToken) {
@@ -113,7 +126,7 @@ TEST(Tokenize, OptionExactlyOneValue) {
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
   EXPECT_EQ(r.tokens[0].text, "name");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "--");
   EXPECT_EQ(r.tokens[0].position, 0u);
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "Alice");
@@ -176,7 +189,7 @@ TEST(Tokenize, InlineSyntaxSplitsIntoOptionAndValueAtSamePosition) {
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
   EXPECT_EQ(r.tokens[0].text, "name");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "--");
   EXPECT_EQ(r.tokens[0].position, 0u);
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "Alice");
@@ -443,42 +456,53 @@ TEST(Tokenize, ErrorInlineSyntaxCannotSatisfyMinTwo) {
 static auto tokenize_cfg(std::initializer_list<std::string_view> args,
                          const SpecMap& spec, const cli::TokenizerConfig& cfg,
                          const CmdSet& cmds = {}) -> TokenizeResult {
-  return cli::tokenize(tok(args), spec, cmds, cfg);
+  auto option_nargs = [&](std::string_view opt) -> std::optional<Nargs> {
+    if (auto it = spec.find(std::string(opt)); it != spec.end()) {
+      return it->second;
+    }
+    return std::nullopt;
+  };
+
+  auto is_command = [&](std::string_view name) -> bool {
+    return cmds.contains(std::string(name));
+  };
+
+  return cli::tokenize(tok(args), option_nargs, is_command, cfg);
 }
 
 TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
   // "+verbose" recognised as option when "+" is in option_prefixes
-  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
   auto r = tokenize_cfg({"+verbose"}, {{"+verbose", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
   EXPECT_EQ(r.tokens[0].text, "verbose");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "+");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], cfg), "+");
 }
 
 TEST(TokenizeMultiPrefix, MatchedPrefixDistinguishesPrefixes) {
   // "--foo" and "+foo" are different options; matched_prefix tells them apart
-  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
   SpecMap spec{{"--foo", kFlag}, {"+foo", kFlag}};
   auto r = tokenize_cfg({"--foo", "+foo"}, spec, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
-  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
-  EXPECT_EQ(r.tokens[1].matched_prefix, "+");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], cfg), "--");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[1], cfg), "+");
 }
 
 TEST(TokenizeMultiPrefix, DefaultPrefixStillWorks) {
   // Default config ({"--"}) behaves identically to before
   auto r = tokenize_cfg({"--name", "Alice"}, {{"--name", kOne}}, {});
   ASSERT_TRUE(r.has_value());
-  EXPECT_EQ(r.tokens[0].matched_prefix, "--");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "--");
   EXPECT_EQ(r.tokens[1].text, "Alice");
-  EXPECT_TRUE(r.tokens[1].matched_prefix.empty());
+  EXPECT_TRUE(cli::token_prefix_view(r.tokens[1], {}).empty());
 }
 
 TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
-  cli::TokenizerConfig cfg{.option_prefixes = {"--", "+"}};
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
   auto r = tokenize_cfg({"+unknown"}, {{"--foo", kFlag}}, cfg);
   ASSERT_FALSE(r.has_value());
   EXPECT_EQ(r.error.code, ErrorCode::unknown_option);
@@ -488,7 +512,7 @@ TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
 // ---- inline_value_separator -----------------------------------------------
 
 TEST(TokenizeInlineSep, ColonSeparator) {
-  cli::TokenizerConfig cfg{.inline_value_separator = ':'};
+  auto cfg = cli::TokenizerConfig{}.with_inline_value_separator(':');
   auto r = tokenize_cfg({"--name:Alice"}, {{"--name", kOne}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
@@ -505,7 +529,7 @@ TEST(TokenizeInlineSep, DefaultEqualsStillWorks) {
 
 TEST(TokenizeInlineSep, EqualsTreatedAsValueWhenSepIsColon) {
   // With sep=':', "--name=Alice" has no separator → entire token is option name.
-  cli::TokenizerConfig cfg{.inline_value_separator = ':'};
+  auto cfg = cli::TokenizerConfig{}.with_inline_value_separator(':');
   auto r = tokenize_cfg({"--name=Alice"}, {{"--name=Alice", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
   EXPECT_EQ(r.tokens[0].text, "name=Alice");
@@ -531,7 +555,7 @@ TEST(TokenizeCluster, SingleFlagStillWorks) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
   EXPECT_EQ(r.tokens[0].text, "v");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "-");
 }
 
 TEST(TokenizeCluster, FlagsThenValueNextToken) {
@@ -551,7 +575,7 @@ TEST(TokenizeCluster, AttachedValueOnly) {
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].text, "o");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "-");
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "file");
   EXPECT_EQ(r.tokens[1].position, 0u);
@@ -643,7 +667,7 @@ TEST(Tokenize, ShortOptionInlineSeparator) {
   ASSERT_EQ(r.tokens.size(), 2u);
   EXPECT_EQ(r.tokens[0].type, TokenType::option);
   EXPECT_EQ(r.tokens[0].text, "o");
-  EXPECT_EQ(r.tokens[0].matched_prefix, "-");
+  EXPECT_EQ(cli::token_prefix_view(r.tokens[0], {}), "-");
   EXPECT_EQ(r.tokens[1].type, TokenType::value);
   EXPECT_EQ(r.tokens[1].text, "file");
 }

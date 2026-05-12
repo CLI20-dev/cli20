@@ -375,7 +375,12 @@ struct PositionalImpl : public PositionalTag {
  *   };
  * @endcode
  */
-struct Description : public std::string, DescriptionTag {};
+struct Description : DescriptionTag {
+  std::string_view text{};
+  constexpr Description() = default;
+  constexpr Description(std::string_view s) : text(s) {}
+  constexpr operator std::string_view() const { return text; }
+};
 
 /**
  * @brief Parameter bag used when constructing a `Command` field.
