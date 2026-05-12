@@ -17,14 +17,16 @@ var searchData=
   ['color_2ehh_14',['color.hh',['../color_8hh.html',1,'']]],
   ['colormode_15',['ColorMode',['../namespacecli.html#ae9400206faff3444393e605d6a25c439',1,'cli']]],
   ['command_16',['Command',['../structcli_1_1Command.html',1,'cli::Command&lt; Name, T &gt;'],['../structcli_1_1Command.html#ae48742eb854b3679771d45b3139be268',1,'cli::Command::Command()=default'],['../structcli_1_1Command.html#a831d8269bcf223c7472f10232faf0b1d',1,'cli::Command::Command(CommandParameter param)']]],
-  ['command_17',['command',['../namespacecli.html#ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f',1,'cli']]],
+  ['command_17',['command',['../structcli_1_1HelpPalette.html#aeca0ec6c1317b62e1983768e85b06d2d',1,'cli::HelpPalette::command'],['../namespacecli.html#ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f',1,'cli::command']]],
   ['command_5fname_18',['command_name',['../structcli_1_1Command.html#a3a637689709d601a556d0caf3e1b10b1',1,'cli::Command']]],
   ['commandparameter_19',['CommandParameter',['../structcli_1_1CommandParameter.html',1,'cli']]],
   ['commandtag_20',['CommandTag',['../structcli_1_1CommandTag.html',1,'cli']]],
-  ['constraint_2ehh_21',['constraint.hh',['../constraint_8hh.html',1,'']]],
-  ['constraintresult_22',['ConstraintResult',['../structcli_1_1ConstraintResult.html',1,'cli']]],
-  ['conversion_23',['conversion',['../namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a8a496e4dcb443b1c529e75d7ec2888df',1,'cli']]],
-  ['conversion_5ferror_24',['conversion_error',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a3bdd07e68601d724e97067c6a7bce2a9',1,'cli']]],
-  ['custom_25',['Custom',['../structcli_1_1action_1_1Custom.html',1,'cli::action']]],
-  ['custom_26',['custom',['../namespacecli_1_1action.html#aa9036759e5a494c11bb457f902ee5c31',1,'cli::action']]]
+  ['conflicts_21',['conflicts',['../namespacecli.html#a5b5088b2c336fbc48921df1f1e8961cf',1,'cli']]],
+  ['conflictsrelation_22',['ConflictsRelation',['../structcli_1_1ConflictsRelation.html',1,'cli']]],
+  ['constraint_2ehh_23',['constraint.hh',['../constraint_8hh.html',1,'']]],
+  ['constraintresult_24',['ConstraintResult',['../structcli_1_1ConstraintResult.html',1,'cli']]],
+  ['conversion_25',['conversion',['../namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a8a496e4dcb443b1c529e75d7ec2888df',1,'cli']]],
+  ['conversion_5ferror_26',['conversion_error',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a3bdd07e68601d724e97067c6a7bce2a9',1,'cli']]],
+  ['custom_27',['Custom',['../structcli_1_1action_1_1Custom.html',1,'cli::action']]],
+  ['custom_28',['custom',['../namespacecli_1_1action.html#aa9036759e5a494c11bb457f902ee5c31',1,'cli::action']]]
 ];

@@ -20,5 +20,8 @@ var searchData=
   ['is_5fignored_17',['is_ignored',['../structcli_1_1ActionResult.html#a8484435e9652c971ffbadb7f42d9ad46',1,'cli::ActionResult::is_ignored()'],['../structcli_1_1ActionResult_3_01void_01_4.html#a9adce66ac01a3fea944e8dafc2ab3d94',1,'cli::ActionResult&lt; void &gt;::is_ignored()']]],
   ['is_5fregular_5ffile_18',['is_regular_file',['../namespacecli_1_1validation.html#ab9975e4c6a83ab290a985a0c67db130d',1,'cli::validation']]],
   ['isdirectory_19',['IsDirectory',['../structcli_1_1validation_1_1IsDirectory.html',1,'cli::validation']]],
-  ['isregularfile_20',['IsRegularFile',['../structcli_1_1validation_1_1IsRegularFile.html',1,'cli::validation']]]
+  ['isregularfile_20',['IsRegularFile',['../structcli_1_1validation_1_1IsRegularFile.html',1,'cli::validation']]],
+  ['isrelationset_21',['IsRelationSet',['../structcli_1_1IsRelationSet.html',1,'cli']]],
+  ['isrelationset_3c_20relationset_3c_20relations_2e_2e_2e_20_3e_20_3e_22',['IsRelationSet&lt; RelationSet&lt; Relations... &gt; &gt;',['../structcli_1_1IsRelationSet_3_01RelationSet_3_01Relations_8_8_8_01_4_01_4.html',1,'cli']]],
+  ['items_23',['items',['../structcli_1_1RelationSet.html#a1ac2d40fe87a11afe4ca3311d890f1b3',1,'cli::RelationSet']]]
 ];

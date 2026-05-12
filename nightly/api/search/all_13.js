@@ -8,5 +8,6 @@ var searchData=
   ['value_5findex_5',['value_index',['../structcli_1_1ActionCtx.html#a107270a92603524ddda52141852e7ae6',1,'cli::ActionCtx::value_index'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a7b9b06332cc5e47ad1de2846079d3f12',1,'cli::ActionCtx&lt; void &gt;::value_index']]],
   ['value_5for_6',['value_or',['../structcli_1_1PositionalImpl.html#ad8db23ea6132835b072e4e895f7abe25',1,'cli::PositionalImpl']]],
   ['value_5ftype_7',['value_type',['../structcli_1_1ActionResult.html#a03ee470592a532bd706485c402ca0655',1,'cli::ActionResult::value_type'],['../structcli_1_1ActionResult_3_01void_01_4.html#a99a10d2371ead0037a52704861ef0cae',1,'cli::ActionResult&lt; void &gt;::value_type'],['../structcli_1_1PositionalImpl.html#a1f7f781a41adc6351ac70f2242260277',1,'cli::PositionalImpl::value_type']]],
-  ['view_8',['view',['../structcli_1_1StringLiteral.html#a3014d1e5526e0699051cfcac9de27fd3',1,'cli::StringLiteral']]]
+  ['values_8',['values',['../structcli_1_1NameList.html#a733da65fb7b21dc874a932a9106e8d33',1,'cli::NameList']]],
+  ['view_9',['view',['../structcli_1_1StringLiteral.html#a3014d1e5526e0699051cfcac9de27fd3',1,'cli::StringLiteral']]]
 ];

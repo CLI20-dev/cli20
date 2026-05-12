@@ -1,12 +1,10 @@
 var searchData=
 [
-  ['parent_5fexists_0',['parent_exists',['../namespacecli_1_1validation.html#a9af6daba88670bf343de188dffe0539f',1,'cli::validation']]],
-  ['path_1',['path',['../namespacecli_1_1conversion.html#af9b6ac4a41b2cf578796334c17d06ed4',1,'cli::conversion']]],
-  ['position_2',['position',['../structcli_1_1ParseError.html#acb170b565e5510125e24ef415c1e154a',1,'cli::ParseError::position'],['../structcli_1_1Token.html#ae904130a91d102fcdafb93abc2d0d480',1,'cli::Token::position']]],
-  ['positive_3',['positive',['../namespacecli_1_1validation.html#acf6c9949d84d9eadd7ccd4355902aaae',1,'cli::validation']]],
-  ['predicate_4',['predicate',['../namespacecli_1_1validation.html#a1c4116c3c905b23421041857c41d41bc',1,'cli::validation']]],
-  ['presence_5',['presence',['../structcli_1_1ArgParameter.html#a6139c8740892aa7f89fc5e4b5a6f4d7e',1,'cli::ArgParameter']]],
-  ['print_5fhelp_6',['print_help',['../namespacecli_1_1action.html#abc9367bf663b1ba499d91cdc93b85f84',1,'cli::action']]],
-  ['push_7',['push',['../namespacecli_1_1pack.html#a96845f625a5575985c9d694699a41483',1,'cli::pack']]],
-  ['push_5funique_8',['push_unique',['../namespacecli_1_1pack.html#a9afa999a79e80003f325482452f2f134',1,'cli::pack']]]
+  ['name_0',['name',['../structcli_1_1conversion_1_1NegatableResult.html#a24f09ac76b19052b4d3cfacd9f8b0732',1,'cli::conversion::NegatableResult::name'],['../structcli_1_1Command.html#adafa441c2b60b08bf99499c3fbd68be3',1,'cli::Command::name'],['../structcli_1_1GroupParams.html#a7c7de381736cb35e19db4db59d2ba56b',1,'cli::GroupParams::name'],['../structcli_1_1GroupRelation.html#ab055265d16abbeac3dd0faf7281bc64f',1,'cli::GroupRelation::name']]],
+  ['nargs_1',['nargs',['../structcli_1_1ActionCtx.html#a206cc6a76642915bf65b945ef1cfe213',1,'cli::ActionCtx::nargs'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a6376431030c1f0074f7056fd223ae202',1,'cli::ActionCtx&lt; void &gt;::nargs'],['../structcli_1_1PositionalImpl.html#a51ec67e89ea8c2bc4bc5732a6e665427',1,'cli::PositionalImpl::nargs']]],
+  ['negatable_2',['negatable',['../namespacecli_1_1conversion.html#a177665b2e9fabfe6777e9cb2474d1621',1,'cli::conversion']]],
+  ['non_5fempty_3',['non_empty',['../namespacecli_1_1validation.html#a02c3ee2cdf90be97596b875dfa1eee3c',1,'cli::validation']]],
+  ['non_5fnegative_4',['non_negative',['../namespacecli_1_1validation.html#a1bb75fcea4fcda42abf0fbf6b9bd164a',1,'cli::validation']]],
+  ['none_5',['none',['../namespacecli_1_1nargs.html#a68874bbf441fc82b3d70695abc0df9fa',1,'cli::nargs']]],
+  ['not_5fblank_6',['not_blank',['../namespacecli_1_1validation.html#a2294ac53ecf8f04d381e29ab0446a097',1,'cli::validation']]]
 ];

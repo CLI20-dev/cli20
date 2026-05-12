@@ -23,7 +23,7 @@ var searchData=
   ['predicate_20',['Predicate',['../structcli_1_1validation_1_1Predicate.html',1,'cli::validation']]],
   ['predicate_21',['predicate',['../namespacecli_1_1validation.html#a1c4116c3c905b23421041857c41d41bc',1,'cli::validation']]],
   ['presence_22',['Presence',['../namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebd',1,'cli']]],
-  ['presence_23',['presence',['../structcli_1_1ArgParameter.html#a6139c8740892aa7f89fc5e4b5a6f4d7e',1,'cli::ArgParameter']]],
+  ['presence_23',['presence',['../structcli_1_1ArgParameter.html#a6139c8740892aa7f89fc5e4b5a6f4d7e',1,'cli::ArgParameter::presence'],['../structcli_1_1PositionalImpl.html#a1c0fcffc03bac9438758fa39f56215b4',1,'cli::PositionalImpl::presence()']]],
   ['print_5fhelp_24',['print_help',['../namespacecli_1_1action.html#abc9367bf663b1ba499d91cdc93b85f84',1,'cli::action']]],
   ['printhelp_25',['PrintHelp',['../structcli_1_1action_1_1PrintHelp.html',1,'cli::action']]],
   ['program_5fname_26',['program_name',['../structcli_1_1Parser.html#a1a91cde7e7b6d268c26ab2d09976db6a',1,'cli::Parser']]],

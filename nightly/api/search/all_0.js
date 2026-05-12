@@ -17,9 +17,10 @@ var searchData=
   ['argparameter_14',['ArgParameter',['../structcli_1_1ArgParameter.html',1,'cli']]],
   ['argparameter_3c_20value_5ftype_20_3e_15',['ArgParameter&lt; value_type &gt;',['../structcli_1_1ArgParameter.html',1,'cli']]],
   ['argument_2ehh_16',['argument.hh',['../argument_8hh.html',1,'']]],
-  ['argument_5ftype_17',['argument_type',['../structcli_1_1Command.html#a1fe2f82bd2ee4a7ffc48e9181c3fb052',1,'cli::Command']]],
-  ['argumentspec_18',['ArgumentSpec',['../conceptcli_1_1ArgumentSpec.html',1,'cli']]],
-  ['as_5ftuple_19',['as_tuple',['../namespacecli.html#acd53497000ad272a20bc2203271ace24',1,'cli::as_tuple(T &amp;t)'],['../namespacecli.html#af78d697da4951519cf0735abc5553d6f',1,'cli::as_tuple(const T &amp;t)']]],
-  ['at_5fmost_5fone_5fof_20',['at_most_one_of',['../namespacecli_1_1constraint.html#a9d670e9be55864b48292aa0ea63fbebb',1,'cli::constraint']]],
-  ['auto_5f_21',['auto_',['../namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a',1,'cli']]]
+  ['argument_5fbase_2ehh_17',['argument_base.hh',['../argument__base_8hh.html',1,'']]],
+  ['argument_5ftype_18',['argument_type',['../structcli_1_1Command.html#a1fe2f82bd2ee4a7ffc48e9181c3fb052',1,'cli::Command']]],
+  ['argument_5fvalidation_2ehh_19',['argument_validation.hh',['../argument__validation_8hh.html',1,'']]],
+  ['argumentspec_20',['ArgumentSpec',['../conceptcli_1_1ArgumentSpec.html',1,'cli']]],
+  ['as_5ftuple_21',['as_tuple',['../namespacecli.html#acd53497000ad272a20bc2203271ace24',1,'cli::as_tuple(T &amp;t)'],['../namespacecli.html#af78d697da4951519cf0735abc5553d6f',1,'cli::as_tuple(const T &amp;t)']]],
+  ['at_5fmost_5fone_5fof_22',['at_most_one_of',['../namespacecli_1_1constraint.html#a9d670e9be55864b48292aa0ea63fbebb',1,'cli::constraint']]]
 ];

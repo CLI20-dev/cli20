@@ -120,6 +120,10 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a2ed3069cff07e313eb419c8ab93edd95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback invoked once after parsing completes.  <br /></td></tr>
 <tr class="memitem:a67eb7e7a36e50fb2ae64beb73b683686" id="r_a67eb7e7a36e50fb2ae64beb73b683686"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a67eb7e7a36e50fb2ae64beb73b683686">env</a> {}</td></tr>
 <tr class="memdesc:a67eb7e7a36e50fb2ae64beb73b683686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Environment variable name to fall back to when the option is absent from the command line.  <br /></td></tr>
+<tr class="memitem:aeabfbb77750ab5e0dbf5337a5992e863" id="r_aeabfbb77750ab5e0dbf5337a5992e863"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aeabfbb77750ab5e0dbf5337a5992e863">hidden</a> {}</td></tr>
+<tr class="memdesc:aeabfbb77750ab5e0dbf5337a5992e863"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether this argument is omitted from generated help.  <br /></td></tr>
+<tr class="memitem:a7242574858d0b4f87305a7f49aebdb8a" id="r_a7242574858d0b4f87305a7f49aebdb8a"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a7242574858d0b4f87305a7f49aebdb8a">deprecated</a> {}</td></tr>
+<tr class="memdesc:a7242574858d0b4f87305a7f49aebdb8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional deprecation message shown in generated help.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class T&gt;<br />
@@ -129,9 +133,9 @@ struct cli::ArgParameter&lt; T &gt;</div><p>Parameter bag used when constructing
 <div class="line">    .presence = <a class="code hl_variable" href="namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7">cli::required</a>,</div>
 <div class="line">    .default_value = 1,</div>
 <div class="line">}};</div>
-<div class="ttc" id="anamespacecli_html_a2f2a157655195ae5d1328b4b9955a3b7"><div class="ttname"><a href="namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7">cli::required</a></div><div class="ttdeci">constexpr auto required</div><div class="ttdoc">Convenience constant for Presence::required.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00062">argument.hh:62</a></div></div>
-<div class="ttc" id="anamespacecli_html_af1c2740179c6ccc154e1045e3d1e527a"><div class="ttname"><a href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a">cli::Option</a></div><div class="ttdeci">Arg&lt; Name, ShortName, detail::ActionFor&lt; T &gt;::set_once &gt; Option</div><div class="ttdoc">A single-value option that stores the parsed result in T.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00869">argument.hh:869</a></div></div>
-<div class="ttc" id="astructcli_1_1ArgParameter_html"><div class="ttname"><a href="structcli_1_1ArgParameter.html">cli::ArgParameter</a></div><div class="ttdoc">Parameter bag used when constructing ArgImpl or PositionalImpl with named fields.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00382">argument.hh:382</a></div></div>
+<div class="ttc" id="anamespacecli_html_a2f2a157655195ae5d1328b4b9955a3b7"><div class="ttname"><a href="namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7">cli::required</a></div><div class="ttdeci">constexpr auto required</div><div class="ttdoc">Convenience constant for Presence::required.</div><div class="ttdef"><b>Definition</b> <a href="argument__base_8hh_source.html#l00039">argument_base.hh:39</a></div></div>
+<div class="ttc" id="anamespacecli_html_af1c2740179c6ccc154e1045e3d1e527a"><div class="ttname"><a href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a">cli::Option</a></div><div class="ttdeci">Arg&lt; Name, ShortName, detail::ActionFor&lt; T &gt;::set_once &gt; Option</div><div class="ttdoc">A single-value option that stores the parsed result in T.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00585">argument.hh:585</a></div></div>
+<div class="ttc" id="astructcli_1_1ArgParameter_html"><div class="ttname"><a href="structcli_1_1ArgParameter.html">cli::ArgParameter</a></div><div class="ttdoc">Parameter bag used when constructing ArgImpl or PositionalImpl with named fields.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00065">argument.hh:65</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>The storage value type of the argument. </td></tr>
@@ -139,7 +143,7 @@ struct cli::ArgParameter&lt; T &gt;</div><p>Parameter bag used when constructing
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00382">382</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00065">65</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a3e8ac70ebf834b26756cf08691502338" name="a3e8ac70ebf834b26756cf08691502338"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3e8ac70ebf834b26756cf08691502338">&#9670;&#160;</a></span>default_value</h2>
@@ -157,7 +161,27 @@ template&lt;class T&gt; </div>
 
 <p>Default value when the argument is absent. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00386">386</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00069">69</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a7242574858d0b4f87305a7f49aebdb8a" name="a7242574858d0b4f87305a7f49aebdb8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7242574858d0b4f87305a7f49aebdb8a">&#9670;&#160;</a></span>deprecated</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view <a class="el" href="structcli_1_1ArgParameter.html">cli::ArgParameter</a>&lt; T &gt;::deprecated {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Optional deprecation message shown in generated help. </p>
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00076">76</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -177,7 +201,7 @@ template&lt;class T&gt; </div>
 
 <p>Environment variable name to fall back to when the option is absent from the command line. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00389">389</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00072">72</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -197,7 +221,27 @@ template&lt;class T&gt; </div>
 
 <p><a class="el" href="namespacecli.html#a027641d00d18b18aec164ec8a1b10854" title="A built-in help flag that prints help and exits with code 0.">Help</a> text shown in <span class="tt">--<a class="el" href="#a30e1c198851be72459f903cbb7996f1d" title="Help text shown in --help output.">help</a></span> output. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00383">383</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00066">66</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="aeabfbb77750ab5e0dbf5337a5992e863" name="aeabfbb77750ab5e0dbf5337a5992e863"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeabfbb77750ab5e0dbf5337a5992e863">&#9670;&#160;</a></span>hidden</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="structcli_1_1ArgParameter.html">cli::ArgParameter</a>&lt; T &gt;::hidden {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether this argument is omitted from generated help. </p>
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00074">74</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -217,7 +261,7 @@ template&lt;class T&gt; </div>
 
 <p>Callback invoked once after parsing completes. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00388">388</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00071">71</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -237,7 +281,7 @@ template&lt;class T&gt; </div>
 
 <p>Whether the argument is required. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00384">384</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00067">67</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

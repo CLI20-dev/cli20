@@ -110,25 +110,16 @@ $(function(){initNavTree('argument_8hh.html','',''); });
 <code>#include &lt;type_traits&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &quot;<a class="el" href="action_8hh_source.html">cli/action.hh</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="argument__base_8hh_source.html">cli/argument_base.hh</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="argument__validation_8hh_source.html">cli/argument_validation.hh</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="meta_8hh_source.html">cli/meta.hh</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="relation_8hh_source.html">cli/relation.hh</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="string__literal_8hh_source.html">cli/string_literal.hh</a>&quot;</code><br />
 </div>
 <p><a href="argument_8hh_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:cli_3A_3ASpecMemberTag" id="r_cli_3A_3ASpecMemberTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1SpecMemberTag.html">cli::SpecMemberTag</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base tag for all members that may appear in an argument specification struct.  <a href="structcli_1_1SpecMemberTag.html#details">More...</a><br /></td></tr>
-<tr class="memitem:cli_3A_3AOptionTag" id="r_cli_3A_3AOptionTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1OptionTag.html">cli::OptionTag</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag base class for command-line option/flag fields.  <a href="structcli_1_1OptionTag.html#details">More...</a><br /></td></tr>
-<tr class="memitem:cli_3A_3APositionalTag" id="r_cli_3A_3APositionalTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1PositionalTag.html">cli::PositionalTag</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag base class for positional argument fields.  <a href="structcli_1_1PositionalTag.html#details">More...</a><br /></td></tr>
-<tr class="memitem:cli_3A_3ACommandTag" id="r_cli_3A_3ACommandTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1CommandTag.html">cli::CommandTag</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag base class for subcommand fields.  <a href="structcli_1_1CommandTag.html#details">More...</a><br /></td></tr>
-<tr class="memitem:cli_3A_3ADescriptionTag" id="r_cli_3A_3ADescriptionTag"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1DescriptionTag.html">cli::DescriptionTag</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tag base class for the <span class="tt"><a class="el" href="structcli_1_1Description.html" title="A DescriptionTag field that carries the top-level CLI description.">Description</a></span> field that provides the CLI's help text.  <a href="structcli_1_1DescriptionTag.html#details">More...</a><br /></td></tr>
-<tr class="memitem:cli_3A_3ANargs" id="r_cli_3A_3ANargs"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Nargs.html">cli::Nargs</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies the minimum and maximum number of values an option or positional accepts.  <a href="structcli_1_1Nargs.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cli_3A_3AArgParameter_3C_20T_20_3E" id="r_cli_3A_3AArgParameter_3C_20T_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ArgParameter.html">cli::ArgParameter&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter bag used when constructing <span class="tt">ArgImpl</span> or <span class="tt"><a class="el" href="structcli_1_1PositionalImpl.html">PositionalImpl</a></span> with named fields.  <a href="structcli_1_1ArgParameter.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cli_3A_3APositionalImpl_3C_20N_2C_20A_20_3E" id="r_cli_3A_3APositionalImpl_3C_20N_2C_20A_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1PositionalImpl.html">cli::PositionalImpl&lt; N, A &gt;</a></td></tr>
@@ -142,8 +133,6 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:cli" id="r_cli"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html">cli</a></td></tr>
-<tr class="memitem:cli_3A_3Anargs" id="r_cli_3A_3Anargs"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html">cli::nargs</a></td></tr>
-<tr class="memdesc:namespacecli_1_1nargs"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predefined <span class="tt"><a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a></span> constants for common value-count patterns. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-concepts" class="groupheader"><a id="concepts" name="concepts"></a>
 Concepts</h2></td></tr>
@@ -197,36 +186,6 @@ Typedefs</h2></td></tr>
 <tr class="memitem:aa2e71751990e973a4cde94ac9d2d4398" id="r_aa2e71751990e973a4cde94ac9d2d4398"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, char ShortName = '\0'&gt; </td></tr>
 <tr class="memitem:aa2e71751990e973a4cde94ac9d2d4398 template"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#aa2e71751990e973a4cde94ac9d2d4398">cli::PathOption</a> = <a class="el" href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</td></tr>
 <tr class="memdesc:aa2e71751990e973a4cde94ac9d2d4398"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt"><a class="el" href="namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a" title="A single-value option that stores the parsed result in T.">Option</a>&lt;std::filesystem::path, Name, ShortName&gt;</span>.  <br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:ae745c013ca4c76852b6ef9c580ba7ebd" id="r_ae745c013ca4c76852b6ef9c580ba7ebd"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebd">cli::Presence</a> { <a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">cli::required</a>
-, <a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">cli::optional</a>
- }</td></tr>
-<tr class="memdesc:ae745c013ca4c76852b6ef9c580ba7ebd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls whether an option or positional argument is mandatory.  <a href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebd">More...</a><br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a2f2a157655195ae5d1328b4b9955a3b7" id="r_a2f2a157655195ae5d1328b4b9955a3b7"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7">cli::required</a> = <a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">Presence::required</a></td></tr>
-<tr class="memdesc:a2f2a157655195ae5d1328b4b9955a3b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience constant for <span class="tt"><a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdaac67ede5a84eb5a1add7ff4440e9a485">Presence::required</a></span>.  <br /></td></tr>
-<tr class="memitem:a1bf88f352c39face7b8bd776a8dcc624" id="r_a1bf88f352c39face7b8bd776a8dcc624"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624">cli::optional</a> = <a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">Presence::optional</a></td></tr>
-<tr class="memdesc:a1bf88f352c39face7b8bd776a8dcc624"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience constant for <span class="tt"><a class="el" href="namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d">Presence::optional</a></span>.  <br /></td></tr>
-<tr class="memitem:a68874bbf441fc82b3d70695abc0df9fa" id="r_a68874bbf441fc82b3d70695abc0df9fa"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#a68874bbf441fc82b3d70695abc0df9fa">cli::nargs::none</a> {.min = 0, .max = 0}</td></tr>
-<tr class="memdesc:a68874bbf441fc82b3d70695abc0df9fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts no values; used for boolean flags.  <br /></td></tr>
-<tr class="memitem:a39e07bd1ee74a2ceba36374bb38b1f53" id="r_a39e07bd1ee74a2ceba36374bb38b1f53"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#a39e07bd1ee74a2ceba36374bb38b1f53">cli::nargs::one</a> {.min = 1, .max = 1}</td></tr>
-<tr class="memdesc:a39e07bd1ee74a2ceba36374bb38b1f53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts exactly one value.  <br /></td></tr>
-<tr class="memitem:a6c1a45e18786951a3a1e2d02a9c27319" id="r_a6c1a45e18786951a3a1e2d02a9c27319"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#a6c1a45e18786951a3a1e2d02a9c27319">cli::nargs::zero_or_one</a> {.min = 0, .max = 1}</td></tr>
-<tr class="memdesc:a6c1a45e18786951a3a1e2d02a9c27319"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts zero or one value.  <br /></td></tr>
-<tr class="memitem:ab3e4bbfca857da2375706745088256fc" id="r_ab3e4bbfca857da2375706745088256fc"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#ab3e4bbfca857da2375706745088256fc">cli::nargs::zero_or_more</a> {.min = 0, .max = -1}</td></tr>
-<tr class="memdesc:ab3e4bbfca857da2375706745088256fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts zero or more values.  <br /></td></tr>
-<tr class="memitem:a037ac0df67941950bd036e0ff2284a02" id="r_a037ac0df67941950bd036e0ff2284a02"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#a037ac0df67941950bd036e0ff2284a02">cli::nargs::one_or_more</a> {.min = 1, .max = -1}</td></tr>
-<tr class="memdesc:a037ac0df67941950bd036e0ff2284a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts one or more values.  <br /></td></tr>
-<tr class="memitem:aadd670361dd69a893cff2682f4df8c60" id="r_aadd670361dd69a893cff2682f4df8c60"><td class="memTemplParams" colspan="2">template&lt;int N&gt; </td></tr>
-<tr class="memitem:aadd670361dd69a893cff2682f4df8c60 template"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#aadd670361dd69a893cff2682f4df8c60">cli::nargs::exactly</a> {.min = N, .max = N}</td></tr>
-<tr class="memdesc:aadd670361dd69a893cff2682f4df8c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts exactly <span class="tt">N</span> values.  <br /></td></tr>
-<tr class="memitem:aea30ce17166480f7a12f2d5ccd535044" id="r_aea30ce17166480f7a12f2d5ccd535044"><td class="memTemplParams" colspan="2">template&lt;int Min, int Max&gt; </td></tr>
-<tr class="memitem:aea30ce17166480f7a12f2d5ccd535044 template"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecli_1_1nargs.html#aea30ce17166480f7a12f2d5ccd535044">cli::nargs::between</a> {.min = Min, .max = Max}</td></tr>
-<tr class="memdesc:aea30ce17166480f7a12f2d5ccd535044"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts between <span class="tt">Min</span> and <span class="tt">Max</span> values (inclusive).  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

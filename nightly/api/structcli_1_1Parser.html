@@ -126,12 +126,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a1a91cde7e7b6d268c26ab2d09976db6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the program name used in help output.  <br /></td></tr>
 <tr class="memitem:a66a6cdaac79ada55d217ba7f98040bc7" id="r_a66a6cdaac79ada55d217ba7f98040bc7"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a66a6cdaac79ada55d217ba7f98040bc7">set_program_name</a> (std::string name) -&gt; void</td></tr>
 <tr class="memdesc:a66a6cdaac79ada55d217ba7f98040bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the program name used in help output.  <br /></td></tr>
-<tr class="memitem:a05f66237cfa5faca93528b9eef939505" id="r_a05f66237cfa5faca93528b9eef939505"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a05f66237cfa5faca93528b9eef939505">format_help</a> (<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode=<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>) -&gt; std::string</td></tr>
-<tr class="memdesc:a05f66237cfa5faca93528b9eef939505"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a help string for the argument specification.  <br /></td></tr>
+<tr class="memitem:a473c0c069feadfd3e73d70ee344b956e" id="r_a473c0c069feadfd3e73d70ee344b956e"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a473c0c069feadfd3e73d70ee344b956e">format_help</a> (<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode=<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439a296ccece3e9d4949a538964510e58d21">ColorMode::detect</a>, <a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a> palette=<a class="el" href="namespacecli.html#a017481ae0c6bbd1f40e96c34eb7e27ea">default_help_palette</a>) -&gt; std::string</td></tr>
+<tr class="memdesc:a473c0c069feadfd3e73d70ee344b956e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a help string for the argument specification.  <br /></td></tr>
 <tr class="memitem:a8c5394da44fc1fb0b7fe54e33b8cbbdb" id="r_a8c5394da44fc1fb0b7fe54e33b8cbbdb"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a8c5394da44fc1fb0b7fe54e33b8cbbdb">format_help</a> (<a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string</td></tr>
 <tr class="memdesc:a8c5394da44fc1fb0b7fe54e33b8cbbdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a help string including recursive subcommand help.  <br /></td></tr>
+<tr class="memitem:a8981b1c6cf65ba79ce071f56d29b62f3" id="r_a8981b1c6cf65ba79ce071f56d29b62f3"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a8981b1c6cf65ba79ce071f56d29b62f3">format_help</a> (<a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a> palette) -&gt; std::string</td></tr>
 <tr class="memitem:a929913f2ab7a848533b02d428eeb467c" id="r_a929913f2ab7a848533b02d428eeb467c"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a929913f2ab7a848533b02d428eeb467c">format_help</a> (<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode, <a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string</td></tr>
 <tr class="memdesc:a929913f2ab7a848533b02d428eeb467c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a help string with explicit color mode and recursive subcommand help.  <br /></td></tr>
+<tr class="memitem:a41435e9aa42366c6605d3373fd27d412" id="r_a41435e9aa42366c6605d3373fd27d412"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a41435e9aa42366c6605d3373fd27d412">format_help</a> (<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode, <a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a> palette, <a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a>) -&gt; std::string</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-friends" class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -157,8 +159,46 @@ struct cli::Parser&lt; T &gt;</div><p>The main parsing engine for a typed argume
 
 <p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00540">540</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a41435e9aa42366c6605d3373fd27d412" name="a41435e9aa42366c6605d3373fd27d412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41435e9aa42366c6605d3373fd27d412">&#9670;&#160;</a></span>format_help() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Parser.html">cli::Parser</a>&lt; T &gt;::format_help </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a></td>          <td class="paramname"><span class="paramname"><em>color_mode</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a></td>          <td class="paramname"><span class="paramname"><em>palette</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcli_1_1RecurseHelpTag.html">RecurseHelpTag</a></td>          <td class="paramname"><span class="paramname"><em></em></span>&#160;) -&gt; std::string</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00805">805</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
 <a id="a929913f2ab7a848533b02d428eeb467c" name="a929913f2ab7a848533b02d428eeb467c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a929913f2ab7a848533b02d428eeb467c">&#9670;&#160;</a></span>format_help() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a929913f2ab7a848533b02d428eeb467c">&#9670;&#160;</a></span>format_help() <span class="overload">[2/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -195,12 +235,12 @@ template&lt;ArgumentSpec T&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string with all subcommand sections appended. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00790">790</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00801">801</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<a id="a05f66237cfa5faca93528b9eef939505" name="a05f66237cfa5faca93528b9eef939505"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05f66237cfa5faca93528b9eef939505">&#9670;&#160;</a></span>format_help() <span class="overload">[2/3]</span></h2>
+<a id="a473c0c069feadfd3e73d70ee344b956e" name="a473c0c069feadfd3e73d70ee344b956e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a473c0c069feadfd3e73d70ee344b956e">&#9670;&#160;</a></span>format_help() <span class="overload">[3/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -213,8 +253,12 @@ template&lt;ArgumentSpec T&gt; </div>
         <tr>
           <td class="memname">auto <a class="el" href="structcli_1_1Parser.html">cli::Parser</a>&lt; T &gt;::format_help </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a></td>          <td class="paramname"><span class="paramname"><em>color_mode</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a></span></td><td>)</td>
-          <td> -&gt; std::string</td>
+          <td class="paramtype"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a></td>          <td class="paramname"><span class="paramname"><em>color_mode</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439a296ccece3e9d4949a538964510e58d21">ColorMode::detect</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a></td>          <td class="paramname"><span class="paramname"><em>palette</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="namespacecli.html#a017481ae0c6bbd1f40e96c34eb7e27ea">default_help_palette</a></span>&#160;) -&gt; std::string</td>
         </tr>
       </table>
   </td>
@@ -227,18 +271,47 @@ template&lt;ArgumentSpec T&gt; </div>
 <p>Generates a help string for the argument specification. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">color_mode</td><td>Controls ANSI color output. Default: <span class="tt"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a></span>. </td></tr>
+    <tr><td class="paramname">color_mode</td><td>Controls ANSI color output. Default: <span class="tt"><a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439a296ccece3e9d4949a538964510e58d21">ColorMode::detect</a></span>. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00770">770</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00775">775</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a8981b1c6cf65ba79ce071f56d29b62f3" name="a8981b1c6cf65ba79ce071f56d29b62f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8981b1c6cf65ba79ce071f56d29b62f3">&#9670;&#160;</a></span>format_help() <span class="overload">[4/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Parser.html">cli::Parser</a>&lt; T &gt;::format_help </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a></td>          <td class="paramname"><span class="paramname"><em>palette</em></span></td><td>)</td>
+          <td> -&gt; std::string</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00790">790</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
 <a id="a8c5394da44fc1fb0b7fe54e33b8cbbdb" name="a8c5394da44fc1fb0b7fe54e33b8cbbdb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c5394da44fc1fb0b7fe54e33b8cbbdb">&#9670;&#160;</a></span>format_help() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c5394da44fc1fb0b7fe54e33b8cbbdb">&#9670;&#160;</a></span>format_help() <span class="overload">[5/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -265,7 +338,7 @@ template&lt;ArgumentSpec T&gt; </div>
 <p>Generates a help string including recursive subcommand help. </p>
 <dl class="section return"><dt>Returns</dt><dd>The formatted help string with all subcommand sections appended. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00779">779</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00786">786</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

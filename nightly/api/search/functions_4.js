@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['fail_0',['fail',['../structcli_1_1ActionResult.html#ab20ba0a93bbbacce6b2f511d0b1e945b',1,'cli::ActionResult::fail()'],['../structcli_1_1ActionResult_3_01void_01_4.html#a2a890b3d56262beb979aa6e5a1d20e09',1,'cli::ActionResult&lt; void &gt;::fail()'],['../structcli_1_1ConstraintResult.html#afbdc36c162f93e5381afa53cecfc803f',1,'cli::ConstraintResult::fail()'],['../structcli_1_1TokenizeResult.html#a424802dce290bd909ca375344c5bad10',1,'cli::TokenizeResult::fail()'],['../structcli_1_1ParseResult.html#a9562facd8dd88c8b3c3e557d3112e1c8',1,'cli::ParseResult::fail()'],['../namespacecli.html#af2811289e28cd2630006d3505e532f97',1,'cli::fail()']]],
-  ['format_5fhelp_1',['format_help',['../structcli_1_1Parser.html#a05f66237cfa5faca93528b9eef939505',1,'cli::Parser::format_help(ColorMode color_mode=ColorMode::auto_) -&gt; std::string'],['../structcli_1_1Parser.html#a8c5394da44fc1fb0b7fe54e33b8cbbdb',1,'cli::Parser::format_help(RecurseHelpTag) -&gt; std::string'],['../structcli_1_1Parser.html#a929913f2ab7a848533b02d428eeb467c',1,'cli::Parser::format_help(ColorMode color_mode, RecurseHelpTag) -&gt; std::string'],['../namespacecli.html#ad61be7335428fa47f47d222273e338bb',1,'cli::format_help()']]]
+  ['empty_0',['empty',['../structcli_1_1NameList.html#aeac07f65ad6c79347a9e9419a4ad3b0e',1,'cli::NameList']]],
+  ['end_1',['end',['../structcli_1_1NameList.html#a6e6f59eca8eff55572f486570738c646',1,'cli::NameList']]],
+  ['env_2',['env',['../structcli_1_1PositionalImpl.html#a58584a408ece343f610905beba88446f',1,'cli::PositionalImpl']]],
+  ['exit_5fcode_3',['exit_code',['../structcli_1_1ParseError.html#a4b44900e372928d6e94687c1fbe06191',1,'cli::ParseError']]]
 ];

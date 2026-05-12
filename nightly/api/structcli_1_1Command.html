@@ -128,6 +128,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a831d8269bcf223c7472f10232faf0b1d" id="r_a831d8269bcf223c7472f10232faf0b1d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a831d8269bcf223c7472f10232faf0b1d">Command</a> (<a class="el" href="structcli_1_1CommandParameter.html">CommandParameter</a> param)</td></tr>
 <tr class="memitem:af8b7da523b5b4396f3c1cd3a9904fa93" id="r_af8b7da523b5b4396f3c1cd3a9904fa93"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#af8b7da523b5b4396f3c1cd3a9904fa93">provided</a> () const -&gt; bool</td></tr>
 <tr class="memitem:a3412007a8d8297617cb8ad5d731c4ac1" id="r_a3412007a8d8297617cb8ad5d731c4ac1"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a3412007a8d8297617cb8ad5d731c4ac1">help_text</a> () const -&gt; std::string_view</td></tr>
+<tr class="memitem:a991c7e9127b1d1d6f55eea79f1f1b942" id="r_a991c7e9127b1d1d6f55eea79f1f1b942"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a991c7e9127b1d1d6f55eea79f1f1b942">hidden</a> () const -&gt; bool</td></tr>
+<tr class="memitem:a85df9aba803cbacd907b609d11c39e71" id="r_a85df9aba803cbacd907b609d11c39e71"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a85df9aba803cbacd907b609d11c39e71">deprecated</a> () const -&gt; std::string_view</td></tr>
 <tr class="memitem:ac9c33d53836a21fbedfecac920007ca5" id="r_ac9c33d53836a21fbedfecac920007ca5"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#ac9c33d53836a21fbedfecac920007ca5">mark_provided</a> () -&gt; void</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-methods" class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -151,7 +153,7 @@ struct cli::Command&lt; Name, T &gt;</div><p>A named subcommand that nests anoth
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00697">697</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00404">404</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a1fe2f82bd2ee4a7ffc48e9181c3fb052" name="a1fe2f82bd2ee4a7ffc48e9181c3fb052"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1fe2f82bd2ee4a7ffc48e9181c3fb052">&#9670;&#160;</a></span>argument_type</h2>
@@ -167,7 +169,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00699">699</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00406">406</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -224,7 +226,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00702">702</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00409">409</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -254,7 +256,36 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00704">704</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00414">414</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a85df9aba803cbacd907b609d11c39e71" name="a85df9aba803cbacd907b609d11c39e71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85df9aba803cbacd907b609d11c39e71">&#9670;&#160;</a></span>deprecated()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Command.html">cli::Command</a>&lt; Name, T &gt;::deprecated </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; std::string_view</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00420">420</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -283,7 +314,36 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00708">708</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00418">418</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a991c7e9127b1d1d6f55eea79f1f1b942" name="a991c7e9127b1d1d6f55eea79f1f1b942"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a991c7e9127b1d1d6f55eea79f1f1b942">&#9670;&#160;</a></span>hidden()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Name, ArgumentSpec T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto <a class="el" href="structcli_1_1Command.html">cli::Command</a>&lt; Name, T &gt;::hidden </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; bool</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00419">419</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -312,7 +372,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00709">709</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00423">423</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -341,7 +401,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00707">707</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00417">417</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>
@@ -368,7 +428,7 @@ template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00703">703</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00413">413</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

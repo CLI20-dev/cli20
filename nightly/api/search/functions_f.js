@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['validate_0',['validate',['../structcli_1_1Action.html#ad76ee01503938738888a9b7d5dd850ad',1,'cli::Action::validate()'],['../structcli_1_1Action_3_4.html#aa1535d671fd8f1b63cea589f7a1dcc47',1,'cli::Action&lt;&gt;::validate()']]],
-  ['validate_5fimpl_1',['validate_impl',['../structcli_1_1Action.html#ae006cf9d7cb541f18dac4d74cc51903b',1,'cli::Action::validate_impl()'],['../structcli_1_1Action.html#ae006cf9d7cb541f18dac4d74cc51903b',1,'cli::Action&lt;&gt;::validate_impl()']]],
-  ['value_2',['value',['../structcli_1_1PositionalImpl.html#abc743de4aa02b85653b857833207f2ad',1,'cli::PositionalImpl::value() const -&gt; const value_type &amp;'],['../structcli_1_1PositionalImpl.html#ae2943097d1dbfda71833257031cf48be',1,'cli::PositionalImpl::value() -&gt; value_type &amp;']]],
-  ['value_5for_3',['value_or',['../structcli_1_1PositionalImpl.html#ad8db23ea6132835b072e4e895f7abe25',1,'cli::PositionalImpl']]],
-  ['view_4',['view',['../structcli_1_1StringLiteral.html#a3014d1e5526e0699051cfcac9de27fd3',1,'cli::StringLiteral']]]
+  ['to_5fstring_0',['to_string',['../namespacecli.html#a6e6caba2405cd8a1854f7325d8c33679',1,'cli']]],
+  ['tokenize_1',['tokenize',['../namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083',1,'cli']]]
 ];

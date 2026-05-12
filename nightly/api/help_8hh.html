@@ -104,6 +104,9 @@ $(function(){initNavTree('help_8hh.html','',''); });
 <div class="contents">
 <div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;format&gt;</code><br />
+<code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;tuple&gt;</code><br />
@@ -122,9 +125,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ad61be7335428fa47f47d222273e338bb" id="r_ad61be7335428fa47f47d222273e338bb"><td class="memTemplParams" colspan="2">template&lt;ArgumentSpec T&gt; </td></tr>
-<tr class="memitem:ad61be7335428fa47f47d222273e338bb template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#ad61be7335428fa47f47d222273e338bb">cli::format_help</a> (T &amp;value, std::string_view program_name=&quot;program&quot;, <a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode=<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439ae271e2d9f011df547b9b98db5a3f287a">ColorMode::auto_</a>, bool recurse=false) -&gt; std::string</td></tr>
-<tr class="memdesc:ad61be7335428fa47f47d222273e338bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a complete help string for an argument specification.  <br /></td></tr>
+<tr class="memitem:a0ed9e1b8a7952a585744751a42aa5f31" id="r_a0ed9e1b8a7952a585744751a42aa5f31"><td class="memTemplParams" colspan="2">template&lt;ArgumentSpec T&gt; </td></tr>
+<tr class="memitem:a0ed9e1b8a7952a585744751a42aa5f31 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a0ed9e1b8a7952a585744751a42aa5f31">cli::format_help</a> (T &amp;value, std::string_view program_name=&quot;program&quot;, <a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439">ColorMode</a> color_mode=<a class="el" href="namespacecli.html#ae9400206faff3444393e605d6a25c439a296ccece3e9d4949a538964510e58d21">ColorMode::detect</a>, bool recurse=false, <a class="el" href="structcli_1_1HelpPalette.html">HelpPalette</a> palette=<a class="el" href="namespacecli.html#a017481ae0c6bbd1f40e96c34eb7e27ea">default_help_palette</a>) -&gt; std::string</td></tr>
+<tr class="memdesc:a0ed9e1b8a7952a585744751a42aa5f31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a complete help string for an argument specification.  <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

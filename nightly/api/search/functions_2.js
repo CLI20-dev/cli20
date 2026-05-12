@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['data_0',['data',['../structcli_1_1StringLiteral.html#a46a68e1ef60ce58dd7227bd8256d6c49',1,'cli::StringLiteral']]]
+  ['command_0',['Command',['../structcli_1_1Command.html#ae48742eb854b3679771d45b3139be268',1,'cli::Command::Command()=default'],['../structcli_1_1Command.html#a831d8269bcf223c7472f10232faf0b1d',1,'cli::Command::Command(CommandParameter param)']]],
+  ['command_5fname_1',['command_name',['../structcli_1_1Command.html#a3a637689709d601a556d0caf3e1b10b1',1,'cli::Command']]],
+  ['conflicts_2',['conflicts',['../namespacecli.html#a5b5088b2c336fbc48921df1f1e8961cf',1,'cli']]]
 ];

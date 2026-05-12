@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['text_0',['text',['../structcli_1_1Token.html#a0b97bc1df1782aaf7e0d71f097056ad1',1,'cli::Token']]],
-  ['toggle_1',['toggle',['../namespacecli_1_1pack.html#a8a431e577bff1152a7e212a95986e621',1,'cli::pack']]],
-  ['tokens_2',['tokens',['../structcli_1_1TokenizeResult.html#a5d9132f8150957107c3174f7c30d2439',1,'cli::TokenizeResult']]],
-  ['total_5fvalues_3',['total_values',['../structcli_1_1ActionCtx.html#a29ef2eeffb4fc4464f420752ffe87396',1,'cli::ActionCtx::total_values'],['../structcli_1_1ActionCtx_3_01void_01_4.html#a1f812bf1c2893516589dc1fca7cc228c',1,'cli::ActionCtx&lt; void &gt;::total_values']]],
-  ['type_4',['type',['../structcli_1_1Token.html#ac172d5d254d341b960662125857c24dc',1,'cli::Token']]]
+  ['range_0',['range',['../namespacecli_1_1validation.html#a3e570046006514822c6edf9f4721f0f8',1,'cli::validation']]],
+  ['recurse_5fhelp_1',['recurse_help',['../namespacecli.html#a6daa0c1a38f127f7ba2d372eb77b7328',1,'cli']]],
+  ['reject_5fduplicate_2',['reject_duplicate',['../namespacecli_1_1pack.html#a75d87b3d60d15bea7f673c4d660b1edf',1,'cli::pack']]],
+  ['required_3',['required',['../namespacecli.html#a2f2a157655195ae5d1328b4b9955a3b7',1,'cli']]],
+  ['reset_4',['reset',['../structcli_1_1HelpPalette.html#a93d3202a236044c9bc976d374c917ece',1,'cli::HelpPalette']]],
+  ['right_5',['right',['../structcli_1_1ConflictsRelation.html#a67506bb3bc7a22baa753b1769891d0fa',1,'cli::ConflictsRelation']]]
 ];

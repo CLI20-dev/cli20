@@ -112,12 +112,34 @@ $(function(){initNavTree('structcli_1_1CommandParameter.html','','structcli_1_1C
 Public Attributes</h2></td></tr>
 <tr class="memitem:a10d288a60222cb7254827b801c72dd55" id="r_a10d288a60222cb7254827b801c72dd55"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a10d288a60222cb7254827b801c72dd55">help</a> {}</td></tr>
 <tr class="memdesc:a10d288a60222cb7254827b801c72dd55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Brief description shown in the parent command's help.  <br /></td></tr>
+<tr class="memitem:accfe96b1b7804d0f05dfe5545f879423" id="r_accfe96b1b7804d0f05dfe5545f879423"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#accfe96b1b7804d0f05dfe5545f879423">hidden</a> {}</td></tr>
+<tr class="memdesc:accfe96b1b7804d0f05dfe5545f879423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether this command is omitted from generated help.  <br /></td></tr>
+<tr class="memitem:a2211a470538c4f16633dfa84b49cfc3c" id="r_a2211a470538c4f16633dfa84b49cfc3c"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a2211a470538c4f16633dfa84b49cfc3c">deprecated</a> {}</td></tr>
+<tr class="memdesc:a2211a470538c4f16633dfa84b49cfc3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional deprecation message shown in generated help.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Parameter bag used when constructing a <span class="tt"><a class="el" href="structcli_1_1Command.html" title="A named subcommand that nests another argument specification.">Command</a></span> field. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00679">679</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00383">383</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a2211a470538c4f16633dfa84b49cfc3c" name="a2211a470538c4f16633dfa84b49cfc3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2211a470538c4f16633dfa84b49cfc3c">&#9670;&#160;</a></span>deprecated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view cli::CommandParameter::deprecated {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Optional deprecation message shown in generated help. </p>
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00388">388</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
 <a id="a10d288a60222cb7254827b801c72dd55" name="a10d288a60222cb7254827b801c72dd55"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a10d288a60222cb7254827b801c72dd55">&#9670;&#160;</a></span>help</h2>
 
@@ -132,7 +154,25 @@ Public Attributes</h2></td></tr>
 
 <p>Brief description shown in the parent command's help. </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00681">681</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00385">385</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="accfe96b1b7804d0f05dfe5545f879423" name="accfe96b1b7804d0f05dfe5545f879423"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accfe96b1b7804d0f05dfe5545f879423">&#9670;&#160;</a></span>hidden</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cli::CommandParameter::hidden {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether this command is omitted from generated help. </p>
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00386">386</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
 
 </div>
 </div>

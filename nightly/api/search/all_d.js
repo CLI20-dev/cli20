@@ -18,7 +18,7 @@ var searchData=
   ['operator_7c_15',['operator|',['../namespacecli.html#ae626b8b159d8a531615ff09462080b68',1,'cli']]],
   ['operator_7c_7c_16',['operator||',['../structcli_1_1ConstraintResult.html#aa1e64ff6ad4e72c0f9b897620b4a31ce',1,'cli::ConstraintResult']]],
   ['option_17',['Option',['../namespacecli.html#af1c2740179c6ccc154e1045e3d1e527a',1,'cli']]],
-  ['option_18',['option',['../namespacecli.html#ab117880aa75b79c0192736576986aec8aef3e30e070f70244fd6578d88a6b77ac',1,'cli']]],
+  ['option_18',['option',['../structcli_1_1HelpPalette.html#a36a44d7e9e8edae9a750e04fe3fc4c78',1,'cli::HelpPalette::option'],['../namespacecli.html#ab117880aa75b79c0192736576986aec8aef3e30e070f70244fd6578d88a6b77ac',1,'cli::option']]],
   ['option_5fprefixes_19',['option_prefixes',['../structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7',1,'cli::TokenizerConfig']]],
   ['optional_20',['optional',['../namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624',1,'cli::optional'],['../namespacecli.html#ae745c013ca4c76852b6ef9c580ba7ebdad57c24f3fe52d16e7169b912dd647f0d',1,'cli::optional']]],
   ['optiontag_21',['OptionTag',['../structcli_1_1OptionTag.html',1,'cli']]],

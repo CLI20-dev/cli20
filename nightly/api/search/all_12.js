@@ -4,5 +4,6 @@ var searchData=
   ['unknown_5fcommand_1',['unknown_command',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a3d5bf453f3e2135b2286abb2b1c5e591',1,'cli']]],
   ['unknown_5ferror_2',['unknown_error',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a4e44c97a51e5519cd277f335de285ead',1,'cli']]],
   ['unknown_5foption_3',['unknown_option',['../namespacecli.html#ab273a2fec3161e54e544961483ffbe97a36c09abd7943c607e22274d623f1292b',1,'cli']]],
-  ['use_5fstdout_4',['use_stdout',['../structcli_1_1ParseError.html#ab317b9f8cdb6f37451cd71354edbcf83',1,'cli::ParseError']]]
+  ['usage_4',['usage',['../structcli_1_1HelpPalette.html#a024f75835272e9fb6d04e0a1ba3580fc',1,'cli::HelpPalette']]],
+  ['use_5fstdout_5',['use_stdout',['../structcli_1_1ParseError.html#ab317b9f8cdb6f37451cd71354edbcf83',1,'cli::ParseError']]]
 ];

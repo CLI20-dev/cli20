@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['occurrences_0',['occurrences',['../structcli_1_1ActionCtx.html#a1c98c5c52ea7d9eccd1a6cf6ab0a522e',1,'cli::ActionCtx::occurrences'],['../structcli_1_1ActionCtx_3_01void_01_4.html#add8875887bb8c0113c76676ae890bc88',1,'cli::ActionCtx&lt; void &gt;::occurrences']]],
-  ['on_5fparse_1',['on_parse',['../structcli_1_1ArgParameter.html#a2ed3069cff07e313eb419c8ab93edd95',1,'cli::ArgParameter']]],
-  ['one_2',['one',['../namespacecli_1_1nargs.html#a39e07bd1ee74a2ceba36374bb38b1f53',1,'cli::nargs']]],
-  ['one_5fof_3',['one_of',['../namespacecli_1_1validation.html#ab331a5c8ec3d7e28863f05bd14440b33',1,'cli::validation']]],
-  ['one_5for_5fmore_4',['one_or_more',['../namespacecli_1_1nargs.html#a037ac0df67941950bd036e0ff2284a02',1,'cli::nargs']]],
-  ['option_5fprefixes_5',['option_prefixes',['../structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7',1,'cli::TokenizerConfig']]],
-  ['optional_6',['optional',['../namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624',1,'cli']]]
+  ['mark_5fpresent_0',['mark_present',['../namespacecli_1_1pack.html#aae9bda57f0efac3e615043c32dee4d29',1,'cli::pack']]],
+  ['matched_5fprefix_1',['matched_prefix',['../structcli_1_1Token.html#a30153553875b142ecb2c53be7204df6c',1,'cli::Token']]],
+  ['matches_2',['matches',['../namespacecli_1_1validation.html#aac320bf8bc1cfa8ba72937a274ee5c89',1,'cli::validation']]],
+  ['max_3',['max',['../structcli_1_1Nargs.html#ad286972085372a6bf80cc235e9c31648',1,'cli::Nargs::max'],['../namespacecli_1_1validation.html#a9ac3629008225299aed67e1d83a80a7b',1,'cli::validation::max']]],
+  ['members_4',['members',['../structcli_1_1GroupParams.html#a22a4cc89752479559e3eab601077bd4c',1,'cli::GroupParams::members'],['../structcli_1_1GroupRelation.html#af2e0d30d14499f73e894dc0d54f18bc2',1,'cli::GroupRelation::members']]],
+  ['metadata_5',['metadata',['../structcli_1_1HelpPalette.html#a8da83db9bbdc4624fd3fb7821171f5f1',1,'cli::HelpPalette']]],
+  ['metavar_6',['metavar',['../structcli_1_1HelpPalette.html#a328c099be6c094e083c2ad645b35431f',1,'cli::HelpPalette']]],
+  ['min_7',['min',['../structcli_1_1Nargs.html#a3c6b3a54a7f61208218ece389ef1df95',1,'cli::Nargs::min'],['../namespacecli_1_1validation.html#ae007a2c3bc487d8aa6ed17f3c2cda7c2',1,'cli::validation::min']]]
 ];

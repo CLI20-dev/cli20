@@ -129,7 +129,7 @@ Static Public Attributes</h2></td></tr>
 struct cli::conversion::DefaultMissingValue&lt; Value &gt;</div><p>Injects a compile-time default value when an option is invoked as a flag (no value provided). </p>
 <p>Accepts <span class="tt">std::optional&lt;std::string_view&gt;</span> as input:</p><ul>
 <li>If the optional has a value (actual value provided), unwrap and pass through.</li>
-<li>If nullopt (flag-only invocation) and <span class="tt"><a class="el" href="namespacecli_1_1nargs.html" title="Predefined Nargs constants for common value-count patterns.">nargs</a> == 0</span>, inject the compile-time default string.</li>
+<li>If nullopt (flag-only invocation) and <span class="tt"><a class="el" href="namespacecli_1_1nargs.html">nargs</a> == 0</span>, inject the compile-time default string.</li>
 <li>If nullopt but nargs &gt; 0 (value coming separately), return ignore.</li>
 </ul>
 <dl class="tparams"><dt>Template Parameters</dt><dd>

@@ -102,9 +102,6 @@ $(function(){initNavTree('namespacecli_1_1nargs.html','',''); });
   <div class="headertitle"><div class="title">cli::nargs Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Predefined <span class="tt"><a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a></span> constants for common value-count patterns.  
-<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -120,14 +117,10 @@ Variables</h2></td></tr>
 <tr class="memdesc:a037ac0df67941950bd036e0ff2284a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts one or more values.  <br /></td></tr>
 <tr class="memitem:aadd670361dd69a893cff2682f4df8c60" id="r_aadd670361dd69a893cff2682f4df8c60"><td class="memTemplParams" colspan="2">template&lt;int N&gt; </td></tr>
 <tr class="memitem:aadd670361dd69a893cff2682f4df8c60 template"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="#aadd670361dd69a893cff2682f4df8c60">exactly</a> {.min = N, .max = N}</td></tr>
-<tr class="memdesc:aadd670361dd69a893cff2682f4df8c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts exactly <span class="tt">N</span> values.  <br /></td></tr>
 <tr class="memitem:aea30ce17166480f7a12f2d5ccd535044" id="r_aea30ce17166480f7a12f2d5ccd535044"><td class="memTemplParams" colspan="2">template&lt;int Min, int Max&gt; </td></tr>
 <tr class="memitem:aea30ce17166480f7a12f2d5ccd535044 template"><td class="memItemLeft">constexpr <a class="el" href="structcli_1_1Nargs.html">Nargs</a>&#160;</td><td class="memItemRight"><a class="el" href="#aea30ce17166480f7a12f2d5ccd535044">between</a> {.min = Min, .max = Max}</td></tr>
-<tr class="memdesc:aea30ce17166480f7a12f2d5ccd535044"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts between <span class="tt">Min</span> and <span class="tt">Max</span> values (inclusive).  <br /></td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Predefined <span class="tt"><a class="el" href="structcli_1_1Nargs.html" title="Specifies the minimum and maximum number of values an option or positional accepts.">Nargs</a></span> constants for common value-count patterns. </p>
-</div><a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
 <a id="aea30ce17166480f7a12f2d5ccd535044" name="aea30ce17166480f7a12f2d5ccd535044"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aea30ce17166480f7a12f2d5ccd535044">&#9670;&#160;</a></span>between</h2>
 
@@ -150,16 +143,7 @@ template&lt;int Min, int Max&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Accepts between <span class="tt">Min</span> and <span class="tt">Max</span> values (inclusive). </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Min</td><td>Minimum number of values. </td></tr>
-    <tr><td class="paramname">Max</td><td>Maximum number of values. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00100">100</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00065">65</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -185,15 +169,7 @@ template&lt;int N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Accepts exactly <span class="tt">N</span> values. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">N</td><td>The required number of values. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00092">92</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00062">62</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -220,7 +196,7 @@ template&lt;int N&gt; </div>
 <p>Accepts no values; used for boolean flags. </p>
 <p><span class="tt">{0, 0}</span> </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00073">73</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00047">47</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -247,7 +223,7 @@ template&lt;int N&gt; </div>
 <p>Accepts exactly one value. </p>
 <p><span class="tt">{1, 1}</span> </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00076">76</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00050">50</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -274,7 +250,7 @@ template&lt;int N&gt; </div>
 <p>Accepts one or more values. </p>
 <p><span class="tt">{1, -1}</span> </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00085">85</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00059">59</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -301,7 +277,7 @@ template&lt;int N&gt; </div>
 <p>Accepts zero or more values. </p>
 <p><span class="tt">{0, -1}</span> </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00082">82</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00056">56</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
@@ -328,7 +304,7 @@ template&lt;int N&gt; </div>
 <p>Accepts zero or one value. </p>
 <p><span class="tt">{0, 1}</span> </p>
 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00079">79</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="argument__base_8hh_source.html#l00053">53</a> of file <a class="el" href="argument__base_8hh_source.html">argument_base.hh</a>.</p>
 
 </div>
 </div>
