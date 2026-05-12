@@ -482,6 +482,7 @@ TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
 }
 
 TEST(TokenizeMultiPrefix, MatchedPrefixDistinguishesPrefixes) {
+  // "--foo" and "+foo" are different options; matched_prefix tells them apart
   auto cfg = cli::TokenizerConfig{}.with_option_prefixes<"--", "+">();
   SpecMap spec{{"--foo", kFlag}, {"+foo", kFlag}};
   auto r = tokenize_cfg({"--foo", "+foo"}, spec, cfg);
