@@ -26,7 +26,7 @@ for case_name in "${cases[@]}"; do
       --runs "$hyperfine_runs" \
       --prepare "rm -f '$object_file'" \
       --export-json "$json_file" \
-      "$repo_root/bench/compile_time/scripts/compile-one.sh '$case_name' '$library' '$object_dir'" \
+      "bash $repo_root/bench/compile_time/scripts/compile-one.sh '$case_name' '$library' '$object_dir'" \
       >/dev/null
     elapsed="$(python3 -c 'import json, sys; print("{:.6f}".format(json.load(open(sys.argv[1]))["results"][0]["mean"]))' "$json_file")"
     printf "c++%s\t%s\t%s\t%s\n" "$cxx_standard" "$case_name" "$library" "$elapsed" |
