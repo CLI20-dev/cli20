@@ -1,0 +1,53 @@
+---
+sidebar_position: 5
+title: 4. Relations
+---
+
+import {ExampleSource} from '@site/src/components/ExampleDoc';
+
+# Relations
+
+This example shows schema-level relationships between options. Use this pattern
+when the rule can be described from occurrence alone and should also appear in
+generated help. Relation metadata is rendered inline on affected options, while
+named groups get their own `Option groups:` entry.
+
+## Source
+
+<ExampleSource
+  example={{
+    sourcePath: 'examples/relations.cc',
+  }}
+/>
+
+## What This Example Shows
+
+The example defines three static relations:
+
+- `user` and `password` are a named `legacy_auth` group and must be provided together.
+- `json` conflicts with `markdown`.
+- the named `legacy_auth` group depends on `profile`.
+
+The parser enforces these rules after normal option parsing and before the
+program uses the parsed values.
+
+## Try It
+
+```bash
+./build/examples/relations --json
+./build/examples/relations --user alice --password secret --profile prod
+./build/examples/relations --markdown --profile prod
+```
+
+Failure cases:
+
+- `--user alice` fails because `password` is missing from the `legacy_auth` group.
+- `--json --markdown` fails because the two output formats conflict.
+- `--user alice --password secret` fails because `legacy_auth` depends on `profile`.
+- `--help` shows relation metadata next to `--user`, `--password`, `--json`,
+  `--markdown`, and `--profile`.
+
+## Related Examples
+
+- [Validation](/docs/examples/validation)
+- [Advanced](/docs/examples/advanced)
