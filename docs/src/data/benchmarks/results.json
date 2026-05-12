@@ -8,181 +8,181 @@
     {
       "case": "simple",
       "library": "cli20",
-      "seconds": 1.510937,
+      "seconds": 1.568617,
       "standard": "cxx20"
     },
     {
       "case": "simple",
       "library": "cli11",
-      "seconds": 3.420628,
+      "seconds": 3.743366,
       "standard": "cxx20"
     },
     {
       "case": "simple",
       "library": "argparse",
-      "seconds": 1.603756,
+      "seconds": 1.781824,
       "standard": "cxx20"
     },
     {
       "case": "simple",
       "library": "cxxopts",
-      "seconds": 1.96984,
+      "seconds": 2.084148,
       "standard": "cxx20"
     },
     {
       "case": "simple",
       "library": "boost",
-      "seconds": 0.830396,
+      "seconds": 0.88167,
       "standard": "cxx20"
     },
     {
       "case": "many_options",
       "library": "cli20",
-      "seconds": 2.216303,
+      "seconds": 2.155856,
       "standard": "cxx20"
     },
     {
       "case": "many_options",
       "library": "cli11",
-      "seconds": 3.723533,
+      "seconds": 3.508925,
       "standard": "cxx20"
     },
     {
       "case": "many_options",
       "library": "argparse",
-      "seconds": 1.800532,
+      "seconds": 1.82392,
       "standard": "cxx20"
     },
     {
       "case": "many_options",
       "library": "cxxopts",
-      "seconds": 2.134057,
+      "seconds": 2.189928,
       "standard": "cxx20"
     },
     {
       "case": "many_options",
       "library": "boost",
-      "seconds": 1.095079,
+      "seconds": 1.138985,
       "standard": "cxx20"
     },
     {
       "case": "subcommand",
       "library": "cli20",
-      "seconds": 1.602702,
+      "seconds": 1.587791,
       "standard": "cxx20"
     },
     {
       "case": "subcommand",
       "library": "cli11",
-      "seconds": 3.352263,
+      "seconds": 3.255969,
       "standard": "cxx20"
     },
     {
       "case": "subcommand",
       "library": "argparse",
-      "seconds": 1.683755,
+      "seconds": 1.582255,
       "standard": "cxx20"
     },
     {
       "case": "subcommand",
       "library": "cxxopts",
-      "seconds": 1.875861,
+      "seconds": 1.802998,
       "standard": "cxx20"
     },
     {
       "case": "subcommand",
       "library": "boost",
-      "seconds": 0.778103,
+      "seconds": 0.754448,
       "standard": "cxx20"
     },
     {
       "case": "simple",
       "library": "cli20",
-      "seconds": 1.30442,
+      "seconds": 1.236948,
       "standard": "cxx26"
     },
     {
       "case": "simple",
       "library": "cli11",
-      "seconds": 3.328135,
+      "seconds": 3.520713,
       "standard": "cxx26"
     },
     {
       "case": "simple",
       "library": "argparse",
-      "seconds": 1.556079,
+      "seconds": 1.70554,
       "standard": "cxx26"
     },
     {
       "case": "simple",
       "library": "cxxopts",
-      "seconds": 1.839569,
+      "seconds": 1.861667,
       "standard": "cxx26"
     },
     {
       "case": "simple",
       "library": "boost",
-      "seconds": 0.73147,
+      "seconds": 0.788324,
       "standard": "cxx26"
     },
     {
       "case": "many_options",
       "library": "cli20",
-      "seconds": 2.147377,
+      "seconds": 2.258437,
       "standard": "cxx26"
     },
     {
       "case": "many_options",
       "library": "cli11",
-      "seconds": 3.566478,
+      "seconds": 3.7834,
       "standard": "cxx26"
     },
     {
       "case": "many_options",
       "library": "argparse",
-      "seconds": 1.702517,
+      "seconds": 1.853235,
       "standard": "cxx26"
     },
     {
       "case": "many_options",
       "library": "cxxopts",
-      "seconds": 1.961641,
+      "seconds": 2.192126,
       "standard": "cxx26"
     },
     {
       "case": "many_options",
       "library": "boost",
-      "seconds": 1.042563,
+      "seconds": 1.164148,
       "standard": "cxx26"
     },
     {
       "case": "subcommand",
       "library": "cli20",
-      "seconds": 1.534191,
+      "seconds": 1.71208,
       "standard": "cxx26"
     },
     {
       "case": "subcommand",
       "library": "cli11",
-      "seconds": 3.352722,
+      "seconds": 3.582609,
       "standard": "cxx26"
     },
     {
       "case": "subcommand",
       "library": "argparse",
-      "seconds": 1.588675,
+      "seconds": 1.571239,
       "standard": "cxx26"
     },
     {
       "case": "subcommand",
       "library": "cxxopts",
-      "seconds": 1.813563,
+      "seconds": 1.836612,
       "standard": "cxx26"
     },
     {
       "case": "subcommand",
       "library": "boost",
-      "seconds": 0.752213,
+      "seconds": 0.753532,
       "standard": "cxx26"
     }
   ],
@@ -198,271 +198,271 @@
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "simple",
-      "cpuNs": 231.7489955487378,
+      "cpuNs": 253.32093755028515,
       "library": "cli20",
       "standard": "cxx20",
-      "timeNs": 231.78580580568487
+      "timeNs": 253.51536655200294
     },
     {
       "allocatedBytes": 4248.0,
       "allocations": 81.0,
       "case": "simple",
-      "cpuNs": 2897.6993522448342,
+      "cpuNs": 3007.5960679178525,
       "library": "cli11",
       "standard": "cxx20",
-      "timeNs": 2898.723031875759
+      "timeNs": 3008.3965538843627
     },
     {
       "allocatedBytes": 3552.0,
       "allocations": 34.0,
       "case": "simple",
-      "cpuNs": 1370.807262283304,
+      "cpuNs": 1417.6598611255279,
       "library": "argparse",
       "standard": "cxx20",
-      "timeNs": 1370.871370269089
+      "timeNs": 1419.0460132111236
     },
     {
       "allocatedBytes": 21920.0,
       "allocations": 330.0,
       "case": "simple",
-      "cpuNs": 9120.030007501857,
+      "cpuNs": 9319.595083152675,
       "library": "cxxopts",
       "standard": "cxx20",
-      "timeNs": 9119.467355139044
+      "timeNs": 9319.775833614272
     },
     {
       "allocatedBytes": 5120.0,
       "allocations": 86.0,
       "case": "simple",
-      "cpuNs": 2759.2039800995058,
+      "cpuNs": 2787.335722819585,
       "library": "boost",
       "standard": "cxx20",
-      "timeNs": 2760.7627843149858
+      "timeNs": 2788.281564419768
     },
     {
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "many_options",
-      "cpuNs": 3239.5562898276335,
+      "cpuNs": 2731.753916698495,
       "library": "cli20",
       "standard": "cxx20",
-      "timeNs": 3239.5267887016794
+      "timeNs": 2732.860339429325
     },
     {
       "allocatedBytes": 23344.0,
       "allocations": 503.0,
       "case": "many_options",
-      "cpuNs": 17076.92307692294,
+      "cpuNs": 17230.110159118598,
       "library": "cli11",
       "standard": "cxx20",
-      "timeNs": 17079.146382186293
+      "timeNs": 17231.487122739378
     },
     {
       "allocatedBytes": 13992.0,
       "allocations": 98.0,
       "case": "many_options",
-      "cpuNs": 5274.849397590391,
+      "cpuNs": 5355.455568053927,
       "library": "argparse",
       "standard": "cxx20",
-      "timeNs": 5275.853539617867
+      "timeNs": 5357.267719529008
     },
     {
       "allocatedBytes": 126472.0,
       "allocations": 1489.0,
       "case": "many_options",
-      "cpuNs": 41828.40236686452,
+      "cpuNs": 42796.40718562883,
       "library": "cxxopts",
       "standard": "cxx20",
-      "timeNs": 41843.81068841218
+      "timeNs": 42829.34128649778
     },
     {
       "allocatedBytes": 27632.0,
       "allocations": 412.0,
       "case": "many_options",
-      "cpuNs": 20011.4285714286,
+      "cpuNs": 20211.347517730752,
       "library": "boost",
       "standard": "cxx20",
-      "timeNs": 20017.857147779847
+      "timeNs": 20222.458162787534
     },
     {
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "subcommand",
-      "cpuNs": 193.68964897981823,
+      "cpuNs": 200.9111420893017,
       "library": "cli20",
       "standard": "cxx20",
-      "timeNs": 193.8485130367405
+      "timeNs": 201.0356986937043
     },
     {
       "allocatedBytes": 7112.0,
       "allocations": 107.0,
       "case": "subcommand",
-      "cpuNs": 3748.1309615880587,
+      "cpuNs": 3680.5483704087032,
       "library": "cli11",
       "standard": "cxx20",
-      "timeNs": 3754.1139473407293
+      "timeNs": 3681.486037420567
     },
     {
       "allocatedBytes": 5920.0,
       "allocations": 64.0,
       "case": "subcommand",
-      "cpuNs": 2226.506426306124,
+      "cpuNs": 2283.2128514056276,
       "library": "argparse",
       "standard": "cxx20",
-      "timeNs": 2226.3395075520407
+      "timeNs": 2284.819278005795
     },
     {
       "allocatedBytes": 7776.0,
       "allocations": 105.0,
       "case": "subcommand",
-      "cpuNs": 2727.5100401606674,
+      "cpuNs": 2853.648675965263,
       "library": "cxxopts",
       "standard": "cxx20",
-      "timeNs": 2729.593376193315
+      "timeNs": 2855.434201899498
     },
     {
       "allocatedBytes": 1752.0,
       "allocations": 36.0,
       "case": "subcommand",
-      "cpuNs": 951.7006802721053,
+      "cpuNs": 959.8003507351925,
       "library": "boost",
       "standard": "cxx20",
-      "timeNs": 952.2590466274494
+      "timeNs": 960.1038700079201
     },
     {
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "simple",
-      "cpuNs": 225.83251961345562,
+      "cpuNs": 243.00800742717982,
       "library": "cli20",
       "standard": "cxx26",
-      "timeNs": 225.8262064819953
+      "timeNs": 243.42039846220192
     },
     {
       "allocatedBytes": 4248.0,
       "allocations": 81.0,
       "case": "simple",
-      "cpuNs": 2827.43650965921,
+      "cpuNs": 2882.654197283434,
       "library": "cli11",
       "standard": "cxx26",
-      "timeNs": 2827.29195085394
+      "timeNs": 2883.8975749249594
     },
     {
       "allocatedBytes": 3552.0,
       "allocations": 34.0,
       "case": "simple",
-      "cpuNs": 1372.4985139686976,
+      "cpuNs": 1361.5546851461324,
       "library": "argparse",
       "standard": "cxx26",
-      "timeNs": 1372.8907255659572
+      "timeNs": 1361.5212405716484
     },
     {
       "allocatedBytes": 21920.0,
       "allocations": 330.0,
       "case": "simple",
-      "cpuNs": 9009.413468501132,
+      "cpuNs": 8794.838709677477,
       "library": "cxxopts",
       "standard": "cxx26",
-      "timeNs": 9008.327295537027
+      "timeNs": 8798.118064840955
     },
     {
       "allocatedBytes": 5120.0,
       "allocations": 86.0,
       "case": "simple",
-      "cpuNs": 2711.0009910803096,
+      "cpuNs": 2659.7878495660766,
       "library": "boost",
       "standard": "cxx26",
-      "timeNs": 2711.892966319492
+      "timeNs": 2659.6995174306426
     },
     {
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "many_options",
-      "cpuNs": 3140.7657657657373,
+      "cpuNs": 2839.222941720603,
       "library": "cli20",
       "standard": "cxx26",
-      "timeNs": 3140.8502223171495
+      "timeNs": 2858.84976808316
     },
     {
       "allocatedBytes": 23344.0,
       "allocations": 503.0,
       "case": "many_options",
-      "cpuNs": 16815.256257449357,
+      "cpuNs": 16879.898862199785,
       "library": "cli11",
       "standard": "cxx26",
-      "timeNs": 16813.46840478249
+      "timeNs": 16883.533467407964
     },
     {
       "allocatedBytes": 13992.0,
       "allocations": 98.0,
       "case": "many_options",
-      "cpuNs": 5131.349782293295,
+      "cpuNs": 5247.54634678303,
       "library": "argparse",
       "standard": "cxx26",
-      "timeNs": 5131.3650206167995
+      "timeNs": 5249.954558304985
     },
     {
       "allocatedBytes": 126472.0,
       "allocations": 1489.0,
       "case": "many_options",
-      "cpuNs": 40408.284023668486,
+      "cpuNs": 40789.62536022991,
       "library": "cxxopts",
       "standard": "cxx26",
-      "timeNs": 40410.748495549495
+      "timeNs": 40790.4668668183
     },
     {
       "allocatedBytes": 27632.0,
       "allocations": 412.0,
       "case": "many_options",
-      "cpuNs": 19246.87933425786,
+      "cpuNs": 19525.64102564122,
       "library": "boost",
       "standard": "cxx26",
-      "timeNs": 19246.59082557536
+      "timeNs": 19525.878922085136
     },
     {
       "allocatedBytes": 0.0,
       "allocations": 0.0,
       "case": "subcommand",
-      "cpuNs": 189.68813008981428,
+      "cpuNs": 197.47375418963608,
       "library": "cli20",
       "standard": "cxx26",
-      "timeNs": 191.42345980316233
+      "timeNs": 197.7622918708773
     },
     {
       "allocatedBytes": 7112.0,
       "allocations": 107.0,
       "case": "subcommand",
-      "cpuNs": 3574.1301059001075,
+      "cpuNs": 3575.741801145244,
       "library": "cli11",
       "standard": "cxx26",
-      "timeNs": 3577.817696490923
+      "timeNs": 3576.6637176255863
     },
     {
       "allocatedBytes": 5920.0,
       "allocations": 64.0,
       "case": "subcommand",
-      "cpuNs": 2169.029275808921,
+      "cpuNs": 2189.168456581753,
       "library": "argparse",
       "standard": "cxx26",
-      "timeNs": 2169.0355943162886
+      "timeNs": 2190.363759681612
     },
     {
       "allocatedBytes": 7776.0,
       "allocations": 105.0,
       "case": "subcommand",
-      "cpuNs": 2730.244183810804,
+      "cpuNs": 2692.5484060238773,
       "library": "cxxopts",
       "standard": "cxx26",
-      "timeNs": 2730.1399739359954
+      "timeNs": 2692.548405384886
     },
     {
       "allocatedBytes": 1752.0,
       "allocations": 36.0,
       "case": "subcommand",
-      "cpuNs": 927.2561055243561,
+      "cpuNs": 944.422546314541,
       "library": "boost",
       "standard": "cxx26",
-      "timeNs": 927.5472771934168
+      "timeNs": 944.6744185754538
     }
   ],
   "schemaVersion": 1,
@@ -492,8 +492,8 @@
       "case": "many_options",
       "library": "cli20",
       "standard": "cxx20",
-      "strippedBytes": 232544,
-      "unstrippedBytes": 372720
+      "strippedBytes": 216064,
+      "unstrippedBytes": 356224
     },
     {
       "case": "many_options",
@@ -528,7 +528,7 @@
       "library": "cli20",
       "standard": "cxx20",
       "strippedBytes": 89424,
-      "unstrippedBytes": 109976
+      "unstrippedBytes": 109384
     },
     {
       "case": "simple",
@@ -563,7 +563,7 @@
       "library": "cli20",
       "standard": "cxx20",
       "strippedBytes": 123072,
-      "unstrippedBytes": 147832
+      "unstrippedBytes": 147720
     },
     {
       "case": "subcommand",
@@ -597,8 +597,8 @@
       "case": "many_options",
       "library": "cli20",
       "standard": "cxx26",
-      "strippedBytes": 232544,
-      "unstrippedBytes": 372720
+      "strippedBytes": 216064,
+      "unstrippedBytes": 356224
     },
     {
       "case": "many_options",
@@ -633,7 +633,7 @@
       "library": "cli20",
       "standard": "cxx26",
       "strippedBytes": 89424,
-      "unstrippedBytes": 109976
+      "unstrippedBytes": 109384
     },
     {
       "case": "simple",
@@ -668,7 +668,7 @@
       "library": "cli20",
       "standard": "cxx26",
       "strippedBytes": 123072,
-      "unstrippedBytes": 147832
+      "unstrippedBytes": 147720
     },
     {
       "case": "subcommand",
