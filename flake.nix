@@ -102,7 +102,7 @@
               npmDeps = pkgs.fetchNpmDeps {
                 name = "cli20-docs-0.0.0-npm-deps";
                 src = ./docs;
-                hash = "sha256-DOI2KP2qq8zbUjX3Kktgfe16n567pNkkGz5ABGSgSdo=";
+                hash = "sha256-ntnQTTWdih6fLx6QLqarpJQ6pIOdDWRxmysDQQVWswQ=";
               };
               nativeBuildInputs = [
                 pkgs.emscripten
