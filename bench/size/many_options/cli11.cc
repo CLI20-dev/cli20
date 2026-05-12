@@ -1,15 +1,33 @@
 #include <CLI/CLI.hpp>
-#include <map>
 
-#include "bench/many_options.hh"
+enum class Mode { fast, balanced, precise };
+
+struct ManyValues {
+  std::string name;
+  std::string output;
+  std::string target;
+  std::string define;
+  int jobs{};
+  int retries{};
+  int port{};
+  int depth{};
+  double ratio{};
+  double timeout{};
+  double threshold{};
+  double scale{};
+  std::filesystem::path config;
+  std::filesystem::path cache;
+  Mode mode{};
+  Mode color{};
+};
 
 auto main(int argc, char** argv) -> int {
   CLI::App app{"many_options"};
-  bench::ManyValues values;
-  static const std::map<std::string, bench::Mode> modes{
-      {"fast", bench::Mode::fast},
-      {"balanced", bench::Mode::balanced},
-      {"precise", bench::Mode::precise},
+  ManyValues values;
+  static const std::map<std::string, Mode> modes{
+      {"fast", Mode::fast},
+      {"balanced", Mode::balanced},
+      {"precise", Mode::precise},
   };
   app.add_option("--name", values.name);
   app.add_option("--output", values.output);

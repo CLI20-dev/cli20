@@ -1,6 +1,6 @@
 #include <cxxopts.hpp>
 
-#include "bench/many_options.hh"
+enum class Mode { fast, balanced, precise };
 
 auto main(int argc, char** argv) -> int {
   cxxopts::Options options{"many_options"};
@@ -18,8 +18,8 @@ auto main(int argc, char** argv) -> int {
       "scale", "scale", cxxopts::value<double>())(
       "config", "config", cxxopts::value<std::filesystem::path>())(
       "cache", "cache", cxxopts::value<std::filesystem::path>())(
-      "mode", "mode", cxxopts::value<bench::Mode>())(
-      "color", "color", cxxopts::value<bench::Mode>());
+      "mode", "mode", cxxopts::value<Mode>())("color", "color",
+                                              cxxopts::value<Mode>());
   try {
     (void)options.parse(argc, argv);
   } catch (const cxxopts::exceptions::exception&) {

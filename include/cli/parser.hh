@@ -1,8 +1,8 @@
 #pragma once
 
 // #include <expected>
+#include <cstdio>
 #include <cstdlib>
-#include <iostream>
 #include <span>
 #include <string>
 #include <tuple>
@@ -24,6 +24,12 @@
 namespace cli {
 
 namespace detail {
+
+inline auto write_message(FILE* file, std::string_view message) -> void {
+  if (file == nullptr || message.empty()) return;
+  (void)std::fwrite(message.data(), 1, message.size(), file);
+  (void)std::fwrite("\n", 1, 1, file);
+}
 
 inline auto value_count_message(int required, int provided) -> std::string {
   return "option requires at least " + std::to_string(required) +
@@ -1196,9 +1202,10 @@ auto parse(int argc, char* argv[]) -> ParseResult<T> {
 /**
  * @brief Parses `argc`/`argv` and exits the process on failure.
  *
- * If parsing fails, writes the error message to `err` (or `out` for
- * help/exit-success) and calls `std::exit` with the appropriate exit code. On
- * success, returns the fully populated argument struct by value.
+ * If parsing fails, writes the error message directly to `stderr` (or `stdout`
+ * for help/exit-success) using stdio and calls `std::exit` with the appropriate
+ * exit code. Include `cli/parser_stdio.hh` or `cli/parser_iostream.hh` when the
+ * output destination must be customized.
  *
  * This is the typical one-liner entry point for command-line tools:
  * @code
@@ -1208,19 +1215,16 @@ auto parse(int argc, char* argv[]) -> ParseResult<T> {
  * @tparam T   The argument specification type.
  * @param argc Argument count (includes program name at index 0).
  * @param argv Argument vector.
- * @param out  Output stream for help/success messages. Default: `std::cout`.
- * @param err  Output stream for error messages. Default: `std::cerr`.
  * @return The parsed argument struct (never returns on failure).
  */
 template <ArgumentSpec T>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-auto parse_or_exit(int argc, char* argv[], std::ostream& out = std::cout,
-                   std::ostream& err = std::cerr) -> T {
+auto parse_or_exit(int argc, char* argv[]) -> T {
   auto result = parse<T>(argc, argv);
   if (!result) {
     if (const auto message = result.error.message(); !message.empty()) {
-      auto& stream = result.error.use_stdout() ? out : err;
-      stream << message << '\n';
+      detail::write_message(result.error.use_stdout() ? stdout : stderr,
+                            message);
     }
     std::exit(result.error.exit_code());
   }
