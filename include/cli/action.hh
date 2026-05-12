@@ -297,8 +297,14 @@ template <class T>
 [[nodiscard]]
 auto to_chars_string(T value) -> std::string {
   std::array<char, 128> buffer{};
-  const auto [ptr, ec] =
-      std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+  const auto [ptr, ec] = [&] {
+    if constexpr (std::floating_point<T>) {
+      return std::to_chars(buffer.data(), buffer.data() + buffer.size(), value,
+                           std::chars_format::general);
+    } else {
+      return std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+    }
+  }();
   if (ec != std::errc{}) return "<value>";
   return std::string(buffer.data(), ptr);
 }
