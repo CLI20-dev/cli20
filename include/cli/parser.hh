@@ -2,11 +2,16 @@
 
 // #include <expected>
 #include <array>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #ifdef _WIN32
@@ -56,10 +61,6 @@ inline auto value_count_message(int required_count, int provided)
 inline auto inline_value_count_message(int required_count) -> std::string {
   return "option requires at least " + std::to_string(required_count) +
          " value(s), but inline separator provides only 1";
-}
-
-inline auto token_position(std::size_t position) -> std::uint16_t {
-  return static_cast<std::uint16_t>(position);
 }
 
 }  // namespace detail
@@ -171,11 +172,11 @@ static constexpr auto is_short_prefix(std::uint8_t p) -> bool {
  * @brief A single token produced by `tokenize()`.
  */
 struct Token {
-  std::string_view text;   ///< For option tokens: the bare name without prefix
-                           ///< (e.g. `"verbose"` for `--verbose`, `"v"` for
-                           ///< `-v`). For value/positional/command tokens: the
-                           ///< raw text from the args span.
-  std::uint16_t position;  ///< Zero-based index into the original `args` span.
+  std::string_view text;  ///< For option tokens: the bare name without prefix
+                          ///< (e.g. `"verbose"` for `--verbose`, `"v"` for
+                          ///< `-v`). For value/positional/command tokens: the
+                          ///< raw text from the args span.
+  std::size_t position;   ///< Zero-based index into the original `args` span.
   std::uint8_t prefix;  // 0xff = none, high bit = short prefix, low 7bit = long
                         // prefix index
   TokenType type;       ///< Classification of this token.
@@ -288,9 +289,9 @@ struct TokenizeResult {
  * `=` as the inline value separator and `--` as the end-of-options marker.
  */
 struct TokenizerConfig {
- private:
   static constexpr std::size_t max_option_prefixes = 4;
 
+ private:
   std::array<std::string_view, max_option_prefixes> option_prefixes_{"--"};
   std::uint8_t option_prefix_count_{1};
 
@@ -319,35 +320,36 @@ struct TokenizerConfig {
     return inline_value_separator_;
   }
 
-  constexpr auto set_option_prefixes(
-      std::initializer_list<std::string_view> prefixes) -> void {
+  template <StringLiteral... Prefixes>
+  constexpr auto set_option_prefixes() -> void {
+    static_assert(sizeof...(Prefixes) > 0,
+                  "TokenizerConfig needs at least one option prefix");
+    static_assert(sizeof...(Prefixes) <= max_option_prefixes,
+                  "Too many option prefixes for TokenizerConfig");
     option_prefix_count_ = 0;
-
-    for (auto p : prefixes) {
-      if (option_prefix_count_ >= max_option_prefixes) break;
-      option_prefixes_[option_prefix_count_++] = p;
-    }
+    ((option_prefixes_[option_prefix_count_++] = Prefixes.view()), ...);
   }
 
-  [[nodiscard]] constexpr auto with_option_prefixes(
-      std::initializer_list<std::string_view> prefixes) const
+  template <StringLiteral... Prefixes>
+  [[nodiscard]] constexpr auto with_option_prefixes() const -> TokenizerConfig {
+    auto cfg = *this;
+    cfg.template set_option_prefixes<Prefixes...>();
+    return cfg;
+  }
+
+  template <StringLiteral Prefix>
+  [[nodiscard]] constexpr auto with_short_option_prefix() const
       -> TokenizerConfig {
     auto cfg = *this;
-    cfg.set_option_prefixes(prefixes);
+    cfg.short_option_prefix_ = Prefix.view();
     return cfg;
   }
 
-  [[nodiscard]] constexpr auto with_short_option_prefix(
-      std::string_view prefix) const -> TokenizerConfig {
+  template <StringLiteral Separator>
+  [[nodiscard]] constexpr auto with_end_of_options_separator() const
+      -> TokenizerConfig {
     auto cfg = *this;
-    cfg.short_option_prefix_ = prefix;
-    return cfg;
-  }
-
-  [[nodiscard]] constexpr auto with_end_of_options_separator(
-      std::string_view separator) const -> TokenizerConfig {
-    auto cfg = *this;
-    cfg.end_of_options_separator_ = separator;
+    cfg.end_of_options_separator_ = Separator.view();
     return cfg;
   }
 
@@ -438,7 +440,7 @@ inline auto tokenize(std::span<const std::string_view> args,
                         std::uint8_t prefix = kNoPrefix) -> void {
     result.tokens.push_back({
         .text = text,
-        .position = detail::token_position(pos),
+        .position = pos,
         .prefix = prefix,
         .type = type,
     });
@@ -478,8 +480,7 @@ inline auto tokenize(std::span<const std::string_view> args,
       const bool has_inline_val = (eq_pos != std::string_view::npos);
       const std::string_view opt_sv =
           has_inline_val ? tok.substr(0, eq_pos) : tok;
-      const std::string opt_name{opt_sv};
-      const auto nargs_opt = option_nargs(opt_name);
+      const auto nargs_opt = option_nargs(opt_sv);
       if (!nargs_opt) {
         // Short cluster (-xvf) or attached value (-ofile): only when the token
         // uses the short prefix and carries more than one character after it.
@@ -510,13 +511,14 @@ inline auto tokenize(std::span<const std::string_view> args,
                 while (i < args.size()) {
                   const std::string_view next = args[i];
                   if (next == cfg.end_of_options_separator()) break;
-                  if (is_command(std::string(next))) break;
+                  if (is_command(next)) break;
                   if (nargs.max != -1 && count >= nargs.max) break;
                   if (has_prefix(find_prefix(next))) {
                     const auto next_sep = next.find(sep);
-                    const std::string next_opt{next_sep != std::string_view::npos
-                                                   ? next.substr(0, next_sep)
-                                                   : next};
+                    const std::string_view next_opt =
+                        next_sep != std::string_view::npos
+                            ? next.substr(0, next_sep)
+                            : next;
                     if (option_nargs(next_opt).has_value()) break;
                     if (count >= 1 || nargs.min == 0) break;
                   }
@@ -536,13 +538,14 @@ inline auto tokenize(std::span<const std::string_view> args,
                 while (i < args.size()) {
                   const std::string_view next = args[i];
                   if (next == cfg.end_of_options_separator()) break;
-                  if (is_command(std::string(next))) break;
+                  if (is_command(next)) break;
                   if (nargs.max != -1 && count >= nargs.max) break;
                   if (has_prefix(find_prefix(next))) {
                     const auto next_sep = next.find(sep);
-                    const std::string next_opt{next_sep != std::string_view::npos
-                                                   ? next.substr(0, next_sep)
-                                                   : next};
+                    const std::string_view next_opt =
+                        next_sep != std::string_view::npos
+                            ? next.substr(0, next_sep)
+                            : next;
                     if (option_nargs(next_opt).has_value()) break;
                     if (count >= 1 || nargs.min == 0) break;
                   }
@@ -563,7 +566,7 @@ inline auto tokenize(std::span<const std::string_view> args,
           if (!advanced_i) ++i;
           continue;
         }
-        return result.fail(ErrorCode::unknown_option, i, opt_name);
+        return result.fail(ErrorCode::unknown_option, i, std::string(opt_sv));
       }
 
       const Nargs& nargs = *nargs_opt;
@@ -576,11 +579,11 @@ inline auto tokenize(std::span<const std::string_view> args,
 
       if (has_inline_val) {
         if (is_flag) {
-          return result.fail(ErrorCode::invalid_value, i, opt_name,
+          return result.fail(ErrorCode::invalid_value, i, std::string(opt_sv),
                              "flag does not accept a value");
         }
         if (nargs.min > 1) {
-          return result.fail(ErrorCode::missing_value, i, opt_name,
+          return result.fail(ErrorCode::missing_value, i, std::string(opt_sv),
                              detail::inline_value_count_message(nargs.min));
         }
         push(TokenType::value, tok.substr(eq_pos + 1), i);
@@ -598,14 +601,14 @@ inline auto tokenize(std::span<const std::string_view> args,
         const std::string_view next = args[i];
 
         if (next == cfg.end_of_options_separator()) break;
-        if (is_command(std::string(next))) break;
+        if (is_command(next)) break;
         if (nargs.max != -1 && count >= nargs.max) break;
 
         if (has_prefix(find_prefix(next))) {
           const auto next_sep = next.find(sep);
-          const std::string next_opt{next_sep != std::string_view::npos
-                                         ? next.substr(0, next_sep)
-                                         : next};
+          const std::string_view next_opt = next_sep != std::string_view::npos
+                                                ? next.substr(0, next_sep)
+                                                : next;
           if (option_nargs(next_opt).has_value()) break;
 
           // Unknown option-looking: consume only as first value when min > 0
@@ -618,7 +621,7 @@ inline auto tokenize(std::span<const std::string_view> args,
       }
 
       if (count < nargs.min) {
-        return result.fail(ErrorCode::missing_value, i, opt_name,
+        return result.fail(ErrorCode::missing_value, i, std::string(opt_sv),
                            detail::value_count_message(nargs.min, count));
       }
       continue;
@@ -868,6 +871,9 @@ struct Parser {
   TokenizerConfig cfg_;
   std::string program_name_ = "program";
 
+  static constexpr std::size_t field_count = std::tuple_size_v<
+      std::remove_reference_t<decltype(as_tuple(std::declval<T&>()))>>;
+
   auto parse_body(ParseResult<T>& result, std::span<const std::string_view> args,
                   std::size_t first_index) -> void {
     auto lookup = get_option_spec_map(result.value);
@@ -1033,48 +1039,98 @@ struct Parser {
             std::tuple_size_v<std::remove_reference_t<decltype(tup)>>>{});
   }
 
-  // Build the option spec-map and command-name set from the field types of val.
+  // Build a flat lookup table once per parse so tokenization does not reflect
+  // over every field for every argv token.
   struct Lookup {
-    const Parser* self;
-    const T* val;
+    struct OptionEntry {
+      std::string_view prefix;
+      std::string_view name;
+      char short_name{};
+      Nargs nargs{};
+      bool is_short{};
+    };
+
+    struct CommandEntry {
+      std::string_view name;
+    };
+
+    std::array<OptionEntry,
+               field_count*(TokenizerConfig::max_option_prefixes + 1)>
+        options{};
+    std::array<CommandEntry, field_count> commands{};
+    std::size_t option_count{};
+    std::size_t command_count{};
+
+    auto add_long_option(std::string_view prefix, std::string_view name,
+                         Nargs nargs) -> void {
+      options[option_count++] = OptionEntry{
+          .prefix = prefix,
+          .name = name,
+          .short_name = '\0',
+          .nargs = nargs,
+          .is_short = false,
+      };
+    }
+
+    auto add_short_option(std::string_view prefix, char short_name, Nargs nargs)
+        -> void {
+      options[option_count++] = OptionEntry{
+          .prefix = prefix,
+          .name = {},
+          .short_name = short_name,
+          .nargs = nargs,
+          .is_short = true,
+      };
+    }
+
+    auto add_command(std::string_view name) -> void {
+      commands[command_count++] = CommandEntry{.name = name};
+    }
 
     [[nodiscard]] auto option_nargs(std::string_view opt) const
         -> std::optional<Nargs> {
-      std::optional<Nargs> found;
-      self->for_each_field(*val, [&](const auto& f) -> auto {
-        using F = std::remove_cvref_t<decltype(f)>;
-        if constexpr (std::derived_from<F, OptionTag>) {
-          for (const auto& p : self->cfg_.option_prefixes()) {
-            if (opt.starts_with(p) && opt.substr(p.size()) == F::name.view()) {
-              found = F::nargs;
-            }
-          }
-          if constexpr (F::short_name != '\0') {
-            const auto& sp = self->cfg_.short_option_prefix();
-            if (opt.starts_with(sp) && opt.size() == sp.size() + 1 &&
-                opt.back() == F::short_name) {
-              found = F::nargs;
-            }
-          }
+      for (std::size_t i = 0; i < option_count; ++i) {
+        const auto& entry = options[i];
+        if (!opt.starts_with(entry.prefix)) {
+          continue;
         }
-      });
-      return found;
+        const auto rest = opt.substr(entry.prefix.size());
+        if (entry.is_short) {
+          if (rest.size() == 1 && rest.front() == entry.short_name) {
+            return entry.nargs;
+          }
+        } else if (rest == entry.name) {
+          return entry.nargs;
+        }
+      }
+      return std::nullopt;
     }
 
     [[nodiscard]] auto is_command(std::string_view name) const -> bool {
-      bool found = false;
-      self->for_each_field(*val, [&](const auto& f) -> auto {
-        using F = std::remove_cvref_t<decltype(f)>;
-        if constexpr (std::derived_from<F, CommandTag>) {
-          if (F::command_name() == name) found = true;
-        }
-      });
-      return found;
+      for (std::size_t i = 0; i < command_count; ++i) {
+        if (commands[i].name == name) return true;
+      }
+      return false;
     }
   };
 
   auto get_option_spec_map(const T& val) const -> Lookup {
-    return Lookup{.self = this, .val = &val};
+    Lookup lookup{};
+    for_each_field(val, [&](const auto& f) -> auto {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, OptionTag>) {
+        for (const auto& p : cfg_.option_prefixes()) {
+          lookup.add_long_option(p, F::name.view(), F::nargs);
+        }
+        if constexpr (F::short_name != '\0') {
+          lookup.add_short_option(cfg_.short_option_prefix(), F::short_name,
+                                  F::nargs);
+        }
+      } else if constexpr (std::derived_from<F, CommandTag>) {
+        lookup.add_command(F::command_name());
+      }
+    });
+    return lookup;
   }
 
   // Find the option field matching (prefix, bare), notify it, and invoke its

@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -378,7 +379,10 @@ struct PositionalImpl : public PositionalTag {
 struct Description : DescriptionTag {
   std::string_view text{};
   constexpr Description() = default;
-  constexpr Description(std::string_view s) : text(s) {}
+  template <std::size_t N>
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
+  constexpr Description(const char (&s)[N]) : text(s, N - 1) {}
+  constexpr Description(std::string_view) = delete;
   constexpr operator std::string_view() const { return text; }
 };
 

@@ -472,7 +472,7 @@ static auto tokenize_cfg(std::initializer_list<std::string_view> args,
 
 TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
   // "+verbose" recognised as option when "+" is in option_prefixes
-  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes<"--", "+">();
   auto r = tokenize_cfg({"+verbose"}, {{"+verbose", kFlag}}, cfg);
   ASSERT_TRUE(r.has_value());
   ASSERT_EQ(r.tokens.size(), 1u);
@@ -483,7 +483,7 @@ TEST(TokenizeMultiPrefix, AltPrefixRecognised) {
 
 TEST(TokenizeMultiPrefix, MatchedPrefixDistinguishesPrefixes) {
   // "--foo" and "+foo" are different options; matched_prefix tells them apart
-  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes<"--", "+">();
   SpecMap spec{{"--foo", kFlag}, {"+foo", kFlag}};
   auto r = tokenize_cfg({"--foo", "+foo"}, spec, cfg);
   ASSERT_TRUE(r.has_value());
@@ -502,7 +502,7 @@ TEST(TokenizeMultiPrefix, DefaultPrefixStillWorks) {
 }
 
 TEST(TokenizeMultiPrefix, UnknownAltPrefixTokenIsError) {
-  auto cfg = cli::TokenizerConfig{}.with_option_prefixes({"--", "+"});
+  auto cfg = cli::TokenizerConfig{}.with_option_prefixes<"--", "+">();
   auto r = tokenize_cfg({"+unknown"}, {{"--foo", kFlag}}, cfg);
   ASSERT_FALSE(r.has_value());
   EXPECT_EQ(r.error.code, ErrorCode::unknown_option);
