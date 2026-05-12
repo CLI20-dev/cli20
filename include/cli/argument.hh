@@ -9,331 +9,13 @@
 #include <vector>
 
 #include "cli/action.hh"
+#include "cli/argument_base.hh"
+#include "cli/argument_validation.hh"
 #include "cli/meta.hh"
+#include "cli/relation.hh"
 #include "cli/string_literal.hh"
 
 namespace cli {
-
-/** @brief Base tag for all members that may appear in an argument specification
- * struct. */
-struct SpecMemberTag {};
-
-/** @brief Tag base class for command-line option/flag fields. */
-struct OptionTag : SpecMemberTag {};
-
-/** @brief Tag base class for positional argument fields. */
-struct PositionalTag : SpecMemberTag {};
-
-/** @brief Tag base class for subcommand fields. */
-struct CommandTag : SpecMemberTag {};
-
-/** @brief Tag base class for the `Description` field that provides the CLI's
- * help text. */
-struct DescriptionTag : SpecMemberTag {};
-
-/**
- * @brief Specifies the minimum and maximum number of values an option or
- * positional accepts.
- *
- * The default `{0, -1}` is equivalent to `nargs::zero_or_more`.
- *
- * **Valid ranges:**
- * - `min >= 0`
- * - `max >= 1`, or `max == -1` which means *unlimited* (no upper bound)
- * - `min <= max` (when `max != -1`)
- *
- * Prefer the predefined constants in the `cli::nargs` namespace over
- * constructing `Nargs` directly.
- */
-struct Nargs {
-  int min = 0;   ///< Minimum number of values (>= 0).
-  int max = -1;  ///< Maximum number of values; -1 means unlimited.
-};
-
-/**
- * @brief Controls whether an option or positional argument is mandatory.
- *
- * When `required`, the parser returns `ErrorCode::missing_required` if the
- * argument is absent. When `optional` (the default), absence is allowed.
- */
-enum class Presence { required, optional };
-
-/** @brief Convenience constant for `Presence::required`. */
-inline constexpr auto required = Presence::required;
-
-/** @brief Convenience constant for `Presence::optional`. */
-inline constexpr auto optional = Presence::optional;
-
-/**
- * @brief Predefined `Nargs` constants for common value-count patterns.
- */
-namespace nargs {
-
-/** @brief Accepts no values; used for boolean flags. `{0, 0}` */
-inline constexpr Nargs none{.min = 0, .max = 0};
-
-/** @brief Accepts exactly one value. `{1, 1}` */
-inline constexpr Nargs one{.min = 1, .max = 1};
-
-/** @brief Accepts zero or one value. `{0, 1}` */
-inline constexpr Nargs zero_or_one{.min = 0, .max = 1};
-
-/** @brief Accepts zero or more values. `{0, -1}` */
-inline constexpr Nargs zero_or_more{.min = 0, .max = -1};
-
-/** @brief Accepts one or more values. `{1, -1}` */
-inline constexpr Nargs one_or_more{.min = 1, .max = -1};
-
-/**
- * @brief Accepts exactly `N` values.
- * @tparam N The required number of values.
- */
-template <int N>
-inline constexpr Nargs exactly{.min = N, .max = N};
-
-/**
- * @brief Accepts between `Min` and `Max` values (inclusive).
- * @tparam Min Minimum number of values.
- * @tparam Max Maximum number of values.
- */
-template <int Min, int Max>
-inline constexpr Nargs between{.min = Min, .max = Max};
-
-}  // namespace nargs
-
-namespace detail {
-
-/**
- * @brief Checks that every member of aggregate type `T` derives from
- * `SpecMemberTag`.
- *
- * @tparam T The argument specification type to validate.
- * @return `true` if all members inherit from `SpecMemberTag`.
- */
-template <class T>
-consteval auto members_are_derived_from_valid_cli_class() -> bool {
-  return []<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
-             -> auto {
-    return (std::derived_from<std::remove_cvref_t<Args>, SpecMemberTag> && ...);
-  }(std::type_identity<
-                 std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
-}
-
-/**
- * @brief Checks that all `OptionTag` members of `T` have distinct long names.
- *
- * @tparam T The argument specification type to validate.
- * @return `true` if no two options share the same long name.
- */
-template <class T>
-consteval auto options_have_unique_long_name() -> bool {
-  std::vector<std::string_view> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
-      -> auto {
-    (
-        [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
-                                          OptionTag>) {
-            names.push_back(std::remove_cvref_t<Args>::name.view());
-          }
-        }(),
-        ...);
-  }(std::type_identity<
-          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
-  std::ranges::sort(names);
-  return std::ranges::adjacent_find(names) == names.end();
-}
-
-/**
- * @brief Checks that all `OptionTag` members of `T` have distinct short names.
- *
- * Options with no short name (`'\0'`) are excluded from the uniqueness check.
- *
- * @tparam T The argument specification type to validate.
- * @return `true` if no two options share the same non-null short name.
- */
-template <class T>
-consteval auto options_have_unique_short_name() -> bool {
-  std::vector<char> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
-      -> auto {
-    (
-        [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
-                                          OptionTag>) {
-            if constexpr (std::remove_cvref_t<Args>::short_name != '\0') {
-              names.push_back(std::remove_cvref_t<Args>::short_name);
-            }
-          }
-        }(),
-        ...);
-  }(std::type_identity<
-          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
-  std::ranges::sort(names);
-  return std::ranges::adjacent_find(names) == names.end();
-}
-
-/**
- * @brief Checks that all `CommandTag` members of `T` have distinct names.
- *
- * @tparam T The argument specification type to validate.
- * @return `true` if no two subcommands share the same name.
- */
-template <class T>
-consteval auto commands_have_unique_long_name() -> bool {
-  std::vector<std::string_view> names;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
-      -> auto {
-    (
-        [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
-                                          CommandTag>) {
-            names.push_back(std::remove_cvref_t<Args>::name.view());
-          }
-        }(),
-        ...);
-  }(std::type_identity<
-          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
-  std::ranges::sort(names);
-  return std::ranges::adjacent_find(names) == names.end();
-}
-
-/**
- * @brief Checks that any variadic positional appears after all fixed
- * positionals.
- *
- * A variadic positional is one where `nargs.min != nargs.max`. The constraint
- * ensures that token dispatch is unambiguous.
- *
- * @tparam T The argument specification type to validate.
- * @return `true` if no fixed positional follows a variadic positional.
- */
-template <class T>
-consteval auto positionals_have_variadic_at_end() {
-  bool found_variadic = false;
-  bool found_positional_after_variadic = false;
-  [&]<class... Args>(std::type_identity<std::tuple<Args...>>) consteval
-      -> auto {
-    (
-        [&]() consteval -> auto {
-          if constexpr (std::derived_from<std::remove_cvref_t<Args>,
-                                          PositionalTag>) {
-            if (found_variadic) {
-              found_positional_after_variadic = true;
-            }
-            if (std::remove_cvref_t<Args>::nargs.max !=
-                std::remove_cvref_t<Args>::nargs.min) {
-              found_variadic = true;
-            }
-          }
-        }(),
-        ...);
-  }(std::type_identity<
-          std::remove_cvref_t<decltype(as_tuple(std::declval<T>()))>>{});
-  return !found_positional_after_variadic;
-}
-
-/**
- * @brief Validates the syntax of a long option name at compile time.
- *
- * Rules:
- * - Must be non-empty.
- * - Must start with a lowercase ASCII letter.
- * - May contain lowercase letters, digits, and single hyphens.
- * - Must not contain consecutive hyphens or end with a hyphen.
- *
- * @tparam Name The option name to validate (without the `--` prefix).
- * @return `true` if `Name` is a valid long option name.
- */
-template <StringLiteral Name>
-[[nodiscard]]
-constexpr auto is_valid_long_option_name() noexcept -> bool {
-  constexpr auto size = Name.size();
-
-  if constexpr (size == 0) {
-    return false;
-  }
-  auto is_alpha = [](char c) constexpr -> bool {
-    return ('a' <= c && c <= 'z');
-  };
-  auto is_digit = [](char c) constexpr -> bool { return '0' <= c && c <= '9'; };
-  auto is_alnum = [&](char c) constexpr -> bool {
-    return is_alpha(c) || is_digit(c);
-  };
-
-  if (!is_alpha(Name[0])) {
-    return false;
-  }
-  bool previous_is_hyphen = false;
-  for (std::size_t i = 1; i < size; ++i) {
-    const char c = Name[i];
-    if (c == '-') {
-      if (previous_is_hyphen) {
-        return false;
-      }
-      previous_is_hyphen = true;
-      continue;
-    }
-    if (!is_alnum(c)) {
-      return false;
-    }
-    previous_is_hyphen = false;
-  }
-
-  return !previous_is_hyphen;
-}
-
-/**
- * @brief Validates a short option name character at compile time.
- *
- * Accepts ASCII letters (upper or lower case) or `'\0'` (meaning no short name).
- *
- * @param Name The short option character to validate.
- * @return `true` if `Name` is a valid short option name.
- */
-constexpr auto is_valid_short_option_name(char Name) noexcept -> bool {
-  return ('a' <= Name && Name <= 'z') || ('A' <= Name && Name <= 'Z') ||
-         Name == '\0';
-}
-
-/**
- * @brief Validates the syntax of a subcommand name at compile time.
- *
- * Applies the same rules as `is_valid_long_option_name`.
- *
- * @tparam Name The command name to validate.
- * @return `true` if `Name` is a valid command name.
- */
-template <StringLiteral Name>
-[[nodiscard]]
-consteval auto is_valid_command_name() noexcept {
-  return is_valid_long_option_name<Name>();
-}
-
-/**
- * @brief Validates that a `Nargs` value satisfies the basic range constraints.
- *
- * Checks that `min >= 0` and that `max` is either -1 (unlimited) or
- * satisfies `max >= min`. The `ArgImpl` and `PositionalImpl` template
- * `requires` clauses enforce these same constraints at the point of
- * instantiation.
- *
- * @tparam NargsValue The `Nargs` value to validate.
- * @return `true` if `NargsValue` is a well-formed nargs specification.
- */
-template <Nargs NargsValue>
-[[nodiscard]]
-consteval auto is_valid_nargs() noexcept -> bool {
-  if (NargsValue.min < 0) {
-    return false;
-  }
-  if (NargsValue.max != -1 && NargsValue.max < NargsValue.min) {
-    return false;
-  }
-  return true;
-}
-
-}  // namespace detail
 
 /**
  * @brief Concept that validates an aggregate type as a well-formed CLI argument
@@ -358,6 +40,7 @@ concept ArgumentSpec = requires {
   requires detail::options_have_unique_short_name<T>();
   requires detail::commands_have_unique_long_name<T>();
   requires detail::positionals_have_variadic_at_end<T>();
+  requires detail::relations_are_well_formed<T>();
 };
 
 template <ArgumentSpec T>
@@ -388,6 +71,9 @@ struct ArgParameter {
       on_parse{};          ///< Callback invoked once after parsing completes.
   std::string_view env{};  ///< Environment variable name to fall back to when
                            ///< the option is absent from the command line.
+  bool hidden{};  ///< Whether this argument is omitted from generated help.
+  std::string_view
+      deprecated{};  ///< Optional deprecation message shown in generated help.
 };
 
 namespace detail {
@@ -460,6 +146,15 @@ struct ArgImpl : public OptionTag {
 
   [[nodiscard]] auto help_text() const -> const std::string_view {
     return param_.help;
+  }
+  [[nodiscard]] auto hidden() const -> bool { return param_.hidden; }
+  [[nodiscard]] auto deprecated() const -> std::string_view {
+    return param_.deprecated;
+  }
+  [[nodiscard]] auto presence() const -> Presence { return param_.presence; }
+  [[nodiscard]] auto env() const -> std::string_view { return param_.env; }
+  [[nodiscard]] auto default_value() const -> const std::optional<value_type>& {
+    return param_.default_value;
   }
 
  protected:
@@ -613,6 +308,15 @@ struct PositionalImpl : public PositionalTag {
   [[nodiscard]] auto help_text() const -> const std::string_view {
     return param_.help;
   }
+  [[nodiscard]] auto hidden() const -> bool { return param_.hidden; }
+  [[nodiscard]] auto deprecated() const -> std::string_view {
+    return param_.deprecated;
+  }
+  [[nodiscard]] auto presence() const -> Presence { return param_.presence; }
+  [[nodiscard]] auto env() const -> std::string_view { return param_.env; }
+  [[nodiscard]] auto default_value() const -> const std::optional<value_type>& {
+    return param_.default_value;
+  }
 
  protected:
   [[nodiscard]] auto get_param() const -> const ArgParameter<value_type>& {
@@ -678,7 +382,10 @@ struct Description : public std::string, DescriptionTag {};
  */
 struct CommandParameter {
   std::string_view
-      help{};  ///< Brief description shown in the parent command's help.
+      help{};     ///< Brief description shown in the parent command's help.
+  bool hidden{};  ///< Whether this command is omitted from generated help.
+  std::string_view
+      deprecated{};  ///< Optional deprecation message shown in generated help.
 };
 
 /**
@@ -699,17 +406,26 @@ struct Command : public T, public CommandTag {
   using argument_type = T;
 
   Command() = default;
-  Command(CommandParameter param) : help_(param.help) {}
+  Command(CommandParameter param)
+      : help_(param.help),
+        hidden_(param.hidden),
+        deprecated_(param.deprecated) {}
   static constexpr auto name = Name;
   static constexpr auto command_name() -> std::string_view {
     return Name.view();
   }
   [[nodiscard]] auto provided() const -> bool { return provided_; }
   [[nodiscard]] auto help_text() const -> std::string_view { return help_; }
+  [[nodiscard]] auto hidden() const -> bool { return hidden_; }
+  [[nodiscard]] auto deprecated() const -> std::string_view {
+    return deprecated_;
+  }
   auto mark_provided() -> void { provided_ = true; }
 
  private:
   std::string_view help_{};
+  bool hidden_{};
+  std::string_view deprecated_{};
   bool provided_{};
 };
 

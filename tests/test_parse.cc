@@ -81,6 +81,53 @@ struct TotalValuesArgs {
       mode;
 };
 
+struct RelationArgs {
+  cli::StringOption<"user"> user;
+  cli::StringOption<"password"> password;
+  cli::Flag<"json"> json;
+  cli::Flag<"markdown"> markdown;
+  cli::Flag<"deploy"> deploy;
+  cli::StringOption<"profile"> profile;
+
+  static constexpr auto relations = cli::relations(
+      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::conflicts("json", "markdown"), cli::depends_on("deploy", "profile"));
+};
+
+struct UnknownRelationTargetArgs {
+  cli::Flag<"json"> json;
+
+  static constexpr auto relations =
+      cli::relations(cli::conflicts("json", "xml"));
+};
+
+struct DuplicateRelationMembershipArgs {
+  cli::Flag<"user"> user;
+  cli::Flag<"password"> password;
+  cli::Flag<"json"> json;
+
+  static constexpr auto relations = cli::relations(
+      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::conflicts("user", "json"));
+};
+
+struct RelationGroupNameCollisionArgs {
+  cli::Flag<"legacy_auth"> legacy_auth;
+  cli::Flag<"user"> user;
+  cli::Flag<"password"> password;
+
+  static constexpr auto relations = cli::relations(
+      cli::together({.name = "legacy_auth", .group = {"user", "password"}}));
+};
+
+static_assert(cli::detail::relations_are_well_formed<RelationArgs>());
+static_assert(
+    !cli::detail::relations_are_well_formed<UnknownRelationTargetArgs>());
+static_assert(
+    !cli::detail::relations_are_well_formed<DuplicateRelationMembershipArgs>());
+static_assert(
+    !cli::detail::relations_are_well_formed<RelationGroupNameCollisionArgs>());
+
 auto argv(std::initializer_list<std::string_view> values)
     -> std::vector<std::string_view> {
   return {values};
@@ -219,6 +266,44 @@ TEST(Parse, MissingOptionalEntryDoesNotIncrementTotalValues) {
   ASSERT_TRUE(result.has_value());
   EXPECT_EQ(result.value.mode.value(), "fast");
   EXPECT_EQ(seen, (std::vector<std::size_t>{0, 0}));
+}
+
+TEST(Parse, RelationTogetherRequiresAllMembers) {
+  auto args = argv({"prog", "--user", "alice"});
+  auto result = cli::Parser<RelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::dependency_missing);
+  EXPECT_EQ(result.error.subject, "legacy_auth");
+}
+
+TEST(Parse, RelationConflictsRejectsBothArguments) {
+  auto args = argv({"prog", "--json", "--markdown"});
+  auto result = cli::Parser<RelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::mutually_exclusive);
+}
+
+TEST(Parse, RelationDependsOnRequiresTarget) {
+  auto args = argv({"prog", "--deploy"});
+  auto result = cli::Parser<RelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::dependency_missing);
+  EXPECT_EQ(result.error.subject, "--deploy");
+}
+
+TEST(Parse, RelationsPassWhenSatisfied) {
+  auto args = argv({"prog", "--user", "alice", "--password", "secret",
+                    "--deploy", "--profile", "prod", "--json"});
+  auto result = cli::Parser<RelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_value());
 }
 
 #ifdef _WIN32
