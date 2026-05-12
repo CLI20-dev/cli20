@@ -2,6 +2,7 @@
 
 #include <CLI/CLI.hpp>
 #include <argparse/argparse.hpp>
+#include <boost/program_options.hpp>
 #include <cxxopts.hpp>
 #include <string>
 
@@ -11,6 +12,8 @@
 #include "cli/parser.hh"
 
 namespace {
+
+namespace po = boost::program_options;
 
 struct Cli20Build {
   cli::StringOption<"profile"> profile;
@@ -111,9 +114,36 @@ void BM_CxxoptsSubcommand(benchmark::State& state) {
   bench::set_allocation_counters(state, allocations, bytes);
 }
 
+void BM_BoostSubcommand(benchmark::State& state) {
+  auto& args = subcommand_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
+  for (auto _ : state) {
+    const auto stats = bench::measure_allocations([&] {
+      const std::string command = args.storage[1];
+      if (command == "build") {
+        std::string profile;
+        po::options_description options{"build"};
+        options.add_options()("profile", po::value<std::string>(&profile));
+        po::variables_map values;
+        po::store(po::command_line_parser(args.argc() - 1, args.argv() + 1)
+                      .options(options)
+                      .run(),
+                  values);
+        po::notify(values);
+        benchmark::DoNotOptimize(profile);
+      }
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
+  }
+  bench::set_allocation_counters(state, allocations, bytes);
+}
+
 BENCHMARK(BM_Cli20Subcommand);
 BENCHMARK(BM_Cli11Subcommand);
 BENCHMARK(BM_ArgparseSubcommand);
 BENCHMARK(BM_CxxoptsSubcommand);
+BENCHMARK(BM_BoostSubcommand);
 
 }  // namespace

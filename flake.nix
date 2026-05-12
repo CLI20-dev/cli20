@@ -80,7 +80,7 @@
               pkgs.clang-tools
               pkgs.doxygen
               pkgs.emscripten
-              pkgs.boost
+              pkgs.boost.dev
               pkgs.cxxopts
               pkgs.cli11
               pkgs.argparse
@@ -179,6 +179,7 @@
               pkgs.cxxopts
               pkgs.cli11
               pkgs.argparse
+              pkgs.boost.dev
               google_bench
             ];
 
@@ -199,6 +200,9 @@
                 bash bench/compile_time/scripts/run.sh "$RESULTS_DIR/compile_time/cxx$standard"
               done
               python3 bench/scripts/summarize.py --output "$RESULTS_DIR/report.md"
+              python3 bench/scripts/export-doc-data.py \
+                "$RESULTS_DIR" \
+                "$RESULTS_DIR/docs/benchmark-results.json"
 
               runHook postBuild
             '';
@@ -243,6 +247,21 @@
                 --argstr baseUrl "$base_url" \
                 --expr '{ baseUrl }: (builtins.getFlake (toString ./.)).legacyPackages.${pkgs.system}.buildDoc { inherit baseUrl; }'
             ''}/bin/build-cli20-doc";
+          };
+
+          apps.update_benchmark = {
+            type = "app";
+            program = "${pkgs.writeShellScriptBin "update-cli20-benchmark-docs" ''
+              set -euo pipefail
+
+              repo_root="$(pwd)"
+              out_link="$repo_root/result-bench"
+              data_dir="$repo_root/docs/src/data/benchmarks"
+
+              ${pkgs.nix}/bin/nix build -L "$repo_root#bench" --out-link "$out_link"
+              mkdir -p "$data_dir"
+              cp "$out_link/docs/benchmark-results.json" "$data_dir/results.json"
+            ''}/bin/update-cli20-benchmark-docs";
           };
         };
     };
