@@ -397,12 +397,15 @@ inline auto token_prefix_view(const Token& tok, const TokenizerConfig& cfg)
  * - After the end-of-options separator (`--`), all remaining tokens become
  *   `{positional, "...", i}` regardless of prefix.
  *
- * @param args          The argument span to tokenize (typically `argv[1:]`).
- * @param spec_map      Map from full option keys (e.g. `"--verbose"`, `"-v"`) to
- * their `Nargs`. Must NOT contain command names.
- * @param command_names Set of bare subcommand name strings (no prefix).
- * @param cfg           Tokenizer configuration (prefixes, separator character,
- * etc.).
+ * @param args         The argument span to tokenize (typically `argv[1:]`).
+ * @param option_nargs Callable that accepts a full option spelling (e.g.
+ *                     `"--verbose"`, `"-v"`) and returns its `Nargs`, or
+ *                     `std::nullopt` when unknown. Must NOT match command
+ *                     names.
+ * @param is_command   Callable that accepts a bare token and returns whether it
+ *                     is a subcommand name.
+ * @param cfg          Tokenizer configuration (prefixes, separator character,
+ *                     etc.).
  * @return A `TokenizeResult` containing the token list on success, or a
  * `ParseError` on failure.
  */
@@ -412,7 +415,7 @@ inline auto tokenize(std::span<const std::string_view> args,
                      const TokenizerConfig& cfg = {}) -> TokenizeResult {
   TokenizeResult result;
 
-  // Returns the matched prefix (as a view into cfg.option_prefixes) or empty.
+  // Returns an encoded prefix tag that can be decoded with token_prefix_view().
   const auto find_prefix = [&](std::string_view tok) -> std::uint8_t {
     for (std::uint8_t pi = 0;
          pi < static_cast<uint8_t>(cfg.option_prefixes().size()); ++pi) {
@@ -891,12 +894,6 @@ struct Parser {
       return;
     }
 
-    const auto prefix_view = [&](std::uint8_t p) -> std::string_view {
-      if (p == no_prefix()) return {};
-      if (is_short_prefix(p)) return cfg_.short_option_prefix();
-      return cfg_.option_prefixes()[p & kPrefixIndexMask];
-    };
-
     const auto& tokens = tokenized.tokens;
     std::size_t pos_idx = 0, pos_cnt = 0;
 
@@ -906,10 +903,10 @@ struct Parser {
       if (tok.type == TokenType::option) {
         std::size_t j = i + 1;
         while (j < tokens.size() && tokens[j].type == TokenType::value) ++j;
-        auto err =
-            dispatch_option(result.value, prefix_view(tok.prefix), tok.text,
-                            std::span(tokens).subspan(i + 1, j - i - 1),
-                            first_index, tok.position);
+        auto err = dispatch_option(
+            result.value, token_prefix_view(tok, cfg_), tok.text,
+            std::span(tokens).subspan(i + 1, j - i - 1), first_index,
+            tok.position);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
           return;
