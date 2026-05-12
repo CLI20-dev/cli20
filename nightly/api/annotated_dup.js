@@ -60,7 +60,7 @@ var annotated_dup =
       [ "Parser", "structcli_1_1Parser.html", "structcli_1_1Parser" ],
       [ "ArgParameter", "structcli_1_1ArgParameter.html", "structcli_1_1ArgParameter" ],
       [ "PositionalImpl", "structcli_1_1PositionalImpl.html", "structcli_1_1PositionalImpl" ],
-      [ "Description", "structcli_1_1Description.html", null ],
+      [ "Description", "structcli_1_1Description.html", "structcli_1_1Description" ],
       [ "CommandParameter", "structcli_1_1CommandParameter.html", "structcli_1_1CommandParameter" ],
       [ "Command", "structcli_1_1Command.html", "structcli_1_1Command" ],
       [ "SpecMemberTag", "structcli_1_1SpecMemberTag.html", null ],

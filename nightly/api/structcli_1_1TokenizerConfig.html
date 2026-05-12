@@ -103,106 +103,337 @@ $(function(){initNavTree('structcli_1_1TokenizerConfig.html','','structcli_1_1To
 </div><!--header-->
 <div class="contents">
 
-<p>Controls how <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax.  
+<p>Controls how <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="parser_8hh_source.html">parser.hh</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:ab2e063c0fb090f741ec812a6e6f481d7" id="r_ab2e063c0fb090f741ec812a6e6f481d7"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab2e063c0fb090f741ec812a6e6f481d7">option_prefixes</a></td></tr>
-<tr class="memdesc:ab2e063c0fb090f741ec812a6e6f481d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prefixes that introduce long options.  <br /></td></tr>
-<tr class="memitem:a4579006db5a11a4eac48c69463833733" id="r_a4579006db5a11a4eac48c69463833733"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a4579006db5a11a4eac48c69463833733">short_option_prefix</a></td></tr>
-<tr class="memdesc:a4579006db5a11a4eac48c69463833733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prefix for short (single-character) options.  <br /></td></tr>
-<tr class="memitem:afcfeb0fa33908d3017fc54dbcd6d892f" id="r_afcfeb0fa33908d3017fc54dbcd6d892f"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#afcfeb0fa33908d3017fc54dbcd6d892f">end_of_options_separator</a></td></tr>
-<tr class="memdesc:afcfeb0fa33908d3017fc54dbcd6d892f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structcli_1_1Token.html" title="A single token produced by tokenize().">Token</a> that ends option processing; subsequent tokens become positionals.  <br /></td></tr>
-<tr class="memitem:a3ce5137a2dd20d9134466ee7d39ab3e2" id="r_a3ce5137a2dd20d9134466ee7d39ab3e2"><td class="memItemLeft">char&#160;</td><td class="memItemRight"><a class="el" href="#a3ce5137a2dd20d9134466ee7d39ab3e2">inline_value_separator</a></td></tr>
-<tr class="memdesc:a3ce5137a2dd20d9134466ee7d39ab3e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Character separating option name from inline value (e.g.  <br /></td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ab6349c963d78145fd6583ff095717a36" id="r_ab6349c963d78145fd6583ff095717a36"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a> ()=default</td></tr>
+<tr class="memitem:a01293c53c2c2ede2dc1c48a860a2b829" id="r_a01293c53c2c2ede2dc1c48a860a2b829"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a01293c53c2c2ede2dc1c48a860a2b829">option_prefixes</a> () const -&gt; std::span&lt; const std::string_view &gt;</td></tr>
+<tr class="memitem:a2e472acef4e719d21102dbdbb1a85c80" id="r_a2e472acef4e719d21102dbdbb1a85c80"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a2e472acef4e719d21102dbdbb1a85c80">short_option_prefix</a> () const -&gt; std::string_view</td></tr>
+<tr class="memitem:ac5f734a5e55e44ce41242c4842623329" id="r_ac5f734a5e55e44ce41242c4842623329"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#ac5f734a5e55e44ce41242c4842623329">end_of_options_separator</a> () const -&gt; std::string_view</td></tr>
+<tr class="memitem:a456e4a4830ff50a4f09ef3bfa8e5793f" id="r_a456e4a4830ff50a4f09ef3bfa8e5793f"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a456e4a4830ff50a4f09ef3bfa8e5793f">inline_value_separator</a> () const -&gt; char</td></tr>
+<tr class="memitem:ac2ab52d17a0f5e491ef983bce56b0efa" id="r_ac2ab52d17a0f5e491ef983bce56b0efa"><td class="memTemplParams" colspan="2">template&lt;StringLiteral... Prefixes&gt; </td></tr>
+<tr class="memitem:ac2ab52d17a0f5e491ef983bce56b0efa template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#ac2ab52d17a0f5e491ef983bce56b0efa">set_option_prefixes</a> () -&gt; void</td></tr>
+<tr class="memitem:a902e47b95ff157d28fc28b01d593c8ca" id="r_a902e47b95ff157d28fc28b01d593c8ca"><td class="memTemplParams" colspan="2">template&lt;StringLiteral... Prefixes&gt; </td></tr>
+<tr class="memitem:a902e47b95ff157d28fc28b01d593c8ca template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a902e47b95ff157d28fc28b01d593c8ca">with_option_prefixes</a> () const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td></tr>
+<tr class="memitem:a2f41517e9ae2e7a2ea4f152aed35c1af" id="r_a2f41517e9ae2e7a2ea4f152aed35c1af"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Prefix&gt; </td></tr>
+<tr class="memitem:a2f41517e9ae2e7a2ea4f152aed35c1af template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a2f41517e9ae2e7a2ea4f152aed35c1af">with_short_option_prefix</a> () const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td></tr>
+<tr class="memitem:a32181397ed80e7bb3349cb39a0eb9349" id="r_a32181397ed80e7bb3349cb39a0eb9349"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Separator&gt; </td></tr>
+<tr class="memitem:a32181397ed80e7bb3349cb39a0eb9349 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a32181397ed80e7bb3349cb39a0eb9349">with_end_of_options_separator</a> () const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td></tr>
+<tr class="memitem:a2c5a55892d30a1afbd397063fe129dc5" id="r_a2c5a55892d30a1afbd397063fe129dc5"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#a2c5a55892d30a1afbd397063fe129dc5">with_inline_value_separator</a> (char separator) const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:ac650d45043916117968eaf7595d08174" id="r_ac650d45043916117968eaf7595d08174"><td class="memItemLeft">static constexpr std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#ac650d45043916117968eaf7595d08174">max_option_prefixes</a> = 4</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Controls how <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax. </p>
+<div class="textblock"><p>Controls how <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax. </p>
 <p>The defaults implement GNU-style <span class="tt">--long</span> / <span class="tt">-s</span> argument conventions with <span class="tt">=</span> as the inline value separator and <span class="tt">--</span> as the end-of-options marker. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00185">185</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
-</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="afcfeb0fa33908d3017fc54dbcd6d892f" name="afcfeb0fa33908d3017fc54dbcd6d892f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afcfeb0fa33908d3017fc54dbcd6d892f">&#9670;&#160;</a></span>end_of_options_separator</h2>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00291">291</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ab6349c963d78145fd6583ff095717a36" name="ab6349c963d78145fd6583ff095717a36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6349c963d78145fd6583ff095717a36">&#9670;&#160;</a></span>TokenizerConfig()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::string cli::TokenizerConfig::end_of_options_separator</td>
+          <td class="memname">cli::TokenizerConfig::TokenizerConfig </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel default">default</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                                 =</div>
-<div class="line"><span class="stringliteral">&quot;--&quot;</span></div>
-</div><!-- fragment -->
-<p><a class="el" href="structcli_1_1Token.html" title="A single token produced by tokenize().">Token</a> that ends option processing; subsequent tokens become positionals. </p>
-
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00190">190</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<a id="a3ce5137a2dd20d9134466ee7d39ab3e2" name="a3ce5137a2dd20d9134466ee7d39ab3e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ce5137a2dd20d9134466ee7d39ab3e2">&#9670;&#160;</a></span>inline_value_separator</h2>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ac5f734a5e55e44ce41242c4842623329" name="ac5f734a5e55e44ce41242c4842623329"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5f734a5e55e44ce41242c4842623329">&#9670;&#160;</a></span>end_of_options_separator()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">char cli::TokenizerConfig::inline_value_separator</td>
+          <td class="memname">auto cli::TokenizerConfig::end_of_options_separator </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; std::string_view</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                        =</div>
-<div class="line"><span class="charliteral">&#39;=&#39;</span></div>
-</div><!-- fragment -->
-<p>Character separating option name from inline value (e.g. </p>
-<p><span class="tt">=</span> for <span class="tt">--opt=val</span>). </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00193">193</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00314">314</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<a id="ab2e063c0fb090f741ec812a6e6f481d7" name="ab2e063c0fb090f741ec812a6e6f481d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab2e063c0fb090f741ec812a6e6f481d7">&#9670;&#160;</a></span>option_prefixes</h2>
+<a id="a456e4a4830ff50a4f09ef3bfa8e5793f" name="a456e4a4830ff50a4f09ef3bfa8e5793f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a456e4a4830ff50a4f09ef3bfa8e5793f">&#9670;&#160;</a></span>inline_value_separator()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;std::string&gt; cli::TokenizerConfig::option_prefixes</td>
+          <td class="memname">auto cli::TokenizerConfig::inline_value_separator </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; char</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                        = {</div>
-<div class="line"><span class="stringliteral">&quot;--&quot;</span>}</div>
-</div><!-- fragment -->
-<p>Prefixes that introduce long options. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00186">186</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00319">319</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<a id="a4579006db5a11a4eac48c69463833733" name="a4579006db5a11a4eac48c69463833733"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4579006db5a11a4eac48c69463833733">&#9670;&#160;</a></span>short_option_prefix</h2>
+<a id="a01293c53c2c2ede2dc1c48a860a2b829" name="a01293c53c2c2ede2dc1c48a860a2b829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01293c53c2c2ede2dc1c48a860a2b829">&#9670;&#160;</a></span>option_prefixes()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::string cli::TokenizerConfig::short_option_prefix</td>
+          <td class="memname">auto cli::TokenizerConfig::option_prefixes </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; std::span&lt; const std::string_view &gt;</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                            =</div>
-<div class="line"><span class="stringliteral">&quot;-&quot;</span></div>
-</div><!-- fragment -->
-<p>Prefix for short (single-character) options. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00188">188</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00305">305</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="ac2ab52d17a0f5e491ef983bce56b0efa" name="ac2ab52d17a0f5e491ef983bce56b0efa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2ab52d17a0f5e491ef983bce56b0efa">&#9670;&#160;</a></span>set_option_prefixes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;StringLiteral... Prefixes&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::set_option_prefixes </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> -&gt; void</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00324">324</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a2e472acef4e719d21102dbdbb1a85c80" name="a2e472acef4e719d21102dbdbb1a85c80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e472acef4e719d21102dbdbb1a85c80">&#9670;&#160;</a></span>short_option_prefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::short_option_prefix </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; std::string_view</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00310">310</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a32181397ed80e7bb3349cb39a0eb9349" name="a32181397ed80e7bb3349cb39a0eb9349"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32181397ed80e7bb3349cb39a0eb9349">&#9670;&#160;</a></span>with_end_of_options_separator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Separator&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::with_end_of_options_separator </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00349">349</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a2c5a55892d30a1afbd397063fe129dc5" name="a2c5a55892d30a1afbd397063fe129dc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c5a55892d30a1afbd397063fe129dc5">&#9670;&#160;</a></span>with_inline_value_separator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::with_inline_value_separator </td>
+          <td>(</td>
+          <td class="paramtype">char</td>          <td class="paramname"><span class="paramname"><em>separator</em></span></td><td>)</td>
+          <td> const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00356">356</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a902e47b95ff157d28fc28b01d593c8ca" name="a902e47b95ff157d28fc28b01d593c8ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a902e47b95ff157d28fc28b01d593c8ca">&#9670;&#160;</a></span>with_option_prefixes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;StringLiteral... Prefixes&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::with_option_prefixes </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00334">334</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a2f41517e9ae2e7a2ea4f152aed35c1af" name="a2f41517e9ae2e7a2ea4f152aed35c1af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f41517e9ae2e7a2ea4f152aed35c1af">&#9670;&#160;</a></span>with_short_option_prefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="structcli_1_1StringLiteral.html">StringLiteral</a> Prefix&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto cli::TokenizerConfig::with_short_option_prefix </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const -&gt; <a class="el" href="#ab6349c963d78145fd6583ff095717a36">TokenizerConfig</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00341">341</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ac650d45043916117968eaf7595d08174" name="ac650d45043916117968eaf7595d08174"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac650d45043916117968eaf7595d08174">&#9670;&#160;</a></span>max_option_prefixes</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t cli::TokenizerConfig::max_option_prefixes = 4</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00292">292</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

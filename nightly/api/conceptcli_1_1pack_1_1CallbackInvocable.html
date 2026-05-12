@@ -106,19 +106,19 @@ $(function(){initNavTree('conceptcli_1_1pack_1_1CallbackInvocable.html','',''); 
 <p><code>#include &lt;<a class="el" href="action_8hh_source.html">action.hh</a>&gt;</code></p>
 <h2 id="header-conceptdef" class="groupheader">Concept definition</h2>
 <div class="fragment"><div class="line"><span class="keyword">template</span>&lt;auto Fn, <span class="keyword">class</span> T&gt;</div>
-<div class="line"><span class="keyword">concept </span><a class="code hl_concept" href="conceptcli_1_1pack_1_1CallbackInvocable.html">CallbackInvocable</a> = <span class="keyword">requires</span>(<a class="code hl_struct" href="structcli_1_1ActionCtx.html">ActionCtx&lt;std::monostate&gt;</a> ctx, T&amp; <a class="code hl_enumvalue" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">value</a>) {</div>
-<div class="line">  { Fn(ctx, <a class="code hl_enumvalue" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">value</a>) } -&gt; std::same_as&lt;void&gt;;</div>
-<div class="line">} || <span class="keyword">requires</span>(T&amp; <a class="code hl_enumvalue" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">value</a>) {</div>
-<div class="line">  { Fn(<a class="code hl_enumvalue" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">value</a>) } -&gt; std::same_as&lt;void&gt;;</div>
+<div class="line"><span class="keyword">concept </span><a class="code hl_concept" href="conceptcli_1_1pack_1_1CallbackInvocable.html">CallbackInvocable</a> = <span class="keyword">requires</span>(<a class="code hl_struct" href="structcli_1_1ActionCtx.html">ActionCtx&lt;std::monostate&gt;</a> ctx, T&amp; <a class="code hl_enumvalue" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">value</a>) {</div>
+<div class="line">  { Fn(ctx, <a class="code hl_enumvalue" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">value</a>) } -&gt; std::same_as&lt;void&gt;;</div>
+<div class="line">} || <span class="keyword">requires</span>(T&amp; <a class="code hl_enumvalue" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">value</a>) {</div>
+<div class="line">  { Fn(<a class="code hl_enumvalue" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">value</a>) } -&gt; std::same_as&lt;void&gt;;</div>
 <div class="line">} || <span class="keyword">requires</span> {</div>
 <div class="line">  { Fn() } -&gt; std::same_as&lt;void&gt;;</div>
 <div class="line">}</div>
-<div class="ttc" id="aconceptcli_1_1pack_1_1CallbackInvocable_html"><div class="ttname"><a href="conceptcli_1_1pack_1_1CallbackInvocable.html">cli::pack::CallbackInvocable</a></div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01805">action.hh:1805</a></div></div>
-<div class="ttc" id="anamespacecli_html_ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804"><div class="ttname"><a href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">cli::TokenType::value</a></div><div class="ttdeci">@ value</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l00105">parser.hh:105</a></div></div>
-<div class="ttc" id="astructcli_1_1ActionCtx_html"><div class="ttname"><a href="structcli_1_1ActionCtx.html">cli::ActionCtx</a></div><div class="ttdoc">Context passed to each action function during pipeline execution.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00245">action.hh:245</a></div></div>
+<div class="ttc" id="aconceptcli_1_1pack_1_1CallbackInvocable_html"><div class="ttname"><a href="conceptcli_1_1pack_1_1CallbackInvocable.html">cli::pack::CallbackInvocable</a></div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01824">action.hh:1824</a></div></div>
+<div class="ttc" id="anamespacecli_html_a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804"><div class="ttname"><a href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">cli::TokenType::value</a></div><div class="ttdeci">@ value</div><div class="ttdef"><b>Definition</b> <a href="parser_8hh_source.html#l00146">parser.hh:146</a></div></div>
+<div class="ttc" id="astructcli_1_1ActionCtx_html"><div class="ttname"><a href="structcli_1_1ActionCtx.html">cli::ActionCtx</a></div><div class="ttdoc">Context passed to each action function during pipeline execution.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00246">action.hh:246</a></div></div>
 </div><!-- fragment --><a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01805">1805</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01824">1824</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

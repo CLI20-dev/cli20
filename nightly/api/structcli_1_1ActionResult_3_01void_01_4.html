@@ -148,7 +148,7 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>Specialisation of <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a></span> for terminal (pack) actions that produce no value. </p>
 <p>Pack actions such as <span class="tt">SetTrue</span> or <span class="tt">Push</span> write their result directly into the argument storage referenced by <span class="tt"><a class="el" href="structcli_1_1ActionCtx.html#af3a22047c2a588ecf44fbfbacedaac55" title="Reference to the argument&#39;s storage value.">ActionCtx::arg</a></span>; they do not pass a value downstream, so <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;void&gt;</span> carries only an error, success, or ignore state. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00123">123</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00124">124</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a99a10d2371ead0037a52704861ef0cae" name="a99a10d2371ead0037a52704861ef0cae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a99a10d2371ead0037a52704861ef0cae">&#9670;&#160;</a></span>value_type</h2>
@@ -162,7 +162,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00124">124</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00125">125</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -192,7 +192,7 @@ Public Attributes</h2></td></tr>
 <tr><td class="fieldname"><a id="aa019557c6006b07864c1a8cb8f910a90a567bc1d268f135496de3d5b946b691f3" name="aa019557c6006b07864c1a8cb8f910a90a567bc1d268f135496de3d5b946b691f3"></a>ignore&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00126">126</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00127">127</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -229,7 +229,7 @@ Public Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A failed <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;void&gt;</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00171">171</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00172">172</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -258,7 +258,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when the result represents failure. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00147">147</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00148">148</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -287,7 +287,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when the result represents success. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00142">142</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00143">143</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -316,7 +316,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when the result represents success. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00137">137</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00138">138</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -346,7 +346,7 @@ Public Attributes</h2></td></tr>
 <p>Creates an ignore result. </p>
 <dl class="section return"><dt>Returns</dt><dd>An ignored <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;void&gt;</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00180">180</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00181">181</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -375,7 +375,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when the result represents an ignored step. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00152">152</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00153">153</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -405,7 +405,7 @@ Public Attributes</h2></td></tr>
 <p>Creates a success result. </p>
 <dl class="section return"><dt>Returns</dt><dd>A successful <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;void&gt;</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00161">161</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00162">162</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -434,7 +434,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when the result represents success. </p>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00132">132</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00133">133</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -451,7 +451,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00129">129</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00130">130</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -467,7 +467,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00128">128</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00129">129</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -483,7 +483,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00054">54</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00055">55</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

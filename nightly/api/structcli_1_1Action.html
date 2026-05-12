@@ -134,9 +134,9 @@ struct cli::Action&lt; Fns &gt;</div><p>A compile-time pipeline of action functi
 <p>Pipelines are composed with <span class="tt">operator|</span>: </p><div class="fragment"><div class="line"><span class="keyword">constexpr</span> <span class="keyword">auto</span> my_action = <a class="code hl_variable" href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer&lt;int&gt;</a></div>
 <div class="line">                         | <a class="code hl_variable" href="namespacecli_1_1validation.html#acf6c9949d84d9eadd7ccd4355902aaae">cli::validation::positive</a></div>
 <div class="line">                         | <a class="code hl_variable" href="namespacecli_1_1pack.html#af38e6c601a84c171a0637d3f80592f88">cli::pack::set_once</a>;</div>
-<div class="ttc" id="anamespacecli_1_1conversion_html_a117568ca281d1a124f5368550ef3600b"><div class="ttname"><a href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer</a></div><div class="ttdeci">constexpr auto integer</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00903">action.hh:903</a></div></div>
-<div class="ttc" id="anamespacecli_1_1pack_html_af38e6c601a84c171a0637d3f80592f88"><div class="ttname"><a href="namespacecli_1_1pack.html#af38e6c601a84c171a0637d3f80592f88">cli::pack::set_once</a></div><div class="ttdeci">constexpr auto set_once</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01858">action.hh:1858</a></div></div>
-<div class="ttc" id="anamespacecli_1_1validation_html_acf6c9949d84d9eadd7ccd4355902aaae"><div class="ttname"><a href="namespacecli_1_1validation.html#acf6c9949d84d9eadd7ccd4355902aaae">cli::validation::positive</a></div><div class="ttdeci">constexpr auto positive</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01438">action.hh:1438</a></div></div>
+<div class="ttc" id="anamespacecli_1_1conversion_html_a117568ca281d1a124f5368550ef3600b"><div class="ttname"><a href="namespacecli_1_1conversion.html#a117568ca281d1a124f5368550ef3600b">cli::conversion::integer</a></div><div class="ttdeci">constexpr auto integer</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00921">action.hh:921</a></div></div>
+<div class="ttc" id="anamespacecli_1_1pack_html_af38e6c601a84c171a0637d3f80592f88"><div class="ttname"><a href="namespacecli_1_1pack.html#af38e6c601a84c171a0637d3f80592f88">cli::pack::set_once</a></div><div class="ttdeci">constexpr auto set_once</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01877">action.hh:1877</a></div></div>
+<div class="ttc" id="anamespacecli_1_1validation_html_acf6c9949d84d9eadd7ccd4355902aaae"><div class="ttname"><a href="namespacecli_1_1validation.html#acf6c9949d84d9eadd7ccd4355902aaae">cli::validation::positive</a></div><div class="ttdeci">constexpr auto positive</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l01457">action.hh:1457</a></div></div>
 </div><!-- fragment --><p>At pipeline invocation, <span class="tt"><a class="el" href="namespacecli.html#a0a9c1d92df1d5425676944e087144362" title="Helper function for constructing an ignore ActionResult with type deduction.">ignore</a></span> short-circuits the remaining steps while <span class="tt">error</span> is passed through so downstream steps can preserve or react to it.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -145,7 +145,7 @@ struct cli::Action&lt; Fns &gt;</div><p>A compile-time pipeline of action functi
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00432">432</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00450">450</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a378aa33a763e8b8a680872e094dc12bb" name="a378aa33a763e8b8a680872e094dc12bb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a378aa33a763e8b8a680872e094dc12bb">&#9670;&#160;</a></span>invoke() <span class="overload">[1/2]</span></h2>
@@ -178,7 +178,7 @@ template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3e
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00435">435</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00453">453</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -213,7 +213,7 @@ template&lt;class <a class="el" href="namespacecli.html#ae00c69a0b5d1bc9699fef3e
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00457">457</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00475">475</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -242,7 +242,7 @@ template&lt;auto... Fns&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00517">517</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00535">535</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -273,7 +273,7 @@ template&lt;bool EnableTailCheck, class Prev, auto FnHead, auto... FnTail&gt; </
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00479">479</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00497">497</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -302,7 +302,7 @@ template&lt;auto... Fns&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line">                                    = FirstFnType&lt;</div>
 <div class="line">Fns...&gt;::type::template accepts_input&lt;std::optional&lt;std::string_view&gt;&gt;</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00514">514</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l00532">532</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>

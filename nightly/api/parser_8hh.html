@@ -102,14 +102,17 @@ $(function(){initNavTree('parser_8hh.html','',''); });
   <div class="headertitle"><div class="title">parser.hh File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;cstdlib&gt;</code><br />
-<code>#include &lt;format&gt;</code><br />
-<code>#include &lt;iostream&gt;</code><br />
+<div class="textblock"><code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;cstdio&gt;</code><br />
+<code>#include &lt;cstdlib&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
 <code>#include &lt;span&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;tuple&gt;</code><br />
-<code>#include &lt;unordered_map&gt;</code><br />
-<code>#include &lt;unordered_set&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &quot;<a class="el" href="argument_8hh_source.html">cli/argument.hh</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="constraint_8hh_source.html">cli/constraint.hh</a>&quot;</code><br />
@@ -121,40 +124,80 @@ $(function(){initNavTree('parser_8hh.html','',''); });
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:cli_3A_3AToken" id="r_cli_3A_3AToken"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Token.html">cli::Token</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="structcli_1_1Token.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="structcli_1_1Token.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cli_3A_3ATokenizeResult" id="r_cli_3A_3ATokenizeResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1TokenizeResult.html">cli::TokenizeResult</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result returned by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="structcli_1_1TokenizeResult.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result returned by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="structcli_1_1TokenizeResult.html#details">More...</a><br /></td></tr>
+<tr class="memitem:cli_3A_3ATokenizeResult_3A_3ASmallVector_3C_20T_2C_20N_20_3E" id="r_cli_3A_3ATokenizeResult_3A_3ASmallVector_3C_20T_2C_20N_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1TokenizeResult_1_1SmallVector.html">cli::TokenizeResult::SmallVector&lt; T, N &gt;</a></td></tr>
 <tr class="memitem:cli_3A_3ATokenizerConfig" id="r_cli_3A_3ATokenizerConfig"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1TokenizerConfig.html">cli::TokenizerConfig</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls how <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax.  <a href="structcli_1_1TokenizerConfig.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls how <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span> recognises option and separator syntax.  <a href="structcli_1_1TokenizerConfig.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cli_3A_3AParseResult_3C_20T_20_3E" id="r_cli_3A_3AParseResult_3C_20T_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1ParseResult.html">cli::ParseResult&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result returned by <span class="tt"><a class="el" href="structcli_1_1Parser.html#ac88ef2863f9a226be716ae56534a1731" title="Parses standard C-style argc/argv, using argv[0] as the program name.">Parser::parse()</a></span> and the free <span class="tt"><a class="el" href="namespacecli.html#a4220318a1dd8b318645b20307b4f8e01a2e88eca8ada4443dd53a1261d68b5abd">cli::parse()</a></span> function.  <a href="structcli_1_1ParseResult.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cli_3A_3AParser_3C_20T_20_3E" id="r_cli_3A_3AParser_3C_20T_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Parser.html">cli::Parser&lt; T &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main parsing engine for a typed argument specification.  <a href="structcli_1_1Parser.html#details">More...</a><br /></td></tr>
+<tr class="memitem:cli_3A_3AParser_3C_20T_20_3E_3A_3ALookup_3A_3AOptionEntry" id="r_cli_3A_3AParser_3C_20T_20_3E_3A_3ALookup_3A_3AOptionEntry"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Parser_1_1Lookup_1_1OptionEntry.html">cli::Parser&lt; T &gt;::Lookup::OptionEntry</a></td></tr>
+<tr class="memitem:cli_3A_3AParser_3C_20T_20_3E_3A_3ALookup_3A_3ACommandEntry" id="r_cli_3A_3AParser_3C_20T_20_3E_3A_3ALookup_3A_3ACommandEntry"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1Parser_1_1Lookup_1_1CommandEntry.html">cli::Parser&lt; T &gt;::Lookup::CommandEntry</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:cli" id="r_cli"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html">cli</a></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:aac251aa436393815126e25eb0a3013f6" id="r_aac251aa436393815126e25eb0a3013f6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aac251aa436393815126e25eb0a3013f6">CLI20_TOKEN_STACK_CAPACITY</a>&#160;&#160;&#160;32</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ab117880aa75b79c0192736576986aec8" id="r_ab117880aa75b79c0192736576986aec8"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8">cli::TokenType</a> { <a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8aef3e30e070f70244fd6578d88a6b77ac">cli::option</a>
-, <a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a2063c1608d6e0baf80249c42e2be5804">cli::value</a>
-, <a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8ae2d45ea19c2efd31814277330dcdb556">cli::positional</a>
-, <a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8a1dccadfed7bcbb036c56a4afb97e906f">cli::command</a>
+<tr class="memitem:a3aadc6d01d7ff29e788109ca37fef3f2" id="r_a3aadc6d01d7ff29e788109ca37fef3f2"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2">cli::TokenType</a> : uint8_t { <a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2aef3e30e070f70244fd6578d88a6b77ac">cli::option</a>
+, <a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a2063c1608d6e0baf80249c42e2be5804">cli::value</a>
+, <a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2ae2d45ea19c2efd31814277330dcdb556">cli::positional</a>
+, <a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2a1dccadfed7bcbb036c56a4afb97e906f">cli::command</a>
  }</td></tr>
-<tr class="memdesc:ab117880aa75b79c0192736576986aec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies a single token produced by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="namespacecli.html#ab117880aa75b79c0192736576986aec8">More...</a><br /></td></tr>
+<tr class="memdesc:a3aadc6d01d7ff29e788109ca37fef3f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies a single token produced by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  <a href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5d1140c4af51437650f5bbd5bee1b083" id="r_a5d1140c4af51437650f5bbd5bee1b083"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083">cli::tokenize</a> (std::span&lt; const std::string_view &gt; args, const std::unordered_map&lt; std::string, <a class="el" href="structcli_1_1Nargs.html">Nargs</a> &gt; &amp;spec_map, const std::unordered_set&lt; std::string &gt; &amp;command_names={}, const <a class="el" href="structcli_1_1TokenizerConfig.html">TokenizerConfig</a> &amp;cfg={}) -&gt; <a class="el" href="structcli_1_1TokenizeResult.html">TokenizeResult</a></td></tr>
-<tr class="memdesc:a5d1140c4af51437650f5bbd5bee1b083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a raw argument span into an ordered sequence of typed tokens.  <br /></td></tr>
+<tr class="memitem:ab52a3c8147cf2c22d4f83fe16a1f5671" id="r_ab52a3c8147cf2c22d4f83fe16a1f5671"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#ab52a3c8147cf2c22d4f83fe16a1f5671">cli::no_prefix</a> () -&gt; std::uint8_t</td></tr>
+<tr class="memitem:aca9b7e4825fac446735b3dcdd9f4d655" id="r_aca9b7e4825fac446735b3dcdd9f4d655"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#aca9b7e4825fac446735b3dcdd9f4d655">cli::short_prefix</a> () -&gt; std::uint8_t</td></tr>
+<tr class="memitem:a32f3e76ae4d6b121acccd8bf4f1af748" id="r_a32f3e76ae4d6b121acccd8bf4f1af748"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a32f3e76ae4d6b121acccd8bf4f1af748">cli::long_prefix</a> (std::uint8_t i) -&gt; std::uint8_t</td></tr>
+<tr class="memitem:a9aac1f350643917c9df28fe825ef440b" id="r_a9aac1f350643917c9df28fe825ef440b"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a9aac1f350643917c9df28fe825ef440b">cli::has_prefix</a> (std::uint8_t p) -&gt; bool</td></tr>
+<tr class="memitem:aaef7d6a6852bc50cefd9ba4ea30f8899" id="r_aaef7d6a6852bc50cefd9ba4ea30f8899"><td class="memItemLeft">static constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#aaef7d6a6852bc50cefd9ba4ea30f8899">cli::is_short_prefix</a> (std::uint8_t p) -&gt; bool</td></tr>
+<tr class="memitem:a160da59c057f0a545ce251353cd97241" id="r_a160da59c057f0a545ce251353cd97241"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a160da59c057f0a545ce251353cd97241">cli::token_prefix_view</a> (const <a class="el" href="structcli_1_1Token.html">Token</a> &amp;tok, const <a class="el" href="structcli_1_1TokenizerConfig.html">TokenizerConfig</a> &amp;cfg) -&gt; std::string_view</td></tr>
+<tr class="memdesc:a160da59c057f0a545ce251353cd97241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the matched prefix string for an option token.  <br /></td></tr>
+<tr class="memitem:a761d01c67e63c84999f735527ea83b4f" id="r_a761d01c67e63c84999f735527ea83b4f"><td class="memTemplParams" colspan="2">template&lt;class OptionLookup, class CommandLookup&gt; </td></tr>
+<tr class="memitem:a761d01c67e63c84999f735527ea83b4f template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f">cli::tokenize</a> (std::span&lt; const std::string_view &gt; args, OptionLookup option_nargs, CommandLookup is_command, const <a class="el" href="structcli_1_1TokenizerConfig.html">TokenizerConfig</a> &amp;cfg={}) -&gt; <a class="el" href="structcli_1_1TokenizeResult.html">TokenizeResult</a></td></tr>
+<tr class="memdesc:a761d01c67e63c84999f735527ea83b4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a raw argument span into an ordered sequence of typed tokens.  <br /></td></tr>
 <tr class="memitem:a0645662cc14bf44d5eaaec1149056f55" id="r_a0645662cc14bf44d5eaaec1149056f55"><td class="memTemplParams" colspan="2">template&lt;ArgumentSpec T&gt; </td></tr>
 <tr class="memitem:a0645662cc14bf44d5eaaec1149056f55 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a0645662cc14bf44d5eaaec1149056f55">cli::parse</a> (int argc, char *argv[]) -&gt; <a class="el" href="structcli_1_1ParseResult.html">ParseResult</a>&lt; T &gt;</td></tr>
 <tr class="memdesc:a0645662cc14bf44d5eaaec1149056f55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience free function that parses <span class="tt">argc</span>/<span class="tt">argv</span> into type <span class="tt">T</span>.  <br /></td></tr>
-<tr class="memitem:a8c40765bc81b89079e8bf98ae74b9fa7" id="r_a8c40765bc81b89079e8bf98ae74b9fa7"><td class="memTemplParams" colspan="2">template&lt;ArgumentSpec T&gt; </td></tr>
-<tr class="memitem:a8c40765bc81b89079e8bf98ae74b9fa7 template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a8c40765bc81b89079e8bf98ae74b9fa7">cli::parse_or_exit</a> (int argc, char *argv[], std::ostream &amp;out=std::cout, std::ostream &amp;err=std::cerr) -&gt; T</td></tr>
-<tr class="memdesc:a8c40765bc81b89079e8bf98ae74b9fa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses <span class="tt">argc</span>/<span class="tt">argv</span> and exits the process on failure.  <br /></td></tr>
+<tr class="memitem:a040251011d0673b66f297abf53ef9bda" id="r_a040251011d0673b66f297abf53ef9bda"><td class="memTemplParams" colspan="2">template&lt;ArgumentSpec T&gt; </td></tr>
+<tr class="memitem:a040251011d0673b66f297abf53ef9bda template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a040251011d0673b66f297abf53ef9bda">cli::parse_or_exit</a> (int argc, char *argv[]) -&gt; T</td></tr>
+<tr class="memdesc:a040251011d0673b66f297abf53ef9bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses <span class="tt">argc</span>/<span class="tt">argv</span> and exits the process on failure.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ad36131d8a96db5af5347b3b9bfa35aa5" id="r_ad36131d8a96db5af5347b3b9bfa35aa5"><td class="memItemLeft">constexpr std::size_t&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#ad36131d8a96db5af5347b3b9bfa35aa5">cli::token_stack_capacity</a> = <a class="el" href="#aac251aa436393815126e25eb0a3013f6">CLI20_TOKEN_STACK_CAPACITY</a></td></tr>
+<tr class="memdesc:ad36131d8a96db5af5347b3b9bfa35aa5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of tokenizer tokens kept in inline stack storage before falling back to heap allocation.  <br /></td></tr>
+<tr class="memitem:a9beb455e9cce5e37dedf79159fa96884" id="r_a9beb455e9cce5e37dedf79159fa96884"><td class="memItemLeft">static constexpr std::uint8_t&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a9beb455e9cce5e37dedf79159fa96884">cli::kNoPrefix</a> = 0xff</td></tr>
+<tr class="memitem:a7bb9be36e1ea51ffcbc3bc0dc854bcf5" id="r_a7bb9be36e1ea51ffcbc3bc0dc854bcf5"><td class="memItemLeft">static constexpr std::uint8_t&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a7bb9be36e1ea51ffcbc3bc0dc854bcf5">cli::kShortPrefixBit</a> = 0x80</td></tr>
+<tr class="memitem:a18ad8b767e328056a334eec18ff8c1b8" id="r_a18ad8b767e328056a334eec18ff8c1b8"><td class="memItemLeft">static constexpr std::uint8_t&#160;</td><td class="memItemRight"><a class="el" href="namespacecli.html#a18ad8b767e328056a334eec18ff8c1b8">cli::kPrefixIndexMask</a> = 0x7f</td></tr>
 </table>
+<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="aac251aa436393815126e25eb0a3013f6" name="aac251aa436393815126e25eb0a3013f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac251aa436393815126e25eb0a3013f6">&#9670;&#160;</a></span>CLI20_TOKEN_STACK_CAPACITY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CLI20_TOKEN_STACK_CAPACITY&#160;&#160;&#160;32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00029">29</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">

@@ -7,14 +7,10 @@ var hierarchy =
     [ "cli::ActionResult&lt; T &gt;", "structcli_1_1ActionResult.html", null ],
     [ "cli::ActionResult&lt; void &gt;", "structcli_1_1ActionResult_3_01void_01_4.html", null ],
     [ "cli::ArgParameter&lt; T &gt;", "structcli_1_1ArgParameter.html", null ],
-    [ "std::basic_string&lt; Char &gt;", null, [
-      [ "std::string", null, [
-        [ "cli::Description", "structcli_1_1Description.html", null ]
-      ] ]
-    ] ],
     [ "cli::conversion::Bool", "structcli_1_1conversion_1_1Bool.html", null ],
     [ "cli::pack::Callback&lt; Fn &gt;", "structcli_1_1pack_1_1Callback.html", null ],
     [ "cli::conversion::Choice&lt; T, Mapper &gt;", "structcli_1_1conversion_1_1Choice.html", null ],
+    [ "cli::Parser&lt; T &gt;::Lookup::CommandEntry", "structcli_1_1Parser_1_1Lookup_1_1CommandEntry.html", null ],
     [ "cli::CommandParameter", "structcli_1_1CommandParameter.html", null ],
     [ "cli::ConflictsRelation", "structcli_1_1ConflictsRelation.html", null ],
     [ "cli::ConstraintResult", "structcli_1_1ConstraintResult.html", null ],
@@ -55,6 +51,7 @@ var hierarchy =
     [ "cli::validation::NonNegative", "structcli_1_1validation_1_1NonNegative.html", null ],
     [ "cli::validation::NotBlank", "structcli_1_1validation_1_1NotBlank.html", null ],
     [ "cli::validation::OneOf&lt; Allowed &gt;", "structcli_1_1validation_1_1OneOf.html", null ],
+    [ "cli::Parser&lt; T &gt;::Lookup::OptionEntry", "structcli_1_1Parser_1_1Lookup_1_1OptionEntry.html", null ],
     [ "cli::validation::ParentExists", "structcli_1_1validation_1_1ParentExists.html", null ],
     [ "cli::ParseError", "structcli_1_1ParseError.html", null ],
     [ "cli::Parser&lt; T &gt;", "structcli_1_1Parser.html", null ],
@@ -72,6 +69,7 @@ var hierarchy =
     [ "cli::pack::SetFalse", "structcli_1_1pack_1_1SetFalse.html", null ],
     [ "cli::pack::SetOnce", "structcli_1_1pack_1_1SetOnce.html", null ],
     [ "cli::pack::SetTrue", "structcli_1_1pack_1_1SetTrue.html", null ],
+    [ "cli::TokenizeResult::SmallVector&lt; T, N &gt;", "structcli_1_1TokenizeResult_1_1SmallVector.html", null ],
     [ "cli::SpecMemberTag", "structcli_1_1SpecMemberTag.html", [
       [ "cli::CommandTag", "structcli_1_1CommandTag.html", [
         [ "cli::Command< Name, T >", "structcli_1_1Command.html", null ]

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['data_0',['data',['../structcli_1_1StringLiteral.html#a46a68e1ef60ce58dd7227bd8256d6c49',1,'cli::StringLiteral']]],
+  ['data_0',['data',['../structcli_1_1TokenizeResult_1_1SmallVector.html#adc8fbfd3dbba27d22323c9e27ec0a88e',1,'cli::TokenizeResult::SmallVector::data()'],['../structcli_1_1StringLiteral.html#a46a68e1ef60ce58dd7227bd8256d6c49',1,'cli::StringLiteral::data()']]],
   ['deduce_5faccepts_5finput_1',['deduce_accepts_input',['../namespacecli.html#ad6d38d9fb5bfdb74f3698b4713406d66',1,'cli']]],
   ['deduce_5fafter_5ftype_2',['deduce_after_type',['../namespacecli.html#a5d1b970085b6a9a15e1fe97bc841bcae',1,'cli']]],
   ['default_5fhelp_5fpalette_3',['default_help_palette',['../namespacecli.html#a017481ae0c6bbd1f40e96c34eb7e27ea',1,'cli']]],
@@ -11,7 +11,7 @@ var searchData=
   ['depends_5fon_8',['depends_on',['../namespacecli.html#af463e2b349c8dbe05df3a16e3adaddff',1,'cli']]],
   ['dependsonrelation_9',['DependsOnRelation',['../structcli_1_1DependsOnRelation.html',1,'cli']]],
   ['deprecated_10',['deprecated',['../structcli_1_1ArgParameter.html#a7242574858d0b4f87305a7f49aebdb8a',1,'cli::ArgParameter::deprecated'],['../structcli_1_1CommandParameter.html#a2211a470538c4f16633dfa84b49cfc3c',1,'cli::CommandParameter::deprecated'],['../structcli_1_1PositionalImpl.html#ace01519717d7518ca8b609ac95b82e0a',1,'cli::PositionalImpl::deprecated()'],['../structcli_1_1Command.html#a85df9aba803cbacd907b609d11c39e71',1,'cli::Command::deprecated()']]],
-  ['description_11',['Description',['../structcli_1_1Description.html',1,'cli']]],
+  ['description_11',['Description',['../structcli_1_1Description.html',1,'cli::Description'],['../structcli_1_1Description.html#a1fe203dfdfdbd502a77d0184478c7b5d',1,'cli::Description::Description()=default'],['../structcli_1_1Description.html#a3dae2ea6b06d2b107f8af9556982dab2',1,'cli::Description::Description(const char(&amp;s)[N])'],['../structcli_1_1Description.html#a59a1321f5d3381fd87c1fb2850c1eae0',1,'cli::Description::Description(std::string_view)=delete']]],
   ['descriptiontag_12',['DescriptionTag',['../structcli_1_1DescriptionTag.html',1,'cli']]],
   ['detail_13',['detail',['../structcli_1_1ParseError.html#a39949995e758bdb607d9f1f7812a8757',1,'cli::ParseError']]],
   ['detect_14',['detect',['../namespacecli.html#ae9400206faff3444393e605d6a25c439a296ccece3e9d4949a538964510e58d21',1,'cli']]],

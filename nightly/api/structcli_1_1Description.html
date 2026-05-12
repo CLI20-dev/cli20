@@ -73,7 +73,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(function(){initNavTree('structcli_1_1Description.html','',''); });
+$(function(){initNavTree('structcli_1_1Description.html','','structcli_1_1Description-members'); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -113,21 +113,159 @@ Inheritance diagram for cli::Description:</div>
  <div class="center">
   <img src="structcli_1_1Description.png" usemap="#cli_3A_3ADescription_map" alt=""/>
   <map id="cli_3A_3ADescription_map" name="cli_3A_3ADescription_map">
-<area href="structcli_1_1DescriptionTag.html" title="Tag base class for the Description field that provides the CLI&#39;s help text." alt="cli::DescriptionTag" shape="rect" coords="162,56,314,80"/>
-<area href="structcli_1_1SpecMemberTag.html" title="Base tag for all members that may appear in an argument specification struct." alt="cli::SpecMemberTag" shape="rect" coords="162,0,314,24"/>
+<area href="structcli_1_1DescriptionTag.html" title="Tag base class for the Description field that provides the CLI&#39;s help text." alt="cli::DescriptionTag" shape="rect" coords="0,56,127,80"/>
+<area href="structcli_1_1SpecMemberTag.html" title="Base tag for all members that may appear in an argument specification struct." alt="cli::SpecMemberTag" shape="rect" coords="0,0,127,24"/>
   </map>
 </div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a1fe203dfdfdbd502a77d0184478c7b5d" id="r_a1fe203dfdfdbd502a77d0184478c7b5d"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a1fe203dfdfdbd502a77d0184478c7b5d">Description</a> ()=default</td></tr>
+<tr class="memitem:a3dae2ea6b06d2b107f8af9556982dab2" id="r_a3dae2ea6b06d2b107f8af9556982dab2"><td class="memTemplParams" colspan="2">template&lt;std::size_t N&gt; </td></tr>
+<tr class="memitem:a3dae2ea6b06d2b107f8af9556982dab2 template"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a3dae2ea6b06d2b107f8af9556982dab2">Description</a> (const char(&amp;s)[N])</td></tr>
+<tr class="memitem:a59a1321f5d3381fd87c1fb2850c1eae0" id="r_a59a1321f5d3381fd87c1fb2850c1eae0"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a59a1321f5d3381fd87c1fb2850c1eae0">Description</a> (std::string_view)=delete</td></tr>
+<tr class="memitem:a1b7bbd11f7f2b5600a191d0cecb26f3b" id="r_a1b7bbd11f7f2b5600a191d0cecb26f3b"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a1b7bbd11f7f2b5600a191d0cecb26f3b">operator std::string_view</a> () const</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:af9980052e1a2c46c198fcfd9e0bc596f" id="r_af9980052e1a2c46c198fcfd9e0bc596f"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#af9980052e1a2c46c198fcfd9e0bc596f">text</a> {}</td></tr>
+</table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A <span class="tt"><a class="el" href="structcli_1_1DescriptionTag.html" title="Tag base class for the Description field that provides the CLI&#39;s help text.">DescriptionTag</a></span> field that carries the top-level CLI description. </p>
 <p>Add an instance of <span class="tt"><a class="el" href="structcli_1_1Description.html" title="A DescriptionTag field that carries the top-level CLI description.">Description</a></span> as a member of your argument specification struct to provide a paragraph that appears in the help output between the usage line and the options/positionals sections: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>MyArgs {</div>
 <div class="line">  <a class="code hl_struct" href="structcli_1_1Description.html">cli::Description</a> description{<span class="stringliteral">&quot;Does something useful.&quot;</span>};</div>
 <div class="line">  <a class="code hl_typedef" href="namespacecli.html#acf8bcaca8749b9dffa40246ea13153b2">cli::Flag</a>&lt;<span class="stringliteral">&quot;verbose&quot;</span>&gt; verbose;</div>
 <div class="line">};</div>
-<div class="ttc" id="anamespacecli_html_acf8bcaca8749b9dffa40246ea13153b2"><div class="ttname"><a href="namespacecli.html#acf8bcaca8749b9dffa40246ea13153b2">cli::Flag</a></div><div class="ttdeci">Arg&lt; Name, ShortName, pack::set_true, nargs::none &gt; Flag</div><div class="ttdoc">A boolean flag option that stores true when present.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00528">argument.hh:528</a></div></div>
-<div class="ttc" id="astructcli_1_1Description_html"><div class="ttname"><a href="structcli_1_1Description.html">cli::Description</a></div><div class="ttdoc">A DescriptionTag field that carries the top-level CLI description.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00378">argument.hh:378</a></div></div>
+<div class="ttc" id="anamespacecli_html_acf8bcaca8749b9dffa40246ea13153b2"><div class="ttname"><a href="namespacecli.html#acf8bcaca8749b9dffa40246ea13153b2">cli::Flag</a></div><div class="ttdeci">Arg&lt; Name, ShortName, pack::set_true, nargs::none &gt; Flag</div><div class="ttdoc">A boolean flag option that stores true when present.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00537">argument.hh:537</a></div></div>
+<div class="ttc" id="astructcli_1_1Description_html"><div class="ttname"><a href="structcli_1_1Description.html">cli::Description</a></div><div class="ttdoc">A DescriptionTag field that carries the top-level CLI description.</div><div class="ttdef"><b>Definition</b> <a href="argument_8hh_source.html#l00379">argument.hh:379</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00378">378</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00379">379</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a1fe203dfdfdbd502a77d0184478c7b5d" name="a1fe203dfdfdbd502a77d0184478c7b5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe203dfdfdbd502a77d0184478c7b5d">&#9670;&#160;</a></span>Description() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">cli::Description::Description </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel default">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3dae2ea6b06d2b107f8af9556982dab2" name="a3dae2ea6b06d2b107f8af9556982dab2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dae2ea6b06d2b107f8af9556982dab2">&#9670;&#160;</a></span>Description() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::size_t N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">cli::Description::Description </td>
+          <td>(</td>
+          <td class="paramtype">const char(&amp;)</td>          <td class="paramname"><span class="paramname"><em>s</em></span>[N]</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00384">384</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a id="a59a1321f5d3381fd87c1fb2850c1eae0" name="a59a1321f5d3381fd87c1fb2850c1eae0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59a1321f5d3381fd87c1fb2850c1eae0">&#9670;&#160;</a></span>Description() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">cli::Description::Description </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel delete">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a1b7bbd11f7f2b5600a191d0cecb26f3b" name="a1b7bbd11f7f2b5600a191d0cecb26f3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b7bbd11f7f2b5600a191d0cecb26f3b">&#9670;&#160;</a></span>operator std::string_view()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">cli::Description::operator std::string_view </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00386">386</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="af9980052e1a2c46c198fcfd9e0bc596f" name="af9980052e1a2c46c198fcfd9e0bc596f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9980052e1a2c46c198fcfd9e0bc596f">&#9670;&#160;</a></span>text</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view cli::Description::text {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="argument_8hh_source.html#l00380">380</a> of file <a class="el" href="argument_8hh_source.html">argument.hh</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/cli/<a class="el" href="argument_8hh_source.html">argument.hh</a></li>
 </ul>
 </div><!-- contents -->

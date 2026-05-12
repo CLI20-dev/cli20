@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['namelist_0',['NameList',['../structcli_1_1NameList.html#ac079fdf42308ea9fbba762882e8c9942',1,'cli::NameList::NameList()=default'],['../structcli_1_1NameList.html#a47980f3625054e96b99e2d7170c78bdf',1,'cli::NameList::NameList(std::initializer_list&lt; std::string_view &gt; names)']]]
+  ['mark_5fprovided_0',['mark_provided',['../structcli_1_1Command.html#ac9c33d53836a21fbedfecac920007ca5',1,'cli::Command']]],
+  ['message_1',['message',['../structcli_1_1ParseError.html#afcda222c5ca65d6bb89d86378a38fece',1,'cli::ParseError']]]
 ];

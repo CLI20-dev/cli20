@@ -103,11 +103,15 @@ $(function(){initNavTree('structcli_1_1TokenizeResult.html','','structcli_1_1Tok
 </div><!--header-->
 <div class="contents">
 
-<p>The result returned by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  
+<p>The result returned by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="parser_8hh_source.html">parser.hh</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:SmallVector" id="r_SmallVector"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcli_1_1TokenizeResult_1_1SmallVector.html">SmallVector</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a57d57ee9e96aeae5383aa053c0ac2f7a" id="r_a57d57ee9e96aeae5383aa053c0ac2f7a"><td class="memItemLeft">constexpr&#160;</td><td class="memItemRight"><a class="el" href="#a57d57ee9e96aeae5383aa053c0ac2f7a">operator bool</a> () const noexcept</td></tr>
@@ -121,14 +125,14 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a5d9132f8150957107c3174f7c30d2439" id="r_a5d9132f8150957107c3174f7c30d2439"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcli_1_1Token.html">Token</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a5d9132f8150957107c3174f7c30d2439">tokens</a></td></tr>
+<tr class="memitem:a0c580322e1eabbc1ca3da5b9947b4491" id="r_a0c580322e1eabbc1ca3da5b9947b4491"><td class="memItemLeft"><a class="el" href="structcli_1_1TokenizeResult_1_1SmallVector.html">SmallVector</a>&lt; <a class="el" href="structcli_1_1Token.html">Token</a>, <a class="el" href="namespacecli.html#ad36131d8a96db5af5347b3b9bfa35aa5">token_stack_capacity</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0c580322e1eabbc1ca3da5b9947b4491">tokens</a></td></tr>
 <tr class="memitem:ad8e1475cc43ae7cd88502b93b03c6491" id="r_ad8e1475cc43ae7cd88502b93b03c6491"><td class="memItemLeft"><a class="el" href="structcli_1_1ParseError.html">ParseError</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad8e1475cc43ae7cd88502b93b03c6491">error</a> {}</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The result returned by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>. </p>
-<p>On success, <span class="tt"><a class="el" href="#a5d9132f8150957107c3174f7c30d2439">tokens</a></span> contains the ordered token sequence and <span class="tt"><a class="el" href="#ad8e1475cc43ae7cd88502b93b03c6491">error</a></span> is in the default (no-error) state. On failure, <span class="tt"><a class="el" href="#a5d9132f8150957107c3174f7c30d2439">tokens</a></span> may be partial and <span class="tt"><a class="el" href="#ad8e1475cc43ae7cd88502b93b03c6491">error</a></span> describes the first problem encountered. </p>
+<div class="textblock"><p>The result returned by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>. </p>
+<p>On success, <span class="tt"><a class="el" href="#a0c580322e1eabbc1ca3da5b9947b4491">tokens</a></span> contains the ordered token sequence and <span class="tt"><a class="el" href="#ad8e1475cc43ae7cd88502b93b03c6491">error</a></span> is in the default (no-error) state. On failure, <span class="tt"><a class="el" href="#a0c580322e1eabbc1ca3da5b9947b4491">tokens</a></span> may be partial and <span class="tt"><a class="el" href="#ad8e1475cc43ae7cd88502b93b03c6491">error</a></span> describes the first problem encountered. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00132">132</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00192">192</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a424802dce290bd909ca375344c5bad10" name="a424802dce290bd909ca375344c5bad10"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a424802dce290bd909ca375344c5bad10">&#9670;&#160;</a></span>fail()</h2>
@@ -179,7 +183,7 @@ Public Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to <span class="tt">*this</span>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00166">166</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00272">272</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -208,7 +212,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when tokenization failed. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00150">150</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00256">256</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -237,7 +241,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when tokenization succeeded. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00144">144</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00250">250</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -266,7 +270,7 @@ Public Attributes</h2></td></tr>
 
 <p>Returns <span class="tt">true</span> when tokenization succeeded. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00138">138</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00244">244</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -283,23 +287,23 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00134">134</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00240">240</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
-<a id="a5d9132f8150957107c3174f7c30d2439" name="a5d9132f8150957107c3174f7c30d2439"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d9132f8150957107c3174f7c30d2439">&#9670;&#160;</a></span>tokens</h2>
+<a id="a0c580322e1eabbc1ca3da5b9947b4491" name="a0c580322e1eabbc1ca3da5b9947b4491"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c580322e1eabbc1ca3da5b9947b4491">&#9670;&#160;</a></span>tokens</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="structcli_1_1Token.html">Token</a>&gt; cli::TokenizeResult::tokens</td>
+          <td class="memname"><a class="el" href="structcli_1_1TokenizeResult_1_1SmallVector.html">SmallVector</a>&lt;<a class="el" href="structcli_1_1Token.html">Token</a>, <a class="el" href="namespacecli.html#ad36131d8a96db5af5347b3b9bfa35aa5">token_stack_capacity</a>&gt; cli::TokenizeResult::tokens</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00133">133</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00239">239</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

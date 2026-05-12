@@ -2,7 +2,7 @@ var argument_8hh =
 [
     [ "cli::ArgParameter&lt; T &gt;", "structcli_1_1ArgParameter.html", "structcli_1_1ArgParameter" ],
     [ "cli::PositionalImpl&lt; N, A &gt;", "structcli_1_1PositionalImpl.html", "structcli_1_1PositionalImpl" ],
-    [ "cli::Description", "structcli_1_1Description.html", null ],
+    [ "cli::Description", "structcli_1_1Description.html", "structcli_1_1Description" ],
     [ "cli::CommandParameter", "structcli_1_1CommandParameter.html", "structcli_1_1CommandParameter" ],
     [ "cli::Command&lt; Name, T &gt;", "structcli_1_1Command.html", "structcli_1_1Command" ],
     [ "cli::ArgumentSpec", "conceptcli_1_1ArgumentSpec.html", null ],

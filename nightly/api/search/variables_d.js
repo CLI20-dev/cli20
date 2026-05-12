@@ -6,6 +6,5 @@ var searchData=
   ['one_5fof_3',['one_of',['../namespacecli_1_1validation.html#ab331a5c8ec3d7e28863f05bd14440b33',1,'cli::validation']]],
   ['one_5for_5fmore_4',['one_or_more',['../namespacecli_1_1nargs.html#a037ac0df67941950bd036e0ff2284a02',1,'cli::nargs']]],
   ['option_5',['option',['../structcli_1_1HelpPalette.html#a36a44d7e9e8edae9a750e04fe3fc4c78',1,'cli::HelpPalette']]],
-  ['option_5fprefixes_6',['option_prefixes',['../structcli_1_1TokenizerConfig.html#ab2e063c0fb090f741ec812a6e6f481d7',1,'cli::TokenizerConfig']]],
-  ['optional_7',['optional',['../namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624',1,'cli']]]
+  ['optional_6',['optional',['../namespacecli.html#a1bf88f352c39face7b8bd776a8dcc624',1,'cli']]]
 ];

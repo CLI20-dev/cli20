@@ -103,46 +103,26 @@ $(function(){initNavTree('structcli_1_1Token.html','','structcli_1_1Token-member
 </div><!--header-->
 <div class="contents">
 
-<p>A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  
+<p>A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="parser_8hh_source.html">parser.hh</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ac172d5d254d341b960662125857c24dc" id="r_ac172d5d254d341b960662125857c24dc"><td class="memItemLeft"><a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8">TokenType</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac172d5d254d341b960662125857c24dc">type</a></td></tr>
-<tr class="memdesc:ac172d5d254d341b960662125857c24dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classification of this token.  <br /></td></tr>
 <tr class="memitem:a0b97bc1df1782aaf7e0d71f097056ad1" id="r_a0b97bc1df1782aaf7e0d71f097056ad1"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a0b97bc1df1782aaf7e0d71f097056ad1">text</a></td></tr>
 <tr class="memdesc:a0b97bc1df1782aaf7e0d71f097056ad1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For option tokens: the bare name without prefix (e.g.  <br /></td></tr>
-<tr class="memitem:a30153553875b142ecb2c53be7204df6c" id="r_a30153553875b142ecb2c53be7204df6c"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#a30153553875b142ecb2c53be7204df6c">matched_prefix</a></td></tr>
-<tr class="memdesc:a30153553875b142ecb2c53be7204df6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The option prefix that was matched (e.g.  <br /></td></tr>
 <tr class="memitem:ae904130a91d102fcdafb93abc2d0d480" id="r_ae904130a91d102fcdafb93abc2d0d480"><td class="memItemLeft">std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#ae904130a91d102fcdafb93abc2d0d480">position</a></td></tr>
 <tr class="memdesc:ae904130a91d102fcdafb93abc2d0d480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zero-based index into the original <span class="tt">args</span> span.  <br /></td></tr>
+<tr class="memitem:a98b8c70e7e0e123ff7f0aa430b3156f9" id="r_a98b8c70e7e0e123ff7f0aa430b3156f9"><td class="memItemLeft">std::uint8_t&#160;</td><td class="memItemRight"><a class="el" href="#a98b8c70e7e0e123ff7f0aa430b3156f9">prefix</a></td></tr>
+<tr class="memitem:ac172d5d254d341b960662125857c24dc" id="r_ac172d5d254d341b960662125857c24dc"><td class="memItemLeft"><a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2">TokenType</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac172d5d254d341b960662125857c24dc">type</a></td></tr>
+<tr class="memdesc:ac172d5d254d341b960662125857c24dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classification of this token.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a5d1140c4af51437650f5bbd5bee1b083" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>. </p>
+<div class="textblock"><p>A single token produced by <span class="tt"><a class="el" href="namespacecli.html#a761d01c67e63c84999f735527ea83b4f" title="Converts a raw argument span into an ordered sequence of typed tokens.">tokenize()</a></span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00113">113</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00174">174</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a30153553875b142ecb2c53be7204df6c" name="a30153553875b142ecb2c53be7204df6c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30153553875b142ecb2c53be7204df6c">&#9670;&#160;</a></span>matched_prefix</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string_view cli::Token::matched_prefix</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The option prefix that was matched (e.g. </p>
-<p><span class="tt">"--"</span> or <span class="tt">"-"</span>); empty for non-option tokens. </p>
-
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00119">119</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
-
-</div>
-</div>
 <a id="ae904130a91d102fcdafb93abc2d0d480" name="ae904130a91d102fcdafb93abc2d0d480"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae904130a91d102fcdafb93abc2d0d480">&#9670;&#160;</a></span>position</h2>
 
@@ -157,7 +137,23 @@ Public Attributes</h2></td></tr>
 
 <p>Zero-based index into the original <span class="tt">args</span> span. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00122">122</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00179">179</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+
+</div>
+</div>
+<a id="a98b8c70e7e0e123ff7f0aa430b3156f9" name="a98b8c70e7e0e123ff7f0aa430b3156f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98b8c70e7e0e123ff7f0aa430b3156f9">&#9670;&#160;</a></span>prefix</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint8_t cli::Token::prefix</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00180">180</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -176,7 +172,7 @@ Public Attributes</h2></td></tr>
 <p>For option tokens: the bare name without prefix (e.g. </p>
 <p><span class="tt">"verbose"</span> for <span class="tt">--verbose</span>, <span class="tt">"v"</span> for <span class="tt">-v</span>). For value/positional/command tokens: the raw text from the args span. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00115">115</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00175">175</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>
@@ -187,14 +183,14 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacecli.html#ab117880aa75b79c0192736576986aec8">TokenType</a> cli::Token::type</td>
+          <td class="memname"><a class="el" href="namespacecli.html#a3aadc6d01d7ff29e788109ca37fef3f2">TokenType</a> cli::Token::type</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Classification of this token. </p>
 
-<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00114">114</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="parser_8hh_source.html#l00182">182</a> of file <a class="el" href="parser_8hh_source.html">parser.hh</a>.</p>
 
 </div>
 </div>

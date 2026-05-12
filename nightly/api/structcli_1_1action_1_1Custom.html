@@ -130,8 +130,8 @@ Static Public Attributes</h2></td></tr>
 struct cli::action::Custom&lt; Fn &gt;</div><p>Wraps a user-defined callable as a non-terminal action pipeline step. </p>
 <p><span class="tt">Fn</span> must be invocable as:</p>
 <div class="fragment"><div class="line"><a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;U&gt;</a> Fn(<a class="code hl_struct" href="structcli_1_1ActionCtx.html">ActionCtx&lt;void&gt;</a> ctx, <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;T&gt;</a> input);</div>
-<div class="ttc" id="astructcli_1_1ActionCtx_html"><div class="ttname"><a href="structcli_1_1ActionCtx.html">cli::ActionCtx</a></div><div class="ttdoc">Context passed to each action function during pipeline execution.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00245">action.hh:245</a></div></div>
-<div class="ttc" id="astructcli_1_1ActionResult_html"><div class="ttname"><a href="structcli_1_1ActionResult.html">cli::ActionResult</a></div><div class="ttdoc">The result type produced and consumed at each step of an action pipeline.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00047">action.hh:47</a></div></div>
+<div class="ttc" id="astructcli_1_1ActionCtx_html"><div class="ttname"><a href="structcli_1_1ActionCtx.html">cli::ActionCtx</a></div><div class="ttdoc">Context passed to each action function during pipeline execution.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00246">action.hh:246</a></div></div>
+<div class="ttc" id="astructcli_1_1ActionResult_html"><div class="ttname"><a href="structcli_1_1ActionResult.html">cli::ActionResult</a></div><div class="ttdoc">The result type produced and consumed at each step of an action pipeline.</div><div class="ttdef"><b>Definition</b> <a href="action_8hh_source.html#l00048">action.hh:48</a></div></div>
 </div><!-- fragment --><p>for each input type <span class="tt">T</span> it supports. The returned <span class="tt"><a class="el" href="structcli_1_1ActionResult.html" title="The result type produced and consumed at each step of an action pipeline.">ActionResult</a>&lt;U&gt;</span> becomes the input to the next action in the pipeline.</p>
 <p>This is the escape hatch for conversions or transformations that do not fit the built-in <span class="tt"><a class="el" href="namespacecli_1_1conversion.html" title="Actions that convert a raw std::string_view token to a typed value.">conversion</a></span> or <span class="tt"><a class="el" href="namespacecli_1_1validation.html" title="Actions that validate a typed value after conversion.">validation</a></span> actions. Unlike <span class="tt"><a class="el" href="namespacecli_1_1pack.html#adeecd921f590b75c6ec9bbe147c351e7">pack::callback</a></span>, <span class="tt"><a class="el" href="structcli_1_1action_1_1Custom.html" title="Wraps a user-defined callable as a non-terminal action pipeline step.">Custom</a></span> does not terminate the pipeline and does not store a value; its <span class="tt"><a class="el" href="#aa8567ab11aaa1d053be190c9d78d856e">storage_type</a></span> is always <span class="tt">void</span>.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -141,7 +141,7 @@ struct cli::action::Custom&lt; Fn &gt;</div><p>Wraps a user-defined callable as 
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01899">1899</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01918">1918</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 </div><a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Member Typedef Documentation</h2>
 <a id="a1460a076b79fc47c0ca1c42a49369007" name="a1460a076b79fc47c0ca1c42a49369007"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1460a076b79fc47c0ca1c42a49369007">&#9670;&#160;</a></span>after_type</h2>
@@ -162,7 +162,7 @@ template&lt;class Prev&gt; </div>
 <div class="line"><span class="keyword">typename</span> std::invoke_result_t&lt;<span class="keyword">decltype</span>(Fn), <a class="code hl_struct" href="structcli_1_1ActionCtx.html">ActionCtx&lt;void&gt;</a>&amp;,</div>
 <div class="line">                              <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;Prev&gt;</a>&gt;::value_type</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01905">1905</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01924">1924</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -182,7 +182,7 @@ template&lt;class Prev&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01910">1910</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01929">1929</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -218,7 +218,7 @@ template&lt;class T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01914">1914</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01933">1933</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
@@ -249,7 +249,7 @@ template&lt;class Prev&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line">                                =</div>
 <div class="line">std::invocable&lt;<span class="keyword">decltype</span>(Fn), <a class="code hl_struct" href="structcli_1_1ActionCtx.html">ActionCtx&lt;void&gt;</a>&amp;, <a class="code hl_struct" href="structcli_1_1ActionResult.html">ActionResult&lt;Prev&gt;</a>&gt;</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01901">1901</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
+<p class="definition">Definition at line <a class="el" href="action_8hh_source.html#l01920">1920</a> of file <a class="el" href="action_8hh_source.html">action.hh</a>.</p>
 
 </div>
 </div>
