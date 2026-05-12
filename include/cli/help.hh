@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <format>
+#include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -152,11 +154,11 @@ auto command_usage_suffix(T& value) -> std::string {
             [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
-                has_options = true;
+                if (!fields.hidden()) has_options = true;
               } else if constexpr (std::derived_from<F, PositionalTag>) {
-                has_positionals = true;
+                if (!fields.hidden()) has_positionals = true;
               } else if constexpr (std::derived_from<F, CommandTag>) {
-                has_commands = true;
+                if (!fields.hidden()) has_commands = true;
               }
             }(),
             ...);
@@ -339,13 +341,75 @@ auto append_section(std::string& out, std::string_view title,
  * @return The formatted row string.
  */
 template <class Field>
-auto render_help_row(Field& field, std::string_view label, std::size_t width)
+auto help_metadata(Field& field) -> std::vector<std::string> {
+  std::vector<std::string> metadata;
+  if constexpr (std::derived_from<std::remove_cvref_t<Field>, OptionTag> ||
+                std::derived_from<std::remove_cvref_t<Field>, PositionalTag>) {
+    if (field.presence() == Presence::required) {
+      metadata.emplace_back("required");
+    }
+    if (!field.env().empty()) {
+      metadata.emplace_back(std::format("env: {}", field.env()));
+    }
+    if (const auto& default_value = field.default_value()) {
+      using Value = std::remove_cvref_t<decltype(*default_value)>;
+      if constexpr (requires(std::ostream& os, const Value& value) {
+                      os << value;
+                    }) {
+        std::ostringstream out;
+        out << *default_value;
+        metadata.emplace_back(std::format("default: {}", out.str()));
+      }
+    }
+  }
+  if (!field.deprecated().empty()) {
+    metadata.emplace_back(std::format("deprecated: {}", field.deprecated()));
+  }
+  return metadata;
+}
+
+inline auto append_help_metadata(std::string& out,
+                                 const std::vector<std::string>& metadata)
+    -> void {
+  if (metadata.empty()) {
+    return;
+  }
+  out += " [";
+  for (std::size_t i = 0; i < metadata.size(); ++i) {
+    if (i != 0) {
+      out += "] [";
+    }
+    out += metadata[i];
+  }
+  out += "]";
+}
+
+inline auto relation_name_list(NameList<> names) -> std::string {
+  std::string out;
+  for (std::size_t i = 0; i < names.size; ++i) {
+    if (i != 0) out += ", ";
+    out += "--";
+    out += names.values[i];
+  }
+  return out;
+}
+
+template <class Field>
+auto render_help_row(Field& field, std::string_view label, std::size_t width,
+                     std::string_view option_color, std::string_view reset_color)
     -> std::string {
   std::string out = "  ";
+  out += option_color;
   out += label;
-  if (!field.help_text().empty()) {
+  out += reset_color;
+  const auto metadata = help_metadata(field);
+  if (!field.help_text().empty() || !metadata.empty()) {
     out.append(width - label.size() + 2, ' ');
-    append_wrapped_description(out, field.help_text(), width + 4);
+    if (!field.help_text().empty()) {
+      out += field.help_text();
+    }
+    append_help_metadata(out, metadata);
+    out += '\n';
   } else {
     out += '\n';
   }
@@ -430,9 +494,9 @@ auto format_help_impl(T& value, std::string_view program_name,
     out += '\n';
   }
 
-  std::vector<std::pair<std::string, std::string_view>> option_rows;
-  std::vector<std::pair<std::string, std::string_view>> positional_rows;
-  std::vector<std::pair<std::string, std::string_view>> command_rows;
+  std::vector<std::pair<std::string, std::string>> option_rows;
+  std::vector<std::pair<std::string, std::string>> positional_rows;
+  std::vector<std::pair<std::string, std::string>> command_rows;
   std::size_t option_width = 0;
   std::size_t positional_width = 0;
   std::size_t command_width = 0;
@@ -443,18 +507,20 @@ auto format_help_impl(T& value, std::string_view program_name,
             [&]() -> auto {
               using F = std::remove_cvref_t<decltype(fields)>;
               if constexpr (std::derived_from<F, OptionTag>) {
+                if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 option_width = std::max(option_width, label.size());
-                option_rows.emplace_back(std::move(label), fields.help_text());
+                option_rows.emplace_back(std::move(label), std::string{});
               } else if constexpr (std::derived_from<F, PositionalTag>) {
+                if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 positional_width = std::max(positional_width, label.size());
-                positional_rows.emplace_back(std::move(label),
-                                             fields.help_text());
+                positional_rows.emplace_back(std::move(label), std::string{});
               } else if constexpr (std::derived_from<F, CommandTag>) {
+                if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 command_width = std::max(command_width, label.size());
-                command_rows.emplace_back(std::move(label), fields.help_text());
+                command_rows.emplace_back(std::move(label), std::string{});
               }
             }(),
             ...);
@@ -463,8 +529,7 @@ auto format_help_impl(T& value, std::string_view program_name,
 
   auto append_rows =
       [&](std::string_view title,
-          const std::vector<std::pair<std::string, std::string_view>>& rows,
-          std::size_t width) -> auto {
+          const std::vector<std::pair<std::string, std::string>>& rows) -> auto {
     if (rows.empty()) {
       return;
     }
@@ -473,23 +538,81 @@ auto format_help_impl(T& value, std::string_view program_name,
     out += title;
     out += reset;
     out += '\n';
-    for (const auto& [label, description] : rows) {
-      out += "  ";
-      out += option_color;
-      out += label;
-      out += reset;
-      if (!description.empty()) {
-        out.append(width - label.size() + 2, ' ');
-        append_wrapped_description(out, description, width + 4);
-      } else {
-        out += '\n';
-      }
+    for (const auto& [label, row] : rows) {
+      (void)label;
+      out += row;
     }
   };
 
-  append_rows("Options:", option_rows, option_width);
-  append_rows("Positional arguments:", positional_rows, positional_width);
-  append_rows("Commands:", command_rows, command_width);
+  option_rows.clear();
+  positional_rows.clear();
+  command_rows.clear();
+  std::apply(
+      [&](auto&... fields) -> auto {
+        (
+            [&]() -> auto {
+              using F = std::remove_cvref_t<decltype(fields)>;
+              if constexpr (std::derived_from<F, OptionTag>) {
+                if (fields.hidden()) return;
+                auto label = field_usage_label<F>();
+                option_rows.emplace_back(
+                    label, render_help_row(fields, label, option_width,
+                                           option_color, reset));
+              } else if constexpr (std::derived_from<F, PositionalTag>) {
+                if (fields.hidden()) return;
+                auto label = field_usage_label<F>();
+                positional_rows.emplace_back(
+                    label, render_help_row(fields, label, positional_width,
+                                           option_color, reset));
+              } else if constexpr (std::derived_from<F, CommandTag>) {
+                if (fields.hidden()) return;
+                auto label = field_usage_label<F>();
+                command_rows.emplace_back(
+                    label, render_help_row(fields, label, command_width,
+                                           option_color, reset));
+              }
+            }(),
+            ...);
+      },
+      as_tuple(value));
+
+  append_rows("Options:", option_rows);
+  append_rows("Positional arguments:", positional_rows);
+  append_rows("Commands:", command_rows);
+
+  if constexpr (detail::HasRelations<T>) {
+    std::vector<std::string> relation_rows;
+    std::apply(
+        [&](auto... rels) -> auto {
+          (
+              [&]() -> auto {
+                using R = std::remove_cvref_t<decltype(rels)>;
+                if constexpr (std::same_as<R, TogetherRelation>) {
+                  relation_rows.push_back(
+                      std::format("  {}: {} must be provided together\n",
+                                  rels.name, relation_name_list(rels.group)));
+                } else if constexpr (std::same_as<R, ConflictsRelation>) {
+                  relation_rows.push_back(std::format(
+                      "  --{} conflicts with --{}\n", rels.left, rels.right));
+                } else if constexpr (std::same_as<R, DependsOnRelation>) {
+                  relation_rows.push_back(std::format("  --{} depends on --{}\n",
+                                                      rels.source, rels.target));
+                }
+              }(),
+              ...);
+        },
+        T::relations.items);
+    if (!relation_rows.empty()) {
+      out += '\n';
+      out += heading;
+      out += "Relations:";
+      out += reset;
+      out += '\n';
+      for (const auto& row : relation_rows) {
+        out += row;
+      }
+    }
+  }
 
   if (recurse && !command_rows.empty()) {
     std::apply(
@@ -498,6 +621,7 @@ auto format_help_impl(T& value, std::string_view program_name,
               [&]() -> auto {
                 using F = std::remove_cvref_t<decltype(fields)>;
                 if constexpr (std::derived_from<F, CommandTag>) {
+                  if (fields.hidden()) return;
                   out += '\n';
                   out += format_help_impl<typename F::argument_type>(
                       static_cast<typename F::argument_type&>(fields),

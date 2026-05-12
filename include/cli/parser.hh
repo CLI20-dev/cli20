@@ -751,6 +751,11 @@ struct Parser {
       return;
     }
 
+    if (auto err = validate_relations(result.value); err.has_error()) {
+      result.error = std::move(err.error);
+      return;
+    }
+
     if constexpr (requires(T& t) {
                     { t.constraints() } -> std::same_as<ConstraintResult>;
                   }) {
@@ -982,6 +987,113 @@ struct Parser {
       }
     });
     return res;
+  }
+
+  static auto relation_name_list(NameList<> names) -> std::string {
+    std::string out;
+    for (std::size_t i = 0; i < names.size; ++i) {
+      if (i != 0) out += ", ";
+      out += "--";
+      out += names.values[i];
+    }
+    return out;
+  }
+
+  static auto relation_operand_present(T& val, std::string_view name) -> bool {
+    bool found_field = false;
+    bool present = false;
+    for_each_field(val, [&](auto& f) -> auto {
+      using F = std::remove_cvref_t<decltype(f)>;
+      if constexpr (std::derived_from<F, OptionTag> ||
+                    std::derived_from<F, CommandTag>) {
+        if (!found_field && F::name.view() == name) {
+          found_field = true;
+          present = f.provided();
+        }
+      }
+    });
+    if (found_field) return present;
+
+    if constexpr (detail::HasRelations<T>) {
+      bool found_group = false;
+      bool group_present = false;
+      std::apply(
+          [&](auto... rels) -> auto {
+            (
+                [&]() -> auto {
+                  using R = std::remove_cvref_t<decltype(rels)>;
+                  if constexpr (std::same_as<R, TogetherRelation>) {
+                    if (!found_group && rels.name == name) {
+                      found_group = true;
+                      for (auto member : rels.group) {
+                        group_present = group_present ||
+                                        relation_operand_present(val, member);
+                      }
+                    }
+                  }
+                }(),
+                ...);
+          },
+          T::relations.items);
+      return group_present;
+    }
+    return false;
+  }
+
+  static auto validate_relations(T& val) -> ActionResult<void> {
+    if constexpr (!detail::HasRelations<T>) {
+      return ActionResult<void>::ok();
+    } else {
+      ActionResult<void> res = ActionResult<void>::ok();
+      std::apply(
+          [&](auto... rels) -> auto {
+            (
+                [&]() -> auto {
+                  if (res.has_error()) return;
+                  using R = std::remove_cvref_t<decltype(rels)>;
+                  if constexpr (std::same_as<R, TogetherRelation>) {
+                    std::size_t count = 0;
+                    for (auto member : rels.group) {
+                      if (relation_operand_present(val, member)) ++count;
+                    }
+                    if (count != 0 && count != rels.group.size) {
+                      res = ActionResult<void>::fail(ParseError{
+                          .code = ErrorCode::dependency_missing,
+                          .kind = ErrorKind::validation,
+                          .subject = std::string(rels.name),
+                          .detail = "arguments must be provided together: " +
+                                    relation_name_list(rels.group),
+                      });
+                    }
+                  } else if constexpr (std::same_as<R, ConflictsRelation>) {
+                    if (relation_operand_present(val, rels.left) &&
+                        relation_operand_present(val, rels.right)) {
+                      res = ActionResult<void>::fail(ParseError{
+                          .code = ErrorCode::mutually_exclusive,
+                          .kind = ErrorKind::validation,
+                          .subject = "--" + std::string(rels.left) + ", --" +
+                                     std::string(rels.right),
+                          .detail =
+                              "these arguments cannot be provided together",
+                      });
+                    }
+                  } else if constexpr (std::same_as<R, DependsOnRelation>) {
+                    if (relation_operand_present(val, rels.source) &&
+                        !relation_operand_present(val, rels.target)) {
+                      res = ActionResult<void>::fail(ParseError{
+                          .code = ErrorCode::dependency_missing,
+                          .kind = ErrorKind::validation,
+                          .subject = "--" + std::string(rels.source),
+                          .detail = "requires --" + std::string(rels.target),
+                      });
+                    }
+                  }
+                }(),
+                ...);
+          },
+          T::relations.items);
+      return res;
+    }
   }
 
   auto apply_env_fallback(T& val) -> ActionResult<void> {

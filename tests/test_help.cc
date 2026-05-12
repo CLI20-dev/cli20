@@ -56,6 +56,39 @@ struct ExitSuccessArgs {
       {.help = "Print version and exit", .presence = cli::optional}};
 };
 
+struct MetadataHelpArgs {
+  cli::Flag<"visible"> visible{{.help = "Visible flag"}};
+  cli::Flag<"hidden"> hidden{{.help = "Hidden flag", .hidden = true}};
+  cli::Flag<"old"> old{{
+      .help = "Old flag",
+      .deprecated = "use --visible instead",
+  }};
+  cli::StringOption<"output", 'o'> output{{
+      .help = "Output file",
+      .presence = cli::required,
+      .default_value = std::string{"out.txt"},
+      .env = "APP_OUTPUT",
+  }};
+  cli::StringOption<"user"> user{{.help = "User name"}};
+  cli::StringOption<"password"> password{{.help = "Password"}};
+  cli::Flag<"json"> json{{.help = "JSON output"}};
+  cli::Flag<"markdown"> markdown{{.help = "Markdown output"}};
+  cli::Flag<"deploy"> deploy{{.help = "Deploy"}};
+  cli::StringOption<"profile"> profile{{.help = "Deploy profile"}};
+  cli::Command<"legacy", BuildArgs> legacy{{
+      .help = "Legacy command",
+      .deprecated = "use build",
+  }};
+  cli::Command<"internal", BuildArgs> internal{{
+      .help = "Internal command",
+      .hidden = true,
+  }};
+
+  static constexpr auto relations = cli::relations(
+      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::conflicts("json", "markdown"), cli::depends_on("deploy", "profile"));
+};
+
 }  // namespace
 
 TEST(Help, UsageContainsProgramAndMajorGroups) {
@@ -225,4 +258,31 @@ TEST(Help, ExitSuccessActionTriggersDedicatedCode) {
   EXPECT_EQ(result.error.message(), "");
   EXPECT_TRUE(result.error.use_stdout());
   EXPECT_EQ(result.error.exit_code(), 0);
+}
+
+TEST(Help, MetadataIsRenderedAndHiddenFieldsAreOmitted) {
+  cli::Parser<MetadataHelpArgs> parser;
+
+  const auto help = parser.format_help(cli::ColorMode::never);
+  EXPECT_NE(help.find("--visible"), std::string::npos);
+  EXPECT_EQ(help.find("--hidden"), std::string::npos);
+  EXPECT_NE(help.find("[deprecated: use --visible instead]"), std::string::npos);
+  EXPECT_NE(help.find("[required]"), std::string::npos);
+  EXPECT_NE(help.find("[env: APP_OUTPUT]"), std::string::npos);
+  EXPECT_NE(help.find("[default: out.txt]"), std::string::npos);
+  EXPECT_NE(help.find("legacy"), std::string::npos);
+  EXPECT_NE(help.find("[deprecated: use build]"), std::string::npos);
+  EXPECT_EQ(help.find("internal"), std::string::npos);
+}
+
+TEST(Help, RelationsAreRendered) {
+  cli::Parser<MetadataHelpArgs> parser;
+
+  const auto help = parser.format_help(cli::ColorMode::never);
+  EXPECT_NE(help.find("Relations:"), std::string::npos);
+  EXPECT_NE(
+      help.find("legacy_auth: --user, --password must be provided together"),
+      std::string::npos);
+  EXPECT_NE(help.find("--json conflicts with --markdown"), std::string::npos);
+  EXPECT_NE(help.find("--deploy depends on --profile"), std::string::npos);
 }
