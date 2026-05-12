@@ -769,10 +769,10 @@ struct Parser {
   /**
    * @brief Generates a help string for the argument specification.
    *
-   * @param color_mode Controls ANSI color output. Default: `ColorMode::auto_`.
+   * @param color_mode Controls ANSI color output. Default: `ColorMode::detect`.
    * @return The formatted help string.
    */
-  auto format_help(ColorMode color_mode = ColorMode::auto_,
+  auto format_help(ColorMode color_mode = ColorMode::detect,
                    HelpPalette palette = default_help_palette) -> std::string {
     return cli::format_help<T>(scratch_, program_name_, color_mode, false,
                                palette);
@@ -784,11 +784,11 @@ struct Parser {
    * @return The formatted help string with all subcommand sections appended.
    */
   auto format_help(RecurseHelpTag) -> std::string {
-    return format_help(ColorMode::auto_, recurse_help);
+    return format_help(ColorMode::detect, recurse_help);
   }
 
   auto format_help(HelpPalette palette) -> std::string {
-    return format_help(ColorMode::auto_, palette);
+    return format_help(ColorMode::detect, palette);
   }
 
   /**
@@ -1137,7 +1137,7 @@ struct Parser {
 
   auto finalize_special_error(ParseError error) -> ParseError {
     if (error.code == ErrorCode::help_requested && error.detail.empty()) {
-      error.detail = format_help(ColorMode::never);
+      error.detail = format_help(ColorMode::detect);
     }
     return error;
   }

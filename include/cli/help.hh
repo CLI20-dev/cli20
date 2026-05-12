@@ -821,14 +821,14 @@ auto format_help_impl(T& value, std::string_view program_name,
  * @param value        An instance of the argument specification.
  * @param program_name The program name to display in the usage line. Default:
  * `"program"`.
- * @param color_mode   Controls ANSI color output. Default: `ColorMode::auto_`.
+ * @param color_mode   Controls ANSI color output. Default: `ColorMode::detect`.
  * @param recurse      If `true`, also append help for each subcommand. Default:
  * `false`.
  * @return The formatted help string.
  */
 template <ArgumentSpec T>
 auto format_help(T& value, std::string_view program_name = "program",
-                 ColorMode color_mode = ColorMode::auto_, bool recurse = false,
+                 ColorMode color_mode = ColorMode::detect, bool recurse = false,
                  HelpPalette palette = default_help_palette) -> std::string {
   return detail::format_help_impl<T>(value, program_name, color_mode, recurse,
                                      {}, palette);

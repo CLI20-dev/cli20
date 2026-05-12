@@ -13,11 +13,11 @@ namespace cli {
 /**
  * @brief Controls whether ANSI escape codes are emitted by `format_help()`.
  *
- * - `auto_`  : emit codes only when stdout is connected to a TTY (default).
+ * - `detect`  : emit codes only when stdout is connected to a TTY (default).
  * - `never`  : always produce plain text.
  * - `always` : always emit ANSI codes regardless of terminal type.
  */
-enum class ColorMode { auto_, never, always };
+enum class ColorMode { detect, never, always };
 
 /**
  * @brief ANSI palette used by generated help output.
@@ -145,7 +145,7 @@ inline auto is_tty() noexcept -> bool {
  *
  * - `ColorMode::always` → `AnsiStyle{true}`
  * - `ColorMode::never`  → `AnsiStyle{false}`
- * - `ColorMode::auto_`  → `AnsiStyle{is_tty()}`
+ * - `ColorMode::detect`  → `AnsiStyle{is_tty()}`
  *
  * @param mode The requested color mode.
  * @return An `AnsiStyle` with `enabled` set appropriately.
@@ -154,7 +154,7 @@ inline auto resolve_color(ColorMode mode,
                           HelpPalette palette = default_help_palette) noexcept
     -> AnsiStyle {
   const bool on =
-      (mode == ColorMode::always) || (mode == ColorMode::auto_ && is_tty());
+      (mode == ColorMode::always) || (mode == ColorMode::detect && is_tty());
   return AnsiStyle{.enabled = on, .palette = palette};
 }
 
