@@ -772,8 +772,10 @@ struct Parser {
    * @param color_mode Controls ANSI color output. Default: `ColorMode::auto_`.
    * @return The formatted help string.
    */
-  auto format_help(ColorMode color_mode = ColorMode::auto_) -> std::string {
-    return cli::format_help<T>(scratch_, program_name_, color_mode, false);
+  auto format_help(ColorMode color_mode = ColorMode::auto_,
+                   HelpPalette palette = default_help_palette) -> std::string {
+    return cli::format_help<T>(scratch_, program_name_, color_mode, false,
+                               palette);
   }
 
   /**
@@ -785,6 +787,10 @@ struct Parser {
     return format_help(ColorMode::auto_, recurse_help);
   }
 
+  auto format_help(HelpPalette palette) -> std::string {
+    return format_help(ColorMode::auto_, palette);
+  }
+
   /**
    * @brief Generates a help string with explicit color mode and recursive
    * subcommand help.
@@ -794,6 +800,12 @@ struct Parser {
    */
   auto format_help(ColorMode color_mode, RecurseHelpTag) -> std::string {
     return cli::format_help<T>(scratch_, program_name_, color_mode, true);
+  }
+
+  auto format_help(ColorMode color_mode, HelpPalette palette, RecurseHelpTag)
+      -> std::string {
+    return cli::format_help<T>(scratch_, program_name_, color_mode, true,
+                               palette);
   }
 
  private:

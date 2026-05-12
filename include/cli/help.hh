@@ -214,6 +214,39 @@ auto field_usage_label() -> std::string {
   }
 }
 
+template <class T>
+[[nodiscard]]
+auto styled_field_usage_label(const AnsiStyle& style) -> std::string {
+  using F = std::remove_cvref_t<T>;
+  const auto reset = style.reset();
+  if constexpr (std::derived_from<F, OptionTag>) {
+    std::string out;
+    if constexpr (F::short_name != '\0') {
+      out += style.option();
+      out += std::format("-{}", F::short_name);
+      out += reset;
+      out += ", ";
+    }
+    out += style.option();
+    out += std::format("--{}", F::name.view());
+    out += reset;
+    if constexpr (!(F::nargs.min == 0 && F::nargs.max == 0)) {
+      out += " ";
+      out += style.metavar();
+      out += metavar_for<typename F::value_type>();
+      out += reset;
+    }
+    return out;
+  } else if constexpr (std::derived_from<F, PositionalTag>) {
+    return std::format("{}{}{}", style.metavar(),
+                       metavar_for<typename F::value_type>(), reset);
+  } else if constexpr (std::derived_from<F, CommandTag>) {
+    return std::format("{}{}{}", style.command(), F::command_name(), reset);
+  } else {
+    return std::string{};
+  }
+}
+
 /**
  * @brief Splits a string on newline characters.
  *
@@ -480,11 +513,12 @@ auto help_metadata(Field& field) -> std::vector<std::string> {
 }
 
 inline auto append_help_metadata(std::string& out,
-                                 const std::vector<std::string>& metadata)
-    -> void {
+                                 const std::vector<std::string>& metadata,
+                                 const AnsiStyle& style) -> void {
   if (metadata.empty()) {
     return;
   }
+  out += style.metadata();
   out += " [";
   for (std::size_t i = 0; i < metadata.size(); ++i) {
     if (i != 0) {
@@ -493,6 +527,7 @@ inline auto append_help_metadata(std::string& out,
     out += metadata[i];
   }
   out += "]";
+  out += style.reset();
 }
 
 template <class T>
@@ -518,15 +553,22 @@ auto append_group_requirements(std::string& row, std::string_view group_name)
 }
 
 template <class T>
-auto relation_option_group_row(const GroupRelation& group) -> std::string {
-  std::string row = std::format("  {}:\n    {} must be used together\n",
-                                group.name, relation_name_list(group.members));
+auto relation_option_group_row(const GroupRelation& group,
+                               const AnsiStyle& style) -> std::string {
+  std::string row = "  ";
+  row += style.group();
+  row += group.name;
+  row += style.reset();
+  row += ":\n    ";
+  row += relation_name_list(group.members);
+  row += " must be used together\n";
   append_group_requirements<T>(row, group.name);
   return row;
 }
 
 template <class T>
-auto relation_option_group_rows() -> std::vector<std::string> {
+auto relation_option_group_rows(const AnsiStyle& style)
+    -> std::vector<std::string> {
   std::vector<std::string> rows;
   if constexpr (detail::HasRelations<T>) {
     std::apply(
@@ -535,7 +577,7 @@ auto relation_option_group_rows() -> std::vector<std::string> {
               [&]() -> auto {
                 using R = std::remove_cvref_t<decltype(rels)>;
                 if constexpr (std::same_as<R, GroupRelation>) {
-                  rows.push_back(relation_option_group_row<T>(rels));
+                  rows.push_back(relation_option_group_row<T>(rels, style));
                 }
               }(),
               ...);
@@ -546,20 +588,18 @@ auto relation_option_group_rows() -> std::vector<std::string> {
 }
 
 template <class T, class Field>
-auto render_help_row(Field& field, std::string_view label, std::size_t width,
-                     std::string_view option_color, std::string_view reset_color)
-    -> std::string {
+auto render_help_row(Field& field, std::string_view label,
+                     std::string_view styled_label, std::size_t width,
+                     const AnsiStyle& style) -> std::string {
   std::string out = "  ";
-  out += option_color;
-  out += label;
-  out += reset_color;
+  out += styled_label;
   const auto metadata = help_metadata<T>(field);
   if (!field.help_text().empty() || !metadata.empty()) {
     out.append(width - label.size() + 2, ' ');
     if (!field.help_text().empty()) {
       out += field.help_text();
     }
-    append_help_metadata(out, metadata);
+    append_help_metadata(out, metadata, style);
     out += '\n';
   } else {
     out += '\n';
@@ -623,11 +663,11 @@ auto find_description(T& value) -> std::string_view {
 template <class T>
 auto format_help_impl(T& value, std::string_view program_name,
                       ColorMode color_mode, bool recurse,
-                      std::string_view command_path) -> std::string {
-  const auto style = resolve_color(color_mode);
-  const std::string heading =
-      std::string(style.bold()) + std::string(style.underline());
-  const std::string option_color = std::string(style.bold());
+                      std::string_view command_path,
+                      HelpPalette palette = default_help_palette)
+    -> std::string {
+  const auto style = resolve_color(color_mode, palette);
+  const std::string heading = std::string(style.heading());
   const std::string reset = std::string(style.reset());
 
   std::string full_program = std::string(program_name);
@@ -636,8 +676,8 @@ auto format_help_impl(T& value, std::string_view program_name,
     full_program += command_path;
   }
 
-  std::string out =
-      std::format("Usage: {}{}\n", full_program, command_usage_suffix(value));
+  std::string out = std::format("{}Usage:{} {}{}\n", style.usage(), reset,
+                                full_program, command_usage_suffix(value));
 
   if (const auto description = find_description(value); !description.empty()) {
     out += '\n';
@@ -706,21 +746,24 @@ auto format_help_impl(T& value, std::string_view program_name,
               if constexpr (std::derived_from<F, OptionTag>) {
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
+                auto styled_label = styled_field_usage_label<F>(style);
                 option_rows.emplace_back(
-                    label, render_help_row<T>(fields, label, option_width,
-                                              option_color, reset));
+                    label, render_help_row<T>(fields, label, styled_label,
+                                              option_width, style));
               } else if constexpr (std::derived_from<F, PositionalTag>) {
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
+                auto styled_label = styled_field_usage_label<F>(style);
                 positional_rows.emplace_back(
-                    label, render_help_row<T>(fields, label, positional_width,
-                                              option_color, reset));
+                    label, render_help_row<T>(fields, label, styled_label,
+                                              positional_width, style));
               } else if constexpr (std::derived_from<F, CommandTag>) {
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
+                auto styled_label = styled_field_usage_label<F>(style);
                 command_rows.emplace_back(
-                    label, render_help_row<T>(fields, label, command_width,
-                                              option_color, reset));
+                    label, render_help_row<T>(fields, label, styled_label,
+                                              command_width, style));
               }
             }(),
             ...);
@@ -731,7 +774,7 @@ auto format_help_impl(T& value, std::string_view program_name,
   append_rows("Positional arguments:", positional_rows);
   append_rows("Commands:", command_rows);
 
-  const auto option_group_rows = relation_option_group_rows<T>();
+  const auto option_group_rows = relation_option_group_rows<T>(style);
   if (!option_group_rows.empty()) {
     out += '\n';
     out += heading;
@@ -754,7 +797,8 @@ auto format_help_impl(T& value, std::string_view program_name,
                   out += '\n';
                   out += format_help_impl<typename F::argument_type>(
                       static_cast<typename F::argument_type&>(fields),
-                      program_name, color_mode, true, F::command_name());
+                      program_name, color_mode, true, F::command_name(),
+                      palette);
                 }
               }(),
               ...);
@@ -784,10 +828,10 @@ auto format_help_impl(T& value, std::string_view program_name,
  */
 template <ArgumentSpec T>
 auto format_help(T& value, std::string_view program_name = "program",
-                 ColorMode color_mode = ColorMode::auto_, bool recurse = false)
-    -> std::string {
+                 ColorMode color_mode = ColorMode::auto_, bool recurse = false,
+                 HelpPalette palette = default_help_palette) -> std::string {
   return detail::format_help_impl<T>(value, program_name, color_mode, recurse,
-                                     {});
+                                     {}, palette);
 }
 
 }  // namespace cli

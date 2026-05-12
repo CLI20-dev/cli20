@@ -172,9 +172,31 @@ TEST(Help, ColorAlwaysEmitsAnsiHeadingsAndLabels) {
 
   const auto help = parser.format_help(cli::ColorMode::always);
   EXPECT_NE(help.find("\033[1m"), std::string::npos);
-  EXPECT_NE(help.find("\033[4m"), std::string::npos);
+  EXPECT_NE(help.find("\033[1;4;36mOptions:"), std::string::npos);
   EXPECT_NE(help.find("\033[0m"), std::string::npos);
-  EXPECT_NE(help.find("\033[1m-v, --verbose"), std::string::npos);
+  EXPECT_NE(help.find("\033[1;32m-v\033[0m, \033[1;32m--verbose"),
+            std::string::npos);
+  EXPECT_NE(help.find("\033[36m<string>\033[0m"), std::string::npos);
+}
+
+TEST(Help, CustomPaletteIsUsed) {
+  cli::Parser<HelpArgs> parser;
+  constexpr cli::HelpPalette palette{
+      .usage = "\033[95m",
+      .heading = "\033[94m",
+      .option = "\033[93m",
+      .metavar = "\033[92m",
+      .command = "\033[91m",
+      .metadata = "\033[90m",
+      .group = "\033[96m",
+      .reset = "\033[39m",
+  };
+
+  const auto help = parser.format_help(cli::ColorMode::always, palette);
+  EXPECT_NE(help.find("\033[95mUsage:\033[39m"), std::string::npos);
+  EXPECT_NE(help.find("\033[94mOptions:\033[39m"), std::string::npos);
+  EXPECT_NE(help.find("\033[93m-v\033[39m, \033[93m--verbose"),
+            std::string::npos);
 }
 
 TEST(Help, ResolveColorRespectsMode) {
@@ -188,6 +210,8 @@ TEST(Help, ResolveColorRespectsMode) {
   EXPECT_EQ(always.bold(), "\033[1m");
   EXPECT_EQ(always.underline(), "\033[4m");
   EXPECT_EQ(always.reset(), "\033[0m");
+  EXPECT_EQ(always.heading(), "\033[1;4;36m");
+  EXPECT_EQ(always.option(), "\033[1;32m");
 }
 
 TEST(Help, HelpFlagTriggersHelpRequested) {

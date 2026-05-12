@@ -20,6 +20,25 @@ namespace cli {
 enum class ColorMode { auto_, never, always };
 
 /**
+ * @brief ANSI palette used by generated help output.
+ *
+ * Each field is an ANSI SGR sequence. `format_help(ColorMode::never, ...)`
+ * suppresses these sequences regardless of the palette contents.
+ */
+struct HelpPalette {
+  std::string_view usage{"\033[1m"};
+  std::string_view heading{"\033[1;4;36m"};
+  std::string_view option{"\033[1;32m"};
+  std::string_view metavar{"\033[36m"};
+  std::string_view command{"\033[1;33m"};
+  std::string_view metadata{"\033[2m"};
+  std::string_view group{"\033[1;33m"};
+  std::string_view reset{"\033[0m"};
+};
+
+inline constexpr HelpPalette default_help_palette{};
+
+/**
  * @brief Tag type passed to `format_help()` to request recursive sub-command
  * output.
  *
@@ -46,6 +65,7 @@ namespace detail {
 struct AnsiStyle {
   /** @brief Whether ANSI codes should be emitted. */
   bool enabled;
+  HelpPalette palette{};
 
   /**
    * @brief Returns the ANSI bold sequence, or an empty string when disabled.
@@ -72,7 +92,35 @@ struct AnsiStyle {
    * @return `"\033[0m"` if enabled, `""` otherwise.
    */
   [[nodiscard]] constexpr auto reset() const noexcept -> std::string_view {
-    return enabled ? "\033[0m" : "";
+    return enabled ? palette.reset : "";
+  }
+
+  [[nodiscard]] constexpr auto usage() const noexcept -> std::string_view {
+    return enabled ? palette.usage : "";
+  }
+
+  [[nodiscard]] constexpr auto heading() const noexcept -> std::string_view {
+    return enabled ? palette.heading : "";
+  }
+
+  [[nodiscard]] constexpr auto option() const noexcept -> std::string_view {
+    return enabled ? palette.option : "";
+  }
+
+  [[nodiscard]] constexpr auto metavar() const noexcept -> std::string_view {
+    return enabled ? palette.metavar : "";
+  }
+
+  [[nodiscard]] constexpr auto command() const noexcept -> std::string_view {
+    return enabled ? palette.command : "";
+  }
+
+  [[nodiscard]] constexpr auto metadata() const noexcept -> std::string_view {
+    return enabled ? palette.metadata : "";
+  }
+
+  [[nodiscard]] constexpr auto group() const noexcept -> std::string_view {
+    return enabled ? palette.group : "";
   }
 };
 
@@ -102,10 +150,12 @@ inline auto is_tty() noexcept -> bool {
  * @param mode The requested color mode.
  * @return An `AnsiStyle` with `enabled` set appropriately.
  */
-inline auto resolve_color(ColorMode mode) noexcept -> AnsiStyle {
+inline auto resolve_color(ColorMode mode,
+                          HelpPalette palette = default_help_palette) noexcept
+    -> AnsiStyle {
   const bool on =
       (mode == ColorMode::always) || (mode == ColorMode::auto_ && is_tty());
-  return AnsiStyle{on};
+  return AnsiStyle{.enabled = on, .palette = palette};
 }
 
 }  // namespace detail
