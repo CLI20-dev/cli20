@@ -11,6 +11,7 @@ target_link_libraries(bench_runtime PRIVATE
   bench_cli11
   bench_argparse
   bench_cxxopts
+  bench_boost_program_options
   benchmark::benchmark
   benchmark::benchmark_main
 )

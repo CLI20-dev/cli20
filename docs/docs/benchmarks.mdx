@@ -1,0 +1,48 @@
+---
+sidebar_position: 5
+title: Benchmarks
+---
+
+import BenchmarkCharts from '@site/src/components/BenchmarkCharts';
+
+# Benchmarks
+
+This page compares cli20 against CLI11, argparse, cxxopts, and
+Boost.Program_options across three representative schemas. All benchmark
+metrics on this page are **smaller is better**.
+
+- `simple`: one flag, one option, and one required positional argument.
+- `many_options`: strings, integers, doubles, paths, and enum-like choices.
+- `subcommand`: a small command tree with `build` and `test`.
+
+Boost.Program_options is shown as a reference value because it links against
+the Boost.Program_options shared library. Its binary-size numbers are therefore
+not directly comparable with the mostly header-only libraries.
+
+## Results
+
+<BenchmarkCharts />
+
+## Benchmark Source
+
+The benchmark code is kept in the repository so every number on this page can
+be traced back to the parser setup being measured.
+
+| Area | Source |
+|---|---|
+| Runtime benchmarks | [`bench/runtime/`](https://github.com/CLI20-dev/cli20/tree/main/bench/runtime) |
+| Binary size benchmarks | [`bench/size/`](https://github.com/CLI20-dev/cli20/tree/main/bench/size) |
+| Compile-time benchmarks | [`bench/compile_time/`](https://github.com/CLI20-dev/cli20/tree/main/bench/compile_time) |
+| Shared argv/allocation helpers | [`bench/include/bench/`](https://github.com/CLI20-dev/cli20/tree/main/bench/include/bench) |
+| Result summarization | [`bench/scripts/`](https://github.com/CLI20-dev/cli20/tree/main/bench/scripts) |
+
+## Method
+
+Runtime benchmarks construct the parser and parse the same argv every
+iteration. Allocation counts are measured inside the same operation.
+
+Binary size benchmarks build one executable per library and case, then record
+both the unstripped and stripped file sizes.
+
+Compile-time benchmarks compile one translation unit per library and case with
+`hyperfine`, using the same benchmark source as the binary-size targets.

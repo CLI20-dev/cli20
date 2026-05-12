@@ -2,6 +2,7 @@
 
 #include <CLI/CLI.hpp>
 #include <argparse/argparse.hpp>
+#include <boost/program_options.hpp>
 #include <cxxopts.hpp>
 #include <string>
 
@@ -11,6 +12,8 @@
 #include "cli/parser.hh"
 
 namespace {
+
+namespace po = boost::program_options;
 
 struct Cli20Simple {
   cli::Flag<"verbose", 'v'> verbose;
@@ -102,9 +105,42 @@ void BM_CxxoptsSimple(benchmark::State& state) {
   bench::set_allocation_counters(state, allocations, bytes);
 }
 
+void BM_BoostSimple(benchmark::State& state) {
+  auto& args = simple_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
+  for (auto _ : state) {
+    const auto stats = bench::measure_allocations([&] {
+      bool verbose = false;
+      std::string output;
+      std::string input;
+      po::options_description options{"simple"};
+      options.add_options()("verbose,v", po::bool_switch(&verbose))(
+          "output,o", po::value<std::string>(&output))(
+          "input", po::value<std::string>(&input)->required());
+      po::positional_options_description positional;
+      positional.add("input", 1);
+      po::variables_map values;
+      po::store(po::command_line_parser(args.argc(), args.argv())
+                    .options(options)
+                    .positional(positional)
+                    .run(),
+                values);
+      po::notify(values);
+      benchmark::DoNotOptimize(verbose);
+      benchmark::DoNotOptimize(output);
+      benchmark::DoNotOptimize(input);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
+  }
+  bench::set_allocation_counters(state, allocations, bytes);
+}
+
 BENCHMARK(BM_Cli20Simple);
 BENCHMARK(BM_Cli11Simple);
 BENCHMARK(BM_ArgparseSimple);
 BENCHMARK(BM_CxxoptsSimple);
+BENCHMARK(BM_BoostSimple);
 
 }  // namespace

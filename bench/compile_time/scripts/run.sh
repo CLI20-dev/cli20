@@ -8,7 +8,7 @@ hyperfine_runs="${HYPERFINE_RUNS:-5}"
 hyperfine_warmup="${HYPERFINE_WARMUP:-1}"
 
 cases=(simple many_options subcommand)
-libraries=(cli20 cli11 argparse cxxopts)
+libraries=(cli20 cli11 argparse cxxopts boost)
 
 mkdir -p "$out_dir"
 result_file="$out_dir/results.tsv"

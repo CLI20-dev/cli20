@@ -2,6 +2,9 @@
 
 #include <CLI/CLI.hpp>
 #include <argparse/argparse.hpp>
+#include <boost/program_options.hpp>
+#include <boost/program_options/errors.hpp>
+#include <boost/program_options/value_semantic.hpp>
 #include <cli/argument.hh>
 #include <cli/parser.hh>
 #include <cxxopts.hpp>
@@ -17,6 +20,8 @@
 #include "bench/argv.hh"
 
 namespace bench {
+
+namespace po = boost::program_options;
 
 enum class Mode { fast, balanced, precise };
 
@@ -42,6 +47,17 @@ inline auto parse_mode(std::string_view value) -> std::optional<Mode> {
 inline auto parse_mode_or_throw(const std::string& value) -> Mode {
   if (auto mode = parse_mode(value)) return *mode;
   throw std::runtime_error("invalid mode: " + value);
+}
+
+inline void validate(boost::any& out, const std::vector<std::string>& values,
+                     Mode*, int) {
+  po::validators::check_first_occurrence(out);
+  const auto& value = po::validators::get_single_string(values);
+  if (auto mode = parse_mode(value)) {
+    out = *mode;
+    return;
+  }
+  throw po::validation_error(po::validation_error::invalid_option_value, value);
 }
 
 inline auto operator>>(std::istream& in, Mode& mode) -> std::istream& {
@@ -184,6 +200,27 @@ void add_cxxopts_options(cxxopts::Options& options) {
       "color", "color", cxxopts::value<bench::Mode>());
 }
 
+void add_boost_options(boost::program_options::options_description& options,
+                       bench::ManyValues& values) {
+  namespace po = boost::program_options;
+  options.add_options()("name", po::value<std::string>(&values.name))(
+      "output", po::value<std::string>(&values.output))(
+      "target", po::value<std::string>(&values.target))(
+      "define", po::value<std::string>(&values.define))(
+      "jobs", po::value<int>(&values.jobs))(
+      "retries", po::value<int>(&values.retries))("port",
+                                                  po::value<int>(&values.port))(
+      "depth", po::value<int>(&values.depth))("ratio",
+                                              po::value<double>(&values.ratio))(
+      "timeout", po::value<double>(&values.timeout))(
+      "threshold", po::value<double>(&values.threshold))(
+      "scale", po::value<double>(&values.scale))(
+      "config", po::value<std::filesystem::path>(&values.config))(
+      "cache", po::value<std::filesystem::path>(&values.cache))(
+      "mode", po::value<bench::Mode>(&values.mode))(
+      "color", po::value<bench::Mode>(&values.color));
+}
+
 void BM_Cli20ManyOptions(benchmark::State& state) {
   auto& args = many_argv();
   std::size_t allocations = 0;
@@ -251,9 +288,34 @@ void BM_CxxoptsManyOptions(benchmark::State& state) {
   bench::set_allocation_counters(state, allocations, bytes);
 }
 
+void BM_BoostManyOptions(benchmark::State& state) {
+  auto& args = many_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
+  for (auto _ : state) {
+    const auto stats = bench::measure_allocations([&] {
+      boost::program_options::options_description options{"many_options"};
+      bench::ManyValues values;
+      add_boost_options(options, values);
+      boost::program_options::variables_map parsed;
+      boost::program_options::store(
+          boost::program_options::command_line_parser(args.argc(), args.argv())
+              .options(options)
+              .run(),
+          parsed);
+      boost::program_options::notify(parsed);
+      benchmark::DoNotOptimize(values);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
+  }
+  bench::set_allocation_counters(state, allocations, bytes);
+}
+
 BENCHMARK(BM_Cli20ManyOptions);
 BENCHMARK(BM_Cli11ManyOptions);
 BENCHMARK(BM_ArgparseManyOptions);
 BENCHMARK(BM_CxxoptsManyOptions);
+BENCHMARK(BM_BoostManyOptions);
 
 }  // namespace

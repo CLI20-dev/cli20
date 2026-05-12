@@ -15,6 +15,10 @@ target_compile_options(bench_warnings INTERFACE
 )
 
 find_package(benchmark REQUIRED)
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost REQUIRED COMPONENTS program_options)
 
 find_path(BENCH_CLI11_INCLUDE_DIR CLI/CLI.hpp REQUIRED)
 find_path(BENCH_ARGPARSE_INCLUDE_DIR argparse/argparse.hpp REQUIRED)
@@ -28,6 +32,9 @@ target_include_directories(bench_argparse INTERFACE "${BENCH_ARGPARSE_INCLUDE_DI
 
 add_library(bench_cxxopts INTERFACE)
 target_include_directories(bench_cxxopts INTERFACE "${BENCH_CXXOPTS_INCLUDE_DIR}")
+
+add_library(bench_boost_program_options INTERFACE)
+target_link_libraries(bench_boost_program_options INTERFACE Boost::program_options)
 
 function(bench_add_size_executable target source library_target)
   add_executable("${target}" "${source}")
