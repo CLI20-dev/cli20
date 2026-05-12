@@ -1,6 +1,13 @@
-#include "bench/many_options.hh"
-#include "cli/argument.hh"
-#include "cli/parser.hh"
+#include <cli/cli.hh>
+
+enum class Mode { fast, balanced, precise };
+
+inline auto parse_mode(std::string_view value) -> std::optional<Mode> {
+  if (value == "fast") return Mode::fast;
+  if (value == "balanced") return Mode::balanced;
+  if (value == "precise") return Mode::precise;
+  return std::nullopt;
+}
 
 struct Args {
   cli::StringOption<"name"> name;
@@ -17,11 +24,11 @@ struct Args {
   cli::DoubleOption<"scale"> scale;
   cli::PathOption<"config"> config;
   cli::PathOption<"cache"> cache;
-  cli::Arg<"mode", cli::conversion::choice<bench::Mode, bench::parse_mode> |
-                       cli::pack::set_once>
+  cli::Arg<"mode",
+           cli::conversion::choice<Mode, parse_mode> | cli::pack::set_once>
       mode;
-  cli::Arg<"color", cli::conversion::choice<bench::Mode, bench::parse_mode> |
-                        cli::pack::set_once>
+  cli::Arg<"color",
+           cli::conversion::choice<Mode, parse_mode> | cli::pack::set_once>
       color;
 };
 
