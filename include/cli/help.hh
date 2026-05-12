@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <format>
 #include <iterator>
 #include <optional>
 #include <sstream>
@@ -124,7 +123,9 @@ template <class T>
 auto metavar_for() -> std::string {
   using Storage = std::remove_cvref_t<T>;
   using Base = unwrap_storage_t<Storage>;
-  std::string out = std::format("<{}>", MetavarName<Base>::value);
+  std::string out = "<";
+  out += MetavarName<Base>::value;
+  out += ">";
   if constexpr (UnwrapStorage<Storage>::variadic) {
     out.insert(out.size() - 1, "...");
   }
@@ -197,9 +198,12 @@ auto field_usage_label() -> std::string {
   if constexpr (std::derived_from<F, OptionTag>) {
     std::string out;
     if constexpr (F::short_name != '\0') {
-      out += std::format("-{}, ", F::short_name);
+      out += "-";
+      out += F::short_name;
+      out += ", ";
     }
-    out += std::format("--{}", F::name.view());
+    out += "--";
+    out += F::name.view();
     if constexpr (!(F::nargs.min == 0 && F::nargs.max == 0)) {
       out += " ";
       out += metavar_for<typename F::value_type>();
@@ -223,12 +227,14 @@ auto styled_field_usage_label(const AnsiStyle& style) -> std::string {
     std::string out;
     if constexpr (F::short_name != '\0') {
       out += style.option();
-      out += std::format("-{}", F::short_name);
+      out += "-";
+      out += F::short_name;
       out += reset;
       out += ", ";
     }
     out += style.option();
-    out += std::format("--{}", F::name.view());
+    out += "--";
+    out += F::name.view();
     out += reset;
     if constexpr (!(F::nargs.min == 0 && F::nargs.max == 0)) {
       out += " ";
@@ -238,10 +244,15 @@ auto styled_field_usage_label(const AnsiStyle& style) -> std::string {
     }
     return out;
   } else if constexpr (std::derived_from<F, PositionalTag>) {
-    return std::format("{}{}{}", style.metavar(),
-                       metavar_for<typename F::value_type>(), reset);
+    std::string out = std::string(style.metavar());
+    out += metavar_for<typename F::value_type>();
+    out += reset;
+    return out;
   } else if constexpr (std::derived_from<F, CommandTag>) {
-    return std::format("{}{}{}", style.command(), F::command_name(), reset);
+    std::string out = std::string(style.command());
+    out += F::command_name();
+    out += reset;
+    return out;
   } else {
     return std::string{};
   }
@@ -433,7 +444,7 @@ auto relation_operand_label(std::string_view operand) -> std::string {
       return std::string(operand);
     }
   }
-  return std::format("--{}", operand);
+  return "--" + std::string(operand);
 }
 
 template <class T, class Field>
@@ -452,22 +463,22 @@ auto relation_help_metadata() -> std::vector<std::string> {
                   (void)field_name;
                 } else if constexpr (std::same_as<R, ConflictsRelation>) {
                   if (relation_operand_contains<T>(rels.left, field_name)) {
-                    metadata.emplace_back(std::format(
-                        "conflicts: {}", relation_operand_label<T>(rels.right)));
+                    metadata.emplace_back("conflicts: " +
+                                          relation_operand_label<T>(rels.right));
                   }
                   if (relation_operand_contains<T>(rels.right, field_name)) {
-                    metadata.emplace_back(std::format(
-                        "conflicts: {}", relation_operand_label<T>(rels.left)));
+                    metadata.emplace_back("conflicts: " +
+                                          relation_operand_label<T>(rels.left));
                   }
                 } else if constexpr (std::same_as<R, DependsOnRelation>) {
                   if (relation_operand_contains<T>(rels.source, field_name)) {
-                    metadata.emplace_back(std::format(
-                        "requires: {}", relation_operand_label<T>(rels.target)));
+                    metadata.emplace_back(
+                        "requires: " + relation_operand_label<T>(rels.target));
                   }
                   if (relation_operand_contains<T>(rels.target, field_name)) {
                     metadata.emplace_back(
-                        std::format("required by: {}",
-                                    relation_operand_label<T>(rels.source)));
+                        "required by: " +
+                        relation_operand_label<T>(rels.source));
                   }
                 }
               }(),
@@ -489,7 +500,7 @@ auto help_metadata(Field& field) -> std::vector<std::string> {
       metadata.emplace_back("required");
     }
     if (!field.env().empty()) {
-      metadata.emplace_back(std::format("env: {}", field.env()));
+      metadata.emplace_back("env: " + std::string(field.env()));
     }
     if (const auto& default_value = field.default_value()) {
       using Value = std::remove_cvref_t<decltype(*default_value)>;
@@ -498,12 +509,12 @@ auto help_metadata(Field& field) -> std::vector<std::string> {
                     }) {
         std::ostringstream out;
         out << *default_value;
-        metadata.emplace_back(std::format("default: {}", out.str()));
+        metadata.emplace_back("default: " + out.str());
       }
     }
   }
   if (!field.deprecated().empty()) {
-    metadata.emplace_back(std::format("deprecated: {}", field.deprecated()));
+    metadata.emplace_back("deprecated: " + std::string(field.deprecated()));
   }
   auto relation_metadata = relation_help_metadata<T, Field>();
   metadata.insert(metadata.end(),
@@ -557,8 +568,9 @@ auto append_group_requirements(std::string& row, std::string_view group_name)
                 using R = std::remove_cvref_t<decltype(rels)>;
                 if constexpr (std::same_as<R, DependsOnRelation>) {
                   if (rels.source == group_name) {
-                    row += std::format("    requires: {}\n",
-                                       relation_operand_label<T>(rels.target));
+                    row += "    requires: ";
+                    row += relation_operand_label<T>(rels.target);
+                    row += "\n";
                   }
                 }
               }(),
@@ -688,8 +700,13 @@ auto format_help_impl(T& value, std::string_view program_name,
     full_program += command_path;
   }
 
-  std::string out = std::format("{}Usage:{} {}{}\n", style.usage(), reset,
-                                full_program, command_usage_suffix(value));
+  std::string out = std::string(style.usage());
+  out += "Usage:";
+  out += reset;
+  out += " ";
+  out += full_program;
+  out += command_usage_suffix(value);
+  out += "\n";
 
   if (const auto description = find_description(value); !description.empty()) {
     out += '\n';

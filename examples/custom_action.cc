@@ -1,5 +1,4 @@
 #include <charconv>
-#include <format>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -10,17 +9,6 @@
 
 struct MinutesSinceMidnight {
   int value{};
-};
-
-template <>
-struct std::formatter<MinutesSinceMidnight> {
-  constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-
-  auto format(MinutesSinceMidnight time, std::format_context& ctx) const {
-    const int hours = time.value / 60;
-    const int minutes = time.value % 60;
-    return std::format_to(ctx.out(), "{:02}:{:02}", hours, minutes);
-  }
 };
 
 struct HHMMConversion {
