@@ -1,5 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {AnsiUp} from 'ansi_up';
+
+const ansi = new AnsiUp();
+ansi.escape_html = true;
+
+function ansiToHtml(text: string): string {
+  return ansi.ansi_to_html(text);
+}
 
 function splitArgs(input: string): string[] {
   const args: string[] = [];
@@ -361,7 +369,11 @@ export function ExamplePlayground({
                 )}
               </div>
               {entry.output && (
-                <pre className="pg-output">{entry.output}</pre>
+                <pre
+                  className="pg-output"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: ANSI output is escaped by ansi_up before rendering.
+                  dangerouslySetInnerHTML={{__html: ansiToHtml(entry.output)}}
+                />
               )}
             </div>
           ))}
