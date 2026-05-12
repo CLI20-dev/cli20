@@ -39,6 +39,13 @@ struct OptionsOnlyArgs {
       {.help = "Enable verbose logging", .presence = cli::optional}};
 };
 
+struct MultilineHelpArgs {
+  cli::StringOption<"mode"> mode{{
+      .help = "First line\nSecond line",
+      .default_value = std::string{"auto"},
+  }};
+};
+
 struct CommandsOnlyArgs {
   cli::Command<"build", BuildArgs> build{{.help = "Run the build step"}};
 };
@@ -135,6 +142,15 @@ TEST(Help, FlagDoesNotShowMetavar) {
   const auto line_end = help.find('\n', line_start);
   const auto line = help.substr(line_start, line_end - line_start);
   EXPECT_EQ(line.find("<bool>"), std::string::npos);
+}
+
+TEST(Help, MultilineHelpTextKeepsContinuationIndented) {
+  cli::Parser<MultilineHelpArgs> parser;
+
+  const auto help = parser.format_help(cli::ColorMode::never);
+  EXPECT_NE(help.find("--mode <string>  First line [default: auto]\n"
+                      "                   Second line\n"),
+            std::string::npos);
 }
 
 TEST(Help, EmptySectionsAreOmitted) {

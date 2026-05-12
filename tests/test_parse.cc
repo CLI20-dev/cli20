@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <optional>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 #ifdef _WIN32
@@ -92,6 +93,18 @@ struct RelationArgs {
   static constexpr auto relations = cli::relations(
       cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
       cli::conflicts("json", "markdown"), cli::depends_on("deploy", "profile"));
+};
+
+struct GroupOperandRelationArgs {
+  cli::StringOption<"user"> user;
+  cli::StringOption<"password"> password;
+  cli::Flag<"token"> token;
+  cli::StringOption<"profile"> profile;
+
+  static constexpr auto relations = cli::relations(
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
+      cli::conflicts("legacy_auth", "token"),
+      cli::depends_on("legacy_auth", "profile"));
 };
 
 struct UnknownRelationTargetArgs {
@@ -297,6 +310,28 @@ TEST(Parse, RelationDependsOnRequiresTarget) {
   EXPECT_EQ(result.error.subject, "--deploy");
 }
 
+TEST(Parse, RelationConflictFormatsGroupOperandWithoutOptionPrefix) {
+  auto args =
+      argv({"prog", "--user", "alice", "--password", "secret", "--token"});
+  auto result = cli::Parser<GroupOperandRelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::mutually_exclusive);
+  EXPECT_EQ(result.error.subject, "legacy_auth, --token");
+}
+
+TEST(Parse, RelationDependsOnFormatsGroupOperandWithoutOptionPrefix) {
+  auto args = argv({"prog", "--user", "alice", "--password", "secret"});
+  auto result = cli::Parser<GroupOperandRelationArgs>{}.parse(
+      std::span<const std::string_view>(args), 1);
+
+  ASSERT_TRUE(result.has_error());
+  EXPECT_EQ(result.error.code, cli::ErrorCode::dependency_missing);
+  EXPECT_EQ(result.error.subject, "legacy_auth");
+  EXPECT_EQ(result.error.detail, "requires --profile");
+}
+
 TEST(Parse, RelationsPassWhenSatisfied) {
   auto args = argv({"prog", "--user", "alice", "--password", "secret",
                     "--deploy", "--profile", "prod", "--json"});
@@ -304,6 +339,11 @@ TEST(Parse, RelationsPassWhenSatisfied) {
       std::span<const std::string_view>(args), 1);
 
   ASSERT_TRUE(result.has_value());
+}
+
+TEST(Parse, NameListRejectsTooManyNames) {
+  EXPECT_ANY_THROW(
+      [] { std::ignore = cli::NameList<2>({"one", "two", "three"}); }());
 }
 
 #ifdef _WIN32
