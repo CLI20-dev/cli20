@@ -90,7 +90,7 @@ struct RelationArgs {
   cli::StringOption<"profile"> profile;
 
   static constexpr auto relations = cli::relations(
-      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
       cli::conflicts("json", "markdown"), cli::depends_on("deploy", "profile"));
 };
 
@@ -107,7 +107,7 @@ struct DuplicateRelationMembershipArgs {
   cli::Flag<"json"> json;
 
   static constexpr auto relations = cli::relations(
-      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
       cli::conflicts("user", "json"));
 };
 
@@ -117,7 +117,7 @@ struct RelationGroupNameCollisionArgs {
   cli::Flag<"password"> password;
 
   static constexpr auto relations = cli::relations(
-      cli::together({.name = "legacy_auth", .group = {"user", "password"}}));
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}));
 };
 
 static_assert(cli::detail::relations_are_well_formed<RelationArgs>());
@@ -268,7 +268,7 @@ TEST(Parse, MissingOptionalEntryDoesNotIncrementTotalValues) {
   EXPECT_EQ(seen, (std::vector<std::size_t>{0, 0}));
 }
 
-TEST(Parse, RelationTogetherRequiresAllMembers) {
+TEST(Parse, RelationGroupRequiresAllMembers) {
   auto args = argv({"prog", "--user", "alice"});
   auto result = cli::Parser<RelationArgs>{}.parse(
       std::span<const std::string_view>(args), 1);

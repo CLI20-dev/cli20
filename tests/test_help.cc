@@ -85,7 +85,7 @@ struct MetadataHelpArgs {
   }};
 
   static constexpr auto relations = cli::relations(
-      cli::together({.name = "legacy_auth", .group = {"user", "password"}}),
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
       cli::conflicts("json", "markdown"), cli::depends_on("deploy", "profile"));
 };
 
@@ -279,10 +279,14 @@ TEST(Help, RelationsAreRendered) {
   cli::Parser<MetadataHelpArgs> parser;
 
   const auto help = parser.format_help(cli::ColorMode::never);
-  EXPECT_NE(help.find("Relations:"), std::string::npos);
-  EXPECT_NE(
-      help.find("legacy_auth: --user, --password must be provided together"),
-      std::string::npos);
-  EXPECT_NE(help.find("--json conflicts with --markdown"), std::string::npos);
-  EXPECT_NE(help.find("--deploy depends on --profile"), std::string::npos);
+  EXPECT_EQ(help.find("Relations:"), std::string::npos);
+  EXPECT_NE(help.find("Option groups:"), std::string::npos);
+  EXPECT_NE(help.find("--user"), std::string::npos);
+  EXPECT_NE(help.find("legacy_auth:"), std::string::npos);
+  EXPECT_NE(help.find("--user, --password must be used together"),
+            std::string::npos);
+  EXPECT_NE(help.find("[conflicts: --markdown]"), std::string::npos);
+  EXPECT_NE(help.find("[conflicts: --json]"), std::string::npos);
+  EXPECT_NE(help.find("[requires: --profile]"), std::string::npos);
+  EXPECT_NE(help.find("[required by: --deploy]"), std::string::npos);
 }

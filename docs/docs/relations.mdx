@@ -1,0 +1,103 @@
+---
+sidebar_position: 4
+title: Relations
+---
+
+# Relations
+
+Use `static constexpr auto relations` when a relationship between fields should
+be part of the typed schema, generated help, and parse-time validation. The
+help generator renders short relation metadata inline on affected options, and
+named groups in an `Option groups:` section.
+
+This is intentionally metadata, not a replacement for `constraints()`.
+Relations cover simple occurrence-based rules that are independent of runtime
+values. Keep `constraints()` for value-dependent logic such as "`--type foo`
+requires `--foo-config`".
+
+## API
+
+```cpp
+struct Args {
+  cli::StringOption<"user"> user;
+  cli::StringOption<"password"> password;
+  cli::Flag<"json"> json;
+  cli::Flag<"markdown"> markdown;
+  cli::StringOption<"profile"> profile;
+
+  static constexpr auto relations = cli::relations(
+      cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
+      cli::conflicts("json", "markdown"),
+      cli::depends_on("legacy_auth", "profile"));
+};
+```
+
+Names are written without the command-line prefix: use `"json"`, not
+`"--json"`.
+
+## Relation Types
+
+- `cli::group({.name = "...", .members = {...}})` requires all members in the
+  named group to be provided together, or none of them.
+- `cli::conflicts("a", "b")` rejects input when both operands are provided.
+- `cli::depends_on("a", "b")` rejects input when `a` is provided but `b` is not.
+
+All checks are based on `provided()`: defaults do not count as CLI occurrence.
+
+## Named Groups
+
+`group` creates a named group that can be reused as an operand in another
+relation:
+
+```cpp
+static constexpr auto relations = cli::relations(
+    cli::group({.name = "legacy_auth", .members = {"user", "password"}}),
+    cli::depends_on("legacy_auth", "profile"));
+```
+
+This means `--user` and `--password` must appear together, and that legacy auth
+requires `--profile`.
+
+The generated help shows the rule where users look for it:
+
+```text
+--user <string>      User name [requires: --profile]
+--password <string>  Password [requires: --profile]
+--profile <string>   Profile [required by: legacy_auth]
+
+Option groups:
+  legacy_auth:
+    --user, --password must be used together
+    requires: --profile
+```
+
+## Well-Formed Schema Rules
+
+The relation schema is checked at compile time as part of `ArgumentSpec`.
+
+- Every field or group name used by a relation must exist.
+- A `group` needs a non-empty unique name and at least two members.
+- A group name must not collide with an option or command name.
+- Each field may participate in only one direct relation.
+- `conflicts("a", "a")` and `depends_on("a", "a")` are invalid.
+
+These rules are deliberately strict. They keep help text and parse-time
+validation unambiguous.
+
+## Relation Metadata vs `constraints()`
+
+Use relations when the rule is static and occurrence-based:
+
+- `--json` conflicts with `--markdown`
+- `legacy_auth` depends on `--profile`
+- `--user` and `--password` must be provided together
+
+Use `constraints()` when the rule depends on parsed values:
+
+- `--type s3` requires `--bucket`
+- `--mode fast` rejects `--exact`
+- one numeric option must be greater than another
+
+## Example
+
+See [Relations Example](./examples/relations) for a complete program.

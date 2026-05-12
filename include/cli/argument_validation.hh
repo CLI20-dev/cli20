@@ -149,7 +149,7 @@ consteval auto group_name_exists_before(std::string_view name) -> bool {
   } else {
     constexpr auto rel = std::get<I>(T::relations.items);
     using R = std::remove_cvref_t<decltype(rel)>;
-    if constexpr (std::same_as<R, TogetherRelation>) {
+    if constexpr (std::same_as<R, GroupRelation>) {
       if (rel.name == name) return true;
     }
     return group_name_exists_before<T, Limit, I + 1>(name);
@@ -179,8 +179,8 @@ consteval auto relation_membership_count(std::string_view name) -> std::size_t {
     constexpr auto rel = std::get<I>(T::relations.items);
     using R = std::remove_cvref_t<decltype(rel)>;
     std::size_t current = 0;
-    if constexpr (std::same_as<R, TogetherRelation>) {
-      for (auto member : rel.group) {
+    if constexpr (std::same_as<R, GroupRelation>) {
+      for (auto member : rel.members) {
         if (member == name) ++current;
       }
     } else if constexpr (std::same_as<R, ConflictsRelation>) {
@@ -215,13 +215,13 @@ consteval auto relation_items_are_well_formed() -> bool {
     constexpr auto rel = std::get<I>(T::relations.items);
     using R = std::remove_cvref_t<decltype(rel)>;
     constexpr auto field_names = named_relation_targets<T>();
-    if constexpr (std::same_as<R, TogetherRelation>) {
-      if (rel.name.empty() || rel.group.size < 2 ||
+    if constexpr (std::same_as<R, GroupRelation>) {
+      if (rel.name.empty() || rel.members.size < 2 ||
           contains_name(field_names, rel.name) ||
           group_name_exists_before<T, I>(rel.name)) {
         return false;
       }
-      for (auto member : rel.group) {
+      for (auto member : rel.members) {
         if (!contains_name(field_names, member)) return false;
       }
     } else if constexpr (std::same_as<R, ConflictsRelation>) {

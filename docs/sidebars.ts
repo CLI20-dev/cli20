@@ -5,6 +5,7 @@ const sidebars: SidebarsConfig = {
     'intro',
     'tutorial',
     'actions',
+    'relations',
     {
       type: 'category',
       label: 'Examples',

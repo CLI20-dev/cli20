@@ -18,21 +18,23 @@ Each one is small enough to copy into a project, but specific enough to answer
    Nested commands with their own help output and behavior.
 3. [Validation](./validation)
    Parse-time checks for numbers, names, and filesystem arguments.
-4. [Bind](./bind)
+4. [Relations](./relations)
+   Schema-level relationships such as groups, conflicts, and depends_on.
+5. [Bind](./bind)
    Write values directly into existing variables.
-5. [Callback Entry Point](./callback-entry-point)
+6. [Callback Entry Point](./callback-entry-point)
    Fill application state during parsing, then call the real entry point.
-6. [Advanced](./advanced)
+7. [Advanced](./advanced)
    Lower-level composition with explicit conversion, validation, and packing steps.
-7. [Custom Action](./custom-action)
+8. [Custom Action](./custom-action)
    Full struct-based action definition with `accepts_input`, `after_type`, and `storage_type`.
-8. [Git](./git)
+9. [Git](./git)
    A command-heavy CLI inspired by clap's git example, including nested subcommands.
-9. [Compiler Wrapper](./compiler)
+10. [Compiler Wrapper](./compiler)
    Short-cluster flags, negatable key-value options, and `std::map` storage with `insert_or_assign`.
-10. [Distribution and Platform Examples](./distribution-and-platform)
+11. [Distribution and Platform Examples](./distribution-and-platform)
    Single-header usage, C++20 modules, and the Windows Unicode sample used by CI.
-11. [Env Fallback](./env-fallback)
+12. [Env Fallback](./env-fallback)
    Populate options from environment variables with the same conversion and validation pipeline.
 
 ## Building

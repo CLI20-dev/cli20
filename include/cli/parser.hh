@@ -1022,10 +1022,10 @@ struct Parser {
             (
                 [&]() -> auto {
                   using R = std::remove_cvref_t<decltype(rels)>;
-                  if constexpr (std::same_as<R, TogetherRelation>) {
+                  if constexpr (std::same_as<R, GroupRelation>) {
                     if (!found_group && rels.name == name) {
                       found_group = true;
-                      for (auto member : rels.group) {
+                      for (auto member : rels.members) {
                         group_present = group_present ||
                                         relation_operand_present(val, member);
                       }
@@ -1051,18 +1051,18 @@ struct Parser {
                 [&]() -> auto {
                   if (res.has_error()) return;
                   using R = std::remove_cvref_t<decltype(rels)>;
-                  if constexpr (std::same_as<R, TogetherRelation>) {
+                  if constexpr (std::same_as<R, GroupRelation>) {
                     std::size_t count = 0;
-                    for (auto member : rels.group) {
+                    for (auto member : rels.members) {
                       if (relation_operand_present(val, member)) ++count;
                     }
-                    if (count != 0 && count != rels.group.size) {
+                    if (count != 0 && count != rels.members.size) {
                       res = ActionResult<void>::fail(ParseError{
                           .code = ErrorCode::dependency_missing,
                           .kind = ErrorKind::validation,
                           .subject = std::string(rels.name),
                           .detail = "arguments must be provided together: " +
-                                    relation_name_list(rels.group),
+                                    relation_name_list(rels.members),
                       });
                     }
                   } else if constexpr (std::same_as<R, ConflictsRelation>) {

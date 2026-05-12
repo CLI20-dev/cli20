@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <format>
+#include <iterator>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -341,6 +342,112 @@ auto append_section(std::string& out, std::string_view title,
  * @return The formatted row string.
  */
 template <class Field>
+consteval auto relation_field_name() -> std::string_view {
+  using F = std::remove_cvref_t<Field>;
+  if constexpr (std::derived_from<F, OptionTag> ||
+                std::derived_from<F, CommandTag>) {
+    return F::name.view();
+  } else {
+    return {};
+  }
+}
+
+inline auto relation_name_list(NameList<> names) -> std::string {
+  std::string out;
+  for (std::size_t i = 0; i < names.size; ++i) {
+    if (i != 0) out += ", ";
+    out += "--";
+    out += names.values[i];
+  }
+  return out;
+}
+
+template <class T>
+constexpr auto relation_group(std::string_view name) -> NameList<> {
+  NameList<> result;
+  if constexpr (detail::HasRelations<T>) {
+    std::apply(
+        [&](auto... rels) -> auto {
+          (
+              [&]() -> auto {
+                using R = std::remove_cvref_t<decltype(rels)>;
+                if constexpr (std::same_as<R, GroupRelation>) {
+                  if (rels.name == name) result = rels.members;
+                }
+              }(),
+              ...);
+        },
+        T::relations.items);
+  }
+  return result;
+}
+
+template <class T>
+constexpr auto relation_operand_contains(std::string_view operand,
+                                         std::string_view field_name) -> bool {
+  if (operand == field_name) return true;
+  const auto group = relation_group<T>(operand);
+  for (auto member : group) {
+    if (member == field_name) return true;
+  }
+  return false;
+}
+
+template <class T>
+auto relation_operand_label(std::string_view operand) -> std::string {
+  if constexpr (detail::HasRelations<T>) {
+    if (!relation_group<T>(operand).empty()) {
+      return std::string(operand);
+    }
+  }
+  return std::format("--{}", operand);
+}
+
+template <class T, class Field>
+auto relation_help_metadata() -> std::vector<std::string> {
+  std::vector<std::string> metadata;
+  constexpr auto field_name = relation_field_name<Field>();
+  if constexpr (field_name.empty()) {
+    return metadata;
+  } else if constexpr (detail::HasRelations<T>) {
+    std::apply(
+        [&](auto... rels) -> auto {
+          (
+              [&]() -> auto {
+                using R = std::remove_cvref_t<decltype(rels)>;
+                if constexpr (std::same_as<R, GroupRelation>) {
+                  (void)field_name;
+                } else if constexpr (std::same_as<R, ConflictsRelation>) {
+                  if (relation_operand_contains<T>(rels.left, field_name)) {
+                    metadata.emplace_back(std::format(
+                        "conflicts: {}", relation_operand_label<T>(rels.right)));
+                  }
+                  if (relation_operand_contains<T>(rels.right, field_name)) {
+                    metadata.emplace_back(std::format(
+                        "conflicts: {}", relation_operand_label<T>(rels.left)));
+                  }
+                } else if constexpr (std::same_as<R, DependsOnRelation>) {
+                  if (relation_operand_contains<T>(rels.source, field_name)) {
+                    metadata.emplace_back(std::format(
+                        "requires: {}", relation_operand_label<T>(rels.target)));
+                  }
+                  if (relation_operand_contains<T>(rels.target, field_name)) {
+                    metadata.emplace_back(
+                        std::format("required by: {}",
+                                    relation_operand_label<T>(rels.source)));
+                  }
+                }
+              }(),
+              ...);
+        },
+        T::relations.items);
+    return metadata;
+  } else {
+    return metadata;
+  }
+}
+
+template <class T, class Field>
 auto help_metadata(Field& field) -> std::vector<std::string> {
   std::vector<std::string> metadata;
   if constexpr (std::derived_from<std::remove_cvref_t<Field>, OptionTag> ||
@@ -365,6 +472,10 @@ auto help_metadata(Field& field) -> std::vector<std::string> {
   if (!field.deprecated().empty()) {
     metadata.emplace_back(std::format("deprecated: {}", field.deprecated()));
   }
+  auto relation_metadata = relation_help_metadata<T, Field>();
+  metadata.insert(metadata.end(),
+                  std::make_move_iterator(relation_metadata.begin()),
+                  std::make_move_iterator(relation_metadata.end()));
   return metadata;
 }
 
@@ -384,17 +495,57 @@ inline auto append_help_metadata(std::string& out,
   out += "]";
 }
 
-inline auto relation_name_list(NameList<> names) -> std::string {
-  std::string out;
-  for (std::size_t i = 0; i < names.size; ++i) {
-    if (i != 0) out += ", ";
-    out += "--";
-    out += names.values[i];
+template <class T>
+auto append_group_requirements(std::string& row, std::string_view group_name)
+    -> void {
+  if constexpr (detail::HasRelations<T>) {
+    std::apply(
+        [&](auto... rels) -> auto {
+          (
+              [&]() -> auto {
+                using R = std::remove_cvref_t<decltype(rels)>;
+                if constexpr (std::same_as<R, DependsOnRelation>) {
+                  if (rels.source == group_name) {
+                    row += std::format("    requires: {}\n",
+                                       relation_operand_label<T>(rels.target));
+                  }
+                }
+              }(),
+              ...);
+        },
+        T::relations.items);
   }
-  return out;
 }
 
-template <class Field>
+template <class T>
+auto relation_option_group_row(const GroupRelation& group) -> std::string {
+  std::string row = std::format("  {}:\n    {} must be used together\n",
+                                group.name, relation_name_list(group.members));
+  append_group_requirements<T>(row, group.name);
+  return row;
+}
+
+template <class T>
+auto relation_option_group_rows() -> std::vector<std::string> {
+  std::vector<std::string> rows;
+  if constexpr (detail::HasRelations<T>) {
+    std::apply(
+        [&](auto... rels) -> auto {
+          (
+              [&]() -> auto {
+                using R = std::remove_cvref_t<decltype(rels)>;
+                if constexpr (std::same_as<R, GroupRelation>) {
+                  rows.push_back(relation_option_group_row<T>(rels));
+                }
+              }(),
+              ...);
+        },
+        T::relations.items);
+  }
+  return rows;
+}
+
+template <class T, class Field>
 auto render_help_row(Field& field, std::string_view label, std::size_t width,
                      std::string_view option_color, std::string_view reset_color)
     -> std::string {
@@ -402,7 +553,7 @@ auto render_help_row(Field& field, std::string_view label, std::size_t width,
   out += option_color;
   out += label;
   out += reset_color;
-  const auto metadata = help_metadata(field);
+  const auto metadata = help_metadata<T>(field);
   if (!field.help_text().empty() || !metadata.empty()) {
     out.append(width - label.size() + 2, ' ');
     if (!field.help_text().empty()) {
@@ -556,20 +707,20 @@ auto format_help_impl(T& value, std::string_view program_name,
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 option_rows.emplace_back(
-                    label, render_help_row(fields, label, option_width,
-                                           option_color, reset));
+                    label, render_help_row<T>(fields, label, option_width,
+                                              option_color, reset));
               } else if constexpr (std::derived_from<F, PositionalTag>) {
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 positional_rows.emplace_back(
-                    label, render_help_row(fields, label, positional_width,
-                                           option_color, reset));
+                    label, render_help_row<T>(fields, label, positional_width,
+                                              option_color, reset));
               } else if constexpr (std::derived_from<F, CommandTag>) {
                 if (fields.hidden()) return;
                 auto label = field_usage_label<F>();
                 command_rows.emplace_back(
-                    label, render_help_row(fields, label, command_width,
-                                           option_color, reset));
+                    label, render_help_row<T>(fields, label, command_width,
+                                              option_color, reset));
               }
             }(),
             ...);
@@ -580,37 +731,15 @@ auto format_help_impl(T& value, std::string_view program_name,
   append_rows("Positional arguments:", positional_rows);
   append_rows("Commands:", command_rows);
 
-  if constexpr (detail::HasRelations<T>) {
-    std::vector<std::string> relation_rows;
-    std::apply(
-        [&](auto... rels) -> auto {
-          (
-              [&]() -> auto {
-                using R = std::remove_cvref_t<decltype(rels)>;
-                if constexpr (std::same_as<R, TogetherRelation>) {
-                  relation_rows.push_back(
-                      std::format("  {}: {} must be provided together\n",
-                                  rels.name, relation_name_list(rels.group)));
-                } else if constexpr (std::same_as<R, ConflictsRelation>) {
-                  relation_rows.push_back(std::format(
-                      "  --{} conflicts with --{}\n", rels.left, rels.right));
-                } else if constexpr (std::same_as<R, DependsOnRelation>) {
-                  relation_rows.push_back(std::format("  --{} depends on --{}\n",
-                                                      rels.source, rels.target));
-                }
-              }(),
-              ...);
-        },
-        T::relations.items);
-    if (!relation_rows.empty()) {
-      out += '\n';
-      out += heading;
-      out += "Relations:";
-      out += reset;
-      out += '\n';
-      for (const auto& row : relation_rows) {
-        out += row;
-      }
+  const auto option_group_rows = relation_option_group_rows<T>();
+  if (!option_group_rows.empty()) {
+    out += '\n';
+    out += heading;
+    out += "Option groups:";
+    out += reset;
+    out += '\n';
+    for (const auto& row : option_group_rows) {
+      out += row;
     }
   }
 

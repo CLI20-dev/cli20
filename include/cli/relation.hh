@@ -27,14 +27,14 @@ struct NameList {
   [[nodiscard]] constexpr auto empty() const -> bool { return size == 0; }
 };
 
-struct TogetherParams {
+struct GroupParams {
   std::string_view name;
-  NameList<> group;
+  NameList<> members;
 };
 
-struct TogetherRelation {
+struct GroupRelation {
   std::string_view name;
-  NameList<> group;
+  NameList<> members;
 };
 
 struct ConflictsRelation {
@@ -61,9 +61,8 @@ struct IsRelationSet<RelationSet<Relations...>> : std::true_type {};
 template <class T>
 concept RelationSetLike = IsRelationSet<std::remove_cvref_t<T>>::value;
 
-[[nodiscard]] constexpr auto together(TogetherParams params)
-    -> TogetherRelation {
-  return {.name = params.name, .group = params.group};
+[[nodiscard]] constexpr auto group(GroupParams params) -> GroupRelation {
+  return {.name = params.name, .members = params.members};
 }
 
 [[nodiscard]] constexpr auto conflicts(std::string_view left,
