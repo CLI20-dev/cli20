@@ -1,24 +1,25 @@
 #include <cxxopts.hpp>
-#include <string>
+
+#include "bench/many_options.hh"
 
 auto main(int argc, char** argv) -> int {
   cxxopts::Options options{"many_options"};
-  options.add_options()("opt01", "opt01", cxxopts::value<std::string>())(
-      "opt02", "opt02", cxxopts::value<std::string>())(
-      "opt03", "opt03", cxxopts::value<std::string>())(
-      "opt04", "opt04", cxxopts::value<std::string>())(
-      "opt05", "opt05", cxxopts::value<std::string>())(
-      "opt06", "opt06", cxxopts::value<std::string>())(
-      "opt07", "opt07", cxxopts::value<std::string>())(
-      "opt08", "opt08", cxxopts::value<std::string>())(
-      "opt09", "opt09", cxxopts::value<std::string>())(
-      "opt10", "opt10", cxxopts::value<std::string>())(
-      "opt11", "opt11", cxxopts::value<std::string>())(
-      "opt12", "opt12", cxxopts::value<std::string>())(
-      "opt13", "opt13", cxxopts::value<std::string>())(
-      "opt14", "opt14", cxxopts::value<std::string>())(
-      "opt15", "opt15", cxxopts::value<std::string>())(
-      "opt16", "opt16", cxxopts::value<std::string>());
+  options.add_options()("name", "name", cxxopts::value<std::string>())(
+      "output", "output", cxxopts::value<std::string>())(
+      "target", "target", cxxopts::value<std::string>())(
+      "define", "define", cxxopts::value<std::string>())("jobs", "jobs",
+                                                         cxxopts::value<int>())(
+      "retries", "retries", cxxopts::value<int>())("port", "port",
+                                                   cxxopts::value<int>())(
+      "depth", "depth", cxxopts::value<int>())("ratio", "ratio",
+                                               cxxopts::value<double>())(
+      "timeout", "timeout", cxxopts::value<double>())("threshold", "threshold",
+                                                      cxxopts::value<double>())(
+      "scale", "scale", cxxopts::value<double>())(
+      "config", "config", cxxopts::value<std::filesystem::path>())(
+      "cache", "cache", cxxopts::value<std::filesystem::path>())(
+      "mode", "mode", cxxopts::value<bench::Mode>())(
+      "color", "color", cxxopts::value<bench::Mode>());
   try {
     (void)options.parse(argc, argv);
   } catch (const cxxopts::exceptions::exception&) {

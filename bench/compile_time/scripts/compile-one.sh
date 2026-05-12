@@ -22,7 +22,8 @@ fi
 mkdir -p "$output_dir"
 
 : "${CXX:=c++}"
-: "${CXXFLAGS:=-std=c++20 -O2}"
+: "${BENCH_CXX_STANDARD:=20}"
+: "${CXXFLAGS:=-std=c++$BENCH_CXX_STANDARD -O2}"
 
 exec "$CXX" $CXXFLAGS \
   -I"$repo_root/include" \

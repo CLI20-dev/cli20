@@ -161,6 +161,55 @@
             baseUrl = "/cli20/";
           };
 
+          packages.bench = pkgs.stdenvNoCC.mkDerivation {
+            pname = "cli20-bench";
+            inherit version;
+            src = ./.;
+
+            nativeBuildInputs = [
+              pkgs.llvmPackages.libcxxClang
+              pkgs.cmake
+              pkgs.ninja
+              pkgs.hyperfine
+              pkgs.python3
+            ];
+
+            buildInputs = [
+              pkgs.cxxopts
+              pkgs.cli11
+              pkgs.argparse
+              google_bench
+            ];
+
+            dontConfigure = true;
+
+            buildPhase = ''
+              runHook preBuild
+
+              export BUILD_DIR="$TMPDIR/build-bench"
+              export RESULTS_DIR="$TMPDIR/bench-results"
+              export HYPERFINE_RUNS=3
+              export HYPERFINE_WARMUP=0
+
+              for standard in 20 26; do
+                export BENCH_CXX_STANDARD="$standard"
+                bench/scripts/run-runtime.sh --benchmark_min_time=0.01s
+                bench/scripts/run-size.sh
+                bench/compile_time/scripts/run.sh "$RESULTS_DIR/compile_time/cxx$standard"
+              done
+              bench/scripts/summarize.py --output "$RESULTS_DIR/report.md"
+
+              runHook postBuild
+            '';
+
+            installPhase = ''
+              runHook preInstall
+              mkdir -p "$out"
+              cp -R "$RESULTS_DIR"/. "$out"/
+              runHook postInstall
+            '';
+          };
+
           apps.build = {
             type = "app";
             program =

@@ -5,6 +5,7 @@
 #include <cxxopts.hpp>
 #include <string>
 
+#include "bench/allocation_counter.hh"
 #include "bench/argv.hh"
 #include "cli/argument.hh"
 #include "cli/parser.hh"
@@ -24,53 +25,81 @@ auto simple_argv() -> bench::Argv& {
 
 void BM_Cli20Simple(benchmark::State& state) {
   auto& args = simple_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
   for (auto _ : state) {
-    auto result = cli::Parser<Cli20Simple>{}.parse(args.span(), 1);
-    benchmark::DoNotOptimize(result);
+    const auto stats = bench::measure_allocations([&] {
+      auto result = cli::Parser<Cli20Simple>{}.parse(args.span(), 1);
+      benchmark::DoNotOptimize(result);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
   }
+  bench::set_allocation_counters(state, allocations, bytes);
 }
 
 void BM_Cli11Simple(benchmark::State& state) {
   auto& args = simple_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
   for (auto _ : state) {
-    CLI::App app{"simple"};
-    bool verbose = false;
-    std::string output;
-    std::string input;
-    app.add_flag("-v,--verbose", verbose);
-    app.add_option("-o,--output", output);
-    app.add_option("input", input)->required();
-    app.parse(args.argc(), args.argv());
-    benchmark::DoNotOptimize(verbose);
-    benchmark::DoNotOptimize(output);
-    benchmark::DoNotOptimize(input);
+    const auto stats = bench::measure_allocations([&] {
+      CLI::App app{"simple"};
+      bool verbose = false;
+      std::string output;
+      std::string input;
+      app.add_flag("-v,--verbose", verbose);
+      app.add_option("-o,--output", output);
+      app.add_option("input", input)->required();
+      app.parse(args.argc(), args.argv());
+      benchmark::DoNotOptimize(verbose);
+      benchmark::DoNotOptimize(output);
+      benchmark::DoNotOptimize(input);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
   }
+  bench::set_allocation_counters(state, allocations, bytes);
 }
 
 void BM_ArgparseSimple(benchmark::State& state) {
   auto& args = simple_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
   for (auto _ : state) {
-    argparse::ArgumentParser program{"simple"};
-    program.add_argument("-v", "--verbose").flag();
-    program.add_argument("-o", "--output");
-    program.add_argument("input");
-    program.parse_args(args.argc(), args.argv());
-    benchmark::DoNotOptimize(program);
+    const auto stats = bench::measure_allocations([&] {
+      argparse::ArgumentParser program{"simple"};
+      program.add_argument("-v", "--verbose").flag();
+      program.add_argument("-o", "--output");
+      program.add_argument("input");
+      program.parse_args(args.argc(), args.argv());
+      benchmark::DoNotOptimize(program);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
   }
+  bench::set_allocation_counters(state, allocations, bytes);
 }
 
 void BM_CxxoptsSimple(benchmark::State& state) {
   auto& args = simple_argv();
+  std::size_t allocations = 0;
+  std::size_t bytes = 0;
   for (auto _ : state) {
-    cxxopts::Options options{"simple"};
-    options.add_options()("v,verbose", "verbose",
-                          cxxopts::value<bool>()->default_value("false"))(
-        "o,output", "output", cxxopts::value<std::string>())(
-        "input", "input", cxxopts::value<std::string>());
-    options.parse_positional({"input"});
-    auto result = options.parse(args.argc(), args.argv());
-    benchmark::DoNotOptimize(result);
+    const auto stats = bench::measure_allocations([&] {
+      cxxopts::Options options{"simple"};
+      options.add_options()("v,verbose", "verbose",
+                            cxxopts::value<bool>()->default_value("false"))(
+          "o,output", "output", cxxopts::value<std::string>())(
+          "input", "input", cxxopts::value<std::string>());
+      options.parse_positional({"input"});
+      auto result = options.parse(args.argc(), args.argv());
+      benchmark::DoNotOptimize(result);
+    });
+    allocations += stats.allocations;
+    bytes += stats.bytes;
   }
+  bench::set_allocation_counters(state, allocations, bytes);
 }
 
 BENCHMARK(BM_Cli20Simple);

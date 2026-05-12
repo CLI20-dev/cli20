@@ -1,4 +1,5 @@
 add_executable(bench_runtime
+  allocation_count.cc
   simple.cc
   many_options.cc
   subcommand.cc
