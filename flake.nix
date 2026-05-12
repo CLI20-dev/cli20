@@ -30,6 +30,34 @@
         { pkgs, config, ... }:
         let
           version = builtins.replaceStrings [ "\n" ] [ "" ] (builtins.readFile ./VERSION);
+          google_bench = pkgs.stdenv.mkDerivation rec {
+            pname = "google-benchmark";
+            version = "1.9.5";
+
+            src = pkgs.fetchFromGitHub {
+              owner = "google";
+              repo = "benchmark";
+              rev = "v${version}";
+              hash = "sha256-Mm4pG7zMB00iof32CxreoNBFnduPZTMp3reHMCIAFPQ=";
+            };
+
+            nativeBuildInputs = [
+              pkgs.cmake
+            ];
+
+            cmakeFlags = [
+              "-DBENCHMARK_ENABLE_TESTING=OFF"
+              "-DBENCHMARK_ENABLE_GTEST_TESTS=OFF"
+              "-DBENCHMARK_ENABLE_INSTALL=ON"
+            ];
+
+            meta = {
+              description = "A microbenchmark support library";
+              homepage = "https://github.com/google/benchmark";
+              license = pkgs.lib.licenses.asl20;
+              platforms = pkgs.lib.platforms.unix;
+            };
+          };
         in
         rec {
           treefmt = {
@@ -52,7 +80,14 @@
               pkgs.clang-tools
               pkgs.doxygen
               pkgs.emscripten
+              pkgs.boost
+              pkgs.cxxopts
+              pkgs.cli11
+              pkgs.argparse
+              google_bench
               config.treefmt.build.wrapper
+              pkgs.hyperfine
+              pkgs.python3
             ];
           };
 
