@@ -60,3 +60,22 @@ function(add_compile_fail_test name source)
     message(STATUS "Compile-fail test passed: ${name}")
   endif()
 endfunction()
+
+function(add_compile_pass_test name source)
+  try_compile(
+    COMPILE_RESULT
+    ${CMAKE_BINARY_DIR}/try_compile/${name}
+    ${CMAKE_CURRENT_SOURCE_DIR}/compile_pass/${source}
+    CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${PROJECT_SOURCE_DIR}/include"
+    CXX_STANDARD 20
+    OUTPUT_VARIABLE COMPILE_OUTPUT
+  )
+  if(NOT COMPILE_RESULT)
+    message(FATAL_ERROR
+      "Compile-pass test '${name}' failed.\n${COMPILE_OUTPUT}")
+  else()
+    message(STATUS "Compile-pass test passed: ${name}")
+  endif()
+endfunction()
+
+add_compile_pass_test(token_stack_capacity token_stack_capacity.cc)

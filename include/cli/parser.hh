@@ -1,6 +1,7 @@
 #pragma once
 
 // #include <expected>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <span>
@@ -19,7 +20,24 @@
 #include "cli/error.hh"
 #include "cli/help.hh"
 
+#ifndef CLI20_TOKEN_STACK_CAPACITY
+#define CLI20_TOKEN_STACK_CAPACITY 32
+#endif
+
+static_assert(CLI20_TOKEN_STACK_CAPACITY > 0,
+              "CLI20_TOKEN_STACK_CAPACITY must be greater than zero");
+
 namespace cli {
+
+/**
+ * @brief Number of tokenizer tokens kept in inline stack storage before
+ * falling back to heap allocation.
+ *
+ * Define `CLI20_TOKEN_STACK_CAPACITY` before including `cli/parser.hh` to
+ * override the default. Because this value changes header-defined types, use
+ * one value consistently across all translation units in a program.
+ */
+inline constexpr std::size_t token_stack_capacity = CLI20_TOKEN_STACK_CAPACITY;
 
 namespace detail {
 
@@ -29,14 +47,19 @@ inline auto write_message(FILE* file, std::string_view message) -> void {
   (void)std::fwrite("\n", 1, 1, file);
 }
 
-inline auto value_count_message(int required, int provided) -> std::string {
-  return "option requires at least " + std::to_string(required) +
+inline auto value_count_message(int required_count, int provided)
+    -> std::string {
+  return "option requires at least " + std::to_string(required_count) +
          " value(s), but " + std::to_string(provided) + " provided";
 }
 
-inline auto inline_value_count_message(int required) -> std::string {
-  return "option requires at least " + std::to_string(required) +
+inline auto inline_value_count_message(int required_count) -> std::string {
+  return "option requires at least " + std::to_string(required_count) +
          " value(s), but inline separator provides only 1";
+}
+
+inline auto token_position(std::size_t position) -> std::uint16_t {
+  return static_cast<std::uint16_t>(position);
 }
 
 }  // namespace detail
@@ -212,7 +235,7 @@ struct TokenizeResult {
     }
   };
 
-  SmallVector<Token, 32> tokens;
+  SmallVector<Token, token_stack_capacity> tokens;
   ParseError error{};
 
   /** @brief Returns `true` when tokenization succeeded. */
@@ -411,11 +434,11 @@ inline auto tokenize(std::span<const std::string_view> args,
     return cfg.option_prefixes()[p & kPrefixIndexMask];
   };
 
-  const auto push = [&](TokenType type, std::string_view text, std::uint16_t pos,
+  const auto push = [&](TokenType type, std::string_view text, std::size_t pos,
                         std::uint8_t prefix = kNoPrefix) -> void {
     result.tokens.push_back({
         .text = text,
-        .position = pos,
+        .position = detail::token_position(pos),
         .prefix = prefix,
         .type = type,
     });
@@ -470,11 +493,11 @@ inline auto tokenize(std::span<const std::string_view> args,
             const std::string_view char_bare =
                 tok.substr(prefix_sv.size() + k, 1);
             char_full.back() = body[k];
-            const auto nargs_opt = option_nargs(char_full);
-            if (!nargs_opt) {
+            const auto char_nargs_opt = option_nargs(char_full);
+            if (!char_nargs_opt) {
               return result.fail(ErrorCode::unknown_option, i, char_full);
             }
-            const Nargs nargs = *nargs_opt;
+            const Nargs nargs = *char_nargs_opt;
             const bool is_flag = (nargs.min == 0 && nargs.max == 0);
             push(TokenType::option, char_bare, i, prefix);
             if (!is_flag) {
