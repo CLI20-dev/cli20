@@ -903,10 +903,10 @@ struct Parser {
       if (tok.type == TokenType::option) {
         std::size_t j = i + 1;
         while (j < tokens.size() && tokens[j].type == TokenType::value) ++j;
-        auto err = dispatch_option(
-            result.value, token_prefix_view(tok, cfg_), tok.text,
-            std::span(tokens).subspan(i + 1, j - i - 1), first_index,
-            tok.position);
+        auto err =
+            dispatch_option(result.value, token_prefix_view(tok, cfg_), tok.text,
+                            std::span(tokens).subspan(i + 1, j - i - 1),
+                            first_index, tok.position);
         if (err.has_error()) {
           result.error = finalize_special_error(std::move(err.error));
           return;
