@@ -384,7 +384,7 @@ struct DivisibleBy {
           cli::detail::validation_failed_error(
               ctx.index,
               cli::detail::to_error_subject(input.value),
-              std::format("must be divisible by {}", Divisor)));
+              "must be divisible by " + std::to_string(Divisor)));
     return input;
   }
 };

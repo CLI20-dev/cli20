@@ -1,19 +1,20 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <charconv>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
-#include <format>
 #include <functional>
 #include <map>
 #include <optional>
 #include <ranges>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -294,6 +295,16 @@ namespace detail {
 
 template <class T>
 [[nodiscard]]
+auto to_chars_string(T value) -> std::string {
+  std::array<char, 128> buffer{};
+  const auto [ptr, ec] =
+      std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+  if (ec != std::errc{}) return "<value>";
+  return std::string(buffer.data(), ptr);
+}
+
+template <class T>
+[[nodiscard]]
 auto to_error_subject(const T& value) -> std::string {
   using U = std::remove_cvref_t<T>;
 
@@ -305,13 +316,14 @@ auto to_error_subject(const T& value) -> std::string {
     return value == nullptr ? std::string{} : std::string(value);
   } else if constexpr (std::is_same_v<U, bool>) {
     return value ? "true" : "false";
-  } else if constexpr (std::integral<U>) {
-    return std::to_string(value);
+  } else if constexpr (std::integral<U> || std::floating_point<U>) {
+    return to_chars_string(value);
   } else if constexpr (std::same_as<U, std::filesystem::path>) {
     return value.string();
-  } else if constexpr (requires { std::format("{}", value); } or
-                       std::floating_point<U>) {
-    return std::format("{}", value);
+  } else if constexpr (requires(std::ostream& os, const U& v) { os << v; }) {
+    std::ostringstream out;
+    out << value;
+    return out.str();
   } else {
     return "<value>";
   }
@@ -1051,7 +1063,7 @@ struct Min {
     if (input.value < MinValue) {
       return ActionResult<U>::fail(detail::validation_failed_error(
           ctx.index, detail::to_error_subject(input.value),
-          std::format("value must be >= {}", MinValue)));
+          "value must be >= " + detail::to_error_subject(MinValue)));
     }
     return input;
   }
@@ -1081,7 +1093,7 @@ struct Max {
     if (input.value > MaxValue) {
       return ActionResult<U>::fail(detail::validation_failed_error(
           ctx.index, detail::to_error_subject(input.value),
-          std::format("value must be <= {}", MaxValue)));
+          "value must be <= " + detail::to_error_subject(MaxValue)));
     }
     return input;
   }
@@ -1114,7 +1126,8 @@ struct Range {
     if (input.value < MinValue || input.value > MaxValue) {
       return ActionResult<U>::fail(detail::validation_failed_error(
           ctx.index, detail::to_error_subject(input.value),
-          std::format("value must be between {} and {}", MinValue, MaxValue)));
+          "value must be between " + detail::to_error_subject(MinValue) +
+              " and " + detail::to_error_subject(MaxValue)));
     }
     return input;
   }
@@ -1284,7 +1297,7 @@ struct Matches {
     if (!std::regex_match(input.value.begin(), input.value.end(), regex)) {
       return ActionResult<U>::fail(detail::validation_failed_error(
           ctx.index, detail::to_error_subject(input.value),
-          std::format("value must match {}", Pattern.view())));
+          "value must match " + std::string(Pattern.view())));
     }
     return input;
   }

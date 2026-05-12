@@ -2,7 +2,6 @@
 
 // #include <expected>
 #include <cstdlib>
-#include <format>
 #include <iostream>
 #include <span>
 #include <string>
@@ -23,6 +22,20 @@
 #include "cli/help.hh"
 
 namespace cli {
+
+namespace detail {
+
+inline auto value_count_message(int required, int provided) -> std::string {
+  return "option requires at least " + std::to_string(required) +
+         " value(s), but " + std::to_string(provided) + " provided";
+}
+
+inline auto inline_value_count_message(int required) -> std::string {
+  return "option requires at least " + std::to_string(required) +
+         " value(s), but inline separator provides only 1";
+}
+
+}  // namespace detail
 
 #ifdef _WIN32
 namespace detail {
@@ -328,9 +341,7 @@ inline auto tokenize(std::span<const std::string_view> args,
                 if (count < nargs.min) {
                   return result.fail(
                       ErrorCode::missing_value, i, char_full,
-                      std::format("option requires at least {} value(s), but {} "
-                                  "provided",
-                                  nargs.min, count));
+                      detail::value_count_message(nargs.min, count));
                 }
               } else {
                 // Consume next token(s) greedily as values
@@ -356,9 +367,7 @@ inline auto tokenize(std::span<const std::string_view> args,
                 if (count < nargs.min) {
                   return result.fail(
                       ErrorCode::missing_value, i, char_full,
-                      std::format("option requires at least {} value(s), but {} "
-                                  "provided",
-                                  nargs.min, count));
+                      detail::value_count_message(nargs.min, count));
                 }
               }
               advanced_i = true;
@@ -385,11 +394,8 @@ inline auto tokenize(std::span<const std::string_view> args,
                              "flag does not accept a value");
         }
         if (nargs.min > 1) {
-          return result.fail(
-              ErrorCode::missing_value, i, opt_name,
-              std::format("option requires at least {} value(s), but inline "
-                          "separator provides only 1",
-                          nargs.min));
+          return result.fail(ErrorCode::missing_value, i, opt_name,
+                             detail::inline_value_count_message(nargs.min));
         }
         push(TokenType::value, tok.substr(eq_pos + 1), i);
         ++i;
@@ -426,10 +432,8 @@ inline auto tokenize(std::span<const std::string_view> args,
       }
 
       if (count < nargs.min) {
-        return result.fail(
-            ErrorCode::missing_value, i, opt_name,
-            std::format("option requires at least {} value(s), but {} provided",
-                        nargs.min, count));
+        return result.fail(ErrorCode::missing_value, i, opt_name,
+                           detail::value_count_message(nargs.min, count));
       }
       continue;
     }
@@ -951,8 +955,8 @@ struct Parser {
         found = true;
         f.mark_provided();
         auto sub_parser = Parser<typename F::argument_type>{};
-        sub_parser.set_program_name(
-            std::format("{} {}", program_name_, F::command_name()));
+        sub_parser.set_program_name(program_name_ + " " +
+                                    std::string(F::command_name()));
         auto sub = sub_parser.parse(args, first_index);
         if (sub.has_error()) {
           res = ActionResult<void>::fail(std::move(sub.error));

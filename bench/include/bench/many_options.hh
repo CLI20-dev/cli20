@@ -1,9 +1,9 @@
 #pragma once
 
 #include <filesystem>
-#include <format>
 #include <istream>
 #include <optional>
+#include <ostream>
 #include <string>
 #include <string_view>
 
@@ -46,6 +46,10 @@ inline auto operator>>(std::istream& in, Mode& mode) -> std::istream& {
   return in;
 }
 
+inline auto operator<<(std::ostream& out, Mode mode) -> std::ostream& {
+  return out << mode_name(mode);
+}
+
 struct ManyValues {
   std::string name;
   std::string output;
@@ -66,10 +70,3 @@ struct ManyValues {
 };
 
 }  // namespace bench
-
-template <>
-struct std::formatter<bench::Mode> : std::formatter<std::string_view> {
-  auto format(bench::Mode mode, std::format_context& ctx) const {
-    return std::formatter<std::string_view>::format(bench::mode_name(mode), ctx);
-  }
-};
