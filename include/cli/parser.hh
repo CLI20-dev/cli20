@@ -1011,6 +1011,34 @@ struct Parser {
     return out;
   }
 
+  static auto relation_group_exists(std::string_view name) -> bool {
+    if constexpr (!detail::HasRelations<T>) {
+      return false;
+    } else {
+      bool found = false;
+      std::apply(
+          [&](auto... rels) -> auto {
+            (
+                [&]() -> auto {
+                  using R = std::remove_cvref_t<decltype(rels)>;
+                  if constexpr (std::same_as<R, GroupRelation>) {
+                    if (rels.name == name) found = true;
+                  }
+                }(),
+                ...);
+          },
+          T::relations.items);
+      return found;
+    }
+  }
+
+  static auto relation_operand_label(std::string_view operand) -> std::string {
+    if (relation_group_exists(operand)) {
+      return std::string(operand);
+    }
+    return "--" + std::string(operand);
+  }
+
   static auto relation_operand_present(T& val, std::string_view name) -> bool {
     bool found_field = false;
     bool present = false;
@@ -1037,8 +1065,9 @@ struct Parser {
                   if constexpr (std::same_as<R, GroupRelation>) {
                     if (!found_group && rels.name == name) {
                       found_group = true;
+                      group_present = true;
                       for (auto member : rels.members) {
-                        group_present = group_present ||
+                        group_present = group_present &&
                                         relation_operand_present(val, member);
                       }
                     }
@@ -1083,8 +1112,8 @@ struct Parser {
                       res = ActionResult<void>::fail(ParseError{
                           .code = ErrorCode::mutually_exclusive,
                           .kind = ErrorKind::validation,
-                          .subject = "--" + std::string(rels.left) + ", --" +
-                                     std::string(rels.right),
+                          .subject = relation_operand_label(rels.left) + ", " +
+                                     relation_operand_label(rels.right),
                           .detail =
                               "these arguments cannot be provided together",
                       });
@@ -1095,8 +1124,9 @@ struct Parser {
                       res = ActionResult<void>::fail(ParseError{
                           .code = ErrorCode::dependency_missing,
                           .kind = ErrorKind::validation,
-                          .subject = "--" + std::string(rels.source),
-                          .detail = "requires --" + std::string(rels.target),
+                          .subject = relation_operand_label(rels.source),
+                          .detail =
+                              "requires " + relation_operand_label(rels.target),
                       });
                     }
                   }

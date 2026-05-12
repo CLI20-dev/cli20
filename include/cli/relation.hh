@@ -15,7 +15,10 @@ struct NameList {
 
   constexpr NameList() = default;
   constexpr NameList(std::initializer_list<std::string_view> names) {
-    size = names.size() < Max ? names.size() : Max;
+    if (names.size() > Max) {
+      throw "cli::NameList capacity exceeded";
+    }
+    size = names.size();
     auto it = names.begin();
     for (std::size_t i = 0; i < size; ++i, ++it) {
       values[i] = *it;

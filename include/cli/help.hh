@@ -530,6 +530,22 @@ inline auto append_help_metadata(std::string& out,
   out += style.reset();
 }
 
+inline auto append_row_description(std::string& out,
+                                   std::string_view description,
+                                   const std::vector<std::string>& metadata,
+                                   const AnsiStyle& style, std::size_t indent)
+    -> void {
+  auto lines = split_lines(description);
+  out += lines.front();
+  append_help_metadata(out, metadata, style);
+  out += '\n';
+  for (std::size_t i = 1; i < lines.size(); ++i) {
+    out.append(indent, ' ');
+    out += lines[i];
+    out += '\n';
+  }
+}
+
 template <class T>
 auto append_group_requirements(std::string& row, std::string_view group_name)
     -> void {
@@ -596,11 +612,7 @@ auto render_help_row(Field& field, std::string_view label,
   const auto metadata = help_metadata<T>(field);
   if (!field.help_text().empty() || !metadata.empty()) {
     out.append(width - label.size() + 2, ' ');
-    if (!field.help_text().empty()) {
-      out += field.help_text();
-    }
-    append_help_metadata(out, metadata, style);
-    out += '\n';
+    append_row_description(out, field.help_text(), metadata, style, width + 4);
   } else {
     out += '\n';
   }
